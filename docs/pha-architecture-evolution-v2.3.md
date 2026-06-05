@@ -3,7 +3,7 @@
 > **状态**：设计文档（Design RFC）— 仅规划，不含实现代码  
 > **基线构建**：`pha-v2.2.11-a-plus`（A+ SchemaIntentRouter 已落地）  
 > **作者立场**：Cursor 架构评审 — 综合 Gemini / Grok 辩论后的独立判断  
-> **修订日期**：2026-05-24
+> **修订日期**：2026-06-01（Wave 3d-δ/ε 事实管道 · Interpretation Policy · Soul 对齐）
 
 ---
 
@@ -95,8 +95,10 @@ Manifest Tier v1 成功落地，中英双语沙箱完工，通过分域审计 + 
 | A+ SchemaIntentRouter + 三车道 | ✅ `pha-v2.2.11-a-plus` |
 | Manifest Tier v1 披露协议 | ✅ `pha-v2.2.12-manifest-tier-v1` |
 | combined E2E numerics | ✅ `t0_plus_disclosure` 下 exit 0 |
-| Route Telemetry 系统化 | ⏳ Stage 2A 纳入 HarnessBuildReport |
-| 混合注册表 + Metadata Catalog | 📋 Stage 2 → [`metadata-catalog-v2.3.md`](metadata-catalog-v2.3.md)（**v2.3.3** 终审合流；**2A 待文辉确认编码**） |
+| Route Telemetry 系统化 | ⏳ 字段部分落地；**运营化**见 [`telemetry-review-playbook.md`](telemetry-review-playbook.md) |
+| 混合注册表 + Metadata Catalog | ✅ 2A–2D 编码；**生产深化 = P1**（不阻塞 3B） |
+| **Stage 3B Perception Worker** | 🚧 **3B-α 实现** → [`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) v1.0 |
+| 3A 附件问答金标闭环 | ⏳ [`stage3a-regression-checklist-v1.md`](stage3a-regression-checklist-v1.md) |
 
 ---
 
@@ -130,9 +132,71 @@ Manifest Tier v1 成功落地，中英双语沙箱完工，通过分域审计 + 
 
 **Harness Veto 权** 分布在 L0～L2：LLM 的任何 fetch 建议，都必须经过 L0 Profile 允许域 + L2 Manifest 域校验；Shadow LLM 永远碰不到 L0 方向盘。
 
+### 2.1 端到端数据流（含 Perception Worker · 2026-05-26）
+
+真机复盘（DeepSeek / Qwen 7B）证明：**L3 不能承担 OCR/定账**；Tier0 若吃掉定账则模型必幻觉。在 L0 与 L2 之间插入 **确定性 Perception Worker**（3B-α/β）。
+
+**感知层宪法（2026-05-27 · Spec v0.3）**：**无知路由** — 上传不假设业务族；**L0.0 介质分轨** → **L0.2 全类型 `layout_region` 切片** → **L0.4 多引擎 IR** → **L0.5 `document_family`** → Schema 定账。中英文键名见 Spec §0.1。详见 [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) §0.1 · §1.4 · §7.0–§7.10。
+
+```text
+用户 + N 个附件（未知业务族）
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────┐
+│ L0 · 聊天意图（SchemaIntentRouter + attachment_qa_mode）      │
+│   会话焦点 · episodic_bridge 默认车道 · Harness Veto         │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│ L0.0–L0.6 · Perception Worker（3B-α 现网 / 3B-β 目标）        │
+│   L0.0 media_route（pdf_* | raster_photo）                  │
+│   L0.4 适配器 IR（OCR / Layout / PDF / 可选 VLM）            │
+│   L0.5 document_family（supplement|lab|medication|…）       │
+│   L0.6 LabelLedgerV1 + merge_trace + P 门禁 G1–G6            │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+│ Evidence      │  │ Metadata      │  │ Shadow        │
+│ Worker        │  │ Catalog       │  │ 默认关        │
+└───────┬───────┘  └───────┬───────┘  └───────────────┘
+        └─────────┬─────────┘
+                  ▼
+┌─────────────────────────────────────────────────────────────┐
+│ L2 · Tier0（ATTACHMENT_LABEL + DATA_AVAILABILITY + TASK …）  │
+└───────────────────────────┬─────────────────────────────────┘
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│ L3 · 主 LLM — 仅自然语言综合，禁止脑补定账外剂量              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**子 Agent 两阶段（不可跳级）**：
+
+| 阶段 | 形态 | 说明 |
+|------|------|------|
+| **3B-α** | 确定性 Perception Worker | 当前 P0；无 LLM 主路径 |
+| **3B-β** | 轻量 LLM Worker（Lab/指南等） | 金标绿 + 2 周 Telemetry 后再开 Flag |
+
 ---
 
-## 3. 演进蓝图（四阶段，我的版本）
+### 2.2 硬件 Tier 与 Progressive Enhancement（M4 底线）
+
+文辉裁定：**同一套 PHA，M4 Air（7B）必须流畅；高配须有明显红利**。检测与能力由 `runtime_capabilities()` + `PHA_HARDWARE_TIER` 映射（实现见 Stage 3B RFC §7）。
+
+| Tier | 检测条件（示例） | Perception | MC / Catalog | Shadow | 主模型 |
+|------|------------------|------------|--------------|--------|--------|
+| **T1 · 生存** | VRAM ≤16G 或仅 7B 可用；`PHA_HARDWARE_TIER=1` | 串行 OCR；禁止默认双 Vision | MC Tier1；≤400 token | **关** | 7B 单轮 |
+| **T2 · 进阶** | 14B 可用或 VRAM>16G | OCR 多页；可选 Vision **校验** Flag | MC 略扩 | 采样 ≤5% | 7B/14B |
+| **T3 · 高配** | 多模型并存 / 云端 API | 并发 OCR 页 | MC Tier0 A/B | 采样 ≤10% | 14B/32B/云 |
+
+**原则**：T1 行为 = 默认生产行为；T2/T3 只增能力、不破坏 T1 契约。
+
+---
+
+## 3. 演进蓝图（五阶段，我的版本）
 
 相对 Grok/Gemini 的三阶段，我把 **Stage 1 拆成「收尾」与「加固」**，并单独立项 **Manifest tier**，避免「A+ 完工」的虚假 Green。
 
@@ -177,7 +241,11 @@ Manifest Tier v1 成功落地，中英双语沙箱完工，通过分域审计 + 
 | Grok · Stage 2 RFC | 9.0/10 | 批准细化；建议准入 Checklist → 已写入 RFC §5.6 |
 | Gemini | 终审通过 | **收回当轮注册**；坚定支持 Discover→Promote + CI 预置模板 |
 
-**编码状态**：**2A ✅** · **2B ✅** · **2C ✅** MC Tier1（`PHA_METADATA_CATALOG=1`）· **2D ✅** Shadow（`PHA_SHADOW_ROUTING=1` + 强制采样仅自测）
+**编码状态**：**2A ✅** · **2B ✅** · **2C ✅** · **2D ✅** · **3A ✅** OCR/视觉并网 · **3A.1–3A.2.2 ✅** 代码已合 · **3A 金标 E2E ⏳ 未绿** · **3B 🔴 P0 RFC v0.9**
+
+**3A RFC**：[`stage3a1`](stage3a1-attachment-qa-governance.md) · [`stage3a2`](stage3a2-episodic-focus-and-grounded-rationale.md) · [`stage3a2.1`](stage3a2.1-response-ux-and-causal-anchor.md) · [`stage3a2.2`](stage3a2.2-answer-quality-and-vision-guard.md) · [`stage3a-regression-checklist-v1`](stage3a-regression-checklist-v1.md) · [`stage3a2.3`](stage3a2.3-chat-attachment-inline-preview.md) 📋 P2 UX
+
+**3B RFC**：[`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) · v1 blocking 金标：**IMG_6800 + IMG_6801**
 
 **目标**：
 
@@ -205,7 +273,33 @@ Manifest Tier v1 成功落地，中英双语沙箱完工，通过分域审计 + 
 | MC 纯英文 | ❌ 坚持 Stage 1 双语；动态 slot 保留 `title_zh` |
 | Shadow 100% | ❌ Profile 分层采样 + confidence≥0.7 高优 telemetry |
 
-**验收**：见 RFC §11；Flag 全关 ≡ v2.2.12。
+**验收**：见 RFC §11；Flag 全关 ≡ v2.2.12。  
+**P1 深化**：MC 点单率周报、Dynamic Slot 零 core 改动演练（**不阻塞 3B 金标**）。
+
+---
+
+### Stage 3B — Perception Worker（v2.3.3+ · **当前 P0**）
+
+**目标**：用户上传 1～N 张补剂图 → **定账准确、可审计、低置信可拒答** → L3 只「说人话」。
+
+| 工作包 | 状态 | 说明 |
+|--------|------|------|
+| **3B-α · 定账契约** | 🚧 Week1 | P 层 G1–G6 · `perception_merge.py` · [`stage3b-week1-implementation.md`](stage3b-week1-implementation.md) |
+| **3B-α · 金标 E2E** | ✅ CI | `scripts/pha_perception_golden_6800_6801.py` |
+| **3B-α · 多图 Merge** | 📋 | Facts 优先；电商噪声隔离 |
+| **3B-α · 置信度/拒答** | 📋 | 结合 `layout_hints`；不误伤单成分合法场景 |
+| **3B-α · Fixture E2E** | ⏳ | NOW·PS/Choline/Inositol **仅 CI**（见 Spec 附录 A） |
+| **3B-α · L3 禁脑补剂量** | 📋 | TASK 宪法 + numerics 对齐 |
+| **3B-β · Vision Worker** | 📋 Spec v0.2 | [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) · 介质分轨 + 后置 `document_family` |
+| **3C · 附件异步 + 证据桥接** | 📋 Spec | 见下表 |
+| **3C · 视觉能力矩阵** | 📋 v0.2 | [`stage3c-vision-capability-matrix.md`](stage3c-vision-capability-matrix.md) |
+| **3B · 真图 E2E** | 📋 | [`stage3b-e2e-real-label-fixture.md`](stage3b-e2e-real-label-fixture.md) |
+
+**3C Specs**：[`stage3c-async-attachment-orchestrator.md`](stage3c-async-attachment-orchestrator.md) · [`stage3c-episodic-evidence-bridge.md`](stage3c-episodic-evidence-bridge.md) · [`stage3c-active-recall-bridge.md`](stage3c-active-recall-bridge.md)（🔒 v0.2）· [`stage3c-k-interaction-lookup-backlog.md`](stage3c-k-interaction-lookup-backlog.md) · 分析 [`stage3c-attachment-evidence-bridge-analysis.md`](stage3c-attachment-evidence-bridge-analysis.md)
+
+**正式 RFC**：[`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) · **β Spec**：[`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md)
+
+**与 3A 关系**：3A 路由/焦点/因果 **不重编码**；缺口归入 3B（见回归清单）。
 
 ---
 
@@ -389,39 +483,155 @@ Stage 1 → PHA_HARNESS_CATALOG_MODE=legacy → v2.2.6 全量预注入（极端�
 
 ---
 
-## 7. 下一步行动计划（仅设计/文档/验收，不写 Stage 2 代码）
+## 7. 下一步行动计划（Week 0–4 · 2026-05-26 核准）
 
-### 7.1 立即（1～3 天）— Stage 1 收官
+> **Week 0 约束**：文档 + 金标设计 + 3A 回归扫描；**核心实现待 `stage3b-perception-worker-rfc` v1.0 签字后启动**。
 
-| # | 动作 | 产出 |
-|---|------|------|
-| 1 | 编写 `docs/manifest-tier-v1.md` | T0/T1/T2 引用 tier 契约 |
-| 2 | 在 `lab_lipid_panel.schema.json` 设计 `reference_values` 块（文档级，Review 后再改 JSON） | LDL 3.4 等指南常数声明 |
-| 3 | 扩展 `HarnessBuildReport` 字段设计：`intent_route` | 字段 schema 文档更新 |
-| 4 | 重跑三 E2E + golden，确认 combined numerics 设计评审通过后再实现 tier | 验收报告 |
-
-### 7.2 短期（1～2 周）— Stage 1 加固
+### 7.0 轨零 — 基线冻结（0.5 天）
 
 | # | 动作 | 产出 |
 |---|------|------|
-| 5 | Schema 治理 checklist + 关键词冲突检测脚本 **设计** | `docs/schema-governance.md` |
-| 6 | 更新 `harness-evidence-matrix.md`：路由来源改为 SchemaIntentRouter | 矩阵与代码一致 |
-| 7 | 收集 20～50 条真实用户句（脱敏）做 route golden 集 | `tests/fixtures/intent_route_golden.jsonl`（仅数据） |
+| 0.1 | 对照 `build_marker` / `/health` / 本文档编码状态表 | 基线对照表（见 3A 回归清单 §0） |
+| 0.2 | 归档 DeepSeek/Qwen 失败轮次摘要 | `tests/fixtures/e2e-failures-2026-05/README.md`（脱敏） |
 
-### 7.3 中期（2～4 周）— Stage 2 设计 Review
+### 7.1 轨一 — 3A 回归验收（非重编码）
 
 | # | 动作 | 产出 |
 |---|------|------|
-| 8 | Review 本文档 §4 MC + Shadow | 文辉/Gemini/Grok 签字 |
-| 9 | 撰写 `docs/metadata-catalog-v2.3.md` 实现 RFC（API、slot、flag） | 通过后再编码 |
-| 10 | 定义 Shadow JSONL 字段与 Grafana/Notebook 看板草图 | 观测先行 |
+| 1.1–1.7 | 按 [`stage3a-regression-checklist-v1.md`](stage3a-regression-checklist-v1.md) 扫描 | 红/绿入档；红项 → 3B 依赖 |
 
-### 7.4 明确不做（Stage 2 之前）
+### 7.2 轨二 — Stage 3B RFC + 实现（P0）
 
-- ❌ LLM 全权 Profile 选择
-- ❌ 双轮 ReAct 路由（无 fallback 的）
-- ❌ 动态 FSM Guided Decoding 上生产
-- ❌ 150+ 指标全量 L0 Catalog 平铺
+| # | 动作 | 产出 |
+|---|------|------|
+| 2.1 | RFC v0.9 评审 | [`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) |
+| 2.2 | RFC v1.0 签字后实现 3B-α | `LabelLedgerV1` + 金标脚本 + 拒答 UI |
+| 2.3 | blocking 金标 | IMG_6800+6801 → NOW, PS/Choline/Inositol 50mg |
+
+### 7.3 轨三 — Telemetry 运营化（P0，与 2.1 并行）
+
+| # | 动作 | 产出 |
+|---|------|------|
+| 3.1 | 附件字段 + **L0_L3_Alignment_Rate** KGI | [`telemetry-review-playbook.md`](telemetry-review-playbook.md) |
+| 3.2 | 每周 Review 模板 + JSONL 导出设计 | 同上 §4 |
+
+### 7.4 轨四 — 硬件 Tier（P0 文档 · P1 实现）
+
+| # | 动作 | 产出 |
+|---|------|------|
+| 4.1 | 矩阵写入本文档 §2.2 | ✅ |
+| 4.2 | `runtime_capabilities()` + Flag 映射 | 3B RFC §7 实现 |
+
+### 7.5 轨五 — Stage 2 MC 深化（P1，不阻塞 3B）
+
+| # | 动作 | 产出 |
+|---|------|------|
+| 5.1 | MC 点单率抽样 | Telemetry 周报 |
+| 5.2 | Dynamic Slot 零 core 改动演练 | 演练记录 |
+
+### 7.6 明确不做（当前阶段）
+
+- ❌ 重编码 3A.2.1 / 品牌白名单正则表
+- ❌ 3B-β 并行多 LLM 子 Agent
+- ❌ LangChain 替换 Harness 主链
+- ❌ Hybrid Guided Decoding 上生产
+- ❌ pha-core 完整剥离
+- ❌ 150+ 指标全量 L0 Catalog
+- ❌ 让 7B 或 1.5B **撰写** Active Recall 断言正文（仅 C 层 + 可选 `recall_plan` 枚举）
+
+### 7.7 实施波次总表（2026-05-30 · 更新）
+
+> **Gemini 终审**（全票）：禁止短语触发词 · 禁止小模型写断言 · `anchored_asset` 焦点内每轮强制 · `RECALL_FOCUS` Bottom-Anchor。  
+> **详表**：[`stage3c-active-recall-bridge.md`](stage3c-active-recall-bridge.md) §11 · [`doc-roadmap-v2.3.md`](doc-roadmap-v2.3.md)（文档注册表 + TODO）
+
+| 波次 | 轨道 | 交付 | 门禁 / 状态 |
+|------|------|------|-------------|
+| **Wave 0** | 法理 | Active Recall v0.2 + 介质分轨 Spec v0.2 | ✅ 锁定 |
+| **Wave 1 · P0** | L0 感知 | 介质路由 + episodic 默认车道 | ✅ 已编码 |
+| **Wave 2 · AR** | L2.6 记忆 | `ActiveRecallLedger` + `RECALL_FOCUS` | ✅ 已编码 |
+| **Wave 3 · L0** | 感知泛化 | `layout_region` + OCR 仲裁 + G6 解耦 | 🚧 heuristic L0.2 已编码；Florence/BYOK 待 3d-β |
+| **Wave 3c** | 穿戴分叉 | `WearableSnapshotLedgerV1` · `wearable_screenshot_review` | ✅ 已编码 · ⏳ **真机 6 图 E2E 待绿灯** |
+| **Wave 3d** | 穿戴 merge | `unknown+wearable` coerce · 无数据拒答 · 追问复用 | ✅ 已编码 · L0 定账 9 KPI |
+| **Wave 3d-γ** | 对比合约 | `CompareTableV1` · Audit 强解耦 · 强制 Fallback | ✅ **3d-γ-a/b** · Soul/UX **v2.3.18** |
+| **Wave 3d-ε** | 解读合规 | Interpretation Policy · NO_BASELINE 主观词 audit · 呼吸率入表 | ✅ **v2.3.19**（C-13/C-14） |
+| **Wave 3d-δ** | 事实管道 | Metric Registry · 分期/Workout 日聚合 | ✅ **δ-a/b/c** v2.3.20–23 · Registry JSON 驱动 Compare · **真机前 G3 锻炼增量** |
+| **Wave 3d-β** | 感知精度 | 分屏 KPI · 6 图异步 UX · F 层 fixture | 📋 与 γ 并行 · 依赖 γ 架构绿灯 |
+| **Wave 4a** | 开源门禁 | doctor · CI mock · PII 审计 · English README | 📋 **Spec 优先**（见 doc-roadmap） |
+| **Wave 4b** | L1.5 CHB | Chronic Health Brief 异步 Compiler · `[ref:*]` Schema | 📋 Spec 待写（**3d 绿灯后**） |
+| **Wave 4c** | 跨平台 | Capability Matrix · Linux OCR-only 降级 | 📋 backlog |
+| **Wave 4 · AR-3** | K 层 | `lookup_interactions` + Medication intent | 📋 见 stage3c-k-interaction-lookup-backlog |
+| **Wave 5** | 公开发布 | `personal-health-agent` @ `v0.1.0-alpha` · Demo GIF | 🔒 4a 全绿 + **3d-γ Compare** 金标 |
+
+**科学发车时序（不可颠倒）**：
+
+```text
+读对  →  L0.2 切片 + WearableSnapshot 定账 high（Wave 3c/3d）
+算清  →  CompareTable SSO（Wave 3d-γ）
+不胡编 →  Compare Audit + Fallback（3d-γ）+ Interpretation Policy（3d-ε）
+扩事实 →  Metric Registry + L1 日聚合（3d-δ）              ← 新增
+记住  →  AR-1/2 RECALL_FOCUS 每轮 anchored_asset（Wave 2）
+解读  →  LLM 类型 A 判断 only（Policy v1）· CHB（4b）
+开源  →  4a 门禁 + Public（Wave 5）
+```
+
+**当前 build**：`pha-v2.3.21-wave3d-delta-b-workout-import`  
+**上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md)  
+**穿戴专文**：[`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md) · [`stage3d-gamma-wearable-compare-contract-spec.md`](stage3d-gamma-wearable-compare-contract-spec.md) · [`wearable-interpretation-policy-v1.md`](wearable-interpretation-policy-v1.md) · [`stage3d-delta-wearable-fact-pipeline-spec.md`](stage3d-delta-wearable-fact-pipeline-spec.md)
+
+### 7.9 文档注册表（应写 / 应改）
+
+> 完整清单、优先级、负责人字段见 **[`doc-roadmap-v2.3.md`](doc-roadmap-v2.3.md)**。
+
+| 优先级 | 文档 | 状态 | 说明 |
+|--------|------|------|------|
+| **P0** | [`stage3d-wearable-merge-and-gates-spec.md`](stage3d-wearable-merge-and-gates-spec.md) | 📝 初稿 | 3d coerce/拒答/复用法理 |
+| **P0** | [`stage3d-gamma-wearable-compare-contract-spec.md`](stage3d-gamma-wearable-compare-contract-spec.md) | ✅ **v1.2** | CompareTable SSO · γ-1 夹具 |
+| **P0** | [`wearable-interpretation-policy-v1.md`](wearable-interpretation-policy-v1.md) | ✅ **v1.0 已签字** | 两类判断 · 无基线主观词 · 3d-ε |
+| **P0** | [`stage3d-delta-wearable-fact-pipeline-spec.md`](stage3d-delta-wearable-fact-pipeline-spec.md) | ✅ **v1.0 已签字** | Metric Registry · 分期/Workout · 3d-δ |
+| **P0** | [`stage3d-wearable-e2e-checklist.md`](stage3d-wearable-e2e-checklist.md) | 📝 待写 | 6 图 + G-Compare 红绿表 |
+| **P0** | [`wave4a-open-source-readiness-spec.md`](wave4a-open-source-readiness-spec.md) | 📝 待写 | 开源门禁 · Apache-2.0 · CI · PII |
+| **P1** | [`stage3d-beta-vision-precision-spec.md`](stage3d-beta-vision-precision-spec.md) | 📝 待写 | 分屏 KPI · 异步附件 UX |
+| **P1** | [`wave4b-chronic-health-brief-spec.md`](wave4b-chronic-health-brief-spec.md) | 📝 待写 | L1.5 CHB · Compiler · 写盘门禁 |
+| **P1** | `README.md`（English） | 📝 待写 | Quick Start · 架构 one-pager |
+| **P2** | [`wave4c-cross-platform-capability-matrix.md`](wave4c-cross-platform-capability-matrix.md) | 📝 待写 | Tier A/B/C · OCR 降级 |
+| **维护** | 本文档 §7.7 | ✅ 本次已更新 | 波次总表 |
+| **维护** | [`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md) | 🔄 待补 3d 修订 | build 号 · 3d 状态 |
+
+### 7.11 PHA / LLM 责任边界（2026-06-01 · 架构定调）
+
+> 专文：[`wearable-interpretation-policy-v1.md`](wearable-interpretation-policy-v1.md) · 数仓扩展：[`stage3d-delta-wearable-fact-pipeline-spec.md`](stage3d-delta-wearable-fact-pipeline-spec.md)
+
+| 问题 | 架构答复 |
+|------|----------|
+| 用户要 90d 对比、数仓没有？ | **可以**；在 L1/L2 **确定性聚合** 后写入 CompareTable；禁止 LLM 算 Raw |
+| PHA 保真、LLM 像医生？ | **有 personal baseline → LLM 可解读（类型 A）**；**NO_BASELINE → 仅事实（类型 B）** |
+| 「较为充足」？ | **类型 B 越界**；3d-ε 用 audit 规则族拦截，非改 prompt |
+| 深睡/REM 为何 NO_BASELINE？ | **`warehouse_not_implemented`**；Apple Raw 常有，PHA 日表未聚合（3d-δ） |
+
+**护城河**：当且仅当数据真实且可追溯时，才允许带评价色彩的表述；评价必须能追溯到 CompareTable `verdict` 或个人 90d 基线。
+
+### 7.10 当前 TODO 摘要（2026-06-01）
+
+| # | 任务 | 类型 | 阻塞 |
+|---|------|------|------|
+| T1 | 新会话真机：6 图 + 90 天对比 + 睡眠 | 验收 | — |
+| T2 | 追问无图：「图片里是什么」复用 parse | 验收 | T1 |
+| T3 | 起草 `stage3d-wearable-merge-and-gates-spec.md` | 文档 | — |
+| T4 | 起草 `wave4a-open-source-readiness-spec.md` | 文档 | — |
+| T5 | 实现 `pha_e2e_wearable_screens_real.py` + F 层 fixture | 编码 | T1 绿灯 |
+| T6 | GitHub Actions mock CI | 编码 | T4 Spec |
+| T7 | 起草 `wave4b-chronic-health-brief-spec.md` | 文档 | T1–T2 绿灯 |
+| T8 | **3d-ε** 编码：`compare_no_baseline_subjective` audit | 编码 | ✅ v2.3.19 |
+| T9 | **3d-ε** 编码：`respiratory_rate` 入 CompareTable | 编码 | ✅ v2.3.19 |
+| T10 | **3d-δ** Spec 评审 → sleep stage import 设计评审 | 文档/编码 | δ Spec ✅ |
+
+### 7.8 非 case-by-case 声明（架构交付，非个案补丁）
+
+| 类型 | 内容 |
+|------|------|
+| **平台能力** | L0.0 介质分轨、L0.5 `document_family`、L2.6 Active Recall、episodic 默认车道 |
+| **F 层 only** | NOW/6800/6801、R3 药物项A问句 — 仅 Fixture/E2E，**不进** P 层门禁或路由正则 |
+| **禁止** | 药名触发词表、小模型写断言、OCR≥25 短路、followup 问句白名单 |
 
 ---
 
@@ -441,12 +651,14 @@ Stage 1 → PHA_HARNESS_CATALOG_MODE=legacy → v2.2.6 全量预注入（极端�
 
 ---
 
-## 9. 总结：我的最终立场
+## 9. 总结：我的最终立场（2026-06-01）
 
-1. **Gemini 是对的**：A+ 不是 7B 妥协，是 PHA 的长期骨架；L0 确定性、Data>Context、C 层审计不可让渡。
-2. **Grok 也是对的**：纯关键词 A+ 在 150+ 指标下不可持续；Hybrid 必须渐进，且 Harness 永远 veto。
-3. **我的增量**：先 **观测、先 tier、先 MC**，再 **Shadow**，最后 **Guided Hybrid**；四阶段比三阶段更清晰地对齐「当前 combined E2E 未全绿」的现实。
-4. **下一步不是写 Stage 2 代码**，而是 **Stage 1 收官（Manifest tier + Route Telemetry 设计）+ Stage 2 RFC Review**。
+1. **Gemini / Grok 共识**：A+ 宪法不动；**先跑通金标，再扩架构**；M4 7B 是硬底线。
+2. **3d-γ 已编码**；真机 DeepSeek 可通过 Compare Audit（v2.3.18 Soul 对齐）；Qwen 仍常 Fallback。
+3. **下一优先**：**3d-ε**（Interpretation Policy 编译为 audit）+ **呼吸率入表**；并行 **3d-δ**（分期/Workout 日聚合，非幻觉修 prompt）。
+4. **观测**：Telemetry 必须 **可运营**（含 `L0_L3_Alignment_Rate`），见 [`telemetry-review-playbook.md`](telemetry-review-playbook.md)。
+5. **开源**：Wave 4a Spec 可先写；Public 需 4a CI 全绿 + 3d 金标（见 [`doc-roadmap-v2.3.md`](doc-roadmap-v2.3.md)）。
+6. **CHB**：L1.5 解读层，L1 账本仍为 SSO；**3d-δ 分期 comparable 后再写 4b 深睡叙事**。
 
 ---
 
@@ -454,14 +666,22 @@ Stage 1 → PHA_HARNESS_CATALOG_MODE=legacy → v2.2.6 全量预注入（极端�
 
 | 现有文档 | 关系 |
 |----------|------|
+| [`doc-roadmap-v2.3.md`](doc-roadmap-v2.3.md) | **文档注册表 + TODO 主清单**（2026-05-30） |
 | `harness-evidence-matrix.md` | Stage 1 需更新 Profile 触发源 |
 | `harness-catalog-v2.2.7.md` | Stage 2 MC 是其「目录压缩」延伸 |
 | `harness-dch-p1.6.md` | DCH 与 MC 并存；DCH 仍负责本轮诱饵 |
 | `storage/schemas/README.md` | A+ intent 块治理入口 |
+| [`stage3d-gamma-wearable-compare-contract-spec.md`](stage3d-gamma-wearable-compare-contract-spec.md) | Wave 3d-γ Compare SSO |
+| [`wearable-interpretation-policy-v1.md`](wearable-interpretation-policy-v1.md) | 3d-ε 解读边界 |
+| [`stage3d-delta-wearable-fact-pipeline-spec.md`](stage3d-delta-wearable-fact-pipeline-spec.md) | 3d-δ Metric Registry |
+| [`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md) | Wave 3c/3d 穿戴专文 |
+| [`pha-pm-constitution.md`](pha-pm-constitution.md) | 上位法 |
 
 ## 附录 B：推荐评审顺序
 
-1. 本文档 §3 Stage 划分 + §6 当前缺口  
-2. §4 Stage 2 MC/Shadow 设计  
-3. §8 开放问题裁定  
-4. 通过后再启动 `manifest-tier-v1.md` 与 `metadata-catalog-v2.3.md` 细分 RFC
+1. [`doc-roadmap-v2.3.md`](doc-roadmap-v2.3.md) — 当前 TODO 与文档优先级  
+2. [`stage3d-wearable-merge-and-gates-spec.md`](stage3d-wearable-merge-and-gates-spec.md)（待写）— 3d 验收法理  
+3. [`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md) — 穿戴 Harness 契约  
+4. [`wave4a-open-source-readiness-spec.md`](wave4a-open-source-readiness-spec.md)（待写）— 开源门禁  
+5. [`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) — 感知 Worker 总 RFC  
+6. [`telemetry-review-playbook.md`](telemetry-review-playbook.md)
