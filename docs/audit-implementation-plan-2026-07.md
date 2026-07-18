@@ -194,7 +194,28 @@
 | P2-1 | PyPI 发布 harness-core / harness-loop（alpha channel） | ≥1 个外部 builder 明确表示 vendored 安装不便（有书面记录） | `TODO` |
 | P2-2 | 拆分 pha/ 巨型模块（`wearable_compare_table_v1.py` 等 1000+ 行） | 出现第二个活跃贡献者，或该模块需要功能性大改 | `TODO` |
 | P2-3 | 多租户 / 设备接入 RFC 落地 | 出现真实 ToB 集成意向（非推演），且对方确认场景 | `TODO` |
-| P2-4 | CI 覆盖率门禁（coverage gate） | P0-2 与 P1-1 的包内测试均 DONE | `TODO` |
+| P2-4 | CI 覆盖率门禁（coverage gate） | P0-2 与 P1-1 的包内测试均 DONE | `DONE` |
+
+### P2-4 · CI 覆盖率门禁（完成摘要）
+
+- 状态：`DONE`
+- 目标：对可移植包 `harness_core` + `harness_loop` 的**库面**加 `--cov-fail-under`，防止后续抽取/重构无声掉覆盖。
+- 范围：`.coveragerc` 省略 `cli.py` / `paths.py` / `plugins/*`（CLI 与 PHA 插件由 selfcheck / e2e 覆盖，不进本门禁）。
+- 阈值：`fail-under=80`（落地时库面实测 ≈86%，留回归余量）。
+- DoD：
+
+  ```bash
+  pip install pytest pytest-cov
+  python -m pytest packages/harness_core/tests packages/harness_loop/tests -q \
+    --cov=harness_core --cov=harness_loop \
+    --cov-config=.coveragerc \
+    --cov-report=term-missing:skip-covered \
+    --cov-fail-under=80
+  # 期望：全部 passed 且 Required test coverage of 80% reached
+  ```
+
+  CI：`.github/workflows/ci.yml`「Harness packages unit tests + coverage gate (P2-4)」步骤执行同上命令。
+- 完成记录：2026-07-18 · `.coveragerc` + CI fail-under=80；本地 DoD 53 passed / 86.3%
 
 ---
 
@@ -216,3 +237,4 @@
 | 2026-07-14 | 初版：由 2026-07-14 审计报告转化为可执行方案 | audit agent |
 | 2026-07-14 | 执行协议新增模型算力对账（Model Routing Protocol，见规则文件） | audit agent |
 | 2026-07-14 | 新增 §2.5 P1.5-1 Minimal Attach / Adapter 契约任务卡（审校采纳；实现待 High） | audit agent |
+| 2026-07-18 | P2-4 DONE：CI harness 包库面 coverage gate（`.coveragerc` omit CLI/plugin，fail-under=80） | coding agent |

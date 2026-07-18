@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-07-18 (CI coverage gate for harness packages; audit plan P2-4)
+
+- **类别**：P2（审计方案 P2-4：包内测试已齐后的覆盖率回归门禁）。
+- **配置**：根目录 `.coveragerc` — 计量 `harness_core` + `harness_loop` 库面；**omit** `cli.py` / `paths.py` / `plugins/*`（CLI 与 PHA 插件仍由 selfcheck / e2e 覆盖）。
+- **CI**：`.github/workflows/ci.yml` 单测步骤改为 `pytest-cov` + `--cov-fail-under=80`。
+- **阈值依据**：落地时库面 ≈86%；`80` 防无声回退，不强迫立刻补 CLI 单测。
+- **铁律不变**：不扩到 `pha/` 巨型模块；不改在线熔断路径。
+
+---
+
 ## 2026-07-15 (harness-core α2 — frozen DomainAdapter contract + minimal attach; audit plan P1.5-1)
 
 - **类别**：P1.5（审计方案 P1.5-1：Adapter 契约冻结 + 零健康域 minimal attach 示例）。

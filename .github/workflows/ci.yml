@@ -39,10 +39,15 @@ jobs:
       - name: Doctor (offline — Ollama expected to fail)
         run: python scripts/doctor.py --quick || true
 
-      - name: Harness packages unit tests
+      - name: Harness packages unit tests + coverage gate (P2-4)
         run: |
-          pip install pytest
-          python -m pytest packages/harness_core/tests packages/harness_loop/tests -q
+          pip install pytest pytest-cov
+          # Gate portable library surface only (see .coveragerc — omits CLI / PHA plugin).
+          python -m pytest packages/harness_core/tests packages/harness_loop/tests -q \
+            --cov=harness_core --cov=harness_loop \
+            --cov-config=.coveragerc \
+            --cov-report=term-missing:skip-covered \
+            --cov-fail-under=80
 
       - name: Minimal attach demo (P1.5-1 — must fail-closed)
         run: |

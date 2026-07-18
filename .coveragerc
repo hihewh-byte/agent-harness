@@ -1,0 +1,23 @@
+# Coverage gate for portable harness packages (audit P2-4).
+# Omits CLI entrypoints and PHA-domain plugin (covered by selfchecks / e2e, not unit tests).
+
+[run]
+branch = False
+source =
+    packages/harness_core/src/harness_core
+    packages/harness_loop/src/harness_loop
+omit =
+    */harness_loop/cli.py
+    */harness_loop/paths.py
+    */harness_loop/plugins/*
+    */tests/*
+    */__pycache__/*
+
+[report]
+precision = 1
+show_missing = True
+skip_covered = False
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.
+    raise NotImplementedError
