@@ -35,3 +35,9 @@ reports/e2e/
 !.cursor/rules/
 *.log
 /tmp/
+
+# Pytest / coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
