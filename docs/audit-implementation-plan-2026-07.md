@@ -227,6 +227,7 @@
 | 2026-07-14 | README Builder 段仍写 harness-loop `0.1.0a3`，main 已是 `0.1.0a4`（P1-1） | P1-3 | **已修**：README + `packages/harness_loop/README.md` → `0.1.0a4`（分支 chore/a-readme-a4-and-p12-prep） |
 | 2026-07-14 | High 额度不足，P1-2 邀请正文 / P1-4 威胁模型暂缓；先做 Mid 事务辅助 | P1-2 | 已写 [`docs/p1-2-outreach-prep.md`](p1-2-outreach-prep.md)（Issue #1 现状、邀请对象表、§4 反馈登记模板；**不含**邀请正文） |
 | 2026-07-14 | Core+Loop「直接进用户 Agent」需 Adapter 契约 + 脱水 minimal 示例；外部审校赞同并建议立 P1.5 | 规划 | **已立卡** P1.5-1（见 §2.5）；实现须 High；本提交只入库任务卡，不动架构代码 |
+| 2026-07-31 | GitHub 丢一眼误判为「健康 App」：仓库名 `personal_health_agent` vs About/README 写通用 harness（分发诊断） | 分发审计 | **叙事修复（未改仓库名）**：README 第一屏改为 Harness Core+Loop；PHA 降为 reference app 专节；维护者须同步改 GitHub About 文案（见 README 顶部 Glance test） |
 
 ---
 

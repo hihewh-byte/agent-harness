@@ -1,6 +1,6 @@
-# harness-core (vendored in PHA)
+# harness-core
 
-Thin **domain-agnostic** online control plane. Part of the **Harness component family**:
+Thin **domain-agnostic** online control plane (vendored in this monorepo; PHA is the reference app, not the product name of this package). Part of the **Harness component family**:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐

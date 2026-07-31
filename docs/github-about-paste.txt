@@ -1,0 +1,23 @@
+# Paste into GitHub → Settings → General → About (maintainer action)
+
+## Description (one line)
+
+Portable fail-closed harness (core+loop) for agents that must not invent numbers/IDs. PHA in this monorepo is the reference health app — not the product.
+
+## Website (optional)
+
+https://github.com/hihewh-byte/personal_health_agent#builder-10-seconds--no-llm--no-health-domain
+
+## Topics (recommended)
+
+fail-closed
+guardrails-framework
+llm-security
+deterministic-ai
+agent-evaluation
+harness
+
+## Note
+
+Repository *name* `personal_health_agent` still conflicts with the harness pitch.
+README first screen is fixed; renaming the repo is a separate decision (see audit plan §4 2026-07-31).

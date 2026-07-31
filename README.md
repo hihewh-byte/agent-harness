@@ -1,32 +1,35 @@
-# Personal Health Agent (PHA)
+# Harness Core + Loop
 
-**Local-first personal health intelligence** — import Apple Health exports, parse lab reports and wearable screenshots, and chat with an evidence-grounded AI. All data stays on your machine.
+**Portable fail-closed control plane for agents that must not invent numbers or IDs** — deterministic set assertions, plan-before-compose, post-audit without a second LLM. Offline Loop emits **proposals only** (human PR); never auto-merges catalogs.
 
-> **Not a medical device.** PHA does **not** provide medical advice, diagnosis, or treatment. Outputs are for personal wellness tracking only. Always consult qualified healthcare professionals.
+| Layer | What you get |
+|-------|----------------|
+| **harness-core** | Online fence: Plan → Compose → Post-Audit · fail-closed |
+| **harness-loop** | Offline evolution: harvest → gates → distill → promote (proposal-only) |
+| **PHA (this monorepo)** | *Reference app* — local-first personal health agent that proves the fence under weak LLMs |
 
-![PHA dashboard — English UI, evidence chat, numerics audit](docs/assets/pha-demo-hero.jpg)
+> **Glance test:** If you want a health chatbot UI, jump to [Use the PHA app](#use-the-pha-app-reference-implementation). If you build agents that must not invent numbers/IDs — you are in the right place; start with [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain).
 
 | | |
 |---|---|
 | **License** | [Apache-2.0](LICENSE) |
 | **Python** | 3.10+ |
-| **LLM** | [Ollama](https://ollama.com) (local) |
-| **Release** | [`v0.4.0-beta.1`](https://github.com/hihewh-byte/personal_health_agent/releases/tag/v0.4.0-beta.1) |
-| **Build** | `pha-v2.3.32-full-import-only` |
+| **Packages** | [`packages/harness_core`](packages/harness_core/) · [`packages/harness_loop`](packages/harness_loop/) (vendored; **not on PyPI yet**) |
+| **Reference app** | PHA · build `pha-v2.3.32-full-import-only` · [`v0.4.0-beta.1`](https://github.com/hihewh-byte/personal_health_agent/releases/tag/v0.4.0-beta.1) |
 
 ### Choose your path
 
 | Path | For whom | Start here |
 |------|----------|------------|
-| **Use PHA** | Run the personal health app locally | [5-minute Quick Start](#5-minute-quick-start-native--recommended-first-try) · [Clone & verify](#clone--verify-60-seconds--no-ollama) |
-| **Attach Harness** | Build agents on the portable control plane | [Attach in 15 minutes](docs/attach-in-15-minutes.md) · [harness-builder-overview](docs/harness-builder-overview.md) · [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain) |
-| **Contribute Loop** | Evolve offline recognition via harvest → promote → PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) |
+| **Attach Harness** | Wire fail-closed numerics/ID fence into *your* agent | [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain) · [Attach in 15 minutes](docs/attach-in-15-minutes.md) · [harness-builder-overview](docs/harness-builder-overview.md) |
+| **Contribute Loop** | Offline harvest → promote → human PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) · [Issue #1](https://github.com/hihewh-byte/personal_health_agent/issues/1) |
+| **Use PHA app** | Run the health reference UI locally | [Use the PHA app](#use-the-pha-app-reference-implementation) · [5-minute Quick Start](#5-minute-quick-start-pha-app) |
 
 ---
 
 ## Builder? 10 seconds · no LLM · no health domain
 
-**Building agents, not using PHA as an app?** Prove the harness control plane in one terminal block — no Ollama, no Apple Health data, no PyPI.
+Prove the portable control plane in one terminal block — **no Ollama, no Apple Health, no PyPI**.
 
 ```bash
 git clone https://github.com/hihewh-byte/personal_health_agent.git
@@ -41,22 +44,22 @@ harness-loop eval-check \
 
 You should see `RESULT: PASS` (bootstrap) and `PASS toy_smoke_v0.json` — a **non-health toy domain** on the portable `harness.eval_set/v1` contract.
 
-**Harness Loop (Alpha)** is vendored in-repo (`0.1.0a4`; not on PyPI yet): `harness-loop version` · portable `harvest --e2e-jsonl` / `promote --static-only` · `reflect --plugin pha` · `gates`/`distill`.  
-Deeper: [harness-builder-overview](docs/harness-builder-overview.md) · [Loop attach guide](examples/loop_reference_pha.md) · [Issue #1 — call for builders](https://github.com/hihewh-byte/personal_health_agent/issues/1).
+**Harness Loop (Alpha)** is vendored in-repo (`0.1.0a4`): `harness-loop version` · `harvest --e2e-jsonl` · `promote --static-only` · `gates` / `distill`.  
+Deeper: [harness-builder-overview](docs/harness-builder-overview.md) · [Loop attach](examples/loop_reference_pha.md) · [call for builders](https://github.com/hihewh-byte/personal_health_agent/issues/1).
 
 ---
 
-## Why PHA?
+## Why fail-closed (not another “self-heal” rail)
 
-Most “health chatbots” let the LLM invent numbers. PHA flips the control plane:
+Agents that touch money, tickets, device IDs, or lab-like numbers fail when the model invents a precise value. This stack flips the control plane:
 
-1. **Harness plans first** — each turn freezes which evidence slots are allowed (`TurnEvidencePlan`)
-2. **Tier0 budget** — critical facts are protected; the model cannot crowd them out
-3. **Numerics / Compare audit** — user-visible numbers must match injected evidence or the reply is downgraded
+1. **Plan first** — freeze which evidence / atoms are allowed before compose  
+2. **Protected budget** — critical facts cannot be crowded out of context  
+3. **Deterministic post-audit** — user-visible numbers/IDs must be in the allowlist, or the turn **fail-closes** (no silent rewrite loop)
 
-If you are learning to **build agents that stay honest under weak local LLMs**, the harness layer is the interesting part — not the chat UI.
+The interesting part for builders is **harness-core + harness-loop**, not the chat UI. PHA is only the stress-tested reference domain.
 
-> ⚠️ **Beta (`v0.4.0-beta.1`)** — Core anti-hallucination paths are covered by offline selfchecks. Adaptive reply language (RLP) and large English asset corpora are **not** fully stress-tested. If something breaks, [open an Issue](https://github.com/hihewh-byte/personal_health_agent/issues) — edge cases fuel Phase 2.
+> ⚠️ **Alpha / Beta honesty** — Core anti-hallucination paths are covered by offline selfchecks. Packages are **vendored in this repo**, not a polished PyPI product yet. Edge cases → [open an Issue](https://github.com/hihewh-byte/personal_health_agent/issues).
 
 ---
 
@@ -131,11 +134,19 @@ We treated “framework complete” as **dual-domain proof of the control plane*
 - `harness_core` is **vendored in this repo** for clone-and-run proof, but **not** published to PyPI as a standalone package yet.
 - Extracting a separate PyPI package remains **demand-driven** (see [Issue #1](https://github.com/hihewh-byte/personal_health_agent/issues/1)).
 
-If you only want to **use PHA as an app**: follow Quick Start above. If you care about the harness: run the golden script (it should print a `PASS harness_core adapter` line), then read the protocol + blueprint docs.
+Builders: run the golden script (expect `PASS harness_core adapter`), then read the protocol + blueprint docs. App users: continue below.
 
 ---
 
-## 5-minute Quick Start (native · recommended first try)
+## Use the PHA app (reference implementation)
+
+**Personal Health Agent (PHA)** is the *reference* product in this monorepo: local-first import of Apple Health exports, lab/wearable attachments, and evidence-grounded chat. It exists to prove harness-core under a weak local LLM — not to redefine what this repository is.
+
+> **Not a medical device.** PHA does **not** provide medical advice, diagnosis, or treatment. Outputs are for personal wellness tracking only. Always consult qualified healthcare professionals.
+
+![PHA dashboard — English UI, evidence chat, numerics audit](docs/assets/pha-demo-hero.jpg)
+
+### 5-minute Quick Start (PHA app)
 
 **Honest timing**
 
@@ -144,13 +155,13 @@ If you only want to **use PHA as an app**: follow Quick Start above. If you care
 | Ollama + `qwen2.5:7b-instruct` already installed | **~3–5 min** |
 | Cold start (first model pull ~4–5 GB) | **15–40 min** (network-bound) |
 
-### Prerequisites
+#### Prerequisites
 
 - macOS or Linux, Python 3.10+
 - [Ollama](https://ollama.com) running (`ollama serve` or Ollama Desktop)
 - Optional later: Tesseract (OCR for screenshots)
 
-### Steps
+#### Steps
 
 ```bash
 git clone https://github.com/hihewh-byte/personal_health_agent.git
@@ -179,7 +190,7 @@ Empty warehouse is OK — you can chat immediately; import Apple Health `export.
 
 ---
 
-## Features
+## PHA app features (reference)
 
 - **Apple Health import** — `export.zip` → SQLite warehouse (steps, sleep, HRV, workouts, labs)
 - **Wearable screenshot review** — Watch OCR → 90-day CompareTable + audit / hybrid fallback

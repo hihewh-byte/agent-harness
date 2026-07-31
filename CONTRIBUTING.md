@@ -1,10 +1,12 @@
-# Contributing to Personal Health Agent
+# Contributing
 
-Thank you for your interest in PHA. This project handles **personal health data** — please follow these rules carefully.
+This monorepo ships **Harness Core + Loop** (portable fail-closed control plane) and **PHA** (personal health *reference* app). Most contributions are harness or PHA-domain plugins — read [README.md](README.md) first-screen glance test before you start.
+
+PHA paths handle **personal health data** — follow PII rules carefully.
 
 ## Before you start
 
-1. Read [README.md](README.md) and [docs/INSTALL.md](docs/INSTALL.md).
+1. Read [README.md](README.md) (harness-first) and, for the app, [docs/INSTALL.md](docs/INSTALL.md).
 2. Run `python scripts/doctor.py` and `bash scripts/run_selfchecks.sh`.
 3. Do **not** include real health exports, SQLite databases, lab PDFs, screenshots, or **`reports/chb/**/brief_*.json`** in PRs.
 
