@@ -11,8 +11,8 @@ You implement **one object with three methods**. That's the whole integration.
 ## 0. See it run first (60 seconds)
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness
+cd agent-harness
 PYTHONPATH=packages/harness_core/src python examples/attach_minimal/run_demo.py
 ```
 
@@ -83,6 +83,6 @@ your prompts or catalogs at runtime ([threat model](threat-model-v0.md)).
 - It never phones home, needs a network, or requires a specific LLM vendor.
 - It never imports your domain code; the boundary is the three-method adapter.
 
-Questions / feedback: [Issue #1 — call for builders](https://github.com/hihewh-byte/personal_health_agent/issues/1).
+Questions / feedback: [Issue #1 — call for builders](https://github.com/hihewh-byte/agent-harness/issues/1).
 The health app in this repo (PHA) is just the reference implementation of the
 same contract (`pha/harness_core_adapter.py::PHANumericsAdapter`).

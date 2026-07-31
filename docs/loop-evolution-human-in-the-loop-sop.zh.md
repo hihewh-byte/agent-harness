@@ -30,7 +30,7 @@
 ### A1. 生成 proposal（离线）
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 export PYTHONPATH=.
 
 PHA_E2E_JSONL=/path/to/en_stress_50x_*.jsonl \

@@ -72,6 +72,6 @@ If you clone PHA to study the harness:
 
 1. Run `bash scripts/bootstrap.sh` (or `bash scripts/run_selfchecks.sh` for the full suite)
 2. Skim this file + the consensus baseline
-3. [Open an Issue](https://github.com/hihewh-byte/personal_health_agent/issues) with: what you tried to reuse, what blocked you, which module felt most portable
+3. [Open an Issue](https://github.com/hihewh-byte/agent-harness/issues) with: what you tried to reuse, what blocked you, which module felt most portable
 
 That feedback decides whether a future `agent-harness-core` extraction is worth the cost.

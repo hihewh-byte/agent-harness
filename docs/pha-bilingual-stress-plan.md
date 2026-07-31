@@ -24,7 +24,7 @@
 ### 1. 启动 PHA（另开终端）
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 source .venv/bin/activate   # 如有
 PYTHONPATH=. python -m pha.main
 ```

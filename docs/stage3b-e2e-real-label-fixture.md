@@ -58,7 +58,7 @@
 ## 5. 运行
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 export PHA_E2E_LABEL_FRONT=/path/to/desensitized_front.jpg
 export PHA_E2E_LABEL_FACTS=/path/to/desensitized_facts.jpg
 python3 scripts/pha_e2e_attachment_label_real.py --json-out /tmp/pha_e2e_label.json

@@ -123,7 +123,7 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 ## 8. 验收
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 python scripts/pha_wearable_registry_selfcheck.py
 python scripts/pha_wearable_compare_table_selfcheck.py
 ./scripts/pha_restart_accept.sh

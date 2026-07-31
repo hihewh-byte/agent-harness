@@ -42,8 +42,8 @@ bash scripts/pull-models.sh
 ## Option A — Native Python (fastest first success)
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent.git
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness.git
+cd agent-harness
 
 bash scripts/bootstrap.sh          # Python 3.10+; creates .venv + golden PASS
 source .venv/bin/activate          # Windows: .venv\Scripts\activate

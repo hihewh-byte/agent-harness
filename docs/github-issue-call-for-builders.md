@@ -9,8 +9,8 @@ We already have a **second in-house domain** (tax / filing agent) that mirrors t
 ## 30s demo (no Ollama)
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent.git
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness.git
+cd agent-harness
 bash scripts/bootstrap.sh
 ```
 
@@ -18,8 +18,8 @@ You should see `RESULT: PASS` with profile / Tier0 slots / tools — no model ca
 Requires **Python 3.10+** (macOS: `PHA_PYTHON=python3.12 bash scripts/bootstrap.sh` if `python3` is 3.9).
 
 Docs:
-- https://github.com/hihewh-byte/personal_health_agent/blob/main/docs/harness-builder-overview.md
-- https://github.com/hihewh-byte/personal_health_agent/blob/main/README.md#30-second-no-llm-golden-run-see-the-harness-first
+- https://github.com/hihewh-byte/agent-harness/blob/main/docs/harness-builder-overview.md
+- https://github.com/hihewh-byte/agent-harness/blob/main/README.md#30-second-no-llm-golden-run-see-the-harness-first
 
 ## Questions for you
 

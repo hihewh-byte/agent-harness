@@ -32,7 +32,7 @@
 ### A1. Generate proposal (offline)
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 export PYTHONPATH=.
 
 # From E2E / harness telemetry

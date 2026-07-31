@@ -246,7 +246,7 @@ Implementations stay in PHA / tax. Core may later ship a trivial “substring al
 **Public (this repo):**
 
 ```text
-personal_health_agent/packages/harness_core/
+packages/harness_core/   # monorepo root (GitHub: agent-harness)
   README.md
   pyproject.toml
   src/harness_core/

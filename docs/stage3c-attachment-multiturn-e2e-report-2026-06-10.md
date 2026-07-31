@@ -91,6 +91,6 @@
 复现命令：
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 PYTHONUNBUFFERED=1 .venv/bin/python scripts/pha_e2e_attachment_multiturn_report.py
 ```

@@ -69,7 +69,7 @@
 
 | 内容 | 建议位置 | 原因 |
 |------|----------|------|
-| 产品/RFC 文档（现状） | `personal_health_agent/docs/rfcs/*` | 已与 Core 蓝图挂钩；可继续迭代文档 |
+| 产品/RFC 文档（现状） | `<repo>/docs/rfcs/*` | 已与 Core 蓝图挂钩；可继续迭代文档 |
 | **HIO 生产/PoC 代码** | **新建私有仓**或 `myAgents/hospital_iot_ops_agent/`（本地） | **不要**把医院厂商适配、样例库、售前 Demo 数据推进 PHA 公网仓 |
 | 控制平面 | **消费** `packages/harness_core`（拷贝或 path 依赖） | Core 已在 PHA 公网 vendored；HIO 是 Domain Plugin |
 | `tax_agent` | **只读参考孪生**；**禁止 push / 禁止拷贝隐私数据** | 本地财务隐私 |
@@ -96,7 +96,7 @@
 | 6 | [`rfc-enterprise-multi-tenant.md`](rfc-enterprise-multi-tenant.md) | 租户/Gateway 设计（HIO 鉴权外部化时对照） |
 | 7 | [`rfc-device-ingestion-adapter.md`](rfc-device-ingestion-adapter.md) | 设备摄入 L0（HIO 优先 DB View，未必走此 RFC） |
 
-**公网仓库**：https://github.com/hihewh-byte/personal_health_agent（默认 `main`，个人健康 Agent；HIO 仅 DOC）。
+**公网仓库**：https://github.com/hihewh-byte/agent-harness（默认 `main`；Harness + PHA reference；HIO 仅 DOC）。
 
 ---
 
@@ -106,7 +106,7 @@
 
 | 位置 | 说明 |
 |------|------|
-| `personal_health_agent/packages/harness_core/` | **公网已 vendored**，权威交付形态 |
+| `<repo>/packages/harness_core/` | **公网已 vendored**，权威交付形态 |
 | `myAgents/harness_core/` | 工作区根下同构骨架（接口级） |
 
 **模块**：`turn_plan` · `turn_fsm` · `integrity` · `plan_vs_actual`  
@@ -117,9 +117,9 @@
 
 | 路径 | 说明 |
 |------|------|
-| `personal_health_agent/pha/harness_core_adapter.py` | PHA 薄适配；公网可参考 |
+| `<repo>/pha/harness_core_adapter.py` | PHA 薄适配；公网可参考 |
 | `tax_agent/harness_core_adapter.py` | 本地孪生；**只读参考，勿外泄** |
-| `personal_health_agent/scripts/pha_harness_golden_run.py` | 绿墙范例：须能打出 `PASS harness_core adapter` |
+| `<repo>/scripts/pha_harness_golden_run.py` | 绿墙范例：须能打出 `PASS harness_core adapter` |
 
 ### 3.3 架构口诀（实现时贴在 PR 描述里）
 

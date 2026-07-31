@@ -373,7 +373,7 @@ POST {OLLAMA_BASE_URL}/api/chat
 ## 8. 构建与启动
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 PYTHONPATH=. .venv/bin/python -m pha.main
 # → http://127.0.0.1:8787/
 ```

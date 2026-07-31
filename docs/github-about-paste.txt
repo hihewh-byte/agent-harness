@@ -1,4 +1,4 @@
-# Paste into GitHub → Settings → General → About (maintainer action)
+# GitHub → Settings → General → About
 
 ## Description (one line)
 
@@ -6,7 +6,7 @@ Portable fail-closed harness (core+loop) for agents that must not invent numbers
 
 ## Website (optional)
 
-https://github.com/hihewh-byte/personal_health_agent#builder-10-seconds--no-llm--no-health-domain
+https://github.com/hihewh-byte/agent-harness#builder-10-seconds--no-llm--no-health-domain
 
 ## Topics (recommended)
 
@@ -17,7 +17,6 @@ deterministic-ai
 agent-evaluation
 harness
 
-## Note
+## Repo name
 
-Repository *name* `personal_health_agent` still conflicts with the harness pitch.
-README first screen is fixed; renaming the repo is a separate decision (see audit plan §4 2026-07-31).
+Public repository: **`hihewh-byte/agent-harness`** (renamed from `personal_health_agent`; old URL redirects).

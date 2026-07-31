@@ -124,7 +124,7 @@ git cherry-pick 3c801de
 ## 8. 验收命令（v2.3.29）
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 bash scripts/pha_restart_accept.sh   # → Acceptance PASSED
 bash scripts/run_selfchecks.sh       # 23/23
 open http://127.0.0.1:8787

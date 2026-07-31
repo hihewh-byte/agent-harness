@@ -7,7 +7,7 @@
 
 | Field | Value |
 |-------|--------|
-| URL | https://github.com/hihewh-byte/personal_health_agent/issues/1 |
+| URL | https://github.com/hihewh-byte/agent-harness/issues/1 |
 | State | **open** |
 | Title | `[Call for builders] Which harness modules are portable?` |
 | Comments | **2** — both from owner `hihewh-byte` (Phase A closeout; Loop α2 / Builder 10s update) |

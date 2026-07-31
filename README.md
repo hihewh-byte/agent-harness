@@ -15,14 +15,14 @@
 | **License** | [Apache-2.0](LICENSE) |
 | **Python** | 3.10+ |
 | **Packages** | [`packages/harness_core`](packages/harness_core/) · [`packages/harness_loop`](packages/harness_loop/) (vendored; **not on PyPI yet**) |
-| **Reference app** | PHA · build `pha-v2.3.32-full-import-only` · [`v0.4.0-beta.1`](https://github.com/hihewh-byte/personal_health_agent/releases/tag/v0.4.0-beta.1) |
+| **Reference app** | PHA · build `pha-v2.3.32-full-import-only` · [`v0.4.0-beta.1`](https://github.com/hihewh-byte/agent-harness/releases/tag/v0.4.0-beta.1) |
 
 ### Choose your path
 
 | Path | For whom | Start here |
 |------|----------|------------|
 | **Attach Harness** | Wire fail-closed numerics/ID fence into *your* agent | [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain) · [Attach in 15 minutes](docs/attach-in-15-minutes.md) · [harness-builder-overview](docs/harness-builder-overview.md) |
-| **Contribute Loop** | Offline harvest → promote → human PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) · [Issue #1](https://github.com/hihewh-byte/personal_health_agent/issues/1) |
+| **Contribute Loop** | Offline harvest → promote → human PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) · [Issue #1](https://github.com/hihewh-byte/agent-harness/issues/1) |
 | **Use PHA app** | Run the health reference UI locally | [Use the PHA app](#use-the-pha-app-reference-implementation) · [5-minute Quick Start](#5-minute-quick-start-pha-app) |
 
 ---
@@ -32,8 +32,8 @@
 Prove the portable control plane in one terminal block — **no Ollama, no Apple Health, no PyPI**.
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent.git
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness.git
+cd agent-harness
 bash scripts/bootstrap.sh
 source .venv/bin/activate
 pip install -e packages/harness_core packages/harness_loop
@@ -45,7 +45,7 @@ harness-loop eval-check \
 You should see `RESULT: PASS` (bootstrap) and `PASS toy_smoke_v0.json` — a **non-health toy domain** on the portable `harness.eval_set/v1` contract.
 
 **Harness Loop (Alpha)** is vendored in-repo (`0.1.0a4`): `harness-loop version` · `harvest --e2e-jsonl` · `promote --static-only` · `gates` / `distill`.  
-Deeper: [harness-builder-overview](docs/harness-builder-overview.md) · [Loop attach](examples/loop_reference_pha.md) · [call for builders](https://github.com/hihewh-byte/personal_health_agent/issues/1).
+Deeper: [harness-builder-overview](docs/harness-builder-overview.md) · [Loop attach](examples/loop_reference_pha.md) · [call for builders](https://github.com/hihewh-byte/agent-harness/issues/1).
 
 ---
 
@@ -59,7 +59,7 @@ Agents that touch money, tickets, device IDs, or lab-like numbers fail when the 
 
 The interesting part for builders is **harness-core + harness-loop**, not the chat UI. PHA is only the stress-tested reference domain.
 
-> ⚠️ **Alpha / Beta honesty** — Core anti-hallucination paths are covered by offline selfchecks. Packages are **vendored in this repo**, not a polished PyPI product yet. Edge cases → [open an Issue](https://github.com/hihewh-byte/personal_health_agent/issues).
+> ⚠️ **Alpha / Beta honesty** — Core anti-hallucination paths are covered by offline selfchecks. Packages are **vendored in this repo**, not a polished PyPI product yet. Edge cases → [open an Issue](https://github.com/hihewh-byte/agent-harness/issues).
 
 ---
 
@@ -68,8 +68,8 @@ The interesting part for builders is **harness-core + harness-loop**, not the ch
 After clone, one script installs deps and proves the harness runs **without any LLM**:
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent.git
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness.git
+cd agent-harness
 bash scripts/bootstrap.sh
 ```
 
@@ -132,7 +132,7 @@ We treated “framework complete” as **dual-domain proof of the control plane*
 
 - A second domain (tax / filing) validated the same philosophy in a **local sandbox** with its own golden run. That domain is **not** published here: financial PII stays offline by policy.
 - `harness_core` is **vendored in this repo** for clone-and-run proof, but **not** published to PyPI as a standalone package yet.
-- Extracting a separate PyPI package remains **demand-driven** (see [Issue #1](https://github.com/hihewh-byte/personal_health_agent/issues/1)).
+- Extracting a separate PyPI package remains **demand-driven** (see [Issue #1](https://github.com/hihewh-byte/agent-harness/issues/1)).
 
 Builders: run the golden script (expect `PASS harness_core adapter`), then read the protocol + blueprint docs. App users: continue below.
 
@@ -164,8 +164,8 @@ Builders: run the golden script (expect `PASS harness_core adapter`), then read 
 #### Steps
 
 ```bash
-git clone https://github.com/hihewh-byte/personal_health_agent.git
-cd personal_health_agent
+git clone https://github.com/hihewh-byte/agent-harness.git
+cd agent-harness
 
 bash scripts/bootstrap.sh          # creates .venv, installs deps, golden PASS
 source .venv/bin/activate
@@ -278,6 +278,6 @@ Checklist: [docs/wave4a-open-source-readiness-spec.md](docs/wave4a-open-source-r
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Run `bash scripts/run_selfchecks.sh` before opening a PR.
 
-Building agents / fighting numerical hallucination? Star the repo or [open an Issue](https://github.com/hihewh-byte/personal_health_agent/issues) with your edge case — that feedback drives Phase 2 more than vanity metrics.
+Building agents / fighting numerical hallucination? Star the repo or [open an Issue](https://github.com/hihewh-byte/agent-harness/issues) with your edge case — that feedback drives Phase 2 more than vanity metrics.
 
 Security: [SECURITY.md](SECURITY.md) · Changelog: [CHANGELOG.md](CHANGELOG.md)

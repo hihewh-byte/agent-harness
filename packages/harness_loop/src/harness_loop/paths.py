@@ -39,6 +39,6 @@ def require_pha_scripts(root: Path) -> Path:
     if not (scripts / "pha_loop_promote_candidate.py").is_file():
         raise FileNotFoundError(
             f"PHA reference scripts not found under {root}. "
-            "Set HARNESS_LOOP_REPO_ROOT to the personal_health_agent checkout."
+            "Set HARNESS_LOOP_REPO_ROOT to the agent-harness checkout (monorepo root)."
         )
     return scripts

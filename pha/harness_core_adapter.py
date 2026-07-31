@@ -22,7 +22,7 @@ class HarnessCoreUnavailable(ImportError):
 
 def _candidate_src_dirs() -> list[Path]:
     here = Path(__file__).resolve()
-    # pha/harness_core_adapter.py → personal_health_agent/packages/harness_core/src
+    # pha/harness_core_adapter.py → <repo>/packages/harness_core/src
     pha_root = here.parents[1]
     roots = [
         pha_root / "packages" / "harness_core" / "src",

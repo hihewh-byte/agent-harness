@@ -1,7 +1,8 @@
-# 使用 GitHub Desktop 发布 PHA（单仓 · 个人开源版）
+# 使用 GitHub Desktop 发布（单仓 · 个人开源版）
 
-> **Git 根目录** = `personal_health_agent/` 文件夹（其内直接可见 `pha/`、`README.md`、`docker-compose.yml`）。  
-> **不要**把上一级 `myAgents/` 加为仓库（与 ASI 单仓发布相同法理）。
+> **公网仓库**：`hihewh-byte/agent-harness`（Harness Core+Loop；PHA = reference app）。  
+> **Git 根目录** = 本仓检出目录（内含 `pha/`、`packages/`、`README.md`、`docker-compose.yml`）。本地文件夹名可与远程不同。  
+> **不要**把上一级 `myAgents/` 加为仓库。
 
 上位法：[`wave4a-open-source-readiness-spec.md`](wave4a-open-source-readiness-spec.md) · [`CONTRIBUTING.md`](../CONTRIBUTING.md)
 
@@ -10,7 +11,7 @@
 ## 0. 发布前审计（Maintainer 必跑）
 
 ```bash
-cd personal_health_agent
+cd agent-harness
 
 # 1. PII 历史检测 — 若输出为空则无需 filter-repo
 git log --all --full-history --oneline -- "**/brief_*.json"
@@ -40,7 +41,7 @@ git filter-repo --path-match 'reports/chb/' --invert-paths --force
 
 ## 1. GitHub Desktop 操作
 
-1. **File → Add Local Repository…** → 选择 **`personal_health_agent`** 文件夹。
+1. **File → Add Local Repository…** → 选择本仓检出根目录（含 `pha/` 与 `packages/`）。
 2. 确认当前分支；建议发行前使用 **`main`**（见 §2）。
 3. **Changes** 中勾选待发布文件；**勿选**：
    - `.env` · `data/` · `*.db` · `reports/chb/**/brief_*.json` · `reports/loop/`
@@ -94,8 +95,8 @@ PYTHONPATH=. python3 scripts/pha_chb_compile_all_users.py
 
 | 资产 | 建议 | 说明 |
 |------|------|------|
-| **PHA 产品** | ✅ **本仓** `personal_health_agent` | 含 Harness · FSM · CompareTable · Dashboard · 即 v0.4.0-beta |
-| **PHA 框架（独立库）** | ⏳ **不必首发** | Harness/FSM 仍内嵌于本仓；拆分为 `pha-framework` 属 Future Work（见 Enterprise RFC） |
+| **Harness + PHA reference** | ✅ **本仓** `agent-harness` | harness-core/loop + PHA 参考实现 · v0.4.0-beta |
+| **独立 PyPI 包** | ⏳ **不必首发** | 仍 vendored；PyPI 拆分属 demand-driven（见审计 P2-1） |
 
 **结论**：先发布 **本仓单 repo** 即可；无需等待「框架拆库」。
 

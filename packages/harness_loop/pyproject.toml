@@ -19,8 +19,8 @@ dev = ["pytest>=7.0"]
 harness-loop = "harness_loop.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/hihewh-byte/personal_health_agent"
-Documentation = "https://github.com/hihewh-byte/personal_health_agent/blob/main/packages/harness_loop/README.md"
+Homepage = "https://github.com/hihewh-byte/agent-harness"
+Documentation = "https://github.com/hihewh-byte/agent-harness/blob/main/packages/harness_loop/README.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
