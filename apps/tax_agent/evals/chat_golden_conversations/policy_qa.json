@@ -1,0 +1,228 @@
+{
+  "suite": "policy_qa",
+  "description": "C1.4 / v3.0 PR-A — 知识卡内 13 问 + 卡外 3 问（含股息/利息/CRS；LLM off，确定性快车道 + Composer 模板回落）",
+  "cases": [
+    {
+      "id": "C1.4-in-filing-duty",
+      "turns": [
+        {
+          "message": "境外股票赚的钱要交税吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-overseas-filing-duty",
+            "reply_contains": ["申报", "财产转让", "20%"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-reconciliation-window",
+      "turns": [
+        {
+          "message": "汇算清缴什么时候办",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-annual-reconciliation-window",
+            "reply_contains": ["3 月 1 日", "6 月 30 日"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-20pct",
+      "turns": [
+        {
+          "message": "炒美股卖出税率是多少",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-property-transfer-20pct",
+            "reply_contains": ["20%", "财产转让"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-foreign-credit",
+      "turns": [
+        {
+          "message": "境外已缴的税能抵免吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-foreign-tax-credit",
+            "reply_contains": ["抵免", "境外缴纳"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-late-penalty",
+      "turns": [
+        {
+          "message": "晚申报有滞纳金吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-late-payment-penalty",
+            "reply_contains": ["滞纳金", "万分之五"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-crs",
+      "turns": [
+        {
+          "message": "税务局怎么知道我境外账户",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-crs-data-source",
+            "reply_contains": ["CRS", "信息交换"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-rsu",
+      "turns": [
+        {
+          "message": "RSU归属算什么所得",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-property-vs-salary-rsu",
+            "reply_contains": ["工资薪金", "财产转让"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-annual-netting",
+      "turns": [
+        {
+          "message": "同一年股票盈亏能相抵吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-annual-netting",
+            "reply_contains": ["盈亏", "相抵"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-loss-carryforward",
+      "turns": [
+        {
+          "message": "炒股亏损能结转到下一年吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-loss-no-carryforward",
+            "reply_contains": ["不能结转", "以后纳税年度"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-filing-channels",
+      "turns": [
+        {
+          "message": "在哪里用个税App申报",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-filing-channels",
+            "reply_contains": ["个人所得税 App", "办税服务厅"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-dividend-interest",
+      "turns": [
+        {
+          "message": "美股股息要在中国报税吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-dividend-interest-20pct",
+            "reply_contains": ["股息", "20%", "利息、股息、红利所得"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-futu-interest",
+      "turns": [
+        {
+          "message": "富途税表里的利息收入怎么申报",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-dividend-interest-20pct",
+            "reply_contains": ["利息所得", "股息、利息及其他收入"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-in-crs-dividend",
+      "turns": [
+        {
+          "message": "CRS会报我的股息吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "card_id": "kb:cn-crs-data-source",
+            "reply_contains": ["CRS", "股息", "主动"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-out-france",
+      "turns": [
+        {
+          "message": "法国个人所得税怎么算",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["超出", "知识库"],
+            "reply_not_contains": ["draft"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-out-germany-estate",
+      "turns": [
+        {
+          "message": "德国个人所得税怎么算",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["超出", "知识库"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C1.4-out-japan",
+      "turns": [
+        {
+          "message": "日本个人所得税怎么算",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["超出", "知识库"]
+          }
+        }
+      ]
+    }
+  ]
+}

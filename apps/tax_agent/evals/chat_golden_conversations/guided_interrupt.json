@@ -1,0 +1,36 @@
+{
+  "suite": "guided_interrupt",
+  "cases": [
+    {
+      "id": "C7-guided-interrupt-resume",
+      "description": "向导中途插问汇率，继续申报不丢进度",
+      "session_id": "c7-guided-interrupt",
+      "turns": [
+        {
+          "message": "带我申报",
+          "expect": {
+            "profile": "guided_filing",
+            "reply_contains": ["申报向导"],
+            "guided_active": true
+          }
+        },
+        {
+          "message": "22年的汇率是多少",
+          "expect": {
+            "profile": "policy_explain",
+            "reply_contains": ["6.3757"],
+            "guided_active": true
+          }
+        },
+        {
+          "message": "继续申报",
+          "expect": {
+            "profile": "guided_filing",
+            "reply_contains": ["申报向导"],
+            "guided_active": true
+          }
+        }
+      ]
+    }
+  ]
+}

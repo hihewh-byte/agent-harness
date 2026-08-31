@@ -1,0 +1,28 @@
+brokerTemplateId: broker_ibkr_v1
+brokerName: Interactive Brokers
+version: "1.0"
+sheets:
+  - namePattern: "Trades"
+    rowType: trade
+    columns:
+      tradeDate: { header: "Date/Time", format: "ibkr_datetime" }
+      symbol: { header: "Symbol" }
+      quantity: { header: "Quantity" }
+      proceeds: { header: "Proceeds" }
+      realizedPL: { header: "Realized P/L" }
+      commFee: { header: "Comm/Fee" }
+      eventType: { constant: "CAPITAL_GAIN" }
+  - namePattern: "Dividends"
+    rowType: dividend
+    columns:
+      tradeDate: { header: "Date" }
+      symbol: { header: "Symbol" }
+      grossAmount: { header: "Amount" }
+      withholdingTax: { header: "Tax" }
+      eventType: { constant: "DIVIDEND" }
+  - namePattern: "Withholding Tax"
+    rowType: withholding
+    columns:
+      tradeDate: { header: "Date" }
+      grossAmount: { header: "Amount" }
+      eventType: { constant: "WITHHOLDING_TAX" }

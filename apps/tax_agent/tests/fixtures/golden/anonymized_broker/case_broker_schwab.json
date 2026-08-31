@@ -1,0 +1,135 @@
+{
+  "caseId": "broker_schwab",
+  "description": "Schwab transaction history + realized G/L (anonymized)",
+  "sourceFiles": [
+    "schwab_transactions_realistic.csv",
+    "schwab_realized_gl.csv"
+  ],
+  "brokerTemplateId": "broker_fidelity_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "394a0bf7-2f9c-40ec-8f72-486eeefa019f",
+        "eventType": "INTEREST",
+        "tradeDate": "2024-01-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_transactions_realistic.csv:tx:8",
+        "parseConfidence": 0.96,
+        "grossAmount": {
+          "amount": "25.50",
+          "currency": "USD"
+        },
+        "amountCny": "181.15",
+        "fxRateUsed": 7.1039
+      },
+      {
+        "eventId": "44d159e0-8381-4a48-b9a7-950c0ecd1c37",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-03-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_transactions_realistic.csv:tx:9",
+        "parseConfidence": 0.96,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "450.00",
+          "currency": "USD"
+        },
+        "amountCny": "3192.75",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "694a65d1-a990-4be1-9c64-7f44134f6959",
+        "eventType": "WITHHOLDING_TAX",
+        "tradeDate": "2024-03-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_transactions_realistic.csv:tx:10",
+        "parseConfidence": 0.96,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "67.50",
+          "currency": "USD"
+        },
+        "amountCny": "478.91",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "58022d91-27aa-4e2a-b8a9-366a23d3c60c",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-06-01",
+        "classificationStatus": "inferred",
+        "sourceRowRef": "schwab_transactions_realistic.csv:tx:11",
+        "parseConfidence": 0.75,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "7500.00",
+          "currency": "USD"
+        },
+        "fee": {
+          "amount": "1.00",
+          "currency": "USD"
+        },
+        "amountCny": "53451.00",
+        "fxRateUsed": 7.1268
+      },
+      {
+        "eventId": "f02c1d42-2b2e-4055-977b-3bb880ceed79",
+        "eventType": "WITHHOLDING_TAX",
+        "tradeDate": "2024-08-20",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_transactions_realistic.csv:tx:12",
+        "parseConfidence": 0.96,
+        "grossAmount": {
+          "amount": "30.00",
+          "currency": "USD"
+        },
+        "amountCny": "213.37",
+        "fxRateUsed": 7.1124
+      },
+      {
+        "eventId": "a6594631-d9c0-492c-8a8f-fdebc5a9be99",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-06-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_realized_gl.csv:fgl:5",
+        "parseConfidence": 0.98,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "1300.00",
+          "currency": "USD"
+        },
+        "amountCny": "9264.84",
+        "fxRateUsed": 7.1268
+      },
+      {
+        "eventId": "e6df3b62-55c1-4669-b94a-73cd4a449c1a",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-09-10",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "schwab_realized_gl.csv:fgl:6",
+        "parseConfidence": 0.98,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "400.00",
+          "currency": "USD"
+        },
+        "amountCny": "2802.96",
+        "fxRateUsed": 7.0074
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "13778.54",
+      "creditAllowedCny": "692.21",
+      "netTaxDueCny": "13086.33"
+    }
+  }
+}

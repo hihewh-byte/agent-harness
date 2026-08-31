@@ -15,7 +15,7 @@
 | **License** | [Apache-2.0](LICENSE) |
 | **Python** | 3.10+ |
 | **Packages** | [`packages/harness_core`](packages/harness_core/) · [`packages/harness_loop`](packages/harness_loop/) (vendored; **not on PyPI yet**) |
-| **Reference app** | PHA · build `pha-v2.3.32-full-import-only` · [`v0.4.0-beta.1`](https://github.com/hihewh-byte/agent-harness/releases/tag/v0.4.0-beta.1) |
+| **Reference apps** | PHA · [`apps/tax_agent`](apps/tax_agent/) (Futu CN resident tax) · [`v0.4.0-beta.1`](https://github.com/hihewh-byte/agent-harness/releases/tag/v0.4.0-beta.1) |
 
 ### Choose your path
 
@@ -24,6 +24,7 @@
 | **Attach Harness** | Wire fail-closed numerics/ID fence into *your* agent | [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain) · [Attach in 15 minutes](docs/attach-in-15-minutes.md) · [harness-builder-overview](docs/harness-builder-overview.md) |
 | **Contribute Loop** | Offline harvest → promote → human PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) · [Issue #1](https://github.com/hihewh-byte/agent-harness/issues/1) |
 | **Use PHA app** | Run the health reference UI locally | [Use the PHA app](#use-the-pha-app-reference-implementation) · [5-minute Quick Start](#5-minute-quick-start-pha-app) |
+| **Use Tax app** | Futu 境外所得测算 + harness 第二域 | [`apps/tax_agent/README.zh-CN.md`](apps/tax_agent/README.zh-CN.md) · `bash apps/tax_agent/scripts/bootstrap_tax.sh` |
 
 ---
 

@@ -1,0 +1,90 @@
+brokerTemplateId: broker_schwab_v1
+brokerName: Charles Schwab
+version: "1.1"
+description_zh: >
+  Schwab 官网 Accounts → History → Export CSV。
+  文件前几行为账户元数据，需跳过至表头行（含 Date、Action）。
+
+detection:
+  headerSignatures:
+    - ["Date", "Action", "Amount"]
+    - ["Date", "Action", "Symbol", "Amount"]
+    - ["Closed Date", "Gain/Loss ($)"]
+    - ["Closed Date", "Gain/Loss"]
+  preambleMarkers:
+    - "Charles Schwab"
+    - "Account Number"
+    - "Transaction History"
+
+csvProfiles:
+  transaction_history:
+    headerAliases:
+      Date: ["Date", "Trade Date", "Settlement Date"]
+      Action: ["Action", "Transaction Type"]
+      Symbol: ["Symbol", "Ticker"]
+      Description: ["Description", "Transaction Description"]
+      Quantity: ["Quantity", "Qty"]
+      Price: ["Price", "Share Price"]
+      Fees: ["Fees & Comm", "Fees", "Commission", "Fees and Comm"]
+      Amount: ["Amount", "Net Amount", "Total"]
+    skipActions:
+      - "Buy"
+      - "Reinvest Shares"
+      - "Journal"
+      - "MoneyLink Transfer"
+      - "Wire Funds"
+      - "Deposit"
+      - "Withdrawal"
+      - "ATM Fee"
+      - "Misc Cash Entry"
+      - "Adjustment"
+    actionMap:
+      "Cash Dividend": DIVIDEND
+      "Qualified Dividend": DIVIDEND
+      "Special Dividend": DIVIDEND
+      "Reinvest Dividend": DIVIDEND
+      "Div Adj": DIVIDEND
+      "Bank Interest": INTEREST
+      "Credit Interest": INTEREST
+      "Margin Interest": INTEREST
+      "Foreign Tax Paid": WITHHOLDING_TAX
+      "NRA Tax Adj": WITHHOLDING_TAX
+      "NRA Withholding": WITHHOLDING_TAX
+      "Federal Income Tax": WITHHOLDING_TAX
+      "Tax Withheld": WITHHOLDING_TAX
+      "Sell": CAPITAL_GAIN
+      "Short Sale": CAPITAL_GAIN
+      "Buy to Cover": CAPITAL_GAIN
+      "Sell Short": CAPITAL_GAIN
+      "Lapse Release": STOCK_COMPENSATION
+      "Stock Plan Shares Vested": STOCK_COMPENSATION
+      "Stock Plan Activity": STOCK_COMPENSATION
+      "ESPP Purchase": STOCK_COMPENSATION
+      "Share Award": STOCK_COMPENSATION
+    amountRules:
+      dividend: use_abs_amount
+      interest: use_abs_amount
+      withholding: use_abs_amount
+      capital_gain_sell: use_abs_amount_with_warning
+
+  realized_gain_loss:
+    headerAliases:
+      Date: ["Closed Date", "Date", "Trade Date"]
+      Symbol: ["Symbol", "Ticker"]
+      Proceeds: ["Proceeds", "Sales Proceeds"]
+      CostBasis: ["Cost Basis", "Cost", "CB"]
+      GainLoss: ["Gain/Loss ($)", "Gain/Loss", "Realized Gain/Loss", "Gain/Loss Amount"]
+      Quantity: ["Quantity", "Qty"]
+    eventType: CAPITAL_GAIN
+    gainColumn: GainLoss
+
+# Legacy xlsx sheet names (statement-style workbooks)
+sheets:
+  - namePattern: "Transactions"
+    profile: transaction_history
+  - namePattern: "Transaction"
+    profile: transaction_history
+  - namePattern: "Realized"
+    profile: realized_gain_loss
+  - namePattern: "Gain"
+    profile: realized_gain_loss

@@ -1,0 +1,16 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.data
+*.db
+.git
+.gitignore
+examples
+tests
+scripts
+docs
+agent-transcripts
+*.egg-info
+dist
+.env

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tax-agent.local/schemas/computation_run.schema.json",
+  "title": "ComputationRun",
+  "type": "object",
+  "required": [
+    "runId",
+    "sessionId",
+    "ruleSnapshotId",
+    "requestedAt",
+    "status",
+    "riskLevel",
+    "confidenceScore",
+    "lineItems",
+    "auditBundle"
+  ],
+  "properties": {
+    "runId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "format": "uuid" },
+    "ruleSnapshotId": { "type": "string", "minLength": 1 },
+    "requestedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "status": {
+      "type": "string",
+      "enum": ["success", "partial", "failed"]
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "taxableIncomeCny": { "type": "string" },
+        "taxDueCny": { "type": "string" },
+        "foreignTaxPaidCny": { "type": "string" },
+        "creditAllowedCny": { "type": "string" },
+        "netTaxDueCny": { "type": "string" },
+        "netTaxDueRangeCny": {
+          "type": "object",
+          "properties": {
+            "low": { "type": "string" },
+            "high": { "type": "string" }
+          }
+        }
+      }
+    },
+    "lineItems": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/taxLineItem" }
+    },
+    "auditBundle": { "$ref": "#/$defs/auditBundle" }
+  },
+  "$defs": {
+    "taxLineItem": {
+      "type": "object",
+      "required": [
+        "lineId",
+        "taxCategory",
+        "taxableIncomeCny",
+        "taxRate",
+        "taxDueCny",
+        "netTaxDueCny",
+        "sourceEventIds",
+        "formulaSteps"
+      ],
+      "properties": {
+        "lineId": { "type": "string", "format": "uuid" },
+        "taxCategory": { "type": "string" },
+        "taxableIncomeCny": { "type": "string" },
+        "taxRate": { "type": "number" },
+        "taxDueCny": { "type": "string" },
+        "foreignTaxPaidCny": { "type": "string" },
+        "creditAllowedCny": { "type": "string" },
+        "netTaxDueCny": { "type": "string" },
+        "sourceEventIds": {
+          "type": "array",
+          "items": { "type": "string", "format": "uuid" },
+          "minItems": 1
+        },
+        "formulaSteps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stepIndex", "label", "expression", "output"],
+            "properties": {
+              "stepIndex": { "type": "integer" },
+              "label": { "type": "string" },
+              "expression": { "type": "string" },
+              "inputs": { "type": "object" },
+              "output": {}
+            }
+          }
+        }
+      }
+    },
+    "auditBundle": {
+      "type": "object",
+      "required": [
+        "auditId",
+        "runId",
+        "inputFileHashes",
+        "ruleSnapshotId",
+        "parameterSnapshot",
+        "resultHash",
+        "disclaimerVersion",
+        "createdAt"
+      ],
+      "properties": {
+        "auditId": { "type": "string", "format": "uuid" },
+        "runId": { "type": "string", "format": "uuid" },
+        "inputFileHashes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "ruleSnapshotId": { "type": "string" },
+        "parameterSnapshot": { "type": "object" },
+        "resultHash": { "type": "string" },
+        "disclaimerVersion": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

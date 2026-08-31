@@ -1,0 +1,290 @@
+# Tax Agent intent catalog v1.7 — 声明式 Harness profile 路由（对照 PHA schema_intent_router）
+version: "1.7"
+
+multi_scope:
+  tokens:
+    - 每个年度
+    - 各年
+    - 所有年
+    - 每年
+    - 全部年度
+    - 历年
+    - 多年
+    - 哪些年
+    - 每一年
+  expand: uploaded_years # uploaded_years | fx_dataset_years
+
+anaphora:
+  tokens:
+    - 那23年
+    - 那22年
+    - 那24年
+    - 那25年
+    - 刚才
+    - 那年
+    - 这个年度
+    - 上述
+    - 同款
+    - 继续
+    - 还是
+    - 同上
+    - 同理
+    - 上一个
+    - 换一个年
+
+topic_markers:
+  policy_explain:
+    - 汇率
+    - 中间价
+    - 折算
+    - 依据
+  coverage_check:
+    - 缺
+    - 覆盖
+    - 齐全
+  filing_coach:
+    - 填表
+    - 四列
+    - 合理费用
+
+profiles:
+  casual:
+    priority: 10
+    exact_triggers:
+      - 你好
+      - 您好
+      - hi
+      - hello
+      - 谢谢
+      - 感谢
+      - 收到
+      - 知道了
+      - 好的
+      - ok
+      - 在吗
+    focus: casual
+    fast_lane: true
+
+  guided_filing:
+    priority: 22
+    triggers:
+      - { token: 带我申报, weight: 3 }
+      - { token: 一步步教我, weight: 3 }
+      - { token: 开始申报流程, weight: 3 }
+      - { token: 申报向导, weight: 3 }
+      - { token: 继续申报, weight: 2.5 }
+      - { token: 申报流程, weight: 2 }
+    episodic_continue: true
+    focus: guided_filing
+    fast_lane: true
+
+  filing_onboarding:
+    priority: 20
+    requires_no_dataset: true
+    triggers:
+      - { token: 怎么用, weight: 2 }
+      - { token: 开始, weight: 1.5 }
+      - { token: 入门, weight: 2 }
+      - { token: 第一次, weight: 1.5 }
+      - { token: 需要什么, weight: 2 }
+      - { token: 材料, weight: 1 }
+      - { token: 上传什么, weight: 2 }
+      - { token: checklist, weight: 2 }
+      - { token: 清单, weight: 1.5 }
+    focus: onboarding
+    fast_lane: true
+
+  policy_qa:
+    priority: 35
+    kb_scored: true
+    focus: policy_qa
+    fast_lane: true
+
+  coverage_check:
+    priority: 30
+    triggers:
+      - { token: 缺, weight: 1.5 }
+      - { token: 覆盖, weight: 2 }
+      - { token: 齐全, weight: 2 }
+      - { token: 还缺, weight: 2 }
+      - { token: 哪些年, weight: 1.5 }
+      - { token: 材料, weight: 1 }
+      - { token: 够, weight: 1 }
+    focus: coverage
+    fast_lane_when_no_dataset: true
+
+  policy_explain:
+    priority: 40
+    triggers:
+      - { token: 汇率, weight: 2.5 }
+      - { token: 中间价, weight: 2 }
+      - { token: 折算, weight: 1.5 }
+      - { token: 依据, weight: 1.5 }
+      - { token: 怎么算, weight: 1.5 }
+      - { token: 如何计算, weight: 2 }
+      - { token: 如何确定, weight: 2 }
+      - { token: 怎么确定, weight: 2 }
+      - { token: RMB/USD, weight: 2 }
+      - { token: 美元兑人民币, weight: 2 }
+    episodic_continue: true
+    focus: fx_provenance
+    fast_lane: true
+
+  compute:
+    priority: 50
+    triggers:
+      - { token: 算, weight: 1.5 }
+      - { token: 计算, weight: 2 }
+      - { token: 测算, weight: 2.5 }
+      - { token: 应纳税, weight: 2 }
+      - { token: 补税, weight: 2 }
+      - { token: 交多少税, weight: 2.5 }
+      - { token: 税额, weight: 2 }
+      - { token: estimate, weight: 1.5 }
+      - { token: compute, weight: 1.5 }
+      - { token: tax due, weight: 2 }
+    focus: compute
+
+  filing_narrative:
+    priority: 55
+    triggers:
+      - { token: 帮我写, weight: 2 }
+      - { token: 叙述, weight: 2 }
+      - { token: 说明信, weight: 2.5 }
+      - { token: 申报说明, weight: 2.5 }
+      - { token: 润色, weight: 2 }
+      - { token: 总结申报, weight: 2 }
+    focus: narrative
+    fast_lane: true
+
+  filing_coach:
+    priority: 60
+    triggers:
+      - { token: 填表, weight: 2.5 }
+      - { token: 申报表, weight: 2 }
+      - { token: 四列, weight: 2.5 }
+      - { token: 怎么填, weight: 2 }
+      - { token: 个税, weight: 1 }
+      - { token: 财产转让, weight: 2 }
+      - { token: 合理费用, weight: 2 }
+      - { token: 资产原值, weight: 2 }
+    focus: filing_coach
+
+  risk_brief:
+    priority: 65
+    triggers:
+      - { token: 风险, weight: 2.5 }
+      - { token: 警告, weight: 2 }
+      - { token: ambiguous, weight: 2 }
+      - { token: 复核, weight: 2 }
+      - { token: R001, weight: 3 }
+      - { token: R002, weight: 3 }
+      - { token: R003, weight: 3 }
+    focus: risk
+
+  classified_income:
+    priority: 68
+    requires_dataset: true
+    trigger_groups:
+      amount:
+        - { token: 多少, weight: 2 }
+        - { token: 一共, weight: 2 }
+        - { token: 应补, weight: 2 }
+        - { token: 要报, weight: 2 }
+        - { token: 收入, weight: 1.5 }
+        - { token: 合计, weight: 2 }
+      kind:
+        - { token: 股息, weight: 3 }
+        - { token: 利息, weight: 3 }
+        - { token: 股息利息, weight: 4 }
+        - { token: 分类所得, weight: 3 }
+    requires_all_groups:
+      - amount
+      - kind
+    focus: classified_income
+    inject_insight: true
+    fast_lane: true
+
+  compound_deferral_options:
+    priority: 70
+    requires_all_groups:
+      - deferral
+      - option_expire
+    trigger_groups:
+      deferral:
+        - { token: 盈利, weight: 1 }
+        - { token: 亏损, weight: 1 }
+        - { token: 没卖, weight: 2 }
+        - { token: 未卖, weight: 2 }
+        - { token: 持有, weight: 1.5 }
+        - { token: 抵扣, weight: 1.5 }
+      option_expire:
+        - { token: 期权, weight: 2 }
+        - { token: 到期, weight: 2 }
+        - { token: expire, weight: 2 }
+        - { token: 权利金, weight: 2 }
+    focus: realized_vs_deferred
+    inject_insight: true
+    fast_lane: true
+
+  realized_vs_deferred:
+    priority: 75
+    trigger_groups:
+      deferral:
+        - { token: 盈利, weight: 1 }
+        - { token: 亏损, weight: 1 }
+        - { token: 没卖, weight: 2 }
+        - { token: 未卖, weight: 2 }
+        - { token: 持有, weight: 1.5 }
+        - { token: 抵扣, weight: 1.5 }
+        - { token: 为什么, weight: 1 }
+      option_expire:
+        - { token: 期权, weight: 2 }
+        - { token: 到期, weight: 2 }
+        - { token: expire, weight: 2 }
+        - { token: 权利金, weight: 2 }
+    match_any_group: deferral
+    also_match_substrings:
+      - 亏
+      - 盈
+      - 估值
+      - 未实现
+    focus: realized_vs_deferred
+    inject_insight: true
+    fast_lane: true
+
+  holdings_year_end:
+    priority: 80
+    triggers:
+      - { token: 年末, weight: 2 }
+      - { token: 期末, weight: 2 }
+      - { token: 估值, weight: 2 }
+      - { token: 持仓, weight: 2.5 }
+      - { token: 未卖出, weight: 2 }
+      - { token: 未实现, weight: 2 }
+      - { token: 持有到, weight: 2 }
+      - { token: 年底, weight: 1.5 }
+      - { token: 市值, weight: 2 }
+      - { token: 浮亏, weight: 2 }
+      - { token: 浮盈, weight: 2 }
+    focus: holdings_year_end
+    inject_insight: true
+    fast_lane: true
+
+  explain_summary:
+    priority: 85
+    triggers:
+      - { token: 结果, weight: 2 }
+      - { token: 对不对, weight: 2 }
+      - { token: 准确, weight: 1.5 }
+      - { token: 多少税, weight: 2 }
+      - { token: 纳税, weight: 1.5 }
+      - { token: 应补, weight: 2 }
+      - { token: 解读, weight: 2 }
+      - { token: 解释, weight: 2 }
+    focus: explain_summary
+
+  general:
+    priority: 999
+    triggers: []
+    focus: general

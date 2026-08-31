@@ -1,0 +1,49 @@
+{
+  "suite": "classified_income",
+  "description": "PR-E — 有 dataset + events 时股息/利息走 classified_income → insight_fast；数字来自 TAX_INSIGHT",
+  "cases": [
+    {
+      "id": "C7-classified-dividend-interest-total",
+      "turns": [
+        {
+          "message": "2022年股息利息一共多少",
+          "fixture": "futu_2022_classified",
+          "dataset_id": "c7-classified-ds",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "classified_income",
+            "reply_contains": ["股息", "利息", "38.38", "57.70"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-classified-dividend-how-much",
+      "turns": [
+        {
+          "message": "2022年我有多少股息要报",
+          "fixture": "futu_2022_classified",
+          "dataset_id": "c7-classified-ds2",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "classified_income",
+            "reply_contains": ["股息", "768.27", "38.38"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-classified-policy-without-dataset",
+      "turns": [
+        {
+          "message": "我有多少股息要报",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["股息", "20%"]
+          }
+        }
+      ]
+    }
+  ]
+}

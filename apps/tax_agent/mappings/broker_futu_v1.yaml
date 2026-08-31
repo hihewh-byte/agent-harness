@@ -1,0 +1,54 @@
+brokerTemplateId: broker_futu_v1
+brokerName: Futu / Moomoo
+version: "1.1"
+description_zh: >
+  富途 App「我的税表」年度包 xlsx（证券-交易流水、股息利息汇总；文件名可能为 Annual_Statement 等）
+  及桌面端 History CSV。支持 成交时间/方向/成交金额 与 Date/Type/Amount 表头。
+sheets:
+  - namePattern: "Transaction History"
+    rowType: mixed
+  - namePattern: "交易历史"
+    rowType: mixed
+  - namePattern: "年度账单"
+    rowType: mixed
+  - namePattern: "年度帐单"
+    rowType: mixed
+  - namePattern: "证券-交易流水"
+    rowType: trades
+  - namePattern: "股息、利息及其他收入"
+    rowType: income_summary
+detection:
+  taxPackageSheetNames:
+    - "证券-交易流水"
+    - "股息、利息及其他收入"
+    - "账户信息"
+headerAliases:
+  Date: ["Date", "日期", "交易时间", "成交时间"]
+  Type: ["Type", "类型", "业务类型", "方向"]
+  Symbol: ["Symbol", "代码", "股票代码", "证券代码", "代码名称"]
+  Description: ["Description", "说明", "备注"]
+  Amount: ["Amount", "金额", "成交金额", "发生金额"]
+  Tax: ["Tax", "税费", "预扣税", "股息税", "美国税费"]
+  Fee: ["Fee", "佣金", "总费用", "费用"]
+skipTypes:
+  - "买入"
+  - "买入开仓"
+  - "Buy"
+typeMap:
+  Dividend: DIVIDEND
+  Dividends: DIVIDEND
+  股息: DIVIDEND
+  分红: DIVIDEND
+  现金股息: DIVIDEND
+  Interest: INTEREST
+  利息: INTEREST
+  融资利息: INTEREST
+  Trade: CAPITAL_GAIN
+  交易: CAPITAL_GAIN
+  卖出: CAPITAL_GAIN
+  卖出平仓: CAPITAL_GAIN
+  Tax: WITHHOLDING_TAX
+  税费: WITHHOLDING_TAX
+  预扣税: WITHHOLDING_TAX
+  股息税: WITHHOLDING_TAX
+  美国税费: WITHHOLDING_TAX

@@ -1,0 +1,61 @@
+name: Publish Tax Rules Feed
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "snapshots/**"
+      - "manifest.yaml"
+      - "scripts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Build fx_rates.yaml for snapshots
+        run: python scripts/build_fx_rates.py
+
+      - name: Build feed.json
+        run: python scripts/build_feed.py --output dist/feed.json
+
+      - name: Validate feed JSON
+        run: python scripts/validate_feed.py dist/feed.json
+
+      - name: Upload feed artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tax-rules-feed
+          path: dist/feed.json
+          retention-days: 90
+
+      # 可选：GitHub Pages 静态托管 feed（公开仓库）
+      - name: Publish to gh-pages branch
+        if: vars.PUBLISH_FEED_TO_PAGES == 'true'
+        run: |
+          mkdir -p public
+          cp dist/feed.json public/feed.json
+          echo "Feed at /feed.json"
+
+      - name: Trigger Tax Agent sync webhook
+        if: ${{ secrets.TAX_AGENT_WEBHOOK_URL != '' }}
+        env:
+          WEBHOOK_URL: ${{ secrets.TAX_AGENT_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.TAX_AGENT_WEBHOOK_SECRET }}
+        run: |
+          curl -fsS -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -H "X-Tax-Agent-Webhook-Secret: $WEBHOOK_SECRET" \
+            -d '{"action":"sync_rules","source":"github-actions"}'

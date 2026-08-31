@@ -34,7 +34,7 @@ message → plan (profile / slots / forbidden / tools)
 ## What it is *not* (today)
 
 - Not a `pip install agent-harness` package (no PyPI yet) — Core is **vendored** under [`packages/harness_core/`](../packages/harness_core/)
-- Not a full dual-domain OSS monorepo — the second domain (tax) stays **local-only** for privacy
+- Not a full dual-domain OSS monorepo — **tax** ships as [`apps/tax_agent/`](../apps/tax_agent/) (fixtures only; no personal xlsx)
 - Not domain-agnostic in the PHA plugin layer — health slots / CompareTable stay in PHA
 - Not a multi-agent swarm framework
 

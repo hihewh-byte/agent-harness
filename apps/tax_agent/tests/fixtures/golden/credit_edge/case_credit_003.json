@@ -1,0 +1,33 @@
+{
+  "caseId": "credit_003",
+  "description": "标准30%预扣",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-01",
+        "grossAmount": {
+          "amount": "2000",
+          "currency": "USD"
+        },
+        "amountCny": "14200.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed",
+        "withholdingTax": {
+          "amount": "600",
+          "currency": "USD"
+        }
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "computeOk": true
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "caseId": "broker_tiger_dividends",
+  "description": "Tiger dividends export (anonymized)",
+  "sourceFiles": [
+    "tiger_dividends.csv"
+  ],
+  "brokerTemplateId": "broker_tiger_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "9a7b5e4e-434f-4ae9-8818-2b7e74adad3d",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "tiger_dividends.csv:dividends:2",
+        "parseConfidence": 0.95,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "100.00",
+          "currency": "USD"
+        },
+        "withholdingTax": {
+          "amount": "15.00",
+          "currency": "USD"
+        },
+        "amountCny": "712.68",
+        "fxRateUsed": 7.1268
+      },
+      {
+        "eventId": "5befac96-1af7-424d-b498-b03e5fc06f6c",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-12-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "tiger_dividends.csv:dividends:3",
+        "parseConfidence": 0.95,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "80.00",
+          "currency": "USD"
+        },
+        "withholdingTax": {
+          "amount": "12.00",
+          "currency": "USD"
+        },
+        "amountCny": "575.07",
+        "fxRateUsed": 7.1884
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "257.55",
+      "creditAllowedCny": "193.16",
+      "netTaxDueCny": "64.39"
+    }
+  }
+}

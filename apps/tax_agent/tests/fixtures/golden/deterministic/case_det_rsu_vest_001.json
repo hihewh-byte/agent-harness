@@ -1,0 +1,32 @@
+{
+  "caseId": "det_rsu_vest_001",
+  "description": "RSU 归属日 FMV 按股权激励税目 20% 计税（无 R007 关键词误分类）",
+  "input": {
+    "events": [
+      {
+        "eventType": "STOCK_COMPENSATION",
+        "tradeDate": "2024-03-15",
+        "grossAmount": { "amount": "10000", "currency": "USD" },
+        "amountCny": "71000.00",
+        "fxRateUsed": 7.1,
+        "symbol": "AAPL",
+        "sourceRowRef": "RSU vest 100 shares",
+        "stockComp": { "kind": "rsu_vest", "shares": 100 }
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "high",
+    "allowDraftCompute": true,
+    "summary": {
+      "taxableIncomeCny": "71000.00",
+      "taxDueCny": "14200.00",
+      "netTaxDueCny": "14200.00"
+    }
+  }
+}

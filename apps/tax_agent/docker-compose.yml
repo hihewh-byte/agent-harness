@@ -1,0 +1,22 @@
+services:
+  tax-agent:
+    build: .
+    image: tax-agent:local
+    ports:
+      - "8790:8790"
+    env_file:
+      - .env
+    environment:
+      TAX_AGENT_DB: /data/tax_agent.db
+      # 容器内访问宿主机 Ollama（macOS/Windows Docker Desktop）
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      TAX_AGENT_LLM_ENABLED: ${TAX_AGENT_LLM_ENABLED:-1}
+      TAX_AGENT_RULES_SYNC_ON_STARTUP: ${TAX_AGENT_RULES_SYNC_ON_STARTUP:-0}
+      TAX_AGENT_AUTO_PUBLISH: ${TAX_AGENT_AUTO_PUBLISH:-0}
+    volumes:
+      - tax_agent_data:/data
+      - ./rules:/app/rules:ro
+    restart: unless-stopped
+
+volumes:
+  tax_agent_data:

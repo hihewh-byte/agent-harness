@@ -1,0 +1,85 @@
+{
+  "caseId": "broker_ibkr",
+  "description": "IBKR dividends + trades (anonymized)",
+  "sourceFiles": [
+    "ibkr_dividends.csv",
+    "ibkr_trades.csv"
+  ],
+  "brokerTemplateId": "broker_ibkr_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "bed47c65-3518-49c7-8bb2-caf93afcadfd",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "ibkr_dividends.csv:ibkr_dividends:2",
+        "parseConfidence": 0.95,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "1000.00",
+          "currency": "USD"
+        },
+        "withholdingTax": {
+          "amount": "300.00",
+          "currency": "USD"
+        },
+        "amountCny": "7126.80",
+        "fxRateUsed": 7.1268
+      },
+      {
+        "eventId": "d72aa5af-4438-417f-901e-4c34df13c794",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-09-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "ibkr_dividends.csv:ibkr_dividends:3",
+        "parseConfidence": 0.95,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "200.00",
+          "currency": "USD"
+        },
+        "withholdingTax": {
+          "amount": "60.00",
+          "currency": "USD"
+        },
+        "amountCny": "1401.48",
+        "fxRateUsed": 7.0074
+      },
+      {
+        "eventId": "db3be0a7-7aee-4fa1-87eb-13c436e116cd",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-08-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "ibkr_trades.csv:ibkr_trades:2",
+        "parseConfidence": 0.95,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "500.00",
+          "currency": "USD"
+        },
+        "fee": {
+          "amount": "1.25",
+          "currency": "USD"
+        },
+        "amountCny": "3556.20",
+        "fxRateUsed": 7.1124
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "2416.90",
+      "creditAllowedCny": "1705.66",
+      "netTaxDueCny": "711.24"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "caseId": "broker_futu",
+  "description": "Futu transaction history (anonymized)",
+  "sourceFiles": [
+    "futu_transaction_history.csv"
+  ],
+  "brokerTemplateId": "broker_futu_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "28803a2d-3ca3-4b6d-be31-75e04e4954d1",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-03-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "futu_transaction_history.csv:2",
+        "parseConfidence": 0.95,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "50.00",
+          "currency": "USD"
+        },
+        "withholdingTax": {
+          "amount": "7.50",
+          "currency": "USD"
+        },
+        "amountCny": "354.75",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "83995242-9b8f-458e-a13d-72dd7038d6f4",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-07-15",
+        "classificationStatus": "inferred",
+        "sourceRowRef": "futu_transaction_history.csv:3",
+        "parseConfidence": 0.9,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "200.00",
+          "currency": "USD"
+        },
+        "amountCny": "1426.32",
+        "fxRateUsed": 7.1316
+      },
+      {
+        "eventId": "3faf3b00-0463-4ecf-af29-837460ef4055",
+        "eventType": "INTEREST",
+        "tradeDate": "2024-08-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "futu_transaction_history.csv:4",
+        "parseConfidence": 0.95,
+        "grossAmount": {
+          "amount": "5.00",
+          "currency": "USD"
+        },
+        "amountCny": "35.56",
+        "fxRateUsed": 7.1124
+      },
+      {
+        "eventId": "2cc5ce0e-d04d-4ab6-84c0-480a68b553f2",
+        "eventType": "WITHHOLDING_TAX",
+        "tradeDate": "2024-09-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "futu_transaction_history.csv:5",
+        "parseConfidence": 0.95,
+        "grossAmount": {
+          "amount": "7.50",
+          "currency": "USD"
+        },
+        "amountCny": "52.56",
+        "fxRateUsed": 7.0074
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "363.32",
+      "creditAllowedCny": "105.76",
+      "netTaxDueCny": "257.56"
+    }
+  }
+}

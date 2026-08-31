@@ -1,0 +1,16 @@
+rulePackId: cn_resident_us_equity
+displayName: 中国税务居民 · 美股证券投资收入
+jurisdiction: CN
+sourceJurisdiction: US
+description_zh: '适用于中国大陆税务居民从美国证券市场取得的分红、资本利得、利息等所得， 按中国个人所得税法分类计税，并处理境外已纳税额抵免。
+
+  '
+latestStable: cn_resident_us_equity@2026.06.01
+supportedTaxYears:
+- 2023
+- 2024
+- 2025
+disclaimerVersion: disclaimer_v1.0
+maintainers:
+- role: tax_rule_admin
+  contact: internal

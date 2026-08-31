@@ -1,0 +1,21 @@
+brokerTemplateId: broker_tiger_v1
+brokerName: Tiger Brokers
+version: "1.0"
+locale: zh-CN
+sheets:
+  - namePattern: "成交"
+    rowType: trade
+    columns:
+      tradeDate: { header: "成交时间" }
+      symbol: { header: "代码" }
+      grossAmount: { header: "成交金额" }
+      fee: { header: "佣金" }
+      eventType: { constant: "CAPITAL_GAIN" }
+  - namePattern: "分红"
+    rowType: dividend
+    columns:
+      tradeDate: { header: "日期" }
+      symbol: { header: "代码" }
+      grossAmount: { header: "金额" }
+      withholdingTax: { header: "预扣税" }
+      eventType: { constant: "DIVIDEND" }

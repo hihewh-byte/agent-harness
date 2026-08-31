@@ -1,0 +1,45 @@
+{
+  "caseId": "missing_003",
+  "description": "low withholding coverage case #3",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-04-03",
+        "grossAmount": {
+          "amount": "800",
+          "currency": "USD"
+        },
+        "amountCny": "5680.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed"
+      },
+      {
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-09-03",
+        "grossAmount": {
+          "amount": "400",
+          "currency": "USD"
+        },
+        "amountCny": "2840.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed"
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "dataQuality": {
+    "coverage": {
+      "withholding": 0.59
+    }
+  },
+  "expected": {
+    "riskLevel": "medium",
+    "allowPartial": true
+  }
+}

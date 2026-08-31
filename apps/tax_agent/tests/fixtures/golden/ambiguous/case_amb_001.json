@@ -1,0 +1,28 @@
+{
+  "caseId": "amb_001",
+  "description": "ambiguous classification #1",
+  "input": {
+    "events": [
+      {
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-05-01",
+        "grossAmount": {
+          "amount": "2500",
+          "currency": "USD"
+        },
+        "amountCny": "17750.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "ambiguous"
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "medium"
+  }
+}

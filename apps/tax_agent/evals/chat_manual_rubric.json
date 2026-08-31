@@ -1,0 +1,71 @@
+{
+  "schema": "tax.chat_manual_rubric/v1",
+  "description": "D3 主观体验抽测 — 自然度/有用性/信任感 1-5 分，目标均分 ≥4",
+  "dimensions": [
+    { "id": "naturalness", "label_zh": "自然度", "prompt": "答复是否像人话、非模板堆砌？" },
+    { "id": "usefulness", "label_zh": "有用性", "prompt": "是否直接回答了用户问题并给出可执行下一步？" },
+    { "id": "trust", "label_zh": "信任感", "prompt": "数字/法条是否让人放心、有依据标注？" }
+  ],
+  "samples": [
+    {
+      "id": "R01",
+      "profile": "policy_explain",
+      "message": "22年的补申报汇率怎么定",
+      "notes": "应含汇率数字与法条，非 ## 模板"
+    },
+    {
+      "id": "R02",
+      "profile": "policy_qa",
+      "message": "境外股票赚的钱要交税吗",
+      "notes": "无 dataset；应有 citation"
+    },
+    {
+      "id": "R03",
+      "profile": "policy_qa",
+      "message": "汇算清缴什么时候办",
+      "notes": "3月1日-6月30日"
+    },
+    {
+      "id": "R04",
+      "profile": "policy_qa",
+      "message": "法国个人所得税怎么算",
+      "notes": "超范围诚实拒答"
+    },
+    {
+      "id": "R05",
+      "profile": "guided_filing",
+      "message": "带我申报",
+      "notes": "五步向导第1步"
+    },
+    {
+      "id": "R06",
+      "profile": "coverage_check",
+      "message": "材料覆盖完整吗",
+      "notes": "需 dataset"
+    },
+    {
+      "id": "R07",
+      "profile": "provenance_fast",
+      "message": "那23年呢",
+      "notes": "多轮续焦 M1"
+    },
+    {
+      "id": "R08",
+      "profile": "policy_explain",
+      "message": "每个年度汇率",
+      "notes": "多年表"
+    },
+    {
+      "id": "R09",
+      "profile": "profile_memory",
+      "message": "上次我算到哪了",
+      "notes": "需 userKey 有记录"
+    },
+    {
+      "id": "R10",
+      "profile": "policy_qa",
+      "message": "炒股亏损能结转到下一年吗",
+      "notes": "知识卡：不可跨年"
+    }
+  ]
+}

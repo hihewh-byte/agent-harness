@@ -1,0 +1,53 @@
+name: Production Selfchecks
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        working-directory: tax_agent
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Run production selfchecks
+        working-directory: tax_agent
+        run: python scripts/run_production_selfchecks.py
+
+  ollama-smoke:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        working-directory: tax_agent
+        run: pip install -e .
+
+      - name: Install Ollama
+        run: curl -fsSL https://ollama.com/install.sh | sh
+
+      - name: Pull smoke model
+        run: ollama pull qwen2.5:1.5b-instruct
+
+      - name: Ollama narration smoke
+        working-directory: tax_agent
+        env:
+          TAX_OLLAMA_SMOKE: "1"
+        run: python scripts/run_chat_ollama_smoke.py

@@ -1,0 +1,23 @@
+title: 报税测算报告
+version: "1.0"
+sections:
+  - summary
+  - detail_table
+  - filing_checklist
+  - risks
+  - next_steps
+  - disclaimers
+
+filing_checklist:
+  - 境外所得个人所得税自行纳税申报表（B表）及附表
+  - 美股券商年度对账单（英文原件）
+  - 分红与交易明细（可由本系统导出 TaxEvent CSV）
+  - 境外已纳税额凭证（如 1099-DIV、预扣税汇总）
+  - 汇率换算说明（FxRateRecord 导出）
+  - 本报告 auditBundle JSON（含规则版本与结果哈希）
+
+next_steps:
+  - 核对券商对账单与系统解析结果是否一致（CRS 一致性）
+  - 确认税务居民身份与纳税年度
+  - 咨询持证税务师或在主管税务机关完成正式申报
+  - 保留 auditId 以便重算与复核

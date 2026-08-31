@@ -1,0 +1,241 @@
+# PolicyKB — 中国居民境外收入政策知识卡（C2）
+# 仅 review_status: reviewed 的卡片可进入生产答复
+version: "1.1"
+
+cards:
+  - id: kb:cn-overseas-filing-duty
+    title_zh: 申报义务与范围
+    question_patterns:
+      - { token: 要不要报税, weight: 3 }
+      - { token: 需要申报吗, weight: 3 }
+      - { token: 境外收入, weight: 2.5 }
+      - { token: 境外股票, weight: 2 }
+      - { token: 赚的钱要交税, weight: 2.5 }
+      - { token: 交税吗, weight: 2 }
+      - { token: 申报义务, weight: 3 }
+    answer_t0: |
+      中国税务居民取得的境外所得，依法应在年度汇算清缴时向税务机关申报。
+      常见类型包括：境外股票/期权卖出形成的「财产转让所得」、现金股息形成的「利息、股息、红利所得」、账户利息形成的「利息所得」，均可能适用 20% 比例税率（见个税法相关条款）。
+      未申报或少申报可能产生补缴、滞纳金及行政处罚风险。
+    citations:
+      - { id: kb:cn-iit-art1, label: 个人所得税法第一条 }
+      - { id: kb:cn-iit-art2, label: 个人所得税法第二条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-annual-reconciliation-window
+    title_zh: 汇算清缴时间窗
+    question_patterns:
+      - { token: 汇算清缴, weight: 3 }
+      - { token: 什么时候申报, weight: 2.5 }
+      - { token: 申报时间, weight: 2.5 }
+      - { token: 几月几号, weight: 1.5 }
+      - { token: 截止日期, weight: 2 }
+      - { token: 3月1日, weight: 2 }
+      - { token: 6月30日, weight: 2 }
+    answer_t0: |
+      居民个人综合所得汇算清缴期为每年 3 月 1 日至 6 月 30 日，对上一纳税年度的所得办理汇算。
+      以前年度取得、尚未申报的境外所得，应依法补办申报（补缴），办理时间以税务机关要求为准。
+    citations:
+      - { id: kb:cn-iit-art13, label: 个人所得税法第十三条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-dividend-interest-20pct
+    title_zh: 股息与利息 20% 分类所得
+    question_patterns:
+      - { token: 股息, weight: 3 }
+      - { token: 分红, weight: 2.5 }
+      - { token: 现金股息, weight: 2.5 }
+      - { token: 利息收入, weight: 3 }
+      - { token: 账户利息, weight: 2.5 }
+      - { token: 货币基金, weight: 2 }
+      - { token: 股息利息, weight: 3 }
+      - { token: 利息、股息, weight: 3 }
+    answer_t0: |
+      中国税务居民取得的境外现金股息，通常按「利息、股息、红利所得」申报，适用 20% 比例税率；
+      境外账户利息、货币基金收益等，通常按「利息所得」申报，同样适用 20% 比例税率。
+      应纳税所得额一般为境外税前收入额（人民币折算后）；与「财产转让所得」分税目计税，不得用炒股亏损抵减股息/利息。
+      富途 Annual_Statement 的「股息、利息及其他收入」汇总表即为此类数据来源；个税 App 在对应分类所得栏目填列。
+      境外已预扣税款可按规定抵免，须提供完税凭证；数字测算以上传税表后系统 T0 结果为准（PR-B 起提供分类所得申报表）。
+    citations:
+      - { id: kb:cn-iit-art2, label: 个人所得税法第二条（所得项目分类） }
+      - { id: kb:cn-iit-art3, label: 个人所得税法第三条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-property-transfer-20pct
+    title_zh: 财产转让 20% 税率
+    question_patterns:
+      - { token: 20%, weight: 2.5 }
+      - { token: 百分之二十, weight: 2.5 }
+      - { token: 财产转让, weight: 2.5 }
+      - { token: 税率多少, weight: 2 }
+      - { token: 股票卖出, weight: 2 }
+      - { token: 炒美股, weight: 2 }
+    answer_t0: |
+      境外股票等财产转让所得，适用比例税率 20%，以每次收入额为一次纳税义务。
+      应纳税所得额 = 收入 − 财产原值 − 合理费用；本产品的「申报数据表」四列即按此口径填列。
+    citations:
+      - { id: kb:cn-iit-art3, label: 个人所得税法第三条 }
+      - { id: kb:cn-iit-art6, label: 个人所得税法第六条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-foreign-tax-credit
+    title_zh: 境外已缴税抵免
+    question_patterns:
+      - { token: 境外已缴, weight: 3 }
+      - { token: 抵免, weight: 2.5 }
+      - { token: 美国扣税, weight: 2 }
+      - { token: 双重征税, weight: 2.5 }
+      - { token: 外国已纳税, weight: 2.5 }
+    answer_t0: |
+      居民个人从中国境外取得的所得，已在境外缴纳的个人所得税税额，可在应纳税额中抵免，但抵免额不得超过该纳税人境外所得依照本法规定计算的应纳税额。
+      须提供境外完税凭证等材料；本产品 v1 不自动代算抵免额，需人工核对。
+    citations:
+      - { id: kb:cn-iit-art7, label: 个人所得税法第七条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-late-payment-penalty
+    title_zh: 补缴滞纳金口径
+    question_patterns:
+      - { token: 滞纳金, weight: 3 }
+      - { token: 逾期, weight: 2 }
+      - { token: 晚申报, weight: 2.5 }
+      - { token: 罚款, weight: 2 }
+      - { token: 利息, weight: 1.5 }
+    answer_t0: |
+      纳税人未按期缴纳税款的，税务机关除责令限期缴纳外，从滞纳税款之日起按日加收滞纳税款万分之五的滞纳金。
+      以前年度补办申报的，以税务机关核定应补税额及办理时点为准计算滞纳情形；本产品可提示办理日敏感性，不构成法律意见。
+    citations:
+      - { id: kb:cn-iit-art12, label: 税收征收管理法第三十二条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-crs-data-source
+    title_zh: CRS 与数据来源
+    question_patterns:
+      - { token: CRS, weight: 3 }
+      - { token: 金融账户, weight: 2 }
+      - { token: 税务局怎么知道, weight: 2.5 }
+      - { token: 信息交换, weight: 2 }
+    answer_t0: |
+      中国参与 CRS 等信息交换机制，境外金融机构可能向中国税务机关报送账户信息（含账户余额、股息、利息等收益类信息）。
+      纳税人仍应主动、完整申报境外所得（含股息、利息与财产转让）；勿因「未被查到」或「境外已预扣税」而漏报。
+      本产品不生成 CRS 报送文件，仅辅助理解申报义务与测算参考税额。
+    citations:
+      - { id: kb:cn-crs-multilateral, label: 多边税收征管互助公约及 CRS 相关规定 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-property-vs-salary-rsu
+    title_zh: 财产转让 vs 工资薪金（RSU 边界）
+    question_patterns:
+      - { token: RSU, weight: 3 }
+      - { token: 限制性股票, weight: 2.5 }
+      - { token: 行权, weight: 2 }
+      - { token: 工资薪金, weight: 2 }
+      - { token: 归属, weight: 2 }
+      - { token: vest, weight: 2 }
+    answer_t0: |
+      RSU/期权在归属或行权时形成的所得，通常按「工资薪金」等分类所得处理，与卖出股票形成的「财产转让所得」不同。
+      本产品 v1 聚焦富途 Annual_Statement 中的财产转让（卖出）流水，不自动处理 RSU 归属/行权计税。
+    citations:
+      - { id: kb:cn-iit-art2, label: 个人所得税法第二条（所得项目分类） }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-annual-netting
+    title_zh: 盈亏相抵（年度内）
+    question_patterns:
+      - { token: 盈亏相抵, weight: 3 }
+      - { token: 亏损抵扣, weight: 2.5 }
+      - { token: 亏和盈, weight: 2 }
+      - { token: 相抵, weight: 2 }
+      - { token: 同一纳税年度, weight: 2 }
+    answer_t0: |
+      财产转让所得在同一纳税年度内，盈利与亏损可以相抵；年度净亏损（应纳税所得额≤0）时，该年度应纳税额为 0。
+      相抵口径以卖出日归属年度为准，按本产品的 FIFO 与申报四列计算。
+    citations:
+      - { id: kb:cn-iit-art6, label: 个人所得税法第六条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-loss-no-carryforward
+    title_zh: 亏损不可跨年结转
+    question_patterns:
+      - { token: 跨年, weight: 2 }
+      - { token: 结转, weight: 2.5 }
+      - { token: 亏损带到, weight: 2.5 }
+      - { token: 下一年, weight: 1.5 }
+      - { token: 不能抵扣, weight: 2 }
+    answer_t0: |
+      财产转让所得形成的年度净亏损，不能结转到以后纳税年度抵扣；仅能在该年度内与同年盈利相抵。
+      这与企业所得税亏损弥补规则不同，请勿混淆。
+    citations:
+      - { id: kb:cn-iit-art6, label: 个人所得税法第六条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-filing-channels
+    title_zh: 申报渠道
+    question_patterns:
+      - { token: 个税App, weight: 3 }
+      - { token: 个税 App, weight: 3 }
+      - { token: 办税厅, weight: 2.5 }
+      - { token: 怎么申报, weight: 2 }
+      - { token: 哪里申报, weight: 2.5 }
+      - { token: 申报渠道, weight: 3 }
+    answer_t0: |
+      居民个人可通过个人所得税 App、自然人电子税务局网页或主管税务机关办税服务厅办理汇算清缴及以前年度补办申报。
+      境外财产转让所得在 App 中按「财产转让所得」填列（本产品四列申报表可直接对照）；
+      境外股息按「利息、股息、红利所得」、账户利息按「利息所得」分别填列，不得并入财产转让四列。
+    citations:
+      - { id: kb:cn-iit-art13, label: 个人所得税法第十三条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-fx-rules-overview
+    title_zh: 汇率规则总述
+    question_patterns:
+      - { token: 汇率规则, weight: 3 }
+      - { token: 用什么汇率, weight: 2.5 }
+      - { token: 折算人民币, weight: 2 }
+      - { token: 中间价, weight: 1.5 }
+    answer_t0: |
+      境外所得折算人民币：正常年度汇算一般按办理申报日上月末汇率中间价；以前年度补缴按各所得年度「上一纳税年度」末日中间价（本产品采用 cn_supplemental 数据集）。
+      具体年度汇率请使用「汇率依据」查询，数字以系统 T0 数据集为准。
+    citations:
+      - { id: kb:cn-iit-ir-art32, label: 个人所得税法实施条例第三十二条 }
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:cn-product-scope
+    title_zh: 本产品能做什么/不能做什么
+    question_patterns:
+      - { token: 能做什么, weight: 2.5 }
+      - { token: 不能做什么, weight: 2.5 }
+      - { token: 支持什么, weight: 2 }
+      - { token: 产品范围, weight: 3 }
+      - { token: 富途, weight: 1.5 }
+      - { token: 适用范围, weight: 2.5 }
+    answer_t0: |
+      本产品：服务中国税务居民；解析富途 Annual_Statement xlsx（含「股息、利息及其他收入」汇总）；
+      计算境外股票/期权财产转让 FIFO 与申报四列；股息/利息按 20% 分类所得规则测算（申报表 UI 与 SSOT 分项输出见共识 §2.4，PR-B 落地）。
+      提供汇率溯源与申报辅导（含 CRS 申报义务政策问答）。
+      不支持：非居民、其他券商生产上传、自动代申报、CRS XML 报送、RSU 归属计税、基金/crypto、「全年其他收入」自动计税等。
+    citations: []
+    effective_date: "2024-01-01"
+    review_status: reviewed
+
+  - id: kb:draft-france-tax
+    title_zh: "[草稿] 法国税法"
+    question_patterns:
+      - { token: 法国税, weight: 5 }
+    answer_t0: |
+      草稿内容，不应进入生产。
+    citations: []
+    effective_date: "2024-01-01"
+    review_status: draft

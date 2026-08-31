@@ -1,0 +1,36 @@
+{
+  "caseId": "det_rsu_sale_001",
+  "description": "RSU 出售增益 =  proceeds - 归属日成本基础",
+  "input": {
+    "events": [
+      {
+        "eventType": "STOCK_COMPENSATION",
+        "tradeDate": "2024-09-01",
+        "grossAmount": { "amount": "12000", "currency": "USD" },
+        "amountCny": "85200.00",
+        "fxRateUsed": 7.1,
+        "symbol": "AAPL",
+        "sourceRowRef": "RSU sale",
+        "stockComp": {
+          "kind": "rsu_sale",
+          "proceedsCny": "85200.00",
+          "costBasisCny": "71000.00"
+        }
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "high",
+    "allowDraftCompute": true,
+    "summary": {
+      "taxableIncomeCny": "14200.00",
+      "taxDueCny": "2840.00",
+      "netTaxDueCny": "2840.00"
+    }
+  }
+}

@@ -74,3 +74,24 @@ jobs:
 
       - name: Import smoke test
         run: PYTHONPATH=. python -c "from pha.main import create_app; create_app()"
+
+  tax-agent-selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install harness_core + tax_agent
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e packages/harness_core
+          pip install -e apps/tax_agent
+
+      - name: OSS preflight + production selfchecks
+        working-directory: apps/tax_agent
+        run: |
+          python scripts/preflight_oss_publish.py --strict
+          python scripts/run_production_selfchecks.py

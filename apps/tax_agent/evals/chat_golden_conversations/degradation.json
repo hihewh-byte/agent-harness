@@ -1,0 +1,52 @@
+{
+  "suite": "degradation",
+  "cases": [
+    {
+      "id": "C7-degrade-llm-off-provenance",
+      "description": "LLM off → v1 template, no error leakage",
+      "turns": [
+        {
+          "message": "22年的补申报的汇率是如何确定的",
+          "llm_model": "__off__",
+          "expect": {
+            "reply_contains": ["6.3757"],
+            "reply_not_contains": ["Traceback", "Error", "exception"],
+            "reply_starts_with": "##",
+            "composer_fallback": "llm_unavailable"
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-degrade-timeout-mock",
+      "description": "Narration timeout → template fallback",
+      "turns": [
+        {
+          "message": "22年的补申报的汇率是如何确定的",
+          "llm_model": "auto",
+          "mock_narrate": "timeout",
+          "expect": {
+            "reply_contains": ["6.3757"],
+            "composer_fallback": "timeout",
+            "narrated": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-degrade-audit-numerics",
+      "description": "Fake numerics in narration → audit fallback",
+      "turns": [
+        {
+          "message": "22年的补申报的汇率是如何确定的",
+          "llm_model": "auto",
+          "mock_narrate": "bad_numerics",
+          "expect": {
+            "composer_fallback": "audit_numerics",
+            "narrated": false
+          }
+        }
+      ]
+    }
+  ]
+}

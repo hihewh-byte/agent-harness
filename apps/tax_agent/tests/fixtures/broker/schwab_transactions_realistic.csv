@@ -1,0 +1,12 @@
+"Charles Schwab & Co., Inc."
+"Account Number","1234-5678"
+"Account Name","Individual Brokerage"
+"Export Date","04/15/2025 10:30 AM"
+"Transaction History"
+
+"Date","Action","Symbol","Description","Quantity","Price","Fees & Comm","Amount"
+"01/15/2024","Bank Interest","","SCHWAB BANK INT","","","",25.50
+"03/15/2024","Qualified Dividend","AAPL","APPLE INC CASH DIV ON 100 SHS","","",,450.00
+"03/15/2024","NRA Tax Adj","AAPL","NRA TAX ADJ","","",,-67.50
+"06/01/2024","Sell","AAPL","SOLD 50 SHS","","",-1.00,7500.00
+"08/20/2024","Foreign Tax Paid","","FOREIGN TAX PAID","","",,-30.00

@@ -1,0 +1,31 @@
+version: "2026.06.01"
+defaultPolicy: cn_annual_filing
+legalBasis_zh:
+  - "个人所得税法实施条例第三十二条"
+  - "境外所得申报：正常汇算与以前年度补缴汇率口径"
+policies:
+  cn_annual_filing:
+    label_zh: 正常年度汇算（申报上一月末中间价）
+    rateSource: pboc_middle_rate
+    rateDateRule: last_day_of_month_before_filing
+    requiresFilingDate: true
+  cn_supplemental:
+    label_zh: 以前年度补缴（所得所属年度的上一纳税年度末日中间价，实施条例第32条）
+    rateSource: pboc_middle_rate
+    rateDateRule: prior_tax_year_last_day
+    requiresFilingDate: true
+  safe_harbor_monthly:
+    label_zh: 辅助·按交易发生月折算（核对用）
+    rateSource: pboc_middle_rate
+    rateDateRule: last_business_day_of_month
+  safe_harbor_yearly:
+    label_zh: 辅助·按纳税年度平均汇率
+    rateSource: pboc_middle_rate
+    rateDateRule: yearly_average
+  user_override:
+    label_zh: 用户指定固定汇率
+    requiresUpload: true
+
+fallback:
+  missingRate: use_nearest_prior_business_day
+  maxFallbackDays: 5

@@ -1,0 +1,102 @@
+{
+  "caseId": "broker_vanguard",
+  "description": "Vanguard transaction history (anonymized)",
+  "sourceFiles": [
+    "vanguard_transaction_history.csv"
+  ],
+  "brokerTemplateId": "broker_vanguard_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "a34c3203-c14d-4c03-a230-412dfc44c7fc",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-03-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "vanguard_transaction_history.csv:2",
+        "parseConfidence": 0.95,
+        "symbol": "Vanguard Total Stock Market ETF",
+        "grossAmount": {
+          "amount": "50.00",
+          "currency": "USD"
+        },
+        "amountCny": "354.75",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "30c352ab-6363-4148-adde-ec0a6d140334",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-06-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "vanguard_transaction_history.csv:3",
+        "parseConfidence": 0.95,
+        "symbol": "Vanguard Total Stock Market ETF",
+        "grossAmount": {
+          "amount": "120.00",
+          "currency": "USD"
+        },
+        "amountCny": "855.22",
+        "fxRateUsed": 7.1268
+      },
+      {
+        "eventId": "fb6a24b0-cc2a-49b8-b717-e9a538d393c8",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-08-10",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "vanguard_transaction_history.csv:4",
+        "parseConfidence": 0.95,
+        "symbol": "Vanguard Total Stock Market ETF",
+        "grossAmount": {
+          "amount": "300.00",
+          "currency": "USD"
+        },
+        "amountCny": "2133.72",
+        "fxRateUsed": 7.1124
+      },
+      {
+        "eventId": "da500087-6a55-4dc4-951b-de3fc76e57b0",
+        "eventType": "INTEREST",
+        "tradeDate": "2024-09-01",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "vanguard_transaction_history.csv:5",
+        "parseConfidence": 0.95,
+        "symbol": "Vanguard Federal Money Market Fund",
+        "grossAmount": {
+          "amount": "5.00",
+          "currency": "USD"
+        },
+        "amountCny": "35.04",
+        "fxRateUsed": 7.0074
+      },
+      {
+        "eventId": "6a01f22c-98ca-4e2e-886a-2a89dbf07098",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-10-20",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "vanguard_transaction_history.csv:6",
+        "parseConfidence": 0.95,
+        "symbol": "Vanguard Total Stock Market ETF",
+        "grossAmount": {
+          "amount": "25.00",
+          "currency": "USD"
+        },
+        "amountCny": "178.01",
+        "fxRateUsed": 7.1203
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "711.35",
+      "creditAllowedCny": "0.00",
+      "netTaxDueCny": "711.35"
+    }
+  }
+}

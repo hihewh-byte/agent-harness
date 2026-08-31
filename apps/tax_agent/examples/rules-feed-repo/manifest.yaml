@@ -1,0 +1,8 @@
+rulePackId: cn_resident_us_equity
+feedVersion: "1"
+displayName: 中国税务居民 · 美股证券投资收入
+maintainer: legal-tax-team
+source: internal-rules-git
+description_zh: >
+  独立规则仓库模板。法务修改 snapshots/ 下 YAML 后 push，
+  CI 生成 feed.json 并可选触发 Tax Agent webhook。

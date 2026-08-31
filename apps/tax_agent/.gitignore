@@ -1,0 +1,17 @@
+.venv/
+.data/
+.env
+.env.*
+!.env.example
+docs/*.xlsx
+docs/*.xls
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+**/tax-harness-golden.jsonl
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+*.log
+.DS_Store

@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>富途境外所得报税</title>
+  <style>
+    :root { --bg: #0f1419; --panel: #1a2332; --text: #e7ecf3; --muted: #8b9cb3; --accent: #3d8bfd; --border: #2a3548; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1rem; margin: 0; font-weight: 600; }
+    header span { color: var(--muted); font-size: 0.8rem; }
+    main { flex: 1; display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+    #chat { display: flex; flex-direction: column; min-height: 0; }
+    #messages { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+    .msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; }
+    .msg.user { align-self: flex-end; background: var(--accent); color: #fff; }
+    .msg.assistant { align-self: flex-start; background: var(--panel); border: 1px solid var(--border); }
+    .msg.system { align-self: center; color: var(--muted); font-size: 0.8rem; background: transparent; }
+    #composer { border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 8px; }
+    #composer input[type=text] { flex: 1; background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; }
+    #composer button { background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    aside { border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; font-size: 0.85rem; }
+    aside label { display: block; color: var(--muted); margin: 8px 0 4px; }
+    aside input, aside select { width: 100%; background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 6px; }
+    aside button { width: 100%; margin-top: 8px; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); color: var(--text); cursor: pointer; }
+    aside button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    #fileList { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+    #report { margin-top: 12px; padding: 10px; background: var(--panel); border-radius: 8px; max-height: 420px; overflow-y: auto; font-size: 0.8rem; }
+    .filing-wrap { margin-top: 10px; overflow-x: auto; }
+    .filing-wrap h4 { margin: 8px 0 6px; font-size: 0.82rem; }
+    .filing-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; margin-bottom: 10px; }
+    .filing-table th, .filing-table td { border: 1px solid var(--border); padding: 4px 6px; text-align: right; white-space: nowrap; }
+    .filing-table th:first-child, .filing-table td:first-child { text-align: center; }
+    .filing-table th { background: #243044; color: var(--muted); font-weight: 600; }
+    .filing-table tr.seg-option td { background: #2a2418; }
+    .filing-table tr.row-focus td { background: #1e3a5f; outline: 1px solid var(--accent); }
+    .filing-table tr.seg-classified td { background: #1a2838; }
+    .filing-grand-total { margin: 10px 0; padding: 10px 12px; background: #1e2d42; border: 1px solid var(--accent); border-radius: 8px; font-size: 0.78rem; line-height: 1.5; }
+    .filing-grand-total .gt-title { color: var(--muted); font-size: 0.72rem; margin-bottom: 4px; }
+    .filing-grand-total .gt-net { font-size: 1rem; font-weight: 600; color: #7ec8ff; }
+    .report-breakdown { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.75rem; color: var(--muted); line-height: 1.45; }
+    .clarify-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .clarify-chips button { width: auto; margin: 0; padding: 6px 12px; font-size: 0.78rem; border-radius: 999px; background: #243044; border: 1px solid var(--accent); color: var(--text); cursor: pointer; }
+    .clarify-chips button:hover { background: var(--accent); color: #fff; }
+    .nba-hint { font-size: 0.82rem; opacity: 0.92; border-left: 3px solid var(--accent); padding-left: 10px; }
+    #journeyBar .focus-pill { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: #1e3a5f; border: 1px solid var(--accent); font-weight: 600; }
+    .filing-note { color: var(--muted); font-size: 0.7rem; line-height: 1.4; margin-top: 6px; }
+    .msg-wrap { align-self: flex-start; max-width: 92%; display: flex; flex-direction: column; gap: 8px; }
+    .report-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 0.82rem; }
+    .report-card h3 { margin: 0 0 8px; font-size: 0.88rem; }
+    .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+    .report-grid .k { color: var(--muted); font-size: 0.72rem; }
+    .report-grid .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .report-grid .v.highlight { color: #6ec1ff; font-size: 1rem; grid-column: 1 / -1; }
+    .hint { font-size: 0.72rem; color: var(--muted); line-height: 1.35; margin-top: 4px; }
+    .disclaimer { color: var(--muted); font-size: 0.75rem; margin-top: 12px; line-height: 1.4; }
+    .report-actions { margin-top: 10px; }
+    .report-actions button { width: auto; margin-right: 8px; font-size: 0.75rem; }
+    #journeyBar { margin-top: 8px; padding: 8px 10px; background: #243044; border-radius: 8px; font-size: 0.75rem; line-height: 1.45; }
+    #journeyBar .phase { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 600; margin-bottom: 4px; }
+    #journeyBar .warn { color: #ffb86c; }
+    #filingPanel { margin-top: 10px; }
+    #coachPanel { margin-top: 10px; padding: 8px 0 4px; border-top: 1px solid var(--border); }
+    #coachPanel .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    #coachPanel button { width: 100%; margin-top: 0; padding: 7px 6px; font-size: 0.72rem; }
+    .fact-card { background: #1e2a3d; border: 1px solid var(--accent); border-radius: 10px; padding: 10px 12px; font-size: 0.8rem; }
+    .fact-card .fc-title { font-size: 0.72rem; color: var(--muted); margin-bottom: 6px; }
+    .fact-card .fc-rate { font-size: 1.05rem; font-weight: 700; color: #6ec1ff; font-variant-numeric: tabular-nums; }
+    .fact-card .fc-meta { font-size: 0.72rem; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .fact-card .fc-cite { font-size: 0.7rem; color: #9ab; margin-top: 6px; }
+    .stream-loading { font-size: 0.78rem; color: var(--muted); font-style: italic; padding: 4px 0; }
+    .msg.narration { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>富途境外所得报税</h1>
+    <span>中国税务居民 · 美股境外所得</span>
+  </header>
+  <main>
+    <section id="chat">
+      <div id="messages"></div>
+      <form id="composer">
+        <input type="text" id="input" placeholder="例如：测算 2022 年应补税额" autocomplete="off" />
+        <button type="submit">发送</button>
+      </form>
+    </section>
+    <aside>
+      <label>纳税年度</label>
+      <input type="number" id="taxYear" value="2022" min="2000" max="2100" />
+      <label>对话模型（Ollama）</label>
+      <select id="llmModel"></select>
+      <p id="llmModelHint" class="hint" style="margin-top:4px"></p>
+      <label>答复详简</label>
+      <select id="replyVerbosity">
+        <option value="brief">简短</option>
+        <option value="normal" selected>标准</option>
+        <option value="detailed">详细</option>
+      </select>
+      <label>富途税表 (xlsx，可多选)</label>
+      <input type="file" id="file" accept=".xlsx,.xls" multiple />
+      <p class="hint">请上传 App「我的税表」导出的 Annual_Statement；含「股息、利息及其他收入」汇总表时一并上传（可同文件或分文件）。跨年卖出需同会话上传买入年至卖出年全部税表。</p>
+      <div id="fileList"></div>
+      <button type="button" class="primary" id="btnUpload">上传并解析</button>
+      <button type="button" id="btnCompute">测算税额</button>
+      <button type="button" id="btnComputeMulti">批量测算各年度</button>
+      <button type="button" id="btnFilingTable">生成申报数据表</button>
+      <button type="button" id="btnNewSession">新会话</button>
+      <div id="meta" class="hint" style="margin-top:10px"></div>
+      <div id="journeyBar" style="display:none"></div>
+      <div id="coachPanel">
+        <p class="hint" style="margin:0">填表辅导捷径（当前年度）</p>
+        <div class="coach-grid">
+          <button type="button" data-coach="coverage">材料覆盖</button>
+          <button type="button" data-coach="filing">四列怎么填</button>
+          <button type="button" data-coach="classified">股息利息</button>
+          <button type="button" data-coach="risk">风险清单</button>
+          <button type="button" data-coach="fx">汇率依据</button>
+          <button type="button" data-coach="narrative">申报说明</button>
+          <button type="button" data-coach="narrative_polish">润色说明信</button>
+        </div>
+      </div>
+      <div id="report"></div>
+      <div id="filingPanel"></div>
+      <p class="disclaimer">仅供参考，不构成税务意见。申报前请核对富途税表原件。</p>
+    </aside>
+  </main>
+  <script>
+    const LS_KEY = "futu_tax_session_v1";
+    const state = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+    if (!state.sessionId) state.sessionId = crypto.randomUUID();
+    if (!state.userKey) state.userKey = crypto.randomUUID();
+    if (!state.datasetId) state.datasetId = null;
+    if (!state.lastRunId) state.lastRunId = null;
+    if (!state.dataQuality) state.dataQuality = null;
+    if (!state.llmModel) state.llmModel = "auto";
+    if (!state.replyVerbosity) state.replyVerbosity = "normal";
+    if (!state.llmStatus) state.llmStatus = null;
+    if (!state.journey) state.journey = null;
+
+    const messagesEl = document.getElementById("messages");
+    const metaEl = document.getElementById("meta");
+    const reportEl = document.getElementById("report");
+    const journeyBarEl = document.getElementById("journeyBar");
+    const filingPanelEl = document.getElementById("filingPanel");
+    const fileInput = document.getElementById("file");
+    const fileListEl = document.getElementById("fileList");
+
+    function save() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+    function addMsg(role, text) {
+      const d = document.createElement("div");
+      d.className = "msg " + role;
+      d.textContent = text;
+      messagesEl.appendChild(d);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function fmtCny(val) {
+      if (val == null || val === "") return "—";
+      const n = Number(val);
+      if (Number.isNaN(n)) return String(val);
+      return n.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function combinedRowForYear(ft, taxYear) {
+      if (!ft?.combinedRows?.length) return null;
+      const y = +taxYear;
+      return ft.combinedRows.find(r => +r.taxYear === y) || null;
+    }
+
+    function taxBreakdownHtml(ft, taxYear) {
+      const cr = combinedRowForYear(ft, taxYear);
+      if (!cr) return "";
+      const g = cr.grandTotal || {};
+      const pt = cr.propertyTransfer;
+      const ci = cr.classifiedIncome;
+      const parts = [];
+      if (pt) {
+        parts.push(`财产转让 应税 ${fmtCny(pt.taxableIncomeCny)} / 应补 ${fmtCny(pt.taxDueCny)}`);
+      }
+      if (ci?.dividend) {
+        parts.push(`股息 应补 ${fmtCny(ci.dividend.netTaxDueCny)}`);
+      }
+      if (ci?.interest) {
+        parts.push(`利息 应补 ${fmtCny(ci.interest.netTaxDueCny)}`);
+      }
+      if (!parts.length) return "";
+      const multi = parts.length > 1 || ci;
+      if (!multi) return "";
+      return `<div class="report-breakdown">${parts.join("<br>")}
+        <div style="margin-top:4px">全税目应补合计：<b>${fmtCny(g.netTaxDueCny)}</b> 元（与上方「预计应补税额」同源）</div></div>`;
+    }
+
+    function buildReportCard(payload) {
+      const s = payload.summary || {};
+      const card = document.createElement("div");
+      card.className = "report-card";
+      const blocked = s.message || s.blockedReason;
+      const hasTax = s.taxableIncomeCny != null || s.netTaxDueCny != null;
+      const range = payload.netTaxDueRangeCny;
+      let netDisplay = fmtCny(s.netTaxDueCny);
+      if (range && (range.min != null || range.low != null)) {
+        const lo = range.min ?? range.low;
+        const hi = range.max ?? range.high;
+        netDisplay = `${fmtCny(lo)} ~ ${fmtCny(hi)}`;
+      }
+      const notes = (payload.notes || []).slice(0, 4).map(n => `<div class="hint">· ${n}</div>`).join("");
+      const rules = (payload.triggeredRiskRules || []).length
+        ? `<div class="hint">风险规则：${payload.triggeredRiskRules.join("、")}</div>` : "";
+      const taxYear = payload.taxYear || document.getElementById("taxYear")?.value;
+      const breakdown = taxBreakdownHtml(payload.filingTable, taxYear);
+      card.innerHTML = blocked && !hasTax
+        ? `<h3>测算未完成</h3><div class="hint">${blocked}</div>${notes}${rules}
+           <div class="report-actions"><button type="button" data-action="full-md">完整报告</button></div>`
+        : `<h3>测算结果</h3>
+        <div class="hint" style="margin-bottom:8px">全税目合计（财产转让 + 股息/利息等，与 compute 同源）。财产转让四列与股息/利息分表见侧栏「申报数据表」。</div>
+        <div class="report-grid">
+          <div><div class="k">应纳税所得额</div><div class="v">${fmtCny(s.taxableIncomeCny)}</div></div>
+          <div><div class="k">应纳税额</div><div class="v">${fmtCny(s.taxDueCny)}</div></div>
+          <div><div class="k">境外已纳税额</div><div class="v">${fmtCny(s.foreignTaxPaidCny)}</div></div>
+          <div><div class="k">可抵免税额</div><div class="v">${fmtCny(s.creditAllowedCny)}</div></div>
+          <div class="v highlight">预计应补税额：${netDisplay} CNY</div>
+        </div>${breakdown}${notes}${rules}
+        <div class="report-actions">
+          <button type="button" data-action="full-md">完整报告</button>
+        </div>`;
+      card.querySelector('[data-action="full-md"]').onclick = () => showReport(payload.runId);
+      return card;
+    }
+
+    function renderSidebarCard(payload) {
+      reportEl.innerHTML = "";
+      if (payload && payload.summary) reportEl.appendChild(buildReportCard(payload));
+    }
+
+    function addAssistantReply(text, payload) {
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap";
+      if (text) {
+        const d = document.createElement("div");
+        d.className = "msg assistant";
+        d.textContent = text;
+        wrap.appendChild(d);
+      }
+      if (payload && payload.summary) {
+        wrap.appendChild(buildReportCard(payload));
+        renderSidebarCard(payload);
+      }
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    const JOURNEY_ZH = {
+      onboarding: "入门",
+      collecting: "收集中",
+      ready: "可测算",
+      computed: "已测算",
+      reviewing: "填表辅导",
+      export: "导出",
+    };
+
+    function llmModeLabel(llm) {
+      if (!llm) return "";
+      if (llm.runtime?.composer?.narrated) return "叙述·落地生成";
+      if (llm.mode === "profile_memory") return "规则·本地进度";
+      if (llm.mode === "guided_filing_fast") return "规则·申报向导";
+      if (llm.mode === "policy_qa_fast") return "规则·政策问答";
+      if (llm.mode === "provenance_fast") return "规则·汇率溯源";
+      if (llm.mode === "coverage_fast") return "规则·材料覆盖";
+      if (llm.mode === "narrative_fast") {
+        return llm.narrativePolished ? "叙述·润色+审计" : "规则·申报说明";
+      }
+      if (llm.mode === "insight_fast") return "规则·数据洞察";
+      if (llm.mode === "rules") return "规则引擎";
+      if (llm.model) return `LLM·${llm.model}`;
+      return llm.mode || "";
+    }
+
+    function updateMeta() {
+      const resolved = state.llmStatus?.resolvedModel;
+      const modelLine = state.llmModel === "__off__"
+        ? "LLM 已关闭"
+        : (state.llmModel === "auto"
+          ? (resolved ? `自动→${resolved}` : "自动（无可用模型）")
+          : state.llmModel);
+      const j = state.journey;
+      const phase = j?.journeyPhase ? JOURNEY_ZH[j.journeyPhase] || j.journeyPhase : "";
+      metaEl.textContent = [
+        state.datasetId ? "已上传数据" : "未上传",
+        state.lastRunId ? "已测算" : "",
+        phase ? `阶段·${phase}` : "",
+        modelLine,
+      ].filter(Boolean).join(" · ") || "请先上传税表";
+    }
+
+    function renderJourneyBar(j) {
+      if (!j) { journeyBarEl.style.display = "none"; return; }
+      state.journey = j;
+      const cov = j.coverage || {};
+      const miss = (cov.missingYears || []).join("、");
+      const uploaded = (j.uploadedYears || []).join("、") || "—";
+      journeyBarEl.style.display = "block";
+      const tf = j.turnFocus || state.journey?.turnFocus;
+      const focusYear = tf?.taxYear || j.focusTaxYear;
+      if (focusYear) {
+        document.getElementById("taxYear").value = focusYear;
+        save();
+      }
+      const focusLine = focusYear
+        ? `<div>回合焦点：<span class="focus-pill">${focusYear} 年</span>（TTL ${tf?.ttl ?? "—"}）${tf?.profile ? ` · ${tf.profile}` : ""}</div>` : "";
+      journeyBarEl.innerHTML = `
+        <div class="phase">${JOURNEY_ZH[j.journeyPhase] || j.journeyPhase}</div>
+        <div>已上传年度：${uploaded}</div>
+        ${focusLine}
+        ${miss ? `<div class="warn">缺口：${miss}</div>` : `<div>材料覆盖：${cov.complete ? "完整" : "待确认"}</div>`}
+      `;
+      updateMeta();
+    }
+
+    async function refreshJourneyPanel() {
+      if (!state.datasetId) {
+        journeyBarEl.style.display = "none";
+        filingPanelEl.innerHTML = "";
+        state.journey = null;
+        updateMeta();
+        return;
+      }
+      const q = new URLSearchParams({ taxYear: String(+document.getElementById("taxYear").value) });
+      if (state.lastRunId) q.set("lastRunId", state.lastRunId);
+      if (state.sessionId) q.set("sessionId", state.sessionId);
+      try {
+        const r = await fetch(`/tax/dataset/${state.datasetId}/journey?${q}`);
+        if (!r.ok) return;
+        const j = await r.json();
+        renderJourneyBar(j);
+        if (j.filingTable?.rows?.length) showFilingPanel(j.filingTable);
+      } catch (_) {}
+    }
+
+    async function loadUserProfile() {
+      try {
+        const r = await fetch(`/tax/user/profile?userKey=${encodeURIComponent(state.userKey)}`);
+        if (!r.ok) return;
+        const j = await r.json();
+        if (j.hasProfile) {
+          if (state.llmModel === "auto" && j.llmPreference && j.llmPreference !== "auto") {
+            state.llmModel = j.llmPreference;
+          }
+          if (j.replyVerbosity) state.replyVerbosity = j.replyVerbosity;
+          save();
+        }
+        const vsel = document.getElementById("replyVerbosity");
+        if (vsel) vsel.value = state.replyVerbosity || "normal";
+      } catch (_) {}
+    }
+
+    async function loadLlmStatus() {
+      try {
+        const r = await fetch("/tax/llm/status");
+        const j = await r.json();
+        state.llmStatus = j;
+        const sel = document.getElementById("llmModel");
+        sel.innerHTML = "";
+        (j.modelChoices || []).forEach(c => {
+          const o = document.createElement("option");
+          o.value = c.id;
+          o.textContent = c.label;
+          o.title = c.hint || "";
+          sel.appendChild(o);
+        });
+        sel.value = state.llmModel;
+        const cur = (j.modelChoices || []).find(c => c.id === sel.value);
+        document.getElementById("llmModelHint").textContent =
+          (cur?.hint || j.recommendationZh || "").split("\n")[0];
+        updateMeta();
+      } catch (_) {
+        document.getElementById("llmModelHint").textContent = "无法读取 Ollama 模型列表";
+      }
+    }
+
+    document.getElementById("llmModel").onchange = (e) => {
+      state.llmModel = e.target.value;
+      save();
+      loadLlmStatus();
+    };
+
+    document.getElementById("replyVerbosity").onchange = (e) => {
+      state.replyVerbosity = e.target.value;
+      save();
+    };
+
+    fileInput.onchange = () => {
+      const names = [...fileInput.files].map(f => f.name);
+      fileListEl.textContent = names.length ? "已选: " + names.join(", ") : "";
+    };
+
+    function futuTaxYearsFromQuality(dq) {
+      if (!dq) return [];
+      const pkgs = dq.futuTaxPackages || (dq.futuTaxPackage ? [dq.futuTaxPackage] : []);
+      return [...new Set(pkgs.map(p => p.taxYear).filter(Boolean))].sort((a, b) => a - b);
+    }
+
+    function computePayload(taxYear) {
+      return {
+        datasetId: state.datasetId,
+        sessionId: state.sessionId,
+        taxYear: taxYear ?? +document.getElementById("taxYear").value,
+        residentStatus: "cn_tax_resident",
+        ruleSnapshotId: "latest_stable",
+        fxPolicy: "cn_supplemental",
+        filingScope: "foreign_only",
+        defaultFxRate: 7.10,
+      };
+    }
+
+    async function apiUploadFiles(files) {
+      const fd = new FormData();
+      if (files.length === 1) {
+        fd.append("file", files[0]);
+      } else {
+        for (const f of files) fd.append("files", f);
+      }
+      fd.append("sessionId", state.sessionId);
+      const url = files.length === 1 ? "/tax/upload" : "/tax/upload/batch";
+      const r = await fetch(url, { method: "POST", body: fd });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    async function apiCompute(taxYear) {
+      const r = await fetch("/tax/compute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(computePayload(taxYear)),
+      });
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    function renderFollowUpChips(questions) {
+      if (!questions?.length) return;
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap";
+      const chips = document.createElement("div");
+      chips.className = "clarify-chips";
+      questions.forEach(q => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = q;
+        b.onclick = () => sendCoachMessage(q);
+        chips.appendChild(b);
+      });
+      wrap.appendChild(chips);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function renderNbaHint(text) {
+      if (!text?.trim()) return;
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap";
+      const d = document.createElement("div");
+      d.className = "msg system nba-hint";
+      d.textContent = "💡 下一步建议：" + text.trim();
+      wrap.appendChild(d);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function renderClarifyChips(years, hint) {
+      if (!years?.length) return;
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap";
+      const d = document.createElement("div");
+      d.className = "msg assistant";
+      d.textContent = hint || "请选择纳税年度：";
+      const chips = document.createElement("div");
+      chips.className = "clarify-chips";
+      years.forEach(y => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = `${y} 年`;
+        b.onclick = () => sendCoachMessage(`${y}年补缴汇率是多少`);
+        chips.appendChild(b);
+      });
+      wrap.appendChild(d);
+      wrap.appendChild(chips);
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    /** 与 C5 后端预算对齐：流式总 30s + Ollama 冷启动余量（实测单轮常 60–70s）。 */
+    const CHAT_STREAM_TIMEOUT_MS = 120000;
+    const CHAT_POST_TIMEOUT_MS = 120000;
+
+    function isChatAbortError(err) {
+      const msg = String(err?.message || err || "");
+      return err?.name === "AbortError" || /aborted|abort/i.test(msg);
+    }
+
+    function removeStreamPartial(wrap) {
+      if (wrap?.parentNode) wrap.parentNode.removeChild(wrap);
+    }
+
+    function ensureStreamWrap(existing) {
+      if (existing) return existing;
+      const wrap = document.createElement("div");
+      wrap.className = "msg-wrap stream-wrap";
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return wrap;
+    }
+
+    function hideStreamLoading(wrap) {
+      const el = wrap?.querySelector(".stream-loading");
+      if (el) el.style.display = "none";
+    }
+
+    function showStreamLoading(wrap) {
+      let el = wrap?.querySelector(".stream-loading");
+      if (!el && wrap) {
+        el = document.createElement("div");
+        el.className = "stream-loading";
+        el.textContent = "模型加载中…";
+        const narr = wrap.querySelector(".msg.narration");
+        if (narr) wrap.insertBefore(el, narr);
+        else wrap.appendChild(el);
+      } else if (el) {
+        el.style.display = "";
+        el.textContent = "模型加载中…";
+      }
+    }
+
+    function renderFactCard(card, wrap) {
+      if (!card || !wrap) return;
+      let fc = wrap.querySelector(".fact-card");
+      if (!fc) {
+        fc = document.createElement("div");
+        fc.className = "fact-card";
+        wrap.insertBefore(fc, wrap.firstChild);
+      }
+      const profile = card.profile || "";
+      const tier = card.tier || "T0";
+      const facts = card.facts || {};
+      const cites = (card.citations || []).map(c => c.label).filter(Boolean);
+      let title = "可靠事实（T0）";
+      let highlight = "";
+      let meta = "";
+      if (profile === "policy_explain") {
+        const row = facts.rows ? facts.rows[0] : facts;
+        const y = row?.taxYear || "";
+        const rate = row?.rate || (card.numerics || []).find(n => /^\d\.\d{4}$/.test(String(n)));
+        title = `${y} 年补缴汇率依据`;
+        if (rate) highlight = `${rate} RMB/USD`;
+        if (row?.monthKey) meta = `适用月份：${row.monthKey}`;
+      } else if (profile === "policy_qa") {
+        const cards = facts.cards || [];
+        title = cards[0]?.titleZh || "政策知识库";
+        highlight = (cards[0]?.answerT0 || "").slice(0, 80) + (cards[0]?.answerT0?.length > 80 ? "…" : "");
+      } else if (profile === "coverage_check") {
+        title = "材料覆盖";
+        highlight = facts.complete ? "材料完整" : `缺口：${(facts.missingYears || []).join("、") || "待确认"}`;
+      } else if (profile === "guided_filing") {
+        title = "申报向导";
+        highlight = facts.guidedStep ? `步骤 ${facts.guidedStep}` : "进行中";
+      } else if (profile === "insight_fast") {
+        title = `${facts.taxYear || ""} 年数据洞察`.trim() || "数据洞察";
+        const hl = card.highlights || [];
+        if (hl.length) {
+          highlight = hl.map(h => `${h.label} ${h.value}${h.unit || ""}`).join(" · ");
+        } else {
+          const ci = facts.classifiedIncome || {};
+          const gt = facts.grandTotal || {};
+          const bits = [];
+          if (gt.netTaxDueCny) bits.push(`全税目应补 ${gt.netTaxDueCny} 元`);
+          if (ci.dividend?.netTaxDueCny) bits.push(`股息应补 ${ci.dividend.netTaxDueCny} 元`);
+          if (ci.interest?.netTaxDueCny) bits.push(`利息应补 ${ci.interest.netTaxDueCny} 元`);
+          if (bits.length) highlight = bits.join(" · ");
+        }
+        meta = (facts.classifiedIncome?.dividend || facts.classifiedIncome?.interest)
+          ? "股息/利息与财产转让分税目" : "";
+      } else if (card.numerics?.length) {
+        highlight = card.numerics.slice(0, 4).join(" · ");
+      }
+      fc.innerHTML = `
+        <div class="fc-title">${title} · ${tier}</div>
+        ${highlight ? `<div class="fc-rate">${highlight}</div>` : ""}
+        ${meta ? `<div class="fc-meta">${meta}</div>` : ""}
+        ${cites.length ? `<div class="fc-cite">依据：${cites.join("；")}</div>` : ""}
+      `;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function ensureNarrationEl(wrap) {
+      let el = wrap.querySelector(".msg.narration");
+      if (!el) {
+        el = document.createElement("div");
+        el.className = "msg assistant narration";
+        wrap.appendChild(el);
+      }
+      return el;
+    }
+
+    function finalizeStreamAssistant(wrap, reply, llm) {
+      if (!wrap) return false;
+      hideStreamLoading(wrap);
+      const el = wrap.querySelector(".msg.narration") || wrap.querySelector(".msg.assistant");
+      if (!el) return false;
+      el.textContent = reply || el.textContent || "";
+      const tag = llmModeLabel(llm);
+      if (tag) addMsg("system", `答复方式：${tag}`);
+      return true;
+    }
+
+    /** 统一聊天网关：所有辅导/自然语言均走 POST /tax/chat（年度解析在后端 TaxTurnResolver）。 */
+    async function applyChatResponse(j, streamMeta) {
+      if (j.harness) renderJourneyBar({ ...state.journey, ...j.harness, coverage: state.journey?.coverage });
+      if (j.summary) {
+        addAssistantReply(j.reply, resultPayload(j));
+        state.lastRunId = j.runId;
+        if (j.llm) addMsg("system", `答复方式：${llmModeLabel(j.llm)}`);
+      } else {
+        let streamed = false;
+        if (streamMeta?.hadFactCard && streamMeta?.wrap) {
+          hideStreamLoading(streamMeta.wrap);
+          const el = ensureNarrationEl(streamMeta.wrap);
+          el.textContent = j.reply || "";
+          const tag = llmModeLabel(j.llm);
+          if (tag) addMsg("system", `答复方式：${tag}`);
+          streamed = true;
+        } else if (streamMeta?.rendered) {
+          streamed = finalizeStreamAssistant(streamMeta.wrap, j.reply, j.llm);
+        }
+        if (!streamed) {
+          removeStreamPartial(streamMeta?.wrap);
+          addAssistantWithMeta(j.reply, j.llm);
+        }
+        if (streamMeta?.fallback) {
+          addMsg("system", "流式响应未完成，已自动切换为完整答复（模板/快车道）。");
+        }
+        if (j.action === "clarify") {
+          const years = j.clarifyChoices || j.llm?.turnScope?.taxYears || [];
+          renderClarifyChips(years);
+        }
+        const followUps = j.followUps || j.llm?.followUps || streamMeta?.followUps;
+        if (followUps?.length) renderFollowUpChips(followUps);
+        const nba = j.nba || j.llm?.nba || j.harness?.nba;
+        if (nba) renderNbaHint(nba);
+      }
+      if (j.filingTable) showFilingTable(j.filingTable, false);
+      if (j.action === "show_filing_table" && j.filingTable) showFilingTable(j.filingTable, false);
+      await refreshJourneyPanel();
+      save();
+      updateMeta();
+    }
+
+    async function sendCoachMessage(text, opts = {}) {
+      addMsg("user", text);
+      document.getElementById("input").value = "";
+      try {
+        const useStream = opts.stream !== false && state.llmModel !== "__off__";
+        const j = useStream ? await apiChatStream(text, opts) : await apiChat(text, opts);
+        const streamMeta = j._streamMeta || null;
+        delete j._streamMeta;
+        await applyChatResponse(j, streamMeta);
+      } catch (err) {
+        const hint = isChatAbortError(err)
+          ? "对话超时（可换更小模型或关闭 LLM 使用快车道）"
+          : (err.message === "Failed to fetch" ? "无法连接服务（请确认 API 已启动）" : err.message);
+        addMsg("system", "错误: " + hint);
+      }
+    }
+
+    function parseSseBlocks(buffer) {
+      const events = [];
+      const parts = buffer.split("\n\n");
+      for (const block of parts) {
+        if (!block.trim()) continue;
+        let ev = "message";
+        let data = "";
+        for (const line of block.split("\n")) {
+          if (line.startsWith("event: ")) ev = line.slice(7).trim();
+          if (line.startsWith("data: ")) data = line.slice(6);
+        }
+        if (data) {
+          try { events.push({ event: ev, data: JSON.parse(data) }); }
+          catch (_) { events.push({ event: ev, data }); }
+        }
+      }
+      return events;
+    }
+
+    async function apiChatStreamFallback(message, opts, streamWrap) {
+      const hadFactCard = !!streamWrap?.querySelector(".fact-card");
+      if (streamWrap && hadFactCard) {
+        hideStreamLoading(streamWrap);
+        const narr = streamWrap.querySelector(".msg.narration");
+        if (narr) narr.textContent = "";
+      } else {
+        removeStreamPartial(streamWrap);
+        streamWrap = null;
+      }
+      const j = await apiChat(message, opts);
+      j._streamMeta = { wrap: streamWrap, rendered: false, fallback: true, hadFactCard };
+      return j;
+    }
+
+    async function apiChatStream(message, opts = {}) {
+      const params = new URLSearchParams({
+        sessionId: state.sessionId,
+        userKey: state.userKey,
+        message,
+        taxYear: String(state.taxYear || 2022),
+        residentStatus: state.residentStatus || "cn_tax_resident",
+        fxPolicy: state.fxPolicy || "cn_supplemental",
+        llmModel: state.llmModel || "auto",
+        replyVerbosity: state.replyVerbosity || "normal",
+      });
+      if (state.datasetId) params.set("datasetId", state.datasetId);
+      if (state.lastRunId) params.set("lastRunId", state.lastRunId);
+      if (state.filingDate) params.set("filingDate", state.filingDate);
+      if (opts.narrativePolish != null) params.set("narrativePolish", String(opts.narrativePolish));
+
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), CHAT_STREAM_TIMEOUT_MS);
+      let streamWrap = null;
+      let assistantEl = null;
+      let gotFactCard = false;
+      let streamFollowUps = null;
+      let donePayload = null;
+      try {
+        const r = await fetch("/tax/chat/stream?" + params.toString(), {
+          signal: ctrl.signal,
+        });
+        if (!r.ok) throw new Error(await r.text() || `HTTP ${r.status}`);
+        const reader = r.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const blocks = buf.split("\n\n");
+          buf = blocks.pop() || "";
+          for (const block of blocks) {
+            const evs = parseSseBlocks(block + "\n\n");
+            for (const { event, data } of evs) {
+              if (event === "meta" && data.llm) state.lastLlm = data.llm;
+              if (event === "fact_card") {
+                streamWrap = ensureStreamWrap(streamWrap);
+                renderFactCard(data, streamWrap);
+                gotFactCard = true;
+                showStreamLoading(streamWrap);
+                assistantEl = ensureNarrationEl(streamWrap);
+              }
+              if (event === "delta") {
+                streamWrap = ensureStreamWrap(streamWrap);
+                hideStreamLoading(streamWrap);
+                assistantEl = ensureNarrationEl(streamWrap);
+                assistantEl.textContent += data.text || "";
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+              }
+              if (event === "follow_ups" && data.items?.length) {
+                streamFollowUps = data.items;
+              }
+              if (event === "done") donePayload = data;
+            }
+          }
+        }
+        if (buf.trim()) {
+          for (const { event, data } of parseSseBlocks(buf)) {
+            if (event === "follow_ups" && data.items?.length) streamFollowUps = data.items;
+            if (event === "done") donePayload = data;
+          }
+        }
+        if (!donePayload) {
+          return apiChatStreamFallback(message, opts, streamWrap);
+        }
+        hideStreamLoading(streamWrap);
+        if (donePayload.llm) state.lastLlm = donePayload.llm;
+        if (streamFollowUps?.length && !donePayload.followUps) {
+          donePayload.followUps = streamFollowUps;
+          if (donePayload.llm) donePayload.llm.followUps = streamFollowUps;
+        }
+        donePayload._streamMeta = {
+          wrap: streamWrap,
+          rendered: !!assistantEl,
+          fallback: false,
+          hadFactCard: gotFactCard,
+          followUps: streamFollowUps,
+        };
+        return donePayload;
+      } catch (err) {
+        if (donePayload?.reply) {
+          if (donePayload.llm) state.lastLlm = donePayload.llm;
+          donePayload._streamMeta = { wrap: streamWrap, rendered: !!assistantEl, fallback: false };
+          return donePayload;
+        }
+        if (isChatAbortError(err) || !donePayload) {
+          return apiChatStreamFallback(message, opts, streamWrap);
+        }
+        removeStreamPartial(streamWrap);
+        throw err;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function apiChat(message, opts = {}) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), CHAT_POST_TIMEOUT_MS);
+      try {
+        const r = await fetch("/tax/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: ctrl.signal,
+          body: JSON.stringify({
+            sessionId: state.sessionId,
+            userKey: state.userKey,
+            message,
+            datasetId: state.datasetId,
+            lastRunId: state.lastRunId,
+            llmModel: state.llmModel || "auto",
+            replyVerbosity: state.replyVerbosity || "normal",
+            narrativePolish: opts.narrativePolish,
+            ...computePayload(),
+          }),
+        });
+        if (!r.ok) throw new Error(await r.text() || `HTTP ${r.status}`);
+        const j = await r.json();
+        if (j.llm) state.lastLlm = j.llm;
+        return j;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function addAssistantWithMeta(reply, llm) {
+      addMsg("assistant", reply);
+      const tag = llmModeLabel(llm);
+      if (tag) addMsg("system", `答复方式：${tag}`);
+    }
+
+    async function showReport(runId) {
+      const r = await fetch("/tax/report/" + runId);
+      const j = await r.json();
+      const md = document.createElement("div");
+      md.style.whiteSpace = "pre-wrap";
+      md.style.fontSize = "0.78rem";
+      md.style.marginTop = "8px";
+      md.textContent = j.markdown || "";
+      reportEl.innerHTML = "";
+      if (state.lastRunId) renderSidebarCard({ runId, summary: (j.result || {}).summary });
+      reportEl.appendChild(md);
+    }
+
+    async function loadHistory() {
+      try {
+        const r = await fetch("/tax/chat/history/" + state.sessionId + "?limit=20");
+        const j = await r.json();
+        if (j.messages && j.messages.length) {
+          messagesEl.innerHTML = "";
+          j.messages.forEach(m => addMsg(m.role === "user" ? "user" : m.role === "system" ? "system" : "assistant", m.content));
+        }
+      } catch (_) {}
+    }
+
+    function resultPayload(j) {
+      const y = document.getElementById("taxYear")?.value;
+      return {
+        taxYear: y,
+        runId: j.runId,
+        summary: j.summary,
+        netTaxDueRangeCny: j.netTaxDueRangeCny,
+        triggeredRiskRules: j.triggeredRiskRules,
+        notes: j.notes,
+        filingTable: j.filingTable,
+      };
+    }
+
+    function focusTaxYear() {
+      const tf = state.journey?.turnFocus;
+      return tf?.taxYear || +document.getElementById("taxYear").value;
+    }
+
+    function renderGrandTotalBanner(ft, highlightYear) {
+      const cr = combinedRowForYear(ft, highlightYear);
+      if (!cr?.grandTotal) return "";
+      const g = cr.grandTotal;
+      const ci = cr.classifiedIncome;
+      const hasCls = ci && (ci.dividend || ci.interest);
+      if (!hasCls && !cr.propertyTransfer) return "";
+      const y = cr.taxYear;
+      let detail = "";
+      if (hasCls) {
+        const bits = [];
+        if (cr.propertyTransfer) {
+          bits.push(`财产转让应补 ${fmtCny(cr.propertyTransfer.taxDueCny)}`);
+        }
+        if (ci.dividend) bits.push(`股息应补 ${fmtCny(ci.dividend.netTaxDueCny)}`);
+        if (ci.interest) bits.push(`利息应补 ${fmtCny(ci.interest.netTaxDueCny)}`);
+        detail = bits.join(" · ");
+      }
+      return `<div class="filing-grand-total">
+        <div class="gt-title">${y} 年全税目合计（财产转让 + 股息/利息，分税目不得相抵）</div>
+        <div>应纳税所得额合计 ${fmtCny(g.taxableIncomeCny)} · 应纳税额合计 ${fmtCny(g.taxDueCny)}</div>
+        ${detail ? `<div style="margin-top:4px;color:var(--muted)">${detail}</div>` : ""}
+        <div class="gt-net" style="margin-top:6px">应补税额合计：${fmtCny(g.netTaxDueCny)} 元</div>
+      </div>`;
+    }
+
+    function renderClassifiedIncomeHtml(ft, highlightYear) {
+      const rows = ft?.classifiedIncome?.rows;
+      if (!rows?.length) return "";
+      const hy = highlightYear || focusTaxYear();
+      const head = `<tr>
+        <th>年份</th><th>类别</th><th>收入 USD</th><th>收入 RMB</th>
+        <th>应税 RMB</th><th>20%税 RMB</th><th>境外已扣 RMB</th><th>应补 RMB</th></tr>`;
+      let body = "";
+      for (const r of rows) {
+        const rowCls = hy && +r.taxYear === +hy ? "row-focus" : "";
+        for (const [key, label] of [["dividend", "股息"], ["interest", "利息"]]) {
+          const seg = r[key];
+          if (!seg) continue;
+          body += `<tr class="seg-classified ${rowCls}"><td><b>${r.taxYear}</b></td><td>${label}</td>
+            <td>${seg.grossUsd}</td><td>${fmtCny(seg.grossCny)}</td>
+            <td><b>${fmtCny(seg.taxableIncomeCny)}</b></td>
+            <td>${fmtCny(seg.taxDueCny)}</td>
+            <td>${fmtCny(seg.foreignTaxPaidCny)}</td>
+            <td><b>${fmtCny(seg.netTaxDueCny)}</b></td></tr>`;
+        }
+      }
+      if (!body) return "";
+      const note = ft.classifiedIncomeNote || "股息/利息与财产转让分税目填列，不得并入四列。";
+      return `<h4>股息 / 利息（分类所得）</h4>
+        <table class="filing-table"><thead>${head}</thead><tbody>${body}</tbody></table>
+        <div class="filing-note">${note}</div>`;
+    }
+
+    function renderFilingTableHtml(ft, highlightYear) {
+      if (!ft) return "";
+      const hasProp = ft.rows?.length;
+      const hasCls = ft.classifiedIncome?.rows?.length;
+      if (!hasProp && !hasCls) return "";
+      const hy = highlightYear || focusTaxYear();
+      const parts = [];
+      parts.push(renderGrandTotalBanner(ft, hy));
+      if (hasProp) {
+        const mainHead = `<tr>
+        <th>年份</th><th>总收入 USD</th><th>总收入 RMB</th>
+        <th>资产原值 USD</th><th>资产原值 RMB</th>
+        <th>合理费用 USD</th><th>合理费用 RMB</th>
+        <th>净损益 USD</th><th>净损益 RMB</th><th>20%税 RMB</th><th>建议</th></tr>`;
+        const mainRows = ft.rows.map(r => {
+          const cls = hy && +r.taxYear === +hy ? "row-focus" : "";
+          return `<tr class="${cls}">
+        <td><b>${r.taxYear}</b></td>
+        <td>${r.grossProceedsUsd || r.proceedsUsd}</td><td>${fmtCny(r.grossProceedsCny || r.proceedsCny)}</td>
+        <td>${r.costBasisUsd}</td><td>${fmtCny(r.costBasisCny)}</td>
+        <td>${r.reasonableFeeUsd || "0"}</td><td>${fmtCny(r.reasonableFeeCny || "0")}</td>
+        <td><b>${r.netGainUsd}</b></td><td><b>${fmtCny(r.netGainCny)}</b></td>
+        <td><b>${fmtCny(r.taxDueCny)}</b></td><td>${r.filingAdvice}</td></tr>`;
+        }).join("");
+        const segHead = `<tr>
+        <th>年份</th><th>类别</th><th>卖出 USD</th><th>卖出 RMB</th>
+        <th>原值+费 USD</th><th>原值+费 RMB</th><th>净损益 RMB</th><th>笔数</th></tr>`;
+        let segRows = "";
+        for (const r of ft.rows) {
+          for (const seg of [r.stock, r.option].filter(Boolean)) {
+            const cls = seg.assetType === "option" ? "seg-option" : "";
+            const rowCls = [cls, hy && +r.taxYear === +hy ? "row-focus" : ""].filter(Boolean).join(" ");
+            segRows += `<tr class="${rowCls}"><td>${r.taxYear}</td><td>${seg.assetTypeLabel}</td>
+            <td>${seg.proceedsUsd}</td><td>${fmtCny(seg.proceedsCny)}</td>
+            <td>${seg.costAndFeeUsd}</td><td>${fmtCny(seg.costAndFeeCny)}</td>
+            <td><b>${fmtCny(seg.netGainCny)}</b></td><td>${seg.disposalCount}</td></tr>`;
+          }
+        }
+        const fxNotes = ft.rows.map(r =>
+          `${r.taxYear}年：汇率 ${r.fxRate}（${r.fxPolicy === "cn_annual_filing" ? "正常汇算" : "以前年度补缴"}）`
+        ).join("；");
+        parts.push(`<h4>财产转让所得（申报四列）</h4>
+        <table class="filing-table"><thead>${mainHead}</thead><tbody>${mainRows}</tbody></table>
+        <h4>股票 / 期权分列（人民币计价）</h4>
+        <table class="filing-table"><thead>${segHead}</thead><tbody>${segRows}</tbody></table>
+        <div class="filing-note">${ft.optionNote || ""}<br>${fxNotes}</div>`);
+      }
+      const clsHtml = renderClassifiedIncomeHtml(ft, hy);
+      if (clsHtml) parts.push(clsHtml);
+      return `<div class="filing-wrap">
+        <h4>${ft.title || "申报数据表"}</h4>
+        ${parts.filter(Boolean).join("")}
+      </div>`;
+    }
+
+    function showFilingPanel(ft) {
+      const html = renderFilingTableHtml(ft, focusTaxYear());
+      if (!html) { filingPanelEl.innerHTML = ""; return; }
+      filingPanelEl.innerHTML = html;
+    }
+
+    function showFilingTable(ft, intoChat) {
+      if (!ft) return;
+      const html = renderFilingTableHtml(ft, focusTaxYear());
+      if (!html) return;
+      showFilingPanel(ft);
+      if (intoChat) {
+        const wrap = document.createElement("div");
+        wrap.className = "msg-wrap";
+        const d = document.createElement("div");
+        d.className = "msg assistant";
+        d.innerHTML = "<b>境外所得申报数据表</b>（财产转让四列 + 股息/利息分类所得，可直接对照个税 App 填列）" + html;
+        wrap.appendChild(d);
+        messagesEl.appendChild(wrap);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+    }
+
+    async function apiFilingTable() {
+      const r = await fetch("/tax/dataset/" + state.datasetId + "/filing-table");
+      if (!r.ok) throw new Error(await r.text());
+      return r.json();
+    }
+
+    document.getElementById("btnUpload").onclick = async () => {
+      const files = [...fileInput.files];
+      if (!files.length) { addMsg("system", "请选择富途税表 xlsx"); return; }
+      try {
+        const last = await apiUploadFiles(files);
+        state.datasetId = last.datasetId;
+        state.sessionId = last.sessionId;
+        state.dataQuality = last.dataQuality || null;
+        save(); updateMeta();
+        const names = (last.files || []).map(x => x.fileName).join(", ") || files.map(f => f.name).join(", ");
+        addMsg("assistant", `已解析 ${last.eventCount} 条事件（${names}）。`);
+        const warns = (last.files || []).flatMap(x => x.warnings || []).concat(last.warnings || []);
+        if (warns.length) addMsg("system", [...new Set(warns)].join("\n"));
+        const years = futuTaxYearsFromQuality(state.dataQuality);
+        if (years.length) {
+          addMsg("system", `识别纳税年度：${years.join("、")}。可说「测算 ${years[0]} 年税额」或点侧栏按钮。`);
+          document.getElementById("taxYear").value = years[years.length - 1];
+        }
+        await refreshJourneyPanel();
+        if (warns.some(w => w.includes("Trade 金额作为资本利得近似"))) {
+          addMsg("system", "解析异常：未走 FIFO。请确认上传的是富途 Annual_Statement 税表 xlsx。");
+        }
+        if (warns.some(w => w.includes("期初持仓") || w.includes("exceeds FIFO lots"))) {
+          addMsg("system", "检测到跨年持仓：请同会话上传买入年税表（如 2022+2023），否则 AMZN 等卖出成本不完整，税额可能偏高。");
+        }
+      } catch (e) { addMsg("system", "上传失败: " + e.message); }
+    };
+
+    document.getElementById("btnCompute").onclick = async () => {
+      if (!state.datasetId) { addMsg("system", "请先上传税表"); return; }
+      try {
+        const j = await apiCompute();
+        state.lastRunId = j.runId;
+        save(); updateMeta();
+        const y = document.getElementById("taxYear").value;
+        addAssistantReply(`${y} 年度测算完成。`, resultPayload(j));
+        if (j.filingTable) showFilingTable(j.filingTable, false);
+        await refreshJourneyPanel();
+      } catch (e) { addMsg("system", "测算失败: " + e.message); }
+    };
+
+    document.getElementById("btnComputeMulti").onclick = async () => {
+      if (!state.datasetId) { addMsg("system", "请先上传税表"); return; }
+      const years = futuTaxYearsFromQuality(state.dataQuality);
+      if (years.length < 2) {
+        addMsg("system", years.length === 1
+          ? `仅 ${years[0]} 年；请上传更多年度税表后批量测算。`
+          : "未识别税表年度，请上传含「证券-交易流水」的 Annual_Statement。");
+        return;
+      }
+      try {
+        for (const y of years) {
+          document.getElementById("taxYear").value = y;
+          const j = await apiCompute(y);
+          state.lastRunId = j.runId;
+          addAssistantReply(`【${y} 年】测算完成。`, resultPayload(j));
+        }
+        save(); updateMeta();
+        try {
+          const ft = await apiFilingTable();
+          showFilingTable(ft, true);
+        } catch (_) {}
+        await refreshJourneyPanel();
+      } catch (e) { addMsg("system", "批量测算失败: " + e.message); }
+    };
+
+    document.getElementById("btnFilingTable").onclick = async () => {
+      if (!state.datasetId) { addMsg("system", "请先上传税表"); return; }
+      try {
+        const ft = await apiFilingTable();
+        showFilingTable(ft, true);
+        addMsg("system", "申报数据表已生成：财产转让四列 + 股息/利息分类所得（分税目，见侧栏）。");
+        await refreshJourneyPanel();
+      } catch (e) { addMsg("system", "生成失败: " + e.message); }
+    };
+
+    document.querySelectorAll("#coachPanel [data-coach]").forEach(btn => {
+      btn.onclick = () => {
+        const y = document.getElementById("taxYear").value;
+        const kind = btn.getAttribute("data-coach");
+        if (!state.datasetId && kind !== "fx") {
+          addMsg("system", "请先上传税表");
+          return;
+        }
+        const prompts = {
+          coverage: `${y} 年材料齐全吗，还缺哪些年度税表？`,
+          filing: `${y} 年个税 App 财产转让四列怎么填？`,
+          classified: `${y} 年富途税表里的股息和利息收入怎么申报？`,
+          risk: `${y} 年有什么申报风险要注意？`,
+          fx: `${y} 年补缴汇率依据是什么？`,
+          narrative: `帮我写 ${y} 年境外财产转让申报说明`,
+          narrative_polish: `帮我写并润色 ${y} 年申报说明信`,
+        };
+        const polish = kind === "narrative_polish";
+        sendCoachMessage(prompts[kind] || "", polish ? { narrativePolish: true } : {});
+      };
+    });
+
+    document.getElementById("btnNewSession").onclick = async () => {
+      const r = await fetch("/tax/session/new", { method: "POST" });
+      const j = await r.json();
+      state.sessionId = j.sessionId;
+      state.datasetId = null;
+      state.lastRunId = null;
+      state.dataQuality = null;
+      messagesEl.innerHTML = "";
+      reportEl.innerHTML = "";
+      filingPanelEl.innerHTML = "";
+      journeyBarEl.style.display = "none";
+      state.journey = null;
+      addMsg("system", "新会话已开始，请重新上传税表。");
+      save(); updateMeta();
+    };
+
+    document.getElementById("composer").onsubmit = async (e) => {
+      e.preventDefault();
+      const text = document.getElementById("input").value.trim();
+      if (!text) return;
+      await sendCoachMessage(text);
+    };
+
+    addMsg("system", "上传富途 Annual_Statement 税表后，可说「测算 2022 年应补多少税」。所有问答经 /tax/chat，支持多轮续问（如「22年汇率」→「那23年呢」）。");
+    const vselInit = document.getElementById("replyVerbosity");
+    if (vselInit) vselInit.value = state.replyVerbosity || "normal";
+    updateMeta();
+    loadUserProfile().then(() => loadLlmStatus());
+    loadHistory();
+    refreshJourneyPanel();
+  </script>
+</body>
+</html>

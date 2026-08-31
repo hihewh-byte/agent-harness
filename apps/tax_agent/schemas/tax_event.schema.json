@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tax-agent.local/schemas/tax_event.schema.json",
+  "title": "TaxEvent",
+  "description": "Canonical tax event from parsed broker documents (v1)",
+  "type": "object",
+  "required": [
+    "eventId",
+    "accountId",
+    "eventType",
+    "tradeDate",
+    "grossAmount",
+    "sourceRowRef",
+    "parseConfidence",
+    "classificationStatus"
+  ],
+  "properties": {
+    "eventId": { "type": "string", "format": "uuid" },
+    "accountId": { "type": "string", "format": "uuid" },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "DIVIDEND",
+        "CAPITAL_GAIN",
+        "INTEREST",
+        "WITHHOLDING_TAX",
+        "FEE",
+        "OTHER"
+      ]
+    },
+    "tradeDate": { "type": "string", "format": "date" },
+    "settleDate": { "type": "string", "format": "date" },
+    "symbol": { "type": "string", "maxLength": 32 },
+    "quantity": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$" },
+    "grossAmount": { "$ref": "#/$defs/money" },
+    "withholdingTax": { "$ref": "#/$defs/money" },
+    "fee": { "$ref": "#/$defs/money" },
+    "netAmount": { "$ref": "#/$defs/money" },
+    "description": { "type": "string", "maxLength": 512 },
+    "sourceRowRef": { "type": "string", "maxLength": 128 },
+    "parseConfidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "classificationStatus": {
+      "type": "string",
+      "enum": ["confirmed", "inferred", "ambiguous"]
+    },
+    "amountCny": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$" },
+    "fxRateUsed": { "type": "number", "exclusiveMinimum": 0 },
+    "fxRateDate": { "type": "string", "format": "date" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "money": {
+      "type": "object",
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "string", "pattern": "^-?[0-9]+(\\.[0-9]+)?$" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

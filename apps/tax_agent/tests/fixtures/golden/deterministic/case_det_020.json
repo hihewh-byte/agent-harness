@@ -1,0 +1,49 @@
+{
+  "caseId": "det_020",
+  "description": "generated deterministic #20",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-03-20",
+        "grossAmount": {
+          "amount": "1500",
+          "currency": "USD"
+        },
+        "amountCny": "10650.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed",
+        "withholdingTax": {
+          "amount": "450",
+          "currency": "USD"
+        }
+      },
+      {
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-07-20",
+        "grossAmount": {
+          "amount": "700",
+          "currency": "USD"
+        },
+        "amountCny": "4970.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed"
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "summary": {
+      "taxDueCny": "3124.00",
+      "creditAllowedCny": "2130.00",
+      "netTaxDueCny": "994.00"
+    },
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85
+  }
+}

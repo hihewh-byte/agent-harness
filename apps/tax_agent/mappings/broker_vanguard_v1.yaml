@@ -1,0 +1,16 @@
+brokerTemplateId: broker_vanguard_v1
+brokerName: Vanguard
+version: "1.0"
+sheets:
+  - namePattern: "Transaction history"
+    rowType: mixed
+    columns:
+      tradeDate: { header: "Settlement date" }
+      transactionType: { header: "Transaction type" }
+      grossAmount: { header: "Amount" }
+typeMap:
+  Dividend: DIVIDEND
+  "Qualified dividend": DIVIDEND
+  "Short-term cap gain": CAPITAL_GAIN
+  "Long-term cap gain": CAPITAL_GAIN
+  Interest: INTEREST

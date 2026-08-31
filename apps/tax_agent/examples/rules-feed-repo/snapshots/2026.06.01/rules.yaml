@@ -1,0 +1,43 @@
+version: "2026.06.01"
+ruleSnapshotId: cn_resident_us_equity@2026.06.01
+taxYearDefault: 2025
+legalBasisNotes_zh:
+  - "个人所得税法及实施条例 — 境外所得分类"
+  - "财政部税务总局公告2020年第3号 — 境外分类所得单独计税"
+  - "国家税务总局专家解读 — 境外股票同年度盈亏相抵、不得跨年结转"
+  - "税收抵免管理办法 — 境外已纳税额抵免限额"
+  - "具体税率与汇总口径以本快照为准；用户须结合当年官方文件核对"
+
+residentGate:
+  requiredStatus: cn_tax_resident
+  blockComputeIf: uncertain
+
+categories:
+  cn_interest_dividend:
+    label_zh: 利息、股息、红利所得
+    rate: 0.20
+    appliesTo: [DIVIDEND]
+    incomeFormula: sum_gross_amount_cny
+  cn_property_transfer:
+    label_zh: 财产转让所得
+    rate: 0.20
+    appliesTo: [CAPITAL_GAIN]
+    incomeFormula: annual_net_realized_gain_cny
+    costBasis:
+      includeFees: true
+      matchMethod: fifo
+  cn_interest:
+    label_zh: 利息所得
+    rate: 0.20
+    appliesTo: [INTEREST]
+    incomeFormula: sum_gross_amount_cny
+
+withholding:
+  eventType: WITHHOLDING_TAX
+  treatAs: foreign_tax_paid
+  allocateTo: [cn_interest_dividend, cn_property_transfer, cn_interest]
+
+credit:
+  method: per_item_limit
+  formula: min(foreign_tax_paid_cny, tax_due_cny)
+  allocation: proportional_by_tax_due

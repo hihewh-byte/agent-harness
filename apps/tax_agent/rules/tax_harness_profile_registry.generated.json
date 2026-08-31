@@ -1,0 +1,337 @@
+{
+  "schema": "tax.harness_profile_registry/v1",
+  "profile_count": 16,
+  "profiles": {
+    "casual": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "TASK"
+      ],
+      "slots_tier1": [],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE",
+        "USER_SNAPSHOT"
+      ],
+      "tools_allowed": [
+        "reply_only"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": false
+    },
+    "guided_filing": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "DATA_COVERAGE",
+        "FILING_SNAPSHOT",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE",
+        "INVENT_POLICY"
+      ],
+      "tools_allowed": [
+        "check_coverage",
+        "compute_tax",
+        "get_filing_table",
+        "reply_only"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "filing_onboarding": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "FILING_SCOPE",
+        "TASK"
+      ],
+      "slots_tier1": [],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "request_upload",
+        "reply_only"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "coverage_check": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "DATA_COVERAGE",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "check_coverage",
+        "request_upload",
+        "reply_only"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": true
+    },
+    "policy_qa": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "POLICY_CARDS",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE",
+        "INVENT_POLICY"
+      ],
+      "tools_allowed": [
+        "reply_only"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "policy_explain": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "FX_PROVENANCE",
+        "TASK"
+      ],
+      "slots_tier1": [],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE",
+        "GET_HEALTH_DATA"
+      ],
+      "tools_allowed": [
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "compute": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "FILING_SNAPSHOT",
+        "NUMERICS_MANIFEST",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "compute_tax",
+        "request_upload",
+        "reply_only"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": false
+    },
+    "filing_narrative": {
+      "slots_tier0": [
+        "FILING_TABLE_AUTHORITY",
+        "NUMERICS_MANIFEST",
+        "RISK_BRIEF",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "compose_filing_narrative",
+        "reply_only"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "filing_coach": {
+      "slots_tier0": [
+        "FILING_TABLE_AUTHORITY",
+        "FX_PROVENANCE",
+        "RISK_BRIEF",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "get_filing_table",
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": false
+    },
+    "risk_brief": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "RISK_BRIEF",
+        "TASK"
+      ],
+      "slots_tier1": [],
+      "forbidden": [
+        "LLM_COMPUTE"
+      ],
+      "tools_allowed": [
+        "get_risk_brief",
+        "reply_only"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": false
+    },
+    "compound_deferral_options": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "TAX_INSIGHT",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "get_tax_insight",
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "classified_income": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "TAX_INSIGHT",
+        "NUMERICS_MANIFEST",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "get_tax_insight",
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "realized_vs_deferred": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "TAX_INSIGHT",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "get_tax_insight",
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "holdings_year_end": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "TAX_INSIGHT",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "get_tax_insight",
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": true,
+      "in_fast_profiles_set": true
+    },
+    "explain_summary": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "FILING_SNAPSHOT",
+        "NUMERICS_MANIFEST",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "LLM_COMPUTE",
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "reply_only",
+        "show_report"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": false
+    },
+    "general": {
+      "slots_tier0": [
+        "MASTER_ANCHOR",
+        "FILING_SNAPSHOT",
+        "TASK"
+      ],
+      "slots_tier1": [
+        "CHAT_RECALL"
+      ],
+      "forbidden": [
+        "INVENT_FX_RATE"
+      ],
+      "tools_allowed": [
+        "compute_tax",
+        "request_upload",
+        "show_report",
+        "reply_only",
+        "get_tax_insight"
+      ],
+      "fast_lane_default": false,
+      "in_fast_profiles_set": false
+    }
+  },
+  "validation_ok": true,
+  "validation_errors": []
+}

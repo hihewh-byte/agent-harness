@@ -1,0 +1,4 @@
+status: review
+effectiveFrom: "2026-01-01"
+source: rules-feed-repo-template
+changelog_zh: 模板快照（与 tax_agent 基线一致，供 CI 演示）

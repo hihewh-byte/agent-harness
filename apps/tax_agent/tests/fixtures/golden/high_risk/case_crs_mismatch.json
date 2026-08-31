@@ -1,0 +1,25 @@
+{
+  "caseId": "high_crs_mismatch",
+  "description": "声明1个账户但解析出2个",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-15",
+        "grossAmount": { "amount": "1000", "currency": "USD" },
+        "amountCny": "7100",
+        "fxRateUsed": 7.1
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "declaredAccountCount": 1,
+  "parsedAccountCount": 2,
+  "expected": {
+    "riskLevel": "high"
+  }
+}

@@ -1,0 +1,43 @@
+version: "1.0"
+description: Risk grading rules for Tax Agent v1
+rules:
+  - id: R001
+    condition: residentStatus == uncertain
+    level: high
+    message_zh: 税务居民身份未确认，无法给出最终税额
+  - id: R002
+    condition: residentStatus == non_resident
+    level: high
+    message_zh: 非中国税务居民不在本规则包范围
+  - id: R003
+    condition: ambiguousEventCount > 0 AND ambiguousAmountCny > 1000
+    level: high
+    message_zh: 存在大额未分类交易
+  - id: R004
+    condition: withholdingCoverage < 0.8
+    level: medium
+    message_zh: 预扣税数据不完整，抵免按区间估算
+  - id: R005
+    condition: brokerTemplateId == template_unknown
+    level: medium
+    message_zh: 未识别券商模板，需人工确认列映射
+  - id: R006
+    condition: confidenceScore < 0.85
+    level: medium
+    message_zh: 整体置信度偏低
+  - id: R007
+    condition: hasStockCompensation == true
+    level: high
+    message_zh: 股权激励草稿税额已输出，须专家复核成本基础与申报口径
+  - id: R008
+    condition: filingScope == includes_domestic && !domesticIncomeProvided
+    level: medium
+    message_zh: 已选含境内综合所得但未提供境内收入，结果仅含境外部分
+  - id: R009
+    condition: crsAccountCountMismatch == true
+    level: high
+    message_zh: 声明账户数与解析账户数不一致
+  - id: R010
+    condition: ruleSnapshotStatus == deprecated
+    level: medium
+    message_zh: 使用已弃用规则快照

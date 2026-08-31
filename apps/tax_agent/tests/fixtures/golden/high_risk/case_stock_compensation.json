@@ -1,0 +1,30 @@
+{
+  "caseId": "high_stock_comp",
+  "description": "RSU/股权激励事件触发 R007 专家复核",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-04-01",
+        "grossAmount": { "amount": "200", "currency": "USD" },
+        "amountCny": "1420.00",
+        "fxRateUsed": 7.1,
+        "sourceRowRef": "RSU vest 2024-Q1 AAPL"
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "high",
+    "allowDraftCompute": true,
+    "summary": {
+      "taxableIncomeCny": "1420.00",
+      "taxDueCny": "284.00",
+      "netTaxDueCny": "284.00"
+    }
+  }
+}

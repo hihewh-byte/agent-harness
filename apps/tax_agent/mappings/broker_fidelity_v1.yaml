@@ -1,0 +1,65 @@
+brokerTemplateId: broker_fidelity_v1
+brokerName: Fidelity Investments
+version: "1.2"
+description_zh: >
+  Fidelity 账户 History → Download CSV；资本利得建议再上传 Gains & Losses / Closed Positions 导出。
+
+detection:
+  preambleMarkers:
+    - "Fidelity"
+    - "FIDELITY INVESTMENTS"
+    - "Realized Gains"
+    - "Gains and Losses"
+  headerSignatures:
+    - ["Run Date", "Action", "Amount"]
+    - ["Run Date", "Action", "Amount ($)"]
+    - ["Date Sold", "Gain/Loss ($)"]
+    - ["Closed Date", "Gain/Loss ($)"]
+
+csvProfiles:
+  account_history:
+    headerAliases:
+      Date: ["Run Date", "Date", "Trade Date"]
+      Action: ["Action", "Transaction Type"]
+      Symbol: ["Symbol", "Ticker"]
+      Description: ["Description", "Transaction Description"]
+      Amount: ["Amount ($)", "Amount", "Net Amount"]
+      Fees: ["Fees ($)", "Commission ($)", "Fees", "Commission"]
+    skipActions:
+      - "You Bought"
+      - "BUY"
+      - "REINVESTMENT"
+      - "TRANSFER"
+      - "DEPOSIT"
+      - "WITHDRAWAL"
+      - "Electronic Funds Transfer"
+      - "FEE CHARGED"
+    actionMap:
+      "DIVIDEND": DIVIDEND
+      "DIVIDEND RECEIVED": DIVIDEND
+      "REINVEST DIVIDEND": DIVIDEND
+      "INTEREST EARNED": INTEREST
+      "INTEREST": INTEREST
+      "FOREIGN TAX PAID": WITHHOLDING_TAX
+      "FOREIGN TAX WITHHELD": WITHHOLDING_TAX
+      "TAX WITHHELD": WITHHOLDING_TAX
+      "NRA TAX": WITHHOLDING_TAX
+      "YOU SOLD": CAPITAL_GAIN
+      "SOLD": CAPITAL_GAIN
+      "RSU VEST": STOCK_COMPENSATION
+      "RSU VESTED": STOCK_COMPENSATION
+      "ESPP PURCHASE": STOCK_COMPENSATION
+      "STOCK PLAN": STOCK_COMPENSATION
+      "RESTRICTED STOCK": STOCK_COMPENSATION
+    sellUsesAmountAsInferredGain: true
+
+  gains_losses:
+    headerAliases:
+      Date: ["Date Sold", "Closed Date", "Sale Date", "Run Date"]
+      Symbol: ["Symbol", "Ticker", "Security"]
+      GainLoss: ["Gain/Loss ($)", "Gain/Loss", "Realized Gain/Loss", "Total Gain/Loss ($)", "Gain/Loss Amount"]
+      Proceeds: ["Proceeds", "Sales Proceeds", "Amount Proceeds"]
+      CostBasis: ["Cost Basis", "Cost", "CB", "Original Cost"]
+      ShortTerm: ["Short Term Gain/Loss", "Short-Term Gain/Loss", "ST Gain/Loss"]
+      LongTerm: ["Long Term Gain/Loss", "Long-Term Gain/Loss", "LT Gain/Loss"]
+    gainColumn: GainLoss

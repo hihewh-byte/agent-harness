@@ -1,0 +1,102 @@
+{
+  "caseId": "broker_fidelity",
+  "description": "Fidelity activity + gains/losses (anonymized)",
+  "sourceFiles": [
+    "fidelity_activity_realistic.csv",
+    "fidelity_gains_losses.csv"
+  ],
+  "brokerTemplateId": "broker_fidelity_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "b570c3c1-896d-4fda-83ba-4932b2da69be",
+        "eventType": "INTEREST",
+        "tradeDate": "2024-01-10",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "fidelity_activity_realistic.csv:fd:6",
+        "parseConfidence": 0.96,
+        "grossAmount": {
+          "amount": "15.25",
+          "currency": "USD"
+        },
+        "amountCny": "108.33",
+        "fxRateUsed": 7.1039
+      },
+      {
+        "eventId": "c448fd38-e34d-417a-be2a-aa4493d67e14",
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-03-20",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "fidelity_activity_realistic.csv:fd:7",
+        "parseConfidence": 0.96,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "220.00",
+          "currency": "USD"
+        },
+        "amountCny": "1560.90",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "7b4f443d-e767-456b-bab4-e3ac49a437b5",
+        "eventType": "WITHHOLDING_TAX",
+        "tradeDate": "2024-03-20",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "fidelity_activity_realistic.csv:fd:8",
+        "parseConfidence": 0.96,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "33.00",
+          "currency": "USD"
+        },
+        "amountCny": "234.14",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "e32bf3da-8259-478f-8851-446ea8631ae9",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-07-08",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "fidelity_gains_losses.csv:fgl:6",
+        "parseConfidence": 0.98,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "1300.00",
+          "currency": "USD"
+        },
+        "amountCny": "9271.08",
+        "fxRateUsed": 7.1316
+      },
+      {
+        "eventId": "6a905c3e-e22d-4a65-8213-ba2aff7eee2d",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-09-15",
+        "classificationStatus": "confirmed",
+        "sourceRowRef": "fidelity_gains_losses.csv:fgl:7",
+        "parseConfidence": 0.98,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "300.00",
+          "currency": "USD"
+        },
+        "amountCny": "2102.22",
+        "fxRateUsed": 7.0074
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "2608.51",
+      "creditAllowedCny": "234.14",
+      "netTaxDueCny": "2374.37"
+    }
+  }
+}

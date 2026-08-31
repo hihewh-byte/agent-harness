@@ -1,0 +1,5 @@
+Date,Type,Symbol,Description,Quantity,Price,Amount,Tax
+2024-03-01,Dividend,AAPL,Ordinary Dividend,,,50.00,7.50
+2024-07-15,Trade,AAPL,Sell 10 shares,,,200.00,
+2024-08-01,Interest,,USD Cash Interest,,,5.00,
+2024-09-01,Tax,,Withholding Tax,,,-7.50,

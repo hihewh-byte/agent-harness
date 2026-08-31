@@ -1,0 +1,70 @@
+{
+  "suite": "cross_profile",
+  "cases": [
+    {
+      "id": "C7-profile-policy-qa",
+      "turns": [
+        {
+          "message": "境外股票赚的钱要交税吗",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["申报", "财产转让"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-profile-guided-filing",
+      "turns": [
+        {
+          "message": "带我申报",
+          "session_id": "c7-guided-1",
+          "expect": {
+            "profile": "guided_filing",
+            "reply_contains": ["申报向导", "1/5"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-profile-provenance",
+      "turns": [
+        {
+          "message": "22年的补申报的汇率是如何确定的",
+          "expect": {
+            "profile": "policy_explain",
+            "reply_contains": ["6.3757"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-profile-out-of-scope",
+      "turns": [
+        {
+          "message": "法国个人所得税怎么算",
+          "expect": {
+            "profile": "policy_qa",
+            "reply_contains": ["超出", "知识库"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "C7-profile-coverage",
+      "turns": [
+        {
+          "message": "材料覆盖完整吗",
+          "dataset_id": "c7-ds-gap",
+          "data_quality": {
+            "futuTaxPackages": [{"taxYear": 2023}]
+          },
+          "expect": {
+            "profile": "coverage_check",
+            "reply_contains": ["2023"]
+          }
+        }
+      ]
+    }
+  ]
+}

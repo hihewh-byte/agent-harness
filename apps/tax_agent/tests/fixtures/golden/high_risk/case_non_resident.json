@@ -1,0 +1,23 @@
+{
+  "caseId": "high_non_resident",
+  "description": "非中国税务居民应阻断并标记高风险",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-15",
+        "grossAmount": { "amount": "500", "currency": "USD" },
+        "amountCny": "3550.00",
+        "fxRateUsed": 7.1
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "non_resident",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "high"
+  }
+}

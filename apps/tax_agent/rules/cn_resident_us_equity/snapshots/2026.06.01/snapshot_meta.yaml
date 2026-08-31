@@ -1,0 +1,6 @@
+status: stable
+effectiveFrom: '2026-01-01'
+publishedAt: '2026-06-09T06:08:27+00:00'
+source: initial_v1
+changelog_zh: v1 基线快照（20% 分类税率、分项抵免）
+reviewerId: auto_monitor_rollback

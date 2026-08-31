@@ -1,0 +1,65 @@
+{
+  "caseId": "broker_tiger_trades",
+  "description": "Tiger trades export (anonymized)",
+  "sourceFiles": [
+    "tiger_trades.csv"
+  ],
+  "brokerTemplateId": "broker_tiger_v1",
+  "input": {
+    "events": [
+      {
+        "eventId": "c8508bb9-9660-439a-b082-427853ec01b5",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-03-15",
+        "classificationStatus": "inferred",
+        "sourceRowRef": "tiger_trades.csv:trades:2",
+        "parseConfidence": 0.9,
+        "symbol": "AAPL",
+        "grossAmount": {
+          "amount": "1500.00",
+          "currency": "USD"
+        },
+        "fee": {
+          "amount": "1.50",
+          "currency": "USD"
+        },
+        "amountCny": "10642.50",
+        "fxRateUsed": 7.095
+      },
+      {
+        "eventId": "e38cfa9d-a2e3-407d-9f01-e6267aff12eb",
+        "eventType": "CAPITAL_GAIN",
+        "tradeDate": "2024-09-20",
+        "classificationStatus": "inferred",
+        "sourceRowRef": "tiger_trades.csv:trades:3",
+        "parseConfidence": 0.9,
+        "symbol": "MSFT",
+        "grossAmount": {
+          "amount": "1600.00",
+          "currency": "USD"
+        },
+        "fee": {
+          "amount": "1.20",
+          "currency": "USD"
+        },
+        "amountCny": "11211.84",
+        "fxRateUsed": 7.0074
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "confidenceScoreMin": 0.85,
+    "summary": {
+      "taxDueCny": "4370.87",
+      "creditAllowedCny": "0.00",
+      "netTaxDueCny": "4370.87"
+    }
+  }
+}

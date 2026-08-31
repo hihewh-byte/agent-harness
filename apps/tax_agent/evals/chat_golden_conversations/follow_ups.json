@@ -1,0 +1,64 @@
+{
+  "suite": "follow_ups",
+  "description": "D2 / C1-4 — 每轮快车道经 Composer 须产出 3 条 followUps",
+  "cases": [
+    {
+      "id": "D2-followups-provenance",
+      "turns": [
+        {
+          "message": "22年的补申报的汇率是如何确定的",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_explain",
+            "follow_ups_count": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "D2-followups-policy",
+      "turns": [
+        {
+          "message": "境外股票赚的钱要交税吗",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "policy_qa",
+            "follow_ups_count": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "D2-followups-coverage",
+      "turns": [
+        {
+          "message": "材料覆盖完整吗",
+          "dataset_id": "d2-gap",
+          "data_quality": {
+            "futuTaxPackages": [{"taxYear": 2023}]
+          },
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "coverage_check",
+            "follow_ups_count": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "D2-followups-classified",
+      "turns": [
+        {
+          "message": "2022年股息利息一共多少",
+          "fixture": "futu_2022_classified",
+          "dataset_id": "d2-classified",
+          "llm_model": "__off__",
+          "expect": {
+            "profile": "classified_income",
+            "follow_ups_count": 3
+          }
+        }
+      ]
+    }
+  ]
+}

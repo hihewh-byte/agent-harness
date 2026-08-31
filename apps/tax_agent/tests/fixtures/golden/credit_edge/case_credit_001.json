@@ -1,0 +1,33 @@
+{
+  "caseId": "credit_001",
+  "description": "预扣超过应纳税",
+  "input": {
+    "events": [
+      {
+        "eventType": "DIVIDEND",
+        "tradeDate": "2024-06-01",
+        "grossAmount": {
+          "amount": "1000",
+          "currency": "USD"
+        },
+        "amountCny": "7100.00",
+        "fxRateUsed": 7.1,
+        "classificationStatus": "confirmed",
+        "withholdingTax": {
+          "amount": "500",
+          "currency": "USD"
+        }
+      }
+    ]
+  },
+  "parameters": {
+    "taxYear": 2024,
+    "residentStatus": "cn_tax_resident",
+    "fxPolicy": "safe_harbor_monthly",
+    "ruleSnapshotId": "cn_resident_us_equity@2026.06.01"
+  },
+  "expected": {
+    "riskLevel": "low",
+    "computeOk": true
+  }
+}

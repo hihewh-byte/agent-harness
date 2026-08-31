@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tax Agent 控制台</title>
+  <style>
+    :root { --bg:#0b1020; --card:#151d30; --text:#e8edf5; --muted:#8fa3bf; --accent:#4c9aff; --ok:#5dca8f; --warn:#e8c547; --err:#f08080; --border:#263049; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+    header h1 { margin:0; font-size:1.15rem; }
+    header p { margin:4px 0 0; color:var(--muted); font-size:0.85rem; }
+    .badge { font-size:0.75rem; padding:4px 10px; border-radius:999px; background:var(--card); border:1px solid var(--border); }
+    .badge.ok { color:var(--ok); border-color:#2d5a42; }
+    .badge.err { color:var(--err); border-color:#5a2d2d; }
+    main { max-width:960px; margin:0 auto; padding:24px; display:grid; gap:16px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 20px; }
+    .card h2 { margin:0 0 12px; font-size:1rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    button, a.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border-radius:8px; border:1px solid var(--border); background:#1c2740; color:var(--text); text-decoration:none; cursor:pointer; font-size:0.9rem; }
+    button.primary, a.btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    button:disabled { opacity:0.5; cursor:not-allowed; }
+    pre { background:#0d1322; border:1px solid var(--border); border-radius:8px; padding:12px; overflow:auto; max-height:280px; font-size:0.78rem; white-space:pre-wrap; }
+    ul.links { margin:0; padding-left:18px; color:var(--muted); font-size:0.88rem; line-height:1.7; }
+    .kv { font-size:0.85rem; color:var(--muted); }
+    .kv strong { color:var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Tax Agent 控制台</h1>
+      <p>稳定启动层 · 通过 HTTP API 使用计税引擎，不依赖 CLI</p>
+    </div>
+    <span id="healthBadge" class="badge">检测中…</span>
+  </header>
+  <main>
+    <section class="card">
+      <h2>常用入口</h2>
+      <div class="grid">
+        <a class="btn primary" href="/">报税助手（上传对账单 · 测算）</a>
+        <a class="btn" href="/health" target="_blank">健康检查 JSON</a>
+        <a class="btn" href="/rules/status" target="_blank">规则状态</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>服务状态</h2>
+      <div id="statusKv" class="kv">加载中…</div>
+    </section>
+
+    <section class="card">
+      <h2>运维（原 CLI 替代）</h2>
+      <div class="grid">
+        <button type="button" class="primary" id="btnSelfcheck">运行全量自检</button>
+        <button type="button" id="btnRefresh">刷新状态</button>
+      </div>
+      <p class="kv" style="margin-top:10px">等价命令：<code>tax-agent selfcheck</code> / <code>scripts/run_all_selfchecks.py</code></p>
+      <pre id="selfcheckOut">（自检输出将显示在这里）</pre>
+    </section>
+
+    <section class="card">
+      <h2>稳定契约（不受引擎迭代影响）</h2>
+      <ul class="links" id="manifestList"></ul>
+      <pre id="manifestJson"></pre>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    async function loadHealth() {
+      try {
+        const r = await fetch("/health");
+        const j = await r.json();
+        $("healthBadge").textContent = r.ok ? "服务正常" : "异常";
+        $("healthBadge").className = "badge " + (r.ok ? "ok" : "err");
+        return j;
+      } catch (e) {
+        $("healthBadge").textContent = "无法连接";
+        $("healthBadge").className = "badge err";
+        return null;
+      }
+    }
+
+    async function loadLauncherStatus() {
+      const r = await fetch("/api/v1/launcher/status");
+      const j = await r.json();
+      const h = j.health || {};
+      $("statusKv").innerHTML = [
+        `<div><strong>地址</strong> ${j.origin || location.origin}</div>`,
+        `<div><strong>存储</strong> ${h.store || "—"}</div>`,
+        `<div><strong>规则快照</strong> ${h.latestStable || "—"}</div>`,
+        `<div><strong>Launcher</strong> ${j.launcherVersion || "—"}</div>`,
+      ].join("");
+    }
+
+    async function loadManifest() {
+      const r = await fetch("/api/v1/launcher/manifest");
+      const j = await r.json();
+      $("manifestJson").textContent = JSON.stringify(j, null, 2);
+      const eps = j.endpoints || {};
+      $("manifestList").innerHTML = Object.entries(eps)
+        .map(([k, v]) => `<li><strong>${k}</strong> → <code>${v}</code></li>`)
+        .join("");
+    }
+
+    let pollTimer = null;
+    async function runSelfcheck() {
+      $("btnSelfcheck").disabled = true;
+      $("selfcheckOut").textContent = "自检运行中（约 30–60 秒）…";
+      const r = await fetch("/api/v1/ops/selfcheck", { method: "POST" });
+      const j = await r.json();
+      const jobId = j.jobId;
+      if (!jobId) {
+        $("selfcheckOut").textContent = JSON.stringify(j, null, 2);
+        $("btnSelfcheck").disabled = false;
+        return;
+      }
+      clearInterval(pollTimer);
+      pollTimer = setInterval(async () => {
+        const pr = await fetch("/api/v1/ops/jobs/" + jobId);
+        const pj = await pr.json();
+        $("selfcheckOut").textContent = pj.outputTail || pj.status;
+        if (pj.status === "passed" || pj.status === "failed") {
+          clearInterval(pollTimer);
+          $("btnSelfcheck").disabled = false;
+          $("selfcheckOut").textContent += `\n\n=== ${pj.status.toUpperCase()} exit=${pj.exitCode} ===`;
+        }
+      }, 1500);
+    }
+
+    $("btnSelfcheck").onclick = runSelfcheck;
+    $("btnRefresh").onclick = () => { loadHealth(); loadLauncherStatus(); };
+
+    (async () => {
+      await loadHealth();
+      await loadLauncherStatus();
+      await loadManifest();
+    })();
+  </script>
+</body>
+</html>

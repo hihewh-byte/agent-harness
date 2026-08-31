@@ -1,0 +1,14 @@
+disclaimerVersion: disclaimer_v1.0
+locale: zh-CN
+blocks:
+  - id: not_legal_advice
+    text: >
+      本报告由 Tax Agent 自动生成，仅供参考，不构成税务、法律或投资意见。
+      请在申报前咨询持证税务师或主管税务机关。
+  - id: crs_context
+    text: >
+      CRS 信息交换不替代个人自行申报义务。请确保申报数据与券商对账单及本系统解析结果一致。
+  - id: rule_snapshot
+    text: >
+      计算基于规则快照 {ruleSnapshotId}，生效日期 {effectiveFrom}。
+      法规变更后请使用最新 stable 快照重新计算。
