@@ -148,6 +148,23 @@ def test_build_matches_legacy_metric_resolution() -> bool:
     return True
 
 
+def test_sleep_hours_scalar_fallback() -> bool:
+    agg = WearableDayMetricAgg()
+    accumulate_wearable_sample("sleep", 7.5, "healthkit|u|sleep|t|healthkit", agg)
+    accumulate_wearable_sample("sleep_hours", 6.0, "healthkit|u|sleep|t2|healthkit", agg)
+    row = build_wearable_daily_summary(
+        "default",
+        date(2026, 8, 31),
+        metrics=agg,
+        segment_rows=[],
+    )
+    if row.sleep_hours != 7.5:
+        print("FAIL scalar sleep fallback expected max 7.5 got", row.sleep_hours)
+        return False
+    print("OK scalar sleep_hours fallback when no segments")
+    return True
+
+
 def main() -> int:
     ok = all(
         [
@@ -156,6 +173,7 @@ def main() -> int:
             test_sleep_segment_roundtrip(),
             test_build_summary_sleep_only_preserves_metrics(),
             test_build_matches_legacy_metric_resolution(),
+            test_sleep_hours_scalar_fallback(),
         ],
     )
     print("pha_wearable_daily_aggregator_selfcheck:", "PASS" if ok else "FAIL")

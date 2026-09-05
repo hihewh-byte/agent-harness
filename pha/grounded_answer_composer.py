@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 from typing import Any
 
 from pha.health_intent_catalog import load_health_intent_catalog
@@ -135,6 +136,49 @@ def fact_card_values_subset_of_manifest(
     return True
 
 
+def _is_single_day_anchor(anchor: str) -> bool:
+    raw = (anchor or "").strip()
+    if not raw:
+        return False
+    if "~" not in raw:
+        return True
+    start, end = raw.split("~", 1)
+    return start == end
+
+
+def _focus_summary_header(entries: list, loc: str) -> str:
+    if not entries:
+        if loc == "en":
+            return "From your ~90-day health records:"
+        return "根据您近 90 天的健康记录："
+    if all(_is_single_day_anchor(e.anchor) for e in entries):
+        day = entries[0].anchor.split("~", 1)[0]
+        if loc == "en":
+            return f"From your health records for {day}:"
+        return f"根据您 {day} 的健康记录："
+    span = entries[0].anchor
+    if _anchor_looks_like_90d(span):
+        if loc == "en":
+            return "From your ~90-day health records:"
+        return "根据您近 90 天的健康记录："
+    if loc == "en":
+        return f"From your health records ({span}):"
+    return f"根据您 {span} 的健康记录："
+
+
+def _anchor_looks_like_90d(anchor: str) -> bool:
+    raw = (anchor or "").strip()
+    if "~" not in raw:
+        return False
+    start_s, end_s = raw.split("~", 1)
+    try:
+        start = date.fromisoformat(start_s)
+        end = date.fromisoformat(end_s)
+    except ValueError:
+        return False
+    return 80 <= (end - start).days <= 100
+
+
 def build_manifest_metric_focus_summary(
     manifest: NumericsManifest | None,
     *,
@@ -146,18 +190,16 @@ def build_manifest_metric_focus_summary(
     from pha.response_language import default_response_locale, normalize_response_locale
 
     loc = normalize_response_locale(locale) or default_response_locale()
-    if loc == "en":
-        lines = ["From your ~90-day health records:", ""]
-        for entry in manifest.entries[:6]:
-            val_s = f"{entry.value:g}{entry.unit or ''}"
-            metric_en = _WAREHOUSE_FOCUS_LABEL_EN.get(entry.metric, entry.metric)
-            lines.append(f"- **{metric_en}**: {val_s} ({entry.anchor})")
-        return "\n".join(lines).strip()
-    lines = ["根据您近 90 天的健康记录：", ""]
-    for entry in manifest.entries[:6]:
+    focus = list(manifest.entries[:6])
+    lines = [_focus_summary_header(focus, loc), ""]
+    for entry in focus:
         val_s = f"{entry.value:g}{entry.unit or ''}"
-        label = _WAREHOUSE_FOCUS_LABEL_ZH_DISPLAY.get(entry.metric, entry.metric)
-        lines.append(f"- **{label}**：{val_s}（{entry.anchor}）")
+        if loc == "en":
+            metric = _WAREHOUSE_FOCUS_LABEL_EN.get(entry.metric, entry.metric)
+            lines.append(f"- **{metric}**: {val_s} ({entry.anchor})")
+        else:
+            label = _WAREHOUSE_FOCUS_LABEL_ZH_DISPLAY.get(entry.metric, entry.metric)
+            lines.append(f"- **{label}**：{val_s}（{entry.anchor}）")
     return "\n".join(lines).strip()
 
 
@@ -280,24 +322,24 @@ def answer_has_cjk_locale_leak(text: str, *, locale: str | None = None) -> bool:
     return (cjk / max(len(blob), 1)) > 0.12
 
 
-_WAREHOUSE_FOCUS_LABEL_BY_CAT: dict[str, str] = {
-    "hrv": "HRV均值",
-    "steps": "步数均值",
-    "sleep": "睡眠均值",
-    "rhr": "静息心率均值",
-    "spo2": "血氧均值",
-    "respiratory_rate": "呼吸率均值",
-    "activity_kcal": "活动消耗日均",
-    "vo2max": "VO2max均值",
+_WAREHOUSE_FOCUS_LABELS_BY_CAT: dict[str, tuple[str, ...]] = {
+    "hrv": ("HRV均值", "今日HRV", "当日HRV"),
+    "steps": ("步数均值", "今日步数", "当日步数"),
+    "sleep": ("睡眠均值", "今日睡眠", "当日睡眠"),
+    "rhr": ("静息心率均值", "今日静息心率", "当日静息心率"),
+    "spo2": ("血氧均值", "今日血氧", "当日血氧"),
+    "respiratory_rate": ("呼吸率均值", "今日呼吸率", "当日呼吸率"),
+    "activity_kcal": ("活动消耗日均", "今日活动消耗", "当日活动消耗"),
+    "vo2max": ("VO2max均值", "今日VO2max", "当日VO2max"),
 }
 
-# Registry metric_id → warehouse manifest metric label (same strings as numerics_manifest).
-_REGISTRY_TO_WAREHOUSE_LABEL: dict[str, str] = {
-    "sleep_time_asleep": "睡眠均值",
-    "hrv_rmssd_ms": "HRV均值",
-    "resting_heart_rate_bpm": "静息心率均值",
-    "spo2_percent": "血氧均值",
-    "respiratory_rate": "呼吸率均值",
+# Registry metric_id → warehouse manifest metric labels (mean + same-day).
+_REGISTRY_TO_WAREHOUSE_LABELS: dict[str, tuple[str, ...]] = {
+    "sleep_time_asleep": _WAREHOUSE_FOCUS_LABELS_BY_CAT["sleep"],
+    "hrv_rmssd_ms": _WAREHOUSE_FOCUS_LABELS_BY_CAT["hrv"],
+    "resting_heart_rate_bpm": _WAREHOUSE_FOCUS_LABELS_BY_CAT["rhr"],
+    "spo2_percent": _WAREHOUSE_FOCUS_LABELS_BY_CAT["spo2"],
+    "respiratory_rate": _WAREHOUSE_FOCUS_LABELS_BY_CAT["respiratory_rate"],
 }
 
 _WAREHOUSE_FOCUS_LABEL_EN: dict[str, str] = {
@@ -309,6 +351,22 @@ _WAREHOUSE_FOCUS_LABEL_EN: dict[str, str] = {
     "呼吸率均值": "Mean respiratory rate",
     "活动消耗日均": "Mean active kcal/day",
     "VO2max均值": "Mean VO2max",
+    "今日步数": "Today's steps",
+    "当日步数": "Steps that day",
+    "今日HRV": "Today's HRV",
+    "当日HRV": "HRV that day",
+    "今日睡眠": "Today's sleep",
+    "当日睡眠": "Sleep that day",
+    "今日静息心率": "Today's resting HR",
+    "当日静息心率": "Resting HR that day",
+    "今日血氧": "Today's SpO2",
+    "当日血氧": "SpO2 that day",
+    "今日呼吸率": "Today's respiratory rate",
+    "当日呼吸率": "Respiratory rate that day",
+    "今日活动消耗": "Today's active kcal",
+    "当日活动消耗": "Active kcal that day",
+    "今日VO2max": "Today's VO2max",
+    "当日VO2max": "VO2max that day",
 }
 
 # Prefer Chinese display labels in ZH replies (CJK ratio / readability).
@@ -339,15 +397,13 @@ def _filter_manifest_to_metric_focus(
     labels: list[str] = []
     # Prefer registry-hint focus (e.g. 「心率正常吗」「呼吸正常吗」) over broad core catalog.
     for mid in infer_single_metric_focus_ids(user_message):
-        lab = _REGISTRY_TO_WAREHOUSE_LABEL.get(mid)
-        if lab and lab not in labels:
-            labels.append(lab)
+        for lab in _REGISTRY_TO_WAREHOUSE_LABELS.get(mid, ()):
+            if lab not in labels:
+                labels.append(lab)
     if not labels:
         cats = infer_wearable_metrics(user_message)
         if len(cats) == 1:
-            lab = _WAREHOUSE_FOCUS_LABEL_BY_CAT.get(cats[0])
-            if lab:
-                labels = [lab]
+            labels = list(_WAREHOUSE_FOCUS_LABELS_BY_CAT.get(cats[0], ()))
     if not labels:
         return manifest
     filtered = [e for e in manifest.entries if e.metric in labels]
@@ -359,6 +415,9 @@ def _filter_manifest_to_metric_focus(
             entries=[],
             reference_date=manifest.reference_date,
             forbidden_dates=manifest.forbidden_dates,
+            wearable_grain_source=manifest.wearable_grain_source,
+            wearable_window_start=manifest.wearable_window_start,
+            wearable_window_end=manifest.wearable_window_end,
         )
     return NumericsManifest(
         profile=manifest.profile,
@@ -366,7 +425,53 @@ def _filter_manifest_to_metric_focus(
         entries=filtered,
         reference_date=manifest.reference_date,
         forbidden_dates=manifest.forbidden_dates,
+        wearable_grain_source=manifest.wearable_grain_source,
+        wearable_window_start=manifest.wearable_window_start,
+        wearable_window_end=manifest.wearable_window_end,
     )
+
+
+def _missing_grain_summary(
+    grain: Any,
+    *,
+    locale: str | None,
+    user_message: str,
+) -> str:
+    from pha.response_language import default_response_locale, normalize_response_locale
+    from pha.wearable_time_grain import WearableTimeGrain
+
+    loc = normalize_response_locale(locale) or default_response_locale()
+    if not isinstance(grain, WearableTimeGrain):
+        return ""
+    if grain.is_point_day():
+        span = grain.start.isoformat()
+    else:
+        span = f"{grain.start.isoformat()}~{grain.end.isoformat()}"
+    cats = []
+    try:
+        from pha.intent_gates import infer_wearable_metrics
+
+        cats = infer_wearable_metrics(user_message)
+    except Exception:
+        cats = []
+    metric_zh = {
+        "steps": "步数",
+        "hrv": "HRV",
+        "sleep": "睡眠",
+        "rhr": "静息心率",
+    }.get(cats[0] if cats else "", "该指标")
+    metric_en = {
+        "steps": "steps",
+        "hrv": "HRV",
+        "sleep": "sleep",
+        "rhr": "resting HR",
+    }.get(cats[0] if cats else "", "that metric")
+    if loc == "en":
+        return (
+            f"No verified {metric_en} in your records for {span}. "
+            "This is not filled from another date."
+        )
+    return f"库内没有 {span} 的{metric_zh}记录，不会用其他日期的数字代替。"
 
 
 def try_warehouse_metric_focus_skip(
@@ -382,9 +487,11 @@ def try_warehouse_metric_focus_skip(
 
     Builds manifest lazily when plan omitted NUMERICS_MANIFEST (legacy); wearable_only now includes the slot.
     """
+    from pha.health_data import effective_query_reference_date
     from pha.intent_gates import infer_wearable_metrics
     from pha.numerics_manifest import build_numerics_manifest
     from pha.wearable_compare_table_v1 import infer_single_metric_focus_ids
+    from pha.wearable_time_grain import resolve_wearable_time_grain
 
     msg = (user_message or "").strip()
     if not msg:
@@ -394,8 +501,10 @@ def try_warehouse_metric_focus_skip(
     ) == 1
     if not wants_focus:
         return ""
+    grain = resolve_wearable_time_grain(msg, reference=effective_query_reference_date())
     wm = manifest
-    if wm is None or not wm.entries:
+    # Non-default grains must not reuse a 90-day mean already sitting in the turn manifest.
+    if wm is None or not wm.entries or grain.source != "default":
         wm = build_numerics_manifest(
             user_id,
             profile=profile,
@@ -404,7 +513,12 @@ def try_warehouse_metric_focus_skip(
             include_wearable=True,
         )
     wm = _filter_manifest_to_metric_focus(wm, user_message)
-    return build_manifest_metric_focus_summary(wm, locale=response_locale)
+    summary = build_manifest_metric_focus_summary(wm, locale=response_locale)
+    if summary:
+        return summary
+    if grain.source != "default":
+        return _missing_grain_summary(grain, locale=response_locale, user_message=msg)
+    return ""
 
 
 __all__ = [

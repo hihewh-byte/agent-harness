@@ -21,23 +21,29 @@ alwaysApply: true
 7. [`rules/health_intent_catalog.json`](../rules/health_intent_catalog.json) — 声明式意图 catalog（禁止逐句 if-else 扩规则）
 8. [`docs/harness-tier0-fuse-v2.2.6.1.md`](../docs/harness-tier0-fuse-v2.2.6.1.md) — Tier0 预算与 Protected SLA
 
+## PHA iOS / 主动健康 Agent（ingest、事实卡、通知、`ios/`）
+
+9. [`docs/prd-pha-ios-proactive-agent-v1.md`](../docs/prd-pha-ios-proactive-agent-v1.md) — 产品共识真源；确认行 `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`
+10. [`docs/pha-ios-proactive-change-log.md`](../docs/pha-ios-proactive-change-log.md) — 本轨道改动后**同 PR 必须更新**
+
 ## 启动 / 导入 / 进程 / 部署（`scripts/pha_*`、`pha/main.py`、launchd）
 
-9. [`docs/stability-remediation-plan-2026-06-10.md`](../docs/stability-remediation-plan-2026-06-10.md) — 唯一执行真源 + §6 行为红线
-10. [`docs/startup-change-log.md`](../docs/startup-change-log.md) — 改动后**同 PR 必须更新**
+11. [`docs/stability-remediation-plan-2026-06-10.md`](../docs/stability-remediation-plan-2026-06-10.md) — 唯一执行真源 + §6 行为红线
+12. [`docs/startup-change-log.md`](../docs/startup-change-log.md) — 改动后**同 PR 必须更新**
 
 ## Catalog / Schema / Registry
 
-11. [`docs/metadata-catalog-v2.3.md`](../docs/metadata-catalog-v2.3.md) — Schema 真源与 MC 生成
-12. [`rules/harness_profile_registry.generated.json`](../rules/harness_profile_registry.generated.json) — profile 契约快照（漂移时 `--write` 重生）
+13. [`docs/metadata-catalog-v2.3.md`](../docs/metadata-catalog-v2.3.md) — Schema 真源与 MC 生成
+14. [`rules/harness_profile_registry.generated.json`](../rules/harness_profile_registry.generated.json) — profile 契约快照（漂移时 `--write` 重生）
 
 ## 子 agent / Catalog 工具循环
 
-13. [`docs/harness-subagent-protocol-v1.md`](../docs/harness-subagent-protocol-v1.md)
+15. [`docs/harness-subagent-protocol-v1.md`](../docs/harness-subagent-protocol-v1.md)
 
 ## 开工确认行（PR / 首条实施回复）
 
 - Harness 改动：`CONSENSUS_ACK: harness-opus48-v2026-06-08 read`
+- PHA iOS / ingest / 事实卡 / 主动通知：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`
 - 启动改动：`CONSENSUS_ACK: stability-plan-v2026-06-10 read`
 - Episodic 改动：`CONSENSUS_ACK: stage3c-multi-turn-episodic-focus-rfc read`
 - Goal / Arbiter / 3F 改动：`CONSENSUS_ACK: stage3f-intent-resolution-completeness-rfc read`
@@ -47,3 +53,4 @@ alwaysApply: true
 - 不得为通过单条 E2E 加 phrase 硬编码；用会话锚点 + catalog + clarify
 - 不得削弱 TurnEvidencePlan / Numerics 审计 / Harness Veto
 - 不得让 LLM 夺权改写健康数字
+- 不得在 HealthKit 管道未通时宣称「主动健康 Agent 已上线」；主动路径禁止 LLM 填写精确数字

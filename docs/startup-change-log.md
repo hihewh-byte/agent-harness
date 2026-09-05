@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-08-31
+
+- **HealthKit ingest route (M0-P0; listen bind unchanged)**:
+  - `pha/main.py`: `include_router` for `POST /ingest/healthkit` (implementation in `pha/healthkit_ingest.py`).
+  - 2026-09-04: ingest 400 响应增加 `got` 预览；`GET /ingest/healthkit` 返回 use_post 说明。zip 全量导入改为 preserve healthkit 行。无新进程、无 listen 变更。
+  - `.env.example`: document `PHA_INGEST_TOKEN`, `PHA_INGEST_TZ`; note that iPhone ingest needs `PHA_HOST=0.0.0.0` (still default `127.0.0.1`).
+  - Default listen host/port unchanged. No new process, no launchd change.
+  - Rollback: remove the include_router line; unset ingest env vars.
+
+---
+
 ## 2026-07-15
 
 - **CI adds "Minimal attach demo" step (audit plan P1.5-1)**:

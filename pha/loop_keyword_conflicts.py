@@ -52,6 +52,7 @@ _MIN_TOKEN_LEN = 2
 _MAX_CATALOG_ALIAS_LEN = 8
 
 # 1E-a: dynamic context must not enter static catalog aliases.
+# Calendar binding for these tokens lives in pha.wearable_time_grain.
 TIME_ANCHOR_TOKENS: tuple[str, ...] = (
     "昨晚",
     "昨天",
@@ -61,6 +62,7 @@ TIME_ANCHOR_TOKENS: tuple[str, ...] = (
     "上个月",
     "今天",
     "今日",
+    "当天",
     "今早",
     "今夜",
     "今晚",
@@ -76,6 +78,17 @@ TIME_ANCHOR_TOKENS: tuple[str, ...] = (
     "前年",
     "刚才",
     "上一个",
+    "today",
+    "tonight",
+    "yesterday",
+    "last night",
+    "this week",
+    "last week",
+    "this month",
+    "last month",
+    "last year",
+    "last 7 days",
+    "last 90 days",
 )
 
 AGGREGATION_TOKENS: tuple[str, ...] = (
@@ -501,6 +514,15 @@ def gate_1e_a_layer_denylist(phrase: str) -> ConflictReport:
                     owners=["catalog", "tier_c"],
                 ),
             )
+    if re.search(r"(过去|近|最近)\s*\d+\s*天|(last|past)\s+\d+\s+days", p, re.I):
+        out.add(
+            KeywordConflict(
+                kind="gate_1e_a_time",
+                token="duration_days",
+                detail="rolling duration must not enter static catalog",
+                owners=["catalog", "tier_c"],
+            ),
+        )
     for tok in AGGREGATION_TOKENS:
         if tok in p:
             out.add(

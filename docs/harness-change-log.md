@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-09-05 (Patient State 今日步数走点日绑定)
+
+- **类别**：证据切片诚实性（不改 `harness_core`）。
+- **改动**：`_wearable_ledger_lines` 的「今日步数」用 `pick_point_day_row(..., ref)`，窗口末日不得再标成今天。
+- **回滚**：还原 `pha/patient_state.py` 该段。
+
+---
+
 ## 2026-07-18 (CI coverage gate for harness packages; audit plan P2-4)
 
 - **类别**：P2（审计方案 P2-4：包内测试已齐后的覆盖率回归门禁）。

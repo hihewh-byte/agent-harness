@@ -267,9 +267,12 @@ class AppleHealthParser:
         )
 
         if clear_before_import:
-            logger.info("Clearing wearable_data + wearable_daily for user_id=%s", self._user_id)
-            clear_wearable_storage(self._user_id)
-            store.clear_wearable_ledger(self._user_id)
+            logger.info(
+                "Clearing wearable_data + wearable_daily for user_id=%s (preserve_healthkit=1)",
+                self._user_id,
+            )
+            clear_wearable_storage(self._user_id, preserve_healthkit=True)
+            store.clear_wearable_ledger(self._user_id, wipe_sqlite=False)
 
         upsert_import_sync_state(
             self._user_id,
@@ -331,6 +334,13 @@ class AppleHealthParser:
             from pha.workout_storage import rebuild_workout_daily_rollup
 
             rebuild_workout_daily_rollup(self._user_id)
+
+        from pha.sqlite_storage import query_healthkit_days, rebuild_wearable_daily_for_days
+
+        hk_days = query_healthkit_days(self._user_id)
+        if hk_days:
+            rebuild_wearable_daily_for_days(self._user_id, hk_days)
+            store.hydrate_from_sqlite()
 
         integrity = verify_import_completeness(
             self._user_id,

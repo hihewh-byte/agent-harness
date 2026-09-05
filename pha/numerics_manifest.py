@@ -226,6 +226,9 @@ class NumericsManifest:
     entries: List[ManifestEntry] = field(default_factory=list)
     reference_date: str = ""
     forbidden_dates: Set[str] = field(default_factory=set)
+    wearable_grain_source: str = "default"
+    wearable_window_start: str = ""
+    wearable_window_end: str = ""
 
     @property
     def allowed_dates(self) -> Set[str]:
@@ -259,6 +262,9 @@ class NumericsManifest:
             "allowed_dates": sorted(self.allowed_dates),
             "entries": [e.to_dict() for e in self.entries],
             "forbidden_dates": sorted(self.forbidden_dates),
+            "wearable_grain_source": self.wearable_grain_source,
+            "wearable_window_start": self.wearable_window_start,
+            "wearable_window_end": self.wearable_window_end,
         }
 
 
@@ -333,7 +339,7 @@ def _wearable_entries(
     window = default_wearable_window(user_message, reference=ref)
     anchor = f"{window.start.isoformat()}~{window.end.isoformat()}"
 
-    if wearable_result is None:
+    if wearable_result is None or window.start == window.end:
         metrics = infer_wearable_metrics(user_message)
         if not metrics:
             # Registry-hint focus (e.g. 「呼吸正常吗」) may not hit catalog triggers;
@@ -363,17 +369,33 @@ def _wearable_entries(
         )
 
     out: List[ManifestEntry] = []
-    label_map = {
-        "hrv": ("HRV均值", "ms"),
-        "activity_kcal": ("活动消耗日均", "kcal"),
-        "steps": ("步数均值", "步"),
-        "sleep": ("睡眠均值", "h"),
-        "rhr": ("静息心率均值", "bpm"),
-        "spo2": ("血氧均值", "%"),
-        "respiratory_rate": ("呼吸率均值", "breaths/min"),
-        "vo2max": ("VO2max均值", "mL/kg/min"),
-        "wrist_temp": ("手腕体温均值", "°C"),
-    }
+    same_day = window.start == window.end
+    point_prefix = "今日" if same_day and window.end == ref else "当日"
+    if same_day:
+        anchor = window.start.isoformat()
+        label_map = {
+            "hrv": (f"{point_prefix}HRV", "ms"),
+            "activity_kcal": (f"{point_prefix}活动消耗", "kcal"),
+            "steps": (f"{point_prefix}步数", "步"),
+            "sleep": (f"{point_prefix}睡眠", "h"),
+            "rhr": (f"{point_prefix}静息心率", "bpm"),
+            "spo2": (f"{point_prefix}血氧", "%"),
+            "respiratory_rate": (f"{point_prefix}呼吸率", "breaths/min"),
+            "vo2max": (f"{point_prefix}VO2max", "mL/kg/min"),
+            "wrist_temp": (f"{point_prefix}手腕体温", "°C"),
+        }
+    else:
+        label_map = {
+            "hrv": ("HRV均值", "ms"),
+            "activity_kcal": ("活动消耗日均", "kcal"),
+            "steps": ("步数均值", "步"),
+            "sleep": ("睡眠均值", "h"),
+            "rhr": ("静息心率均值", "bpm"),
+            "spo2": ("血氧均值", "%"),
+            "respiratory_rate": ("呼吸率均值", "breaths/min"),
+            "vo2max": ("VO2max均值", "mL/kg/min"),
+            "wrist_temp": ("手腕体温均值", "°C"),
+        }
     for key, summary in (wearable_result.summaries or {}).items():
         avg = summary.average
         if avg is None:
@@ -387,7 +409,7 @@ def _wearable_entries(
                 value=round(float(avg), 2),
                 unit=unit or str(summary.unit or ""),
                 anchor=anchor,
-                source="wearable.summary",
+                source="wearable.summary" if not same_day else "wearable.daily",
             ),
         )
     return out
@@ -406,6 +428,9 @@ def build_numerics_manifest(
     ref = effective_query_reference_date()
     forbidden = set(_GLOBAL_FORBIDDEN_DATES)
     entries: List[ManifestEntry] = []
+    from pha.wearable_time_grain import resolve_wearable_time_grain
+
+    grain = resolve_wearable_time_grain(user_message, reference=ref)
 
     if include_lipid and profile in ("combined_review", "lab_cross_year", "lifestyle"):
         entries.extend(_lipid_entries(user_id))
@@ -425,6 +450,9 @@ def build_numerics_manifest(
         entries=entries,
         reference_date=ref.isoformat(),
         forbidden_dates=forbidden,
+        wearable_grain_source=grain.source,
+        wearable_window_start=grain.start.isoformat(),
+        wearable_window_end=grain.end.isoformat(),
     )
 
 
@@ -771,6 +799,71 @@ def _audit_dates_and_citation(
     return violations, cited_dates, cited_values, cited_lipid_values, sorted(allowed_dates)
 
 
+_ISO_DATE_CHUNK_RE = re.compile(r"20\d{2}-\d{2}-\d{2}")
+_WEARABLE_COUNT_RE = re.compile(r"(?<![\d.])(\d{3,6})(?![\d.])")
+
+
+def _extract_wearable_count_tokens(text: str) -> List[str]:
+    """Standalone integers (steps/kcal scale). Skip ISO dates and calendar years."""
+    masked = _ISO_DATE_CHUNK_RE.sub(" ", text or "")
+    out: List[str] = []
+    seen: Set[str] = set()
+    for match in _WEARABLE_COUNT_RE.finditer(masked):
+        raw = match.group(1)
+        try:
+            n = int(raw)
+        except ValueError:
+            continue
+        if 1900 <= n <= 2100:
+            continue
+        if n < 100:
+            continue
+        if raw in seen:
+            continue
+        seen.add(raw)
+        out.append(raw)
+    return out
+
+
+def _audit_wearable_grain_counts(text: str, manifest: NumericsManifest) -> List[str]:
+    """Non-default time grain: cited step-scale integers must be on this window's T0."""
+    if (manifest.wearable_grain_source or "default") == "default":
+        return []
+    allowed = manifest.allowed_values
+    violations: List[str] = []
+    for token in _extract_wearable_count_tokens(text):
+        if token in allowed:
+            continue
+        if _in_dose_context(text, token):
+            continue
+        violations.append(f"unauthorized_wearable_count:{token}")
+    return violations
+
+
+def wearable_grain_fence_blocked(audit: Dict[str, Any]) -> bool:
+    return any(
+        str(v).startswith("unauthorized_wearable_count:")
+        for v in (audit or {}).get("violations") or []
+    )
+
+
+def format_wearable_grain_refusal(
+    manifest: NumericsManifest,
+    *,
+    locale: str | None = None,
+) -> str:
+    start = (manifest.wearable_window_start or "").strip()
+    end = (manifest.wearable_window_end or "").strip()
+    span = start if start and start == end else (f"{start}~{end}" if start and end else "该时间窗口")
+    loc = (locale or "").strip().lower()
+    if loc.startswith("en"):
+        return (
+            f"No verified wearable values in your records for {span}. "
+            "This is not filled from another date."
+        )
+    return f"库内没有 {span} 的可核验穿戴记录，不会用其他日期的数字代替。"
+
+
 def _audit_response_numerics_strict(
     answer_text: str,
     manifest: NumericsManifest,
@@ -787,6 +880,7 @@ def _audit_response_numerics_strict(
         manifest,
         require_citation=require_citation,
     )
+    violations.extend(_audit_wearable_grain_counts(text, manifest))
 
     for token in set(_extract_decimal_tokens(text)):
         if token in allowed_values:
@@ -835,6 +929,7 @@ def _audit_response_numerics_t0_plus_disclosure(
         manifest,
         require_citation=require_citation,
     )
+    violations.extend(_audit_wearable_grain_counts(masked, manifest))
 
     # T1 block audit (format + t0 forgery in shell)
     for _, _, block_text, lang_id in blocks:
@@ -939,7 +1034,8 @@ __all__ = [
     "audit_response_numerics",
     "build_numerics_manifest",
     "extract_disclosure_blocks",
-    "format_manifest_tier0_block",
+    "format_wearable_grain_refusal",
+    "wearable_grain_fence_blocked",
     "mask_disclosure_blocks",
     "numerics_audit_mode",
     "numerics_audit_scope",

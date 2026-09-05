@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import time
-from datetime import timedelta
 from typing import Iterator
 
 from fastapi import APIRouter, Query
@@ -17,8 +16,9 @@ from pha.medical_storage import (
     get_health_report_asset,
     list_health_report_assets,
 )
-from pha.sqlite_storage import count_wearable_samples, get_max_wearable_timestamp, query_wearable_daily_range
+from pha.sqlite_storage import count_wearable_samples, get_max_wearable_timestamp
 from pha.sync_status import build_sync_status_payload
+from pha.wearable_daily_bind import load_hero_wearable
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -49,21 +49,7 @@ def sync_status(user_id: str = Query("default")) -> dict:
 def hero_stats(user_id: str = Query("default")) -> dict:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
-    week_start = ref - timedelta(days=6)
-    rows = query_wearable_daily_range(uid, week_start, ref)
-
-    today_steps = None
-    avg_hrv = None
-    avg_sleep = None
-    if rows:
-        latest = rows[-1]
-        today_steps = latest.steps
-        hrv_vals = [float(r.hrv_rmssd_ms) for r in rows if r.hrv_rmssd_ms is not None]
-        sleep_vals = [float(r.sleep_hours) for r in rows if r.sleep_hours is not None]
-        if hrv_vals:
-            avg_hrv = sum(hrv_vals) / len(hrv_vals)
-        if sleep_vals:
-            avg_sleep = sum(sleep_vals) / len(sleep_vals)
+    wearable = load_hero_wearable(uid, ref)
 
     # Hero card: cached LLM count only — never invoke 10–20s slow path on poll
     cached_n = get_cached_alert_count(uid)
@@ -73,9 +59,7 @@ def hero_stats(user_id: str = Query("default")) -> dict:
 
     return {
         "user_id": uid,
-        "today_steps": today_steps,
-        "avg_hrv_7d": round(avg_hrv, 1) if avg_hrv is not None else None,
-        "avg_sleep_7d": round(avg_sleep, 2) if avg_sleep is not None else None,
+        **wearable,
         "medical_alerts": abnormal_n,
         "db_samples": samples,
         "db_max_timestamp": db_max.isoformat() if db_max else None,

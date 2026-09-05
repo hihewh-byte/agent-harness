@@ -140,13 +140,20 @@ class HealthStore(MilestoneDatabasePort):
         uid = user_id.strip() or "default"
         self._wearable[uid] = sorted(rows, key=lambda r: r.day)
 
-    def clear_wearable_ledger(self, user_id: str | None = None) -> None:
-        """Drop in-memory wearable rows and mirror delete in SQLite."""
+    def clear_wearable_ledger(
+        self,
+        user_id: str | None = None,
+        *,
+        wipe_sqlite: bool = True,
+    ) -> None:
+        """Drop in-memory wearable rows; optionally mirror-delete SQLite."""
         if user_id:
             uid = user_id.strip() or "default"
             self._wearable.pop(uid, None)
         else:
             self._wearable.clear()
+        if not wipe_sqlite:
+            return
         try:
             wipe_wearable_data(user_id)
         except (sqlite3.Error, OSError) as exc:

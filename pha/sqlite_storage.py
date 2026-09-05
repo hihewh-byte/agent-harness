@@ -105,8 +105,9 @@ class WearableDataBatchWriter:
     Never holds more than ``STREAM_COMMIT_EVERY`` rows in memory.
     """
 
-    def __init__(self, user_id: str) -> None:
+    def __init__(self, user_id: str, *, on_conflict: str = "ignore") -> None:
         self.user_id = user_id.strip() or "default"
+        self._on_conflict = on_conflict if on_conflict in ("ignore", "update") else "ignore"
         self._conn = open_connection(bulk_import=True)
         self._buffer: List[tuple[str, str, str, float, str]] = []
         self.total_written = 0
@@ -132,14 +133,26 @@ class WearableDataBatchWriter:
             return 0
         n = len(self._buffer)
         before = self._conn.total_changes
-        self._conn.executemany(
+        sql = (
             """
+            INSERT INTO wearable_data
+                (user_id, metric_type, timestamp, value, sample_id)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, sample_id) DO UPDATE SET
+                value = excluded.value,
+                timestamp = excluded.timestamp,
+                metric_type = excluded.metric_type
+            WHERE wearable_data.value IS NOT excluded.value
+               OR wearable_data.timestamp IS NOT excluded.timestamp
+            """
+            if self._on_conflict == "update"
+            else """
             INSERT OR IGNORE INTO wearable_data
                 (user_id, metric_type, timestamp, value, sample_id)
             VALUES (?, ?, ?, ?, ?)
-            """,
-            self._buffer,
+            """
         )
+        self._conn.executemany(sql, self._buffer)
         self._conn.commit()
         inserted = self._conn.total_changes - before
         ignored = n - inserted
@@ -217,8 +230,16 @@ class SleepSegmentBatchWriter:
             _release_connection(self._conn)
 
 
-def clear_wearable_storage(user_id: Optional[str] = None) -> None:
-    """Delete all wearable_daily + wearable_data rows before a full re-import."""
+def clear_wearable_storage(
+    user_id: Optional[str] = None,
+    *,
+    preserve_healthkit: bool = False,
+) -> None:
+    """Delete wearable rows before a full re-import.
+
+    ``preserve_healthkit=True`` keeps ``sample_id LIKE 'healthkit|%'`` (M0-P2:
+    zip must not silently wipe the same-day HealthKit ingest).
+    """
     from pha.workout_storage import init_workout_schema
 
     ensure_schema()
@@ -227,7 +248,17 @@ def clear_wearable_storage(user_id: Optional[str] = None) -> None:
     try:
         if user_id:
             uid = user_id.strip() or "default"
-            conn.execute("DELETE FROM wearable_data WHERE user_id = ?", (uid,))
+            if preserve_healthkit:
+                conn.execute(
+                    """
+                    DELETE FROM wearable_data
+                    WHERE user_id = ?
+                      AND (sample_id IS NULL OR sample_id NOT LIKE 'healthkit|%')
+                    """,
+                    (uid,),
+                )
+            else:
+                conn.execute("DELETE FROM wearable_data WHERE user_id = ?", (uid,))
             conn.execute("DELETE FROM wearable_sleep_segments WHERE user_id = ?", (uid,))
             conn.execute("DELETE FROM wearable_daily WHERE user_id = ?", (uid,))
             conn.execute("DELETE FROM wearable_workout_sessions WHERE user_id = ?", (uid,))
@@ -265,7 +296,78 @@ def count_wearable_samples(user_id: str) -> int:
             "SELECT COUNT(*) AS c FROM wearable_data WHERE user_id = ?",
             (user_id.strip() or "default",),
         ).fetchone()
-        return int(row["c"]) if row else 0
+        return int(row["c"] or 0) if row else 0
+    finally:
+        _release_connection(conn)
+
+
+def count_healthkit_samples(user_id: str) -> int:
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        row = conn.execute(
+            """
+            SELECT COUNT(*) AS c FROM wearable_data
+            WHERE user_id = ? AND sample_id LIKE 'healthkit|%'
+            """,
+            (uid,),
+        ).fetchone()
+        return int(row["c"] or 0) if row else 0
+    finally:
+        _release_connection(conn)
+
+
+def query_healthkit_days(user_id: str) -> list[date]:
+    """Calendar days that still have HealthKit ingest rows."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            SELECT DISTINCT substr(timestamp, 1, 10) AS day
+            FROM wearable_data
+            WHERE user_id = ? AND sample_id LIKE 'healthkit|%'
+            ORDER BY day
+            """,
+            (uid,),
+        )
+        out: list[date] = []
+        for row in cur.fetchall():
+            d = safe_parse_date(str(row["day"] or ""))
+            if d is not None:
+                out.append(d)
+        return out
+    finally:
+        _release_connection(conn)
+
+
+def delete_stale_healthkit_metric_on_day(
+    user_id: str,
+    metric_type: str,
+    day: date,
+    keep_sample_id: str,
+) -> int:
+    """Drop leftover HealthKit rows for one metric/day except the daily-total id."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    keep = (keep_sample_id or "").strip()
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            DELETE FROM wearable_data
+            WHERE user_id = ?
+              AND metric_type = ?
+              AND substr(timestamp, 1, 10) = ?
+              AND sample_id LIKE 'healthkit|%'
+              AND sample_id != ?
+            """,
+            (uid, metric_type, day.isoformat(), keep),
+        )
+        conn.commit()
+        return int(cur.rowcount or 0)
     finally:
         _release_connection(conn)
 
@@ -697,6 +799,19 @@ def resolve_import_watermark(user_id: str) -> Optional[datetime]:
     return get_max_wearable_timestamp(uid)
 
 
+def _is_daily_mirror_row(user_id: str, timestamp: str, sample_id: str) -> bool:
+    """True for noon daily-mirror rows written by ``sync_wearable_data_from_daily``.
+
+    Intraday HealthKit / zip samples must not be skipped. Mirror ``sample_id`` is
+    ``{user_id}|{metric}|{noon_iso}|{value}``; ingest uses ``healthkit|...``.
+    """
+    ts = timestamp or ""
+    sid = sample_id or ""
+    if "T12:00:00" not in ts:
+        return False
+    return sid.startswith(f"{user_id}|")
+
+
 def rebuild_wearable_daily_for_days(user_id: str, days: Sequence[date]) -> int:
     """Re-aggregate ``wearable_daily`` for specific days from ``wearable_data`` + sleep segments."""
     from collections import defaultdict
@@ -736,10 +851,14 @@ def rebuild_wearable_daily_for_days(user_id: str, days: Sequence[date]) -> int:
             for row in cur.fetchall():
                 if row["value"] is None:
                     continue
+                ts = str(row["timestamp"] or "")
+                sid = str(row["sample_id"] or "")
+                if _is_daily_mirror_row(uid, ts, sid):
+                    continue
                 accumulate_wearable_sample(
                     str(row["metric_type"] or ""),
                     float(row["value"]),
-                    str(row["sample_id"] or ""),
+                    sid,
                     metrics,
                 )
             rows.append(

@@ -228,6 +228,7 @@
 | 2026-07-14 | High 额度不足，P1-2 邀请正文 / P1-4 威胁模型暂缓；先做 Mid 事务辅助 | P1-2 | 已写 [`docs/p1-2-outreach-prep.md`](p1-2-outreach-prep.md)（Issue #1 现状、邀请对象表、§4 反馈登记模板；**不含**邀请正文） |
 | 2026-07-14 | Core+Loop「直接进用户 Agent」需 Adapter 契约 + 脱水 minimal 示例；外部审校赞同并建议立 P1.5 | 规划 | **已立卡** P1.5-1（见 §2.5）；实现须 High；本提交只入库任务卡，不动架构代码 |
 | 2026-07-31 | GitHub 丢一眼误判为「健康 App」：仓库名 `personal_health_agent` vs About/README 写通用 harness（分发诊断） | 分发审计 | **叙事修复**：README 第一屏改为 Harness Core+Loop；PHA 降为 reference；**仓库已改名为 `hihewh-byte/agent-harness`**（仓内 clone/Homepage/Issue 链接已同步） |
+| 2026-08-31 | 维护者要将 PHA 逐步做成 iOS App + 主动健康管理 Agent（HealthKit 采集，非改 harness 开源叙事） | 产品规划 | **已立共识 PRD** [`docs/prd-pha-ios-proactive-agent-v1.md`](prd-pha-ios-proactive-agent-v1.md)；确认行 `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`。与本审计 P2 触发卡正交：本轨道按 PRD 里程碑执行，不自动开工 PyPI/拆巨型模块 |
 
 ---
 

@@ -24,9 +24,12 @@ from pha.numerics_manifest import (
     audit_response_numerics,
     build_numerics_manifest,
     format_manifest_tier0_block,
+    format_wearable_grain_refusal,
     numerics_audit_mode,
     numerics_require_citation,
+    wearable_grain_fence_blocked,
 )
+
 logger = logging.getLogger(__name__)
 
 
@@ -236,7 +239,12 @@ def iter_post_compose_audit_phase(ctx: TurnComposeContext) -> Iterator[str]:
         if guard_audit.get("locale_fallback_applied"):
             ctx.answer_text = guarded
             ctx.numerics_audit = {**ctx.numerics_audit, **guard_audit}
-        if numerics_audit_mode() == "block" and not ctx.numerics_audit.get("passed"):
+        if wearable_grain_fence_blocked(ctx.numerics_audit):
+            ctx.answer_text = format_wearable_grain_refusal(
+                ctx.numerics_manifest,
+                locale=ctx.response_locale,
+            )
+        elif numerics_audit_mode() == "block" and not ctx.numerics_audit.get("passed"):
             ctx.answer_text = apply_numerics_audit_to_answer(
                 ctx.answer_text or ctx.raw,
                 ctx.numerics_audit,

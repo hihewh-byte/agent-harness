@@ -111,21 +111,28 @@ def _wearable_ledger_lines(
     if not rows:
         return [f"| （{span_label} 无 wearable_daily） | — | 请导入 Apple Health export.zip |"]
 
-    lines: List[str] = [f"【穿戴 · {span_label} wearable_daily 日均/末日 · n={len(rows)}天】"]
+    from pha.wearable_daily_bind import pick_point_day_row
+
+    lines: List[str] = [f"【穿戴 · {span_label} wearable_daily 日均 · n={len(rows)}天】"]
     steps = [r.steps for r in rows if r.steps is not None]
     hrv = [float(r.hrv_rmssd_ms) for r in rows if r.hrv_rmssd_ms is not None]
     sleep = [float(r.sleep_hours) for r in rows if r.sleep_hours is not None]
     rhr = [float(r.resting_heart_rate_bpm) for r in rows if r.resting_heart_rate_bpm is not None]
     spo2 = [float(r.spo2_pct) for r in rows if r.spo2_pct is not None]
-    latest = rows[-1]
+    today_row = pick_point_day_row(rows, ref)
 
     def _avg(vals: List[float]) -> Optional[float]:
         return sum(vals) / len(vals) if vals else None
 
-    if latest.steps is not None:
-        lines.append(
-            f"| 今日步数 | {int(latest.steps):,} 步 | 末日 {latest.day} | wearable_daily |",
-        )
+    if start <= ref <= end:
+        if today_row is not None and today_row.steps is not None:
+            lines.append(
+                f"| 今日步数 | {int(today_row.steps):,} 步 | {ref.isoformat()} | wearable_daily |",
+            )
+        else:
+            lines.append(
+                f"| 今日步数 | 无 {ref.isoformat()} 行 | 不用其他日期代替 | wearable_daily |",
+            )
     if steps:
         a = sum(steps) / len(steps)
         lines.append(f"| 平均步数 | {int(a):,} 步 | n={len(steps)} | wearable_daily |")

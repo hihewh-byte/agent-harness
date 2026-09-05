@@ -26,6 +26,7 @@ from pha.console import CONSOLE_PAGE_HTML
 from pha.dashboard_api import router as dashboard_router
 from pha.metrics_api import router as metrics_api_router
 from pha.wearable_api import router as wearable_api_router
+from pha.healthkit_ingest import router as healthkit_ingest_router
 from pha.data_importer import AppleImportResult, run_import_from_path
 from pha.health_data import ImportIncompleteError
 from pha.import_jobs import create_job, get_job
@@ -158,6 +159,7 @@ app = FastAPI(title="PHA", version=PHA_SERVER_BUILD, lifespan=_lifespan)
 app.include_router(dashboard_router)
 app.include_router(metrics_api_router)
 app.include_router(wearable_api_router)
+app.include_router(healthkit_ingest_router)
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 if _STATIC_DIR.is_dir():

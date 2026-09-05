@@ -191,6 +191,53 @@ def main() -> int:
     os.environ.pop("PHA_NUMERICS_AUDIT_SCOPE", None)
     os.environ.pop("PHA_NUMERICS_T1_M4_MODE", None)
 
+    grain_empty = NumericsManifest(
+        profile="wearable_only",
+        user_id="selfcheck",
+        entries=[],
+        reference_date="2026-09-04",
+        wearable_grain_source="time_slot",
+        wearable_window_start="2026-09-03",
+        wearable_window_end="2026-09-03",
+    )
+    lie = audit_response_numerics(
+        "昨晚的步数是14808步（2026-09-03）。",
+        grain_empty,
+    )
+    if lie.get("passed") or not any("14808" in str(v) for v in lie.get("violations") or []):
+        print("FAIL grain-empty must reject 14808", lie)
+        failed += 1
+    else:
+        print("OK grain-empty rejects other-day step count")
+
+    today_m = NumericsManifest(
+        profile="wearable_only",
+        user_id="selfcheck",
+        entries=[
+            ManifestEntry(
+                domain="wearable",
+                metric="今日步数",
+                value=11259,
+                unit="步",
+                anchor="2026-09-04",
+                source="wearable.daily",
+            ),
+        ],
+        reference_date="2026-09-04",
+        wearable_grain_source="time_slot",
+        wearable_window_start="2026-09-04",
+        wearable_window_end="2026-09-04",
+    )
+    today_ok = audit_response_numerics(
+        "From your health records for 2026-09-04:\nToday's steps: 11259步 (2026-09-04)",
+        today_m,
+    )
+    if not today_ok.get("passed"):
+        print("FAIL today 11259 should pass grain fence", today_ok)
+        failed += 1
+    else:
+        print("OK grain today 11259 allowed")
+
     wear_manifest = build_numerics_manifest(
         "default",
         profile="wearable_screenshot_review",

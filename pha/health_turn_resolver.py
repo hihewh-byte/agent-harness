@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date
 from typing import Any
 
 from pha.date_range_parser import default_wearable_window, parse_user_date_range
@@ -96,18 +96,15 @@ def _parse_relative_wearable_window(message: str, *, reference: date | None = No
     ref = reference or effective_query_reference_date()
     if not msg:
         return None
-    if re.search(r"上个月|上月", msg):
-        first_this = ref.replace(day=1)
-        end_prev = first_this - timedelta(days=1)
-        start_prev = end_prev.replace(day=1)
-        return WearableWindow(start=start_prev, end=end_prev)
-    if re.search(r"这个月|本月", msg):
-        start = ref.replace(day=1)
-        return WearableWindow(start=start, end=ref)
     explicit = parse_user_date_range(msg)
     if explicit:
         return WearableWindow(start=explicit.start, end=explicit.end)
-    return None
+    from pha.wearable_time_grain import resolve_wearable_time_grain
+
+    grain = resolve_wearable_time_grain(msg, reference=ref)
+    if grain.source == "default":
+        return None
+    return WearableWindow(start=grain.start, end=grain.end)
 
 
 def _default_wearable_window(

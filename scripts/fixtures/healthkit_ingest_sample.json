@@ -1,0 +1,40 @@
+{
+  "user_id": "selfcheck",
+  "samples": [
+    {
+      "metric_type": "hrv",
+      "timestamp": "2026-08-30T08:15:00+08:00",
+      "value": 42.0,
+      "unit": "ms",
+      "source": "healthkit"
+    },
+    {
+      "metric_type": "rhr",
+      "timestamp": "2026-08-30T08:16:00+08:00",
+      "value": 54.0,
+      "unit": "count/min",
+      "source": "healthkit"
+    },
+    {
+      "metric_type": "steps",
+      "timestamp": "2026-08-30T21:00:00+08:00",
+      "value": 8123,
+      "unit": "count",
+      "source": "healthkit"
+    },
+    {
+      "metric_type": "sleep_hours",
+      "timestamp": "2026-08-30T07:00:00+08:00",
+      "value": 7.25,
+      "unit": "hr",
+      "source": "healthkit"
+    },
+    {
+      "metric_type": "active_energy",
+      "timestamp": "2026-08-30T21:00:00+08:00",
+      "value": 410.0,
+      "unit": "kcal",
+      "source": "healthkit"
+    }
+  ]
+}

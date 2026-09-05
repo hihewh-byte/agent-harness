@@ -42,6 +42,8 @@ class WearableDayMetricAgg:
     vo2max_n: int = 0
     wrist_temp_sum: float = 0.0
     wrist_temp_n: int = 0
+    # Scalar daily sleep (HealthKit ingest). Segments still win when present.
+    sleep_hours_max: Optional[float] = None
 
 
 def accumulate_wearable_sample(
@@ -78,6 +80,9 @@ def accumulate_wearable_sample(
     elif mt == _METRIC_WRIST_TEMP:
         agg.wrist_temp_sum += value
         agg.wrist_temp_n += 1
+    elif mt in ("sleep", "sleep_hours"):
+        if value > 0 and (agg.sleep_hours_max is None or value > agg.sleep_hours_max):
+            agg.sleep_hours_max = value
 
 
 def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
@@ -225,6 +230,8 @@ def build_wearable_daily_summary(
         row.sleep_deep_hours = deep_h
         row.sleep_rem_hours = rem_h
         row.sleep_start_time = first_start
+        if row.sleep_hours is None and metrics is not None and metrics.sleep_hours_max is not None:
+            row.sleep_hours = metrics.sleep_hours_max
     elif import_sleep is not None:
         segs, deep_s, rem_s, awake_s, first_start = import_sleep
         sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_import_accumulators(
@@ -239,5 +246,7 @@ def build_wearable_daily_summary(
         row.sleep_deep_hours = deep_h
         row.sleep_rem_hours = rem_h
         row.sleep_start_time = first_start
+    elif metrics is not None and metrics.sleep_hours_max is not None and row.sleep_hours is None:
+        row.sleep_hours = metrics.sleep_hours_max
 
     return row

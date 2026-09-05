@@ -50,6 +50,21 @@ def test_h1_wearable_anaphora_window() -> None:
     print("PASS H1 HRV → 那上个月呢 → focus + May window")
 
 
+def test_h1c_time_anchor_windows() -> None:
+    today = resolve_health_turn_scope("今天步数", reference_date=REF)
+    _assert(today.time_source == "explicit", today)
+    _assert(today.wearable_window is not None, today)
+    _assert(today.wearable_window.start == REF, today.wearable_window)
+    _assert(today.wearable_window.end == REF, today.wearable_window)
+    yday = resolve_health_turn_scope("昨天HRV", reference_date=REF)
+    _assert(yday.wearable_window.start == date(2026, 6, 9), yday.wearable_window)
+    _assert(yday.wearable_window.end == date(2026, 6, 9), yday.wearable_window)
+    week = resolve_health_turn_scope("上周步数", reference_date=REF)
+    _assert(week.wearable_window.start == date(2026, 6, 1), week.wearable_window)
+    _assert(week.wearable_window.end == date(2026, 6, 7), week.wearable_window)
+    print("PASS H1c 今天/昨天/上周 bind explicit wearable window")
+
+
 def test_h2_multi_year_ldl() -> None:
     scope = resolve_health_turn_scope(
         "每年的 LDL",
@@ -219,6 +234,7 @@ def test_turn_scope_report() -> None:
 def main() -> int:
     tests = [
         test_h1_wearable_anaphora_window,
+        test_h1c_time_anchor_windows,
         test_h2_multi_year_ldl,
         test_h3_fast_lane_continue,
         test_h4_lab_year_clarify,

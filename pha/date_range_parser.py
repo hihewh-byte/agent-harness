@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date
 from typing import Optional
 
 from pha.date_parser import safe_parse_date
@@ -95,20 +95,12 @@ def default_wearable_window(
     *,
     reference: Optional[date] = None,
 ) -> ParsedDateRange:
-    """Explicit user range wins; else rolling window from keywords."""
+    """Explicit calendar span wins; else 1E-a time-anchor grain; else 90-day default."""
     explicit = parse_user_date_range(user_message)
     if explicit:
         return explicit
+    from pha.wearable_time_grain import resolve_wearable_time_grain
+
     ref = reference or effective_query_reference_date()
-    text = user_message or ""
-    days = 90
-    if "一年" in text or "365" in text or "12个月" in text or "12 个月" in text:
-        days = 365
-    elif "6个月" in text or "半年" in text:
-        days = 180
-    elif re.search(r"30\s*天|一个月|1\s*个月", text) and "90" not in text:
-        days = 30
-    elif any(k in text for k in ("3个月", "三个月", "3 个月", "近三月", "最近3个月", "90天", "90 天")):
-        days = 90
-    start = ref - timedelta(days=max(1, days) - 1)
-    return ParsedDateRange(start=start, end=ref)
+    grain = resolve_wearable_time_grain(user_message, reference=ref)
+    return ParsedDateRange(start=grain.start, end=grain.end)

@@ -14,6 +14,7 @@
 | **Harness / 聊天 / 路由** | [`docs/harness-consensus-opus48-2026-06-08.md`](docs/harness-consensus-opus48-2026-06-08.md)、[`docs/harness-change-log.md`](docs/harness-change-log.md) |
 | **多轮 / 意图 / clarify** | [`docs/stage3c-multi-turn-episodic-focus-rfc.md`](docs/stage3c-multi-turn-episodic-focus-rfc.md)、[`docs/stage3f-intent-resolution-completeness-rfc.md`](docs/stage3f-intent-resolution-completeness-rfc.md)、[`rules/health_intent_catalog.json`](rules/health_intent_catalog.json) |
 | **Tier0 / 槽位预算** | [`docs/harness-tier0-fuse-v2.2.6.1.md`](docs/harness-tier0-fuse-v2.2.6.1.md) |
+| **PHA iOS / 主动 Agent** | [`docs/prd-pha-ios-proactive-agent-v1.md`](docs/prd-pha-ios-proactive-agent-v1.md)、[`docs/pha-ios-proactive-change-log.md`](docs/pha-ios-proactive-change-log.md) |
 | **启动 / 导入 / 进程** | [`docs/stability-remediation-plan-2026-06-10.md`](docs/stability-remediation-plan-2026-06-10.md)、[`docs/startup-change-log.md`](docs/startup-change-log.md) |
 | **Catalog / Schema** | [`docs/metadata-catalog-v2.3.md`](docs/metadata-catalog-v2.3.md) |
 | **子 agent 协议** | [`docs/harness-subagent-protocol-v1.md`](docs/harness-subagent-protocol-v1.md) |

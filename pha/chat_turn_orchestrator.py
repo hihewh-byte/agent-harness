@@ -887,6 +887,16 @@ def orchestrate_chat_turn_events(
         )
         if _locale_guard_audit.get("locale_fallback_applied"):
             numerics_audit = {**numerics_audit, **_locale_guard_audit}
+        from pha.numerics_manifest import (
+            format_wearable_grain_refusal,
+            wearable_grain_fence_blocked,
+        )
+
+        if wearable_grain_fence_blocked(numerics_audit) and numerics_manifest is not None:
+            answer_text = format_wearable_grain_refusal(
+                numerics_manifest,
+                locale=_slot_ctx.response_locale,
+            )
         _compose_ctx.answer_text = answer_text
 
         l3_focus_violation = False
