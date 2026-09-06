@@ -52,6 +52,10 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 | `ui.label_zh` / `intent_hints` | LLM 表与 Audit 段内匹配 |
 | `ui.footer_when_snapshot_only` | Fallback 脚注（禁止硬编码 metric 名） |
 | `ingest.module` | 关联 `ingest_modules[].module_id` |
+| `fact_card.eligible` | 是否允许出现在事实卡勾选列表 |
+| `fact_card.enabled_default` | 无用户偏好时的默认勾选（默认 ≠ 不可改） |
+| `fact_card.ingest_key` | 对应 `POST /ingest/healthkit` 的 `metric_type`（可空） |
+| `fact_card.unit` / `higher_is_better` | 完整卡展示与分档方向 |
 
 ### `no_baseline_reason`（Spec 枚举 · 行级 reason_code 待 ε+）
 

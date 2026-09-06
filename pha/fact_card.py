@@ -3,6 +3,7 @@
 Numbers are taken only from ``wearable_daily`` rows passed in (or queried).
 Point-day honesty: a missing calendar day is not filled from MAX(day).
 ``as_of`` may be an earlier day; then ``stale=true`` and copy must not say 今日.
+Metric set comes from the wearable registry + user prefs — not a Python list.
 """
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any, Optional, Sequence
 
+from pha.fact_card_prefs import FactCardMetricSpec, resolve_metric_specs
 from pha.health_data import effective_query_reference_date
 from pha.models import WearableDailySummary
 from pha.wearable_time_grain import rolling_n_grain
@@ -19,36 +21,9 @@ BASELINE_DAYS = 90
 MIN_BASELINE_N = 7
 DISCLAIMER = "教育参考，非医疗建议，不能替代医师诊治。"
 
-# (key, row attr, zh label, unit, higher_is_better)
-_METRICS: tuple[tuple[str, str, str, str, bool], ...] = (
-    ("steps", "steps", "步数", "count", True),
-    ("hrv", "hrv_rmssd_ms", "HRV", "ms", True),
-    ("rhr", "resting_heart_rate_bpm", "静息心率", "bpm", False),
-    ("sleep_hours", "sleep_hours", "睡眠", "h", True),
-    ("active_energy", "active_energy_kcal", "活动消耗", "kcal", True),
-)
-
-_ADVICE: dict[tuple[str, str], str] = {
-    ("steps", "below"): "步数低于近90日个人基线。可安排步行或日常活动。",
-    ("steps", "typical"): "步数接近近90日个人中位。",
-    ("steps", "above"): "步数高于近90日个人基线。注意休息与补水。",
-    ("hrv", "below"): "HRV低于近90日个人基线。可考虑偏轻松安排。",
-    ("hrv", "typical"): "HRV接近近90日个人中位。",
-    ("hrv", "above"): "HRV高于近90日个人基线。",
-    ("rhr", "below"): "静息心率高于近90日个人基线。可考虑偏轻松安排。",
-    ("rhr", "typical"): "静息心率接近近90日个人中位。",
-    ("rhr", "above"): "静息心率低于近90日个人基线。",
-    ("sleep_hours", "below"): "睡眠短于近90日个人基线。可优先保证夜间休息。",
-    ("sleep_hours", "typical"): "睡眠接近近90日个人中位。",
-    ("sleep_hours", "above"): "睡眠长于近90日个人基线。",
-    ("active_energy", "below"): "活动消耗低于近90日个人基线。",
-    ("active_energy", "typical"): "活动消耗接近近90日个人中位。",
-    ("active_energy", "above"): "活动消耗高于近90日个人基线。注意恢复。",
-}
 _ADVICE_MISSING = "该指标当日无记录，不用其他日期的数字代替。"
 _ADVICE_UNKNOWN = "个人基线天数不足，只展示数字、不做分档。"
-WHITELIST_N = len(_METRICS)
-_SUMMARY_SYNC = "先把缺项同步进库（HRV/睡眠/心率/消耗），有数后再做恢复向评估。"
+_SUMMARY_SYNC = "先把缺项同步进库，有数后再做恢复向评估。"
 _SUMMARY_BASELINE = "个人基线不足7天，只展示数字、不做分档。"
 _SUMMARY_BELOW = "有指标低于近90日个人基线，可考虑偏轻松安排。"
 _SUMMARY_OK = "有数指标相对近90日个人基线大致持平或偏好。"
@@ -110,10 +85,14 @@ def compose_assessment_summary(
     below = [m for m in present if m.get("band") == "below"]
     unknown = [m for m in present if m.get("band") == "unknown"]
     n_present = len(present)
+    total = len(metrics)
     bits: list[str] = []
     if stale:
         bits.append("不是今日。")
-    bits.append(f"白名单{WHITELIST_N}项中{n_present}项有数。")
+    if total == 0:
+        bits.append("未选择任何指标。")
+    else:
+        bits.append(f"已选{total}项中{n_present}项有数。")
     if missing:
         labels = "、".join(m["label"] for m in missing)
         bits.append(f"{labels}无记录，不顶。")
@@ -122,10 +101,13 @@ def compose_assessment_summary(
     if below:
         labels = "、".join(m["label"] for m in below)
         bits.append(f"{labels}低于近90日个人基线。")
-    if n_present == 0:
-        advice = "库内无白名单数字，无法评估。"
+    if total == 0:
+        advice = "到完整卡底部勾选要看的指标。"
+        kind = "empty_selection"
+    elif n_present == 0:
+        advice = "库内无已选指标数字，无法评估。"
         kind = "empty"
-    elif n_present < WHITELIST_N:
+    elif n_present < total:
         advice = _SUMMARY_SYNC
         kind = "coverage"
     elif below:
@@ -140,18 +122,24 @@ def compose_assessment_summary(
     return {
         "kind": kind,
         "coverage_present": n_present,
-        "coverage_total": WHITELIST_N,
+        "coverage_total": total,
         "text": "".join(bits),
         "advice": advice,
     }
 
 
-def _advice(metric: str, band: str) -> str:
+def _advice(band: str, label: str) -> str:
     if band == "missing":
         return _ADVICE_MISSING
     if band == "unknown":
         return _ADVICE_UNKNOWN
-    return _ADVICE.get((metric, band), _ADVICE_UNKNOWN)
+    if band == "below":
+        return f"{label}低于近90日个人基线。可考虑偏轻松安排。"
+    if band == "above":
+        return f"{label}高于近90日个人基线。"
+    if band == "typical":
+        return f"{label}接近近90日个人中位。"
+    return _ADVICE_UNKNOWN
 
 
 def compose_fact_card(
@@ -159,8 +147,10 @@ def compose_fact_card(
     calendar_day: date,
     rows: Sequence[WearableDailySummary],
     user_id: str = "default",
+    enabled_metric_ids: Optional[Sequence[str]] = None,
 ) -> dict[str, Any]:
     """Pure bind: ``rows`` is the only number source."""
+    specs = resolve_metric_specs(user_id, enabled_metric_ids)
     by_day = {row.day: row for row in rows}
     as_of = max(by_day) if by_day else None
     stale = as_of is None or as_of < calendar_day
@@ -175,55 +165,13 @@ def compose_fact_card(
 
     metrics: list[dict[str, Any]] = []
     advice_items: list[dict[str, str]] = []
-    for key, attr, label, unit, higher_is_better in _METRICS:
-        value = _row_value(as_of_row, attr) if as_of_row is not None else None
-        samples = [
-            v
-            for v in (_row_value(row, attr) for row in baseline_rows)
-            if v is not None
-        ]
-        if value is None:
-            band = "missing"
-            pct = None
-            mean = min_v = max_v = None
-        elif len(samples) < MIN_BASELINE_N:
-            band = "unknown"
-            pct = None
-            mean = _round_num(sum(samples) / len(samples), unit=unit) if samples else None
-            min_v = _round_num(min(samples), unit=unit) if samples else None
-            max_v = _round_num(max(samples), unit=unit) if samples else None
-        else:
-            pct = percentile_rank(value, samples)
-            band = band_from_percentile(pct, higher_is_better=higher_is_better)
-            mean = _round_num(sum(samples) / len(samples), unit=unit)
-            min_v = _round_num(min(samples), unit=unit)
-            max_v = _round_num(max(samples), unit=unit)
-        if value is None:
-            shown = None
-        elif unit in {"count", "bpm"}:
-            shown = int(round(value))
-        else:
-            shown = _round_num(value, unit=unit)
-        metrics.append(
-            {
-                "metric": key,
-                "label": label,
-                "value": shown,
-                "unit": unit,
-                "day": as_of.isoformat() if as_of is not None else None,
-                "baseline_n": len(samples),
-                "baseline_mean": mean,
-                "baseline_min": min_v,
-                "baseline_max": max_v,
-                "percentile": pct,
-                "band": band,
-            }
-        )
+    for spec in specs:
+        metrics.append(_metric_row(spec, as_of, as_of_row, baseline_rows))
         advice_items.append(
             {
-                "metric": key,
-                "band": band,
-                "text": _advice(key, band),
+                "metric": spec.metric_id,
+                "band": metrics[-1]["band"],
+                "text": _advice(metrics[-1]["band"], spec.label),
             }
         )
 
@@ -236,6 +184,10 @@ def compose_fact_card(
         "as_of": as_of.isoformat() if as_of is not None else None,
         "stale": stale,
         "source": "wearable_daily",
+        "selection": {
+            "enabled_metric_ids": [spec.metric_id for spec in specs],
+            "source": "explicit" if enabled_metric_ids is not None else "prefs_or_default",
+        },
         "today": {
             "day": calendar_day.isoformat(),
             "present": today_row is not None,
@@ -250,41 +202,86 @@ def compose_fact_card(
         "summary": summary,
         "advice": advice_items,
     }
+    uid = (user_id or "default").strip() or "default"
     card = {
         "schema": SCHEMA,
-        "user_id": user_id,
+        "user_id": uid,
         "facts": facts,
         "assessment": assessment,
-        "notification": _notification(facts, assessment),
+        "notification": _notification(facts, assessment, user_id=uid),
         "disclaimer": DISCLAIMER,
     }
     return card
 
 
-def _metric_bit(item: dict[str, Any]) -> str:
-    if item["value"] is None:
-        return f"{item['label']}无"
-    unit_s = "" if item["unit"] == "count" else item["unit"]
-    return f"{item['label']}{_fmt(float(item['value']), item['unit'])}{unit_s}"
+def _metric_row(
+    spec: FactCardMetricSpec,
+    as_of: Optional[date],
+    as_of_row: Optional[WearableDailySummary],
+    baseline_rows: Sequence[WearableDailySummary],
+) -> dict[str, Any]:
+    value = _row_value(as_of_row, spec.field) if as_of_row is not None else None
+    samples = [
+        v
+        for v in (_row_value(row, spec.field) for row in baseline_rows)
+        if v is not None
+    ]
+    unit = spec.unit
+    if value is None:
+        band = "missing"
+        pct = None
+        mean = min_v = max_v = None
+    elif len(samples) < MIN_BASELINE_N:
+        band = "unknown"
+        pct = None
+        mean = _round_num(sum(samples) / len(samples), unit=unit) if samples else None
+        min_v = _round_num(min(samples), unit=unit) if samples else None
+        max_v = _round_num(max(samples), unit=unit) if samples else None
+    else:
+        pct = percentile_rank(value, samples)
+        band = band_from_percentile(pct, higher_is_better=spec.higher_is_better)
+        mean = _round_num(sum(samples) / len(samples), unit=unit)
+        min_v = _round_num(min(samples), unit=unit)
+        max_v = _round_num(max(samples), unit=unit)
+    if value is None:
+        shown = None
+    elif unit in {"count", "bpm"}:
+        shown = int(round(value))
+    else:
+        shown = _round_num(value, unit=unit)
+    return {
+        "metric": spec.metric_id,
+        "label": spec.label,
+        "value": shown,
+        "unit": unit,
+        "day": as_of.isoformat() if as_of is not None else None,
+        "baseline_n": len(samples),
+        "baseline_mean": mean,
+        "baseline_min": min_v,
+        "baseline_max": max_v,
+        "percentile": pct,
+        "band": band,
+    }
 
 
-def _notification(facts: dict[str, Any], assessment: dict[str, Any]) -> dict[str, str]:
+def _notification(facts: dict[str, Any], assessment: dict[str, Any], *, user_id: str) -> dict[str, str]:
+    """Lock-screen teaser. Full list lives on the HTML view — iOS truncates body."""
     calendar_day = facts["calendar_day"]
     as_of = facts["as_of"]
     stale = bool(facts["stale"])
     title = f"PHA 事实卡 · {calendar_day}"
+    summary = assessment.get("summary") or {}
+    present = int(summary.get("coverage_present") or 0)
+    total = int(summary.get("coverage_total") or 0)
+    open_path = f"/proactive/fact-card/view?user_id={user_id}"
     if as_of is None:
-        body = f"库内无穿戴日行。评估：无法评估。{DISCLAIMER}"
-        return {"title": title, "body": body}
+        body = f"库内无穿戴日行。打开完整卡。{DISCLAIMER}"
+        return {"title": title, "body": body, "open_path": open_path}
     stamp = f"截至{as_of}"
     if stale:
         stamp += "（非今日）"
-    facts_line = " · ".join(_metric_bit(item) for item in facts["metrics"])
-    summary = assessment.get("summary") or {}
-    eval_line = summary.get("text") or ""
-    advice_line = summary.get("advice") or _ADVICE_UNKNOWN
-    body = f"{stamp}\n{facts_line}\n评估：{eval_line}\n建议：{advice_line} {DISCLAIMER}"
-    return {"title": title, "body": body}
+    body = f"{stamp} · {present}/{total}有数\n打开完整卡看清单与评估。{DISCLAIMER}"
+    return {"title": title, "body": body, "open_path": open_path}
 
 
 def fact_card_numeric_atoms(card: dict[str, Any]) -> set[str]:

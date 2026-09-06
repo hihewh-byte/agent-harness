@@ -161,6 +161,34 @@ def is_registered_comparable_metric(metric_id: str) -> bool:
     return bool((entry.get("compare") or {}).get("comparable_90d"))
 
 
+def fact_card_eligible_entries() -> List[Dict[str, Any]]:
+    """Daily metrics the fact card may render. Selection is user prefs, not code lists."""
+    out: List[Dict[str, Any]] = []
+    for m in list_metric_entries():
+        fc = m.get("fact_card") or {}
+        if not isinstance(fc, dict) or not fc.get("eligible"):
+            continue
+        l1 = m.get("l1") or {}
+        if str(l1.get("kind") or "") != "wearable_daily":
+            continue
+        field = str(l1.get("field") or "").strip()
+        mid = str(m.get("metric_id") or "").strip()
+        if mid and field:
+            out.append(m)
+    return out
+
+
+def default_fact_card_metric_ids() -> Tuple[str, ...]:
+    ids: List[str] = []
+    for m in fact_card_eligible_entries():
+        fc = m.get("fact_card") or {}
+        if fc.get("enabled_default"):
+            mid = str(m.get("metric_id") or "").strip()
+            if mid:
+                ids.append(mid)
+    return tuple(ids)
+
+
 def clear_registry_cache() -> None:
     load_wearable_metric_registry.cache_clear()
 
@@ -168,6 +196,8 @@ def clear_registry_cache() -> None:
 __all__ = [
     "clear_registry_cache",
     "comparable_wearable_daily_specs",
+    "default_fact_card_metric_ids",
+    "fact_card_eligible_entries",
     "ingest_module",
     "is_registered_comparable_metric",
     "list_ingest_modules",

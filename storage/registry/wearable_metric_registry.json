@@ -1,7 +1,7 @@
 {
   "schema_version": "wearable_metric_registry_v1",
-  "version": "2026.06.09",
-  "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合（Wave 3d-δ-c）。Apple Health export 为全量快照，ingest 仅走 /data/upload。",
+  "version": "2026.09.06",
+  "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。",
   "ingest_modules": [],
   "metrics": [
     {
@@ -14,6 +14,13 @@
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
       "ui": { "label_zh": "睡眠总时长" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": true,
+        "ingest_key": "sleep_hours",
+        "unit": "h",
+        "higher_is_better": true
+      },
       "intent_hints": [
         "睡眠",
         "sleep_time",
@@ -38,6 +45,13 @@
       },
       "snapshot": { "unit": "ms", "parser": "numeric" },
       "ui": { "label_zh": "HRV" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": true,
+        "ingest_key": "hrv",
+        "unit": "ms",
+        "higher_is_better": true
+      },
       "intent_hints": [
         "hrv",
         "心率变异性",
@@ -58,6 +72,13 @@
       },
       "snapshot": { "unit": "bpm", "parser": "numeric" },
       "ui": { "label_zh": "静息心率" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": true,
+        "ingest_key": "rhr",
+        "unit": "bpm",
+        "higher_is_better": false
+      },
       "intent_hints": [
         "静息",
         "resting",
@@ -81,6 +102,12 @@
       },
       "snapshot": { "unit": "%", "parser": "numeric" },
       "ui": { "label_zh": "血氧" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "unit": "%",
+        "higher_is_better": true
+      },
       "intent_hints": ["血氧", "spo2", "SpO2", "blood oxygen", "oxygen saturation"]
     },
     {
@@ -93,6 +120,12 @@
       },
       "snapshot": { "unit": "breaths/min", "parser": "numeric" },
       "ui": { "label_zh": "呼吸率" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "unit": "breaths/min",
+        "higher_is_better": true
+      },
       "intent_hints": [
         "呼吸率",
         "respiratory",
@@ -114,6 +147,12 @@
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
       "ui": { "label_zh": "深睡", "footer_when_snapshot_only": true },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "unit": "h",
+        "higher_is_better": true
+      },
       "intent_hints": ["深睡", "深度睡眠", "睡眠分期", "deep sleep"]
     },
     {
@@ -127,6 +166,12 @@
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
       "ui": { "label_zh": "REM", "footer_when_snapshot_only": true },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "unit": "h",
+        "higher_is_better": true
+      },
       "intent_hints": ["REM", "快速眼动", "睡眠分期"]
     },
     {
@@ -154,6 +199,36 @@
       "snapshot": { "unit": "count", "parser": "integer" },
       "ui": { "label_zh": "近期锻炼次数" },
       "intent_hints": ["次锻炼", "锻炼次数", "锻炼天数", "几次锻炼"]
+    },
+    {
+      "metric_id": "steps",
+      "l1": { "kind": "wearable_daily", "field": "steps" },
+      "compare": { "comparable_90d": false },
+      "snapshot": { "unit": "count", "parser": "numeric" },
+      "ui": { "label_zh": "步数", "label_en": "Steps" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": true,
+        "ingest_key": "steps",
+        "unit": "count",
+        "higher_is_better": true
+      },
+      "intent_hints": ["步数", "steps", "走了多少", "step count"]
+    },
+    {
+      "metric_id": "active_energy",
+      "l1": { "kind": "wearable_daily", "field": "active_energy_kcal" },
+      "compare": { "comparable_90d": false },
+      "snapshot": { "unit": "kcal", "parser": "numeric" },
+      "ui": { "label_zh": "活动消耗", "label_en": "Active energy" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": true,
+        "ingest_key": "active_energy",
+        "unit": "kcal",
+        "higher_is_better": true
+      },
+      "intent_hints": ["活动消耗", "active energy", "卡路里"]
     }
   ]
 }

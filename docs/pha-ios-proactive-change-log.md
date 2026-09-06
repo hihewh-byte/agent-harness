@@ -7,6 +7,15 @@
 
 ---
 
+## 2026-09-06 (M1-P3/P4 完整卡可点开 + 用户自选指标)
+
+- **类别**：PRD v1.3 / 事实卡触达 / 反硬编码。
+- **根因**：iOS「显示通知」锁屏截断长正文，且捷径通知没有自定义点击深链；五项写死在 `pha/fact_card.py`，违反宪法「禁止防御性硬编码」。
+- **改动**：锁屏只留短导语 + `open_path`；`GET /proactive/fact-card/view` 渲染完整清单与评估；捷径先做「URL」再「打开 URL」（直接写 `WFURL` 会被忽略，iPhone 报「无 URL」）。指标允许集改 `wearable_metric_registry.json` 的 `fact_card`；用户勾选落 `data/fact_card_prefs.json`。多指标入库立为 **M1-P5**（见 roadmap），本刀不编未入库数字。
+- **回滚**：还原 `fact_card.py` / `fact_card_api.py` / 捷径生成器；去掉 `fact_card_prefs.py` / `fact_card_html.py`。
+
+---
+
 ## 2026-09-06 (M1-P2 通知内容契约：五项 + 卡级评估)
 
 - **类别**：事实卡模板 / PRD v1.2。

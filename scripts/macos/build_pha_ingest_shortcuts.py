@@ -159,24 +159,47 @@ def _dict_value(src_uuid: str, src_name: str, key: str, action_uuid: str, out_na
     )
 
 
-def build_fact_card(url: str, token: str) -> dict:
-    """GET fact card JSON → iPhone local notification (no HealthKit, no LLM)."""
+def _make_url(url: str, action_uuid: str, name: str) -> dict:
+    """Create a URL item. Open URLs cannot take a raw WFURL string (shows「无 URL」)."""
+    return _action(
+        "is.workflow.actions.url",
+        {
+            "UUID": action_uuid,
+            "CustomOutputName": name,
+            "WFURLActionURL": url,
+        },
+    )
+
+
+def _openurl(src_uuid: str, src_name: str) -> dict:
+    return _action(
+        "is.workflow.actions.openurl",
+        {"WFInput": _output_ref(src_uuid, src_name)},
+    )
+
+
+def build_fact_card(url: str, view_url: str, token: str) -> dict:
+    """GET teaser JSON → short lock-screen note → open full HTML card."""
     get_id = _uuid()
     note_id = _uuid()
     title_id = _uuid()
     body_id = _uuid()
+    card_url_id = _uuid()
     actions = [
         _geturl(url, token, get_id, "Fact Card"),
         _dict_value(get_id, "Fact Card", "notification", note_id, "Notification"),
         _dict_value(note_id, "Notification", "title", title_id, "Title"),
         _dict_value(note_id, "Notification", "body", body_id, "Body"),
+        _make_url(view_url, card_url_id, "Card URL"),
         _action(
             "is.workflow.actions.notification",
             {
+                "UUID": _uuid(),
                 "WFNotificationActionTitle": _text_with_refs([(title_id, "Title")]),
                 "WFNotificationActionBody": _text_with_refs([(body_id, "Body")]),
             },
         ),
+        _openurl(card_url_id, "Card URL"),
     ]
     return _workflow("PHA 事实卡通知", actions)
 
@@ -381,13 +404,20 @@ def main() -> int:
     port = env.get("PHA_PORT", "8788").strip() or "8788"
     url = f"http://{host_ip}:{port}/ingest/healthkit"
     fact_url = f"http://{host_ip}:{port}/proactive/fact-card?user_id=default"
+    fact_view = (
+        f"http://{host_ip}:{port}/proactive/fact-card/view"
+        f"?user_id=default&token={token}"
+    )
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "endpoint.txt").write_text(url + "\n" + fact_url + "\n", encoding="utf-8")
+    (OUT_DIR / "endpoint.txt").write_text(
+        url + "\n" + fact_url + "\n" + fact_view.split("&token=")[0] + "\n",
+        encoding="utf-8",
+    )
 
     jobs = [
         ("pha-ingest-probe", build_probe(url, token), "anyone"),
         ("pha-sync-health", build_health(url, token), "people-who-know-me"),
-        ("pha-fact-card", build_fact_card(fact_url, token), "people-who-know-me"),
+        ("pha-fact-card", build_fact_card(fact_url, fact_view, token), "people-who-know-me"),
     ]
     for stem, wf, mode in jobs:
         xml_path = OUT_DIR / f"{stem}.plist"

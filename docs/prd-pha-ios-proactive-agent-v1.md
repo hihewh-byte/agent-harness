@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.2 · 2026-09-06  
+> **版本**：v1.3 · 2026-09-06  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -114,7 +114,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-1.1 | ingest JSON：`metric_type, timestamp, value, source=healthkit` | selfcheck 假数据入库 |
 | FR-1.2 | 鉴权 token；无 token 401 | 单测或 selfcheck |
 | FR-1.3 | 真机：捷径推送 Watch 已有指标 | 库中 `as_of` 与健康 App 同日、数值量级合理 |
-| FR-1.4 | 指标 v1 白名单 | `hrv`, `rhr`, `steps`, `sleep_hours`, `active_energy`（申请不到则文档降级，管道仍算通） |
+| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `rhr`, `steps`, `sleep_hours`, `active_energy`（申请不到则文档降级，管道仍算通） |
+| FR-1.5 | **多指标入库**（任务卡，未做完不得假装评估完整） | 捷径/App 对用户已选且 ∈ FR-1.4 的指标，各用「当日合计一个数字」再 POST；禁止 Find 几百条触发「共享大量健康数据」；缺项诚实为无 |
 
 ### FR-2 事实卡引擎（无 LLM）
 
@@ -124,8 +125,9 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-2.2 | HRV 等分档仅为规则（如 vs 分位），文案模板固定 | 无模型进程 |
 | FR-2.3 | 过期：`as_of` 早于本地日历日则 `stale=true` | 卡片可见；通知须写「非今日」，禁止把末日标成今日 |
 | FR-2.4 | 卡分两层：`facts`（数字）与 `assessment`（规则分档 + 模板建议 + 免责） | JSON 同时有两层；评估句不含诊断/处方 |
-| FR-2.5 | 通知与 JSON **枚举 FR-1.4 全部五项**；无记录写「无」，禁止省略、禁止用其他日顶 | 正文同时出现步数/HRV/睡眠/静息心率/活动消耗 |
-| FR-2.6 | 卡级评估：覆盖率 + stale + 个人基线分档；一句建议。分析 = 相对近90日自己，不是 LLM 长文 | `assessment.summary`；通知有「评估：」「建议：」 |
+| FR-2.5 | JSON / 完整卡枚举 **用户已选** 的注册表指标；无记录写「无」，禁止省略、禁止用其他日顶 | 已选项都出现；未选不出现；默认五项可被用户改掉 |
+| FR-2.6 | 卡级评估：覆盖率 + stale + 个人基线分档；一句建议。分析 = 相对近90日自己，不是 LLM 长文 | `assessment.summary`；完整卡有评估/建议 |
+| FR-2.7 | 指标集由用户指定，禁止 Python 硬编码死列表 | `GET/PUT /proactive/fact-card/prefs`；完整卡底部勾选；落 `data/fact_card_prefs.json`；允许集 = `wearable_metric_registry.json` 的 `fact_card.eligible` |
 
 ### FR-3 主动触达
 
@@ -134,7 +136,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-3.1 | 每日一次（可配置时刻）生成事实卡并通知 | 用户未开聊天也能收到 |
 | FR-3.2 | 提醒只来自用户登记表 | 无登记则无吃药/补剂项 |
 | FR-3.3 | 通知文案含非医疗免责短句 | 固定字符串，非法条长文 |
-| FR-3.4 | **M1 通道 = iPhone 本地通知**：捷径 `GET /proactive/fact-card`（同源 ingest token）后「显示通知」；每日用「快捷指令」自动化定时跑。不是 Mac 通知中心，不是 APNs | 真机能看到五项事实 + 评估/建议（无记录也要出现） |
+| FR-3.4 | **M1 通道 = iPhone 本地通知 + 打开完整卡**：捷径 `GET /proactive/fact-card` 后短通知，再 `打开 URL` → `GET /proactive/fact-card/view`。每日用「快捷指令」自动化定时跑。不是 Mac 通知中心，不是 APNs | 锁屏能看到截至/覆盖率；Safari 能看到完整清单与评估；底部能改指标 |
+| FR-3.5 | 锁屏正文只做导语。完整事实与评估只在 HTML/JSON。禁止靠加长通知正文硬撞 iOS 截断 | 通知含 `open_path`；完整卡数字 ⊆ JSON |
 
 ### FR-4 iOS App 壳（M2）
 
@@ -149,20 +152,27 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 
 现有 harness 聊天可继续跑在 Mac。主动路径 **不得** 为了「更聪明」绕过 Numerics 审计。App 内聊天属 M3。
 
-### 5.1 事实卡内容契约（v1.2 · 主动通知必须遵守）
+### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
-主动通知不是「有数的那一项甩出去」。用户要看的是 **事实清单 + 评估/建议**。分析在 v1 **只允许**相对个人 90 日基线的规则，禁止 LLM 写评语。
+主动通道不是「有数的那一项甩出去」。用户要看的是 **自己选定的事实清单 + 评估/建议**。分析在 v1 **只允许**相对个人 90 日基线的规则，禁止 LLM 写评语。
 
 | 块 | 必须出现 | 禁止 |
 |----|----------|------|
-| **事实** | FR-1.4 五项都出现：有数则写数字+单位，无数则「无」；`截至 as_of`；stale 写「非今日」 | 只列步数；用昨日顶今日；编 HRV/睡眠 |
-| **评估** | 覆盖率（几项有数）；缺项点名；基线 n&lt;7 则「不做分档」；n≥7 则低于/持平/高于个人分位 | 诊断、病因、病理标题 |
+| **事实** | 用户已选指标都出现：有数则写数字+单位，无数则「无」；`截至 as_of`；stale 写「非今日」 | 用昨日顶今日；编未入库数字；把未选项硬塞进卡 |
+| **评估** | 覆盖率（已选里几项有数）；缺项点名；基线 n&lt;7 则「不做分档」；n≥7 则低于/持平/高于个人分位 | 诊断、病因、病理标题 |
 | **建议** | 一句固定模板：缺项→先同步；有低于基线→偏轻松安排；否则持平/偏好 | 训练处方、补剂疗效、用药剂量 |
 | **免责** | 固定：教育参考，非医疗建议，不能替代医师诊治 | 加长法律文 |
 
-**数据完整性**：M0 捷径目前只 POST **步数**。卡必须把其余四项打成「无」，不能假装评估完整。要把评估做实，须扩大同步（捷径或 M2 App 按日合计再 POST 白名单）。扩大同步 **另开任务卡**，不在未入库时编数。
+**数据完整性**：M0 捷径目前只 POST **步数**。已选但未入库的项必须打成「无」，不能假装评估完整。要把评估做实，须做 **FR-1.5 多指标入库**（任务卡 **M1-P5**）：每个已选且 ∈ FR-1.4 的指标，用与步数相同的「当日合计一个数字」再 POST。不要 Find 原始样本列表。未入库时禁止编数。
 
-通知正文固定四行：`截至…` / `五项清单` / `评估：…` / `建议：…` + 免责。锁屏截断可接受，JSON 仍是完整真源。
+**两层触达**：
+
+| 层 | 职责 |
+|----|------|
+| 锁屏通知 | 短导语：截至 / 是否今日 / 覆盖率 /「打开完整卡」。iOS 会截断长正文，禁止把清单塞进通知硬撞 |
+| 完整卡 | `GET /proactive/fact-card/view`：清单 + 评估 + 建议 + 免责 + **勾选指标**。数字 ⊆ JSON |
+
+默认勾选可以是注册表 `enabled_default`（当前：步数 / HRV / 睡眠 / 静息心率 / 活动消耗）。**默认 ≠ 不可改。**
 
 ---
 
@@ -203,13 +213,16 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M0-P2** | 日表对齐；skip-LLM 问答能读到 healthkit 行 | `DONE` | 2026-09-05：真机今日 **14872** 入库；「今天」读当日行，「昨天」11259；空窗/非本窗整步数 fail-closed。Hero「今日步数」走同一点日绑定，不用窗口末日顶。未改 `harness_core` 包。 |
 | **M1-P0** | 无 LLM 事实卡引擎 + `GET /proactive/fact-card` | `DONE` | 2026-09-06：`pha/fact_card.py`；selfcheck PASS；今日无行则 stale + today.steps=null，as_of 步数不标今日。 |
 | **M1-P1** | iPhone 捷径本地通知（可配每日自动化） | `DONE` | 2026-09-06：LAN `192.168.77.219` `GET /proactive/fact-card` **200**；维护者确认 iPhone 弹出事实卡通知。每日自动化仍由「快捷指令」定时跑，未另验。 |
-| **M1-P2** | 通知内容契约：五项事实 + 卡级评估/建议 | `DONE` | 2026-09-06：正文枚举白名单五项；`assessment.summary`；无记录写「无」。M0 捷径仍只同步步数，其余项诚实为无。 |
-| **M1** | （汇总）iPhone 主动事实卡：通道 + 内容契约 | `DONE` | M1-P0 + P1 + P2。未开 M2；多指标入库另开卡。 |
-| **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒 | `TODO` | |
+| **M1-P2** | 通知内容契约：五项事实 + 卡级评估/建议 | `DONE` | 2026-09-06：当时正文枚举白名单五项；`assessment.summary`；无记录写「无」。v1.3 起五项改为默认选择，完整清单改走 HTML。 |
+| **M1-P3** | 完整卡可点开：短通知 + `GET /proactive/fact-card/view` | `DONE` | 2026-09-06：锁屏只保留导语；捷径「打开 URL」进移动完整卡。系统通知本身通常不能自定义点击深链，完整卡靠打开 URL / 以后 M2 App。 |
+| **M1-P4** | 用户自选指标（反硬编码） | `DONE` | 2026-09-06：注册表 `fact_card.eligible` + `data/fact_card_prefs.json` + 完整卡勾选。 |
+| **M1-P5** | 多指标入库（文档已立，代码未做） | `TODO` | 按用户已选 ∩ FR-1.4，各「当日合计」POST；先步数以外的 HRV/睡眠/RHR/消耗。见 [路线图](pha-ios-proactive-roadmap.md)。 |
+| **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
+| **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内问答对接 PHA（可选） | `TODO` | 触发：M2 稳定 |
 | **M4** | 端侧推理 | `TODO` | 触发：有明确机型与模型方案 |
 
-M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card`；`scripts/pha_fact_card_selfcheck.py`；`scripts/macos/build_pha_ingest_shortcuts.py`（`PHA 事实卡通知`）；`docs/pha-fact-card.md`。
+M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/prefs`；`scripts/pha_fact_card_selfcheck.py`；`scripts/macos/build_pha_ingest_shortcuts.py`（`PHA 事实卡通知`）；`docs/pha-fact-card.md`；`docs/pha-ios-proactive-roadmap.md`。
 
 ---
 
@@ -248,6 +261,7 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card`；`scripts/pha
 | 2026-09-06 | M1 通道在表里写成「通知或小组件」，未写明 iPhone；评估/建议未分层 | v1.1：M1 = iPhone 本地通知；卡分 facts / assessment；LLM 评估不进主动路径 |
 | 2026-09-06 | 真机捷径 `GET /proactive/fact-card` 200，iPhone 弹出通知 | M1-P1 通道 DONE |
 | 2026-09-06 | 首版通知只甩出有数的步数，评估层不可见 | v1.2 内容契约 + M1-P2：五项都列出；卡级评估/建议 |
+| 2026-09-06 | iPhone 通知截断且无法点开；五项写死在 Python | v1.3：完整卡 HTML；指标改注册表+用户勾选；多指标入库立为 M1-P5 |
 
 ---
 
@@ -258,3 +272,4 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card`；`scripts/pha
 | 2026-08-31 | v1.0 | 初版共识：管道优先、事实卡无 LLM、iOS 为壳、Mac 为账本 |
 | 2026-09-06 | v1.1 | 冻结 M1 通道为 iPhone 捷径本地通知；事实卡两层（数字 + 模板评估）；主动路径禁止 LLM 评估 |
 | 2026-09-06 | v1.2 | §5.1 内容契约：通知必须五项事实 + 卡级评估/建议；分析=个人基线规则，不是 LLM |
+| 2026-09-06 | v1.3 | 完整卡可点开；指标用户自选（宪法反硬编码）；FR-1.5 / M1-P5 多指标入库写入计划 |
