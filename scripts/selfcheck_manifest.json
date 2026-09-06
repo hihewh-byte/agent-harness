@@ -30,6 +30,7 @@
     {"id": "wearable_daily_aggregator", "script": "scripts/pha_wearable_daily_aggregator_selfcheck.py", "tags": ["storage"]},
     {"id": "wearable_daily_bind", "script": "scripts/pha_wearable_daily_bind_selfcheck.py", "tags": ["m0", "wearable", "hero"]},
     {"id": "healthkit_ingest", "script": "scripts/pha_healthkit_ingest_selfcheck.py", "tags": ["m0", "ingest", "ios"]},
+    {"id": "fact_card", "script": "scripts/pha_fact_card_selfcheck.py", "tags": ["m1", "fact-card", "ios"]},
     {"id": "wearable_registry", "script": "scripts/pha_wearable_registry_selfcheck.py"},
     {"id": "wearable_p15", "script": "scripts/pha_wearable_p15_selfcheck.py"},
     {"id": "wearable_compare_table", "script": "scripts/pha_wearable_compare_table_selfcheck.py"},

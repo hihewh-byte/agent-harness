@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-09-06
+
+- **Fact card route (M1-P0; listen bind unchanged)**:
+  - `pha/main.py`: `include_router` for `GET /proactive/fact-card` (`pha/fact_card_api.py`).
+  - Same `PHA_INGEST_TOKEN` as ingest. No new process, no host/port change.
+  - Rollback: remove the include_router line.
+
+---
+
 ## 2026-08-31
 
 - **HealthKit ingest route (M0-P0; listen bind unchanged)**:

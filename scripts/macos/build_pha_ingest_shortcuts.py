@@ -134,6 +134,53 @@ def _downloadurl(url: str, token: str, body_uuid: str, body_name: str, action_uu
     )
 
 
+def _geturl(url: str, token: str, action_uuid: str, out_name: str) -> dict:
+    return _action(
+        "is.workflow.actions.downloadurl",
+        {
+            "UUID": action_uuid,
+            "CustomOutputName": out_name,
+            "WFURL": url,
+            "WFHTTPMethod": "GET",
+            "WFHTTPHeaders": _headers(token),
+        },
+    )
+
+
+def _dict_value(src_uuid: str, src_name: str, key: str, action_uuid: str, out_name: str) -> dict:
+    return _action(
+        "is.workflow.actions.getvalueforkey",
+        {
+            "UUID": action_uuid,
+            "CustomOutputName": out_name,
+            "WFDictionaryKey": key,
+            "WFInput": _output_ref(src_uuid, src_name),
+        },
+    )
+
+
+def build_fact_card(url: str, token: str) -> dict:
+    """GET fact card JSON → iPhone local notification (no HealthKit, no LLM)."""
+    get_id = _uuid()
+    note_id = _uuid()
+    title_id = _uuid()
+    body_id = _uuid()
+    actions = [
+        _geturl(url, token, get_id, "Fact Card"),
+        _dict_value(get_id, "Fact Card", "notification", note_id, "Notification"),
+        _dict_value(note_id, "Notification", "title", title_id, "Title"),
+        _dict_value(note_id, "Notification", "body", body_id, "Body"),
+        _action(
+            "is.workflow.actions.notification",
+            {
+                "WFNotificationActionTitle": _text_with_refs([(title_id, "Title")]),
+                "WFNotificationActionBody": _text_with_refs([(body_id, "Body")]),
+            },
+        ),
+    ]
+    return _workflow("PHA 事实卡通知", actions)
+
+
 def build_probe(url: str, token: str) -> dict:
     now = datetime.now(ZoneInfo("Asia/Shanghai")).replace(microsecond=0).isoformat()
     body = (
@@ -333,12 +380,14 @@ def main() -> int:
     host_ip = _default_ingest_host()
     port = env.get("PHA_PORT", "8788").strip() or "8788"
     url = f"http://{host_ip}:{port}/ingest/healthkit"
+    fact_url = f"http://{host_ip}:{port}/proactive/fact-card?user_id=default"
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "endpoint.txt").write_text(url + "\n", encoding="utf-8")
+    (OUT_DIR / "endpoint.txt").write_text(url + "\n" + fact_url + "\n", encoding="utf-8")
 
     jobs = [
         ("pha-ingest-probe", build_probe(url, token), "anyone"),
         ("pha-sync-health", build_health(url, token), "people-who-know-me"),
+        ("pha-fact-card", build_fact_card(fact_url, token), "people-who-know-me"),
     ]
     for stem, wf, mode in jobs:
         xml_path = OUT_DIR / f"{stem}.plist"

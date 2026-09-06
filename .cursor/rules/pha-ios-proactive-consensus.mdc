@@ -1,6 +1,6 @@
 ---
 description: PHA iOS 主动健康 Agent 产品共识（ingest / 事实卡 / 通知）
-globs: pha/main.py,pha/healthkit_ingest.py,pha/sqlite_storage.py,pha/wearable_daily_aggregator.py,pha/store.py,scripts/pha_healthkit*,ios/**
+globs: pha/main.py,pha/healthkit_ingest.py,pha/fact_card.py,pha/fact_card_api.py,pha/sqlite_storage.py,pha/wearable_daily_aggregator.py,pha/store.py,scripts/pha_healthkit*,scripts/pha_fact_card*,ios/**
 alwaysApply: false
 ---
 

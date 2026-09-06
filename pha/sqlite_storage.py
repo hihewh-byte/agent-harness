@@ -273,6 +273,23 @@ def clear_wearable_storage(
         _release_connection(conn)
 
 
+def query_max_wearable_daily_day(user_id: str) -> Optional[date]:
+    """Latest ``wearable_daily.day`` for the user, or None. Never invents a calendar day."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        row = conn.execute(
+            "SELECT MAX(day) AS d FROM wearable_daily WHERE user_id = ?",
+            (uid,),
+        ).fetchone()
+        if not row or not row["d"]:
+            return None
+        return safe_parse_date(str(row["d"]))
+    finally:
+        _release_connection(conn)
+
+
 def get_max_wearable_timestamp(user_id: str) -> Optional[datetime]:
     init_schema()
     uid = user_id.strip() or "default"
