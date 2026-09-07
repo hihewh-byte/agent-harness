@@ -87,7 +87,7 @@ curl -sS -X POST "http://<Mac的Tailscale或局域网IP>:8788/ingest/healthkit" 
 
 | 字段 | 规则 |
 |------|------|
-| `metric_type` | v1：`hrv` `rhr` `steps` `sleep_hours` `active_energy`。也接受常见 HealthKit 类型名。未知类型：**丢该样本**，不猜测。 |
+| `metric_type` | v1：`hrv` `hrv_sdnn` `rhr` `steps` `sleep_hours` `sleep_core` `sleep_deep` `sleep_rem` `sleep_in_bed` `sleep_awake` `active_energy`。SDNN 不进 RMSSD。睡眠小时须在 (0, 16]。未知类型：**丢该样本**，不猜测。 |
 | `timestamp` | ISO-8601。按 `PHA_INGEST_TZ` 落到本地日历日。无法解析 → **整批丢弃**（400）。 |
 | `value` | 有限数字。单位见下表，**v1 不做换算**。 |
 | `source` | 必须是 `healthkit`。 |
@@ -97,7 +97,8 @@ curl -sS -X POST "http://<Mac的Tailscale或局域网IP>:8788/ingest/healthkit" 
 
 | 指标 | 值 |
 |------|----|
-| `hrv` | 毫秒（SDNN）。健康 App 有时是秒，须 ×1000。 |
+| `hrv` | 毫秒（仓库 RMSSD / 旧 zip）。手表 SDNN 不要用这个键。 |
+| `hrv_sdnn` | 毫秒（HealthKit SDNN 当时日均） |
 | `rhr` | bpm |
 | `steps` | 当日步数（建议每天一条累计，不要把同一累计值按小时重复 POST） |
 | `sleep_hours` | **小时**（不是秒） |

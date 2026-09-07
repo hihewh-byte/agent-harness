@@ -60,7 +60,19 @@ class WearableDailySummary(BaseModel):
         default=None,
         description="Heart rate variability (HRV), RMSSD in milliseconds.",
     )
+    hrv_sdnn_ms: Optional[float] = Field(
+        default=None,
+        description="HealthKit HRV SDNN daily mean as of ingest (ms). Not RMSSD.",
+    )
     sleep_hours: Optional[float] = None
+    sleep_core_hours: Optional[float] = Field(
+        default=None,
+        description="Asleep Core duration for the wake day (hours).",
+    )
+    in_bed_hours: Optional[float] = Field(
+        default=None,
+        description="In Bed duration for the wake day (hours). Not asleep time.",
+    )
     sleep_deep_hours: Optional[float] = Field(
         default=None,
         description="Deep sleep duration aggregated for the calendar day (hours).",
@@ -72,6 +84,10 @@ class WearableDailySummary(BaseModel):
     awake_duration_hours: Optional[float] = Field(
         default=None,
         description="Time spent awake during sleep window (hours), for fragmentation analysis.",
+    )
+    sleep_period_hours: Optional[float] = Field(
+        default=None,
+        description="First asleep start to last asleep end (hours). Not Time in Bed.",
     )
     sleep_start_time: Optional[datetime] = Field(
         default=None,

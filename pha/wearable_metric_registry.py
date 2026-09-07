@@ -189,6 +189,19 @@ def default_fact_card_metric_ids() -> Tuple[str, ...]:
     return tuple(ids)
 
 
+def fact_card_daily_ingest_keys() -> Tuple[str, ...]:
+    """ingest_key values that use one HealthKit row per calendar day."""
+    keys: List[str] = []
+    for m in fact_card_eligible_entries():
+        fc = m.get("fact_card") or {}
+        if not fc.get("daily_key"):
+            continue
+        key = str(fc.get("ingest_key") or "").strip()
+        if key:
+            keys.append(key)
+    return tuple(keys)
+
+
 def clear_registry_cache() -> None:
     load_wearable_metric_registry.cache_clear()
 
@@ -197,6 +210,7 @@ __all__ = [
     "clear_registry_cache",
     "comparable_wearable_daily_specs",
     "default_fact_card_metric_ids",
+    "fact_card_daily_ingest_keys",
     "fact_card_eligible_entries",
     "ingest_module",
     "is_registered_comparable_metric",

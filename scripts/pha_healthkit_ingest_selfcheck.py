@@ -7,8 +7,9 @@ import json
 import os
 import sys
 import tempfile
-from datetime import date
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -184,6 +185,220 @@ def test_happy_path_and_idempotent(client) -> bool:
         print("FAIL energy doubled after rebuild", rows2[0].active_energy_kcal)
         return False
     print("OK ingest → wearable_data + wearable_daily; idempotent; no energy double-count")
+    return True
+
+
+def test_energy_daily_key_replaces(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "energy_replace"
+    first = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "active_energy",
+                    "timestamp": "2026-08-30T10:00:00+08:00",
+                    "value": 410.0,
+                    "unit": "kcal",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    second = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "active_energy",
+                    "timestamp": "2026-08-30T21:00:00+08:00",
+                    "value": 200.0,
+                    "unit": "kcal",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if first.status_code != 200 or second.status_code != 200:
+        print("FAIL energy daily replace status", first.status_code, second.status_code)
+        return False
+    rows = query_wearable_daily_range(uid, DAY, DAY)
+    if not rows or rows[0].active_energy_kcal != 200.0:
+        print("FAIL energy must replace same-day total, got", rows)
+        return False
+    print("OK active_energy daily key replaces (no sum of two POSTs)")
+    return True
+
+
+def test_hrv_sdnn_does_not_write_rmssd(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "hrv_sdnn_only"
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "hrv_sdnn",
+                    "timestamp": "2026-08-30T07:00:00+08:00",
+                    "value": 38.4,
+                    "unit": "ms",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL hrv_sdnn status", r.status_code, r.text)
+        return False
+    alias = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "heartRateVariabilitySDNN",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 40.0,
+                    "unit": "ms",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if alias.status_code != 200:
+        print("FAIL sdnn alias status", alias.status_code, alias.text)
+        return False
+    rows = query_wearable_daily_range(uid, DAY, DAY)
+    if not rows:
+        print("FAIL hrv_sdnn missing daily row")
+        return False
+    if rows[0].hrv_rmssd_ms is not None:
+        print("FAIL SDNN leaked into RMSSD", rows[0].hrv_rmssd_ms)
+        return False
+    if rows[0].hrv_sdnn_ms != 40.0:
+        print("FAIL daily key should replace SDNN mean, got", rows[0].hrv_sdnn_ms)
+        return False
+    print("OK hrv_sdnn writes hrv_sdnn_ms only")
+    return True
+
+
+def test_sleep_stages_sum_to_asleep(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_stages"
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "sleep_core",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 4.0,
+                    "unit": "h",
+                    "source": "healthkit",
+                },
+                {
+                    "metric_type": "sleep_deep",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 1.5,
+                    "unit": "h",
+                    "source": "healthkit",
+                },
+                {
+                    "metric_type": "sleep_rem",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 1.2,
+                    "unit": "h",
+                    "source": "healthkit",
+                },
+                {
+                    "metric_type": "sleep_in_bed",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 8.0,
+                    "unit": "h",
+                    "source": "healthkit",
+                },
+                {
+                    "metric_type": "sleep_awake",
+                    "timestamp": "2026-08-30T08:00:00+08:00",
+                    "value": 0.3,
+                    "unit": "h",
+                    "source": "healthkit",
+                },
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL sleep stages status", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range(uid, DAY, DAY)
+    if not rows:
+        print("FAIL sleep stages missing daily")
+        return False
+    row = rows[0]
+    if row.sleep_hours != 6.7:
+        print("FAIL sleep_hours must be core+deep+rem, got", row.sleep_hours)
+        return False
+    if row.in_bed_hours != 8.0 or row.sleep_deep_hours != 1.5:
+        print("FAIL stage columns", row.in_bed_hours, row.sleep_deep_hours)
+        return False
+    if row.awake_duration_hours != 0.3:
+        print("FAIL awake", row.awake_duration_hours)
+        return False
+    bad = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "sleep_deep",
+                    "timestamp": "2026-08-30T09:00:00+08:00",
+                    "value": 20,
+                    "unit": "h",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if bad.status_code != 400:
+        print("FAIL hours>16 must 400, got", bad.status_code)
+        return False
+    secs = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "sleep_in_bed",
+                    "timestamp": "2026-08-30T09:00:00+08:00",
+                    "value": 30960,
+                    "unit": "s",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if secs.status_code != 200:
+        print("FAIL sleep seconds coerce status", secs.status_code, secs.text)
+        return False
+    rows = query_wearable_daily_range(uid, DAY, DAY)
+    if not rows or abs(float(rows[0].in_bed_hours) - 8.6) > 0.01:
+        print("FAIL Duration seconds should become hours, got", rows[0].in_bed_hours if rows else None)
+        return False
+    print("OK sleep stages sum to asleep hours; seconds coerced; implausible rejected")
     return True
 
 
@@ -370,10 +585,64 @@ def test_empty_value_hole_in_json(client) -> bool:
 
 def test_get_ingest_explains_post_only(client) -> bool:
     r = client.get("/ingest/healthkit")
-    if r.status_code != 200 or r.json().get("error") != "use_post":
-        print("FAIL GET ingest", r.status_code, r.text)
+    if r.status_code != 200:
+        print("FAIL GET ingest status", r.status_code)
+        return False
+    body = r.json()
+    if body.get("ok") is not False or body.get("error") != "use_post":
+        print("FAIL GET ingest body", body)
         return False
     print("OK GET ingest explains POST-only")
+    return True
+
+
+def test_ingest_last_receipt(client) -> bool:
+    from pha.healthkit_ingest_receipt import load_healthkit_ingest_last, receipt_path
+
+    uid = "receipt_user"
+    bad = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        content=b"PHA_SLEEP_V1\nuser_id=receipt_user\n---VALUES---\n\n---STARTS---\n\n---ENDS---\n",
+    )
+    if bad.status_code != 400:
+        print("FAIL receipt expected 400", bad.status_code, bad.text)
+        return False
+    failed = load_healthkit_ingest_last(uid)
+    if failed.get("ok") is not False or failed.get("error") != "sleep_stage_list_mismatch":
+        print("FAIL receipt after 400", failed, "path", receipt_path())
+        return False
+    today = _local_today()
+    start = _at(today, 2)
+    end = _at(today, 6)
+    good = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        content=(
+            "PHA_SLEEP_V1\n"
+            f"user_id={uid}\n"
+            "---VALUES---\nCore\n---STARTS---\n"
+            f"{start.isoformat()}\n---ENDS---\n{end.isoformat()}\n"
+        ).encode("utf-8"),
+    )
+    if good.status_code != 200:
+        print("FAIL receipt success post", good.status_code, good.text)
+        return False
+    got = client.get(
+        f"/ingest/healthkit/last?user_id={uid}",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+    )
+    if got.status_code != 200:
+        print("FAIL GET last status", got.status_code, got.text)
+        return False
+    body = got.json()
+    if body.get("ok") is not True or body.get("kind") != "sleep":
+        print("FAIL GET last body", body)
+        return False
+    if (body.get("audit") or {}).get("wake_day") != today.isoformat():
+        print("FAIL GET last audit", body)
+        return False
+    print("OK ingest last receipt records fail then success")
     return True
 
 
@@ -621,16 +890,656 @@ def test_skip_llm_time_grain_not_90d_mean(client) -> bool:
     return True
 
 
+def _local_today() -> date:
+    return datetime.now(ZoneInfo(TZ)).replace(tzinfo=None).date()
+
+
+def _at(day: date, hour: int, minute: int = 0) -> datetime:
+    return datetime.combine(day, time(hour, minute))
+
+
+def _audit_ok(payload: dict) -> bool:
+    audit = payload.get("audit") or {}
+    needed = (
+        "kept",
+        "skipped_zero",
+        "dropped_unknown_label",
+        "per_stage_h",
+        "union_asleep_h",
+        "session_span",
+        "window",
+        "stage_overlap",
+    )
+    return all(key in audit for key in needed)
+
+
+def test_sleep_stage_bundle_last_24h(client) -> bool:
+    from pha.sqlite_storage import query_sleep_segments_for_day, query_wearable_daily_range
+
+    uid = "sleep_bundle"
+    now = datetime.now(ZoneInfo(TZ)).replace(tzinfo=None, second=0, microsecond=0)
+    wake = now.replace(hour=7, minute=30)
+    if wake > now:
+        wake = wake - timedelta(days=1)
+    bed = wake - timedelta(hours=8, minutes=36)
+    wake_day = wake.date()
+    # One overlapping In Bed + non-overlapping stages that match Health 9/6.
+    values = [
+        "In Bed",
+        "Asleep Core",
+        "Asleep Deep",
+        "Asleep REM",
+        "Awake",
+        "In Bed",
+    ]
+    starts = [
+        bed.isoformat(),
+        bed.isoformat(),
+        (bed + timedelta(hours=4, minutes=36)).isoformat(),
+        (bed + timedelta(hours=5, minutes=9)).isoformat(),
+        (bed + timedelta(hours=6, minutes=45)).isoformat(),
+        (bed - timedelta(days=1)).isoformat(),
+    ]
+    ends = [
+        wake.isoformat(),
+        (bed + timedelta(hours=4, minutes=36)).isoformat(),
+        (bed + timedelta(hours=5, minutes=9)).isoformat(),
+        (bed + timedelta(hours=6, minutes=45)).isoformat(),
+        wake.isoformat(),
+        (bed - timedelta(days=1) + timedelta(hours=8)).isoformat(),
+    ]
+    payload = {
+        "user_id": uid,
+        "sleep_values": values,
+        "sleep_starts": starts,
+        "sleep_ends": ends,
+    }
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json=payload,
+    )
+    if r.status_code != 200:
+        print("FAIL sleep bundle status", r.status_code, r.text)
+        return False
+    body = r.json()
+    if not _audit_ok(body):
+        print("FAIL sleep bundle missing audit", body)
+        return False
+    if body["audit"].get("stage_overlap"):
+        print("FAIL 9/6-style fixture should not overlap", body["audit"])
+        return False
+    rows = query_wearable_daily_range(uid, wake_day, wake_day)
+    if not rows:
+        print("FAIL sleep bundle missing daily")
+        return False
+    row = rows[0]
+    if abs((row.in_bed_hours or 0) - 8.6) > 0.02:
+        print("FAIL in_bed", row.in_bed_hours)
+        return False
+    if abs((row.sleep_hours or 0) - 6.75) > 0.02:
+        print("FAIL sleep_hours", row.sleep_hours)
+        return False
+    if abs((row.sleep_core_hours or 0) - 4.6) > 0.02:
+        print("FAIL core", row.sleep_core_hours)
+        return False
+    if abs((row.sleep_deep_hours or 0) - 0.55) > 0.02:
+        print("FAIL deep", row.sleep_deep_hours)
+        return False
+    if abs((row.sleep_rem_hours or 0) - 1.6) > 0.02:
+        print("FAIL rem", row.sleep_rem_hours)
+        return False
+    if abs((row.awake_duration_hours or 0) - 1.85) > 0.02:
+        print("FAIL awake", row.awake_duration_hours)
+        return False
+    segs = query_sleep_segments_for_day(uid, wake_day)
+    if len(segs) != 5:
+        print("FAIL expected 5 kept segments, got", len(segs))
+        return False
+    again = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json=payload,
+    )
+    if again.status_code != 200:
+        print("FAIL sleep bundle repeat status", again.status_code, again.text)
+        return False
+    segs2 = query_sleep_segments_for_day(uid, wake_day)
+    if len(segs2) != len(segs):
+        print("FAIL repeat POST not idempotent", len(segs), len(segs2))
+        return False
+    rows2 = query_wearable_daily_range(uid, wake_day, wake_day)
+    if not rows2 or abs((rows2[0].sleep_hours or 0) - 6.75) > 0.02:
+        print("FAIL repeat POST daily drifted", rows2[0].sleep_hours if rows2 else None)
+        return False
+    bad = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["In Bed", "Asleep Core"],
+            "sleep_starts": [bed.isoformat()],
+            "sleep_ends": [wake.isoformat()],
+        },
+    )
+    if bad.status_code != 400 or bad.json().get("detail", {}).get("error") != "sleep_stage_list_mismatch":
+        print("FAIL mismatch must be 400", bad.status_code, bad.text)
+        return False
+    print("OK sleep stage lists pair; wake-day noon window; previous night dropped; audit+segments")
+    return True
+
+
+def test_sleep_bundle_marker_text(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_bundle_text"
+    today = _local_today()
+    start = _at(today, 2)
+    end = _at(today, 3)
+    body = (
+        "PHA_SLEEP_V1\n"
+        f"user_id={uid}\n"
+        "---VALUES---\n"
+        "Asleep Deep\n"
+        "---STARTS---\n"
+        f"{start.isoformat()}\n"
+        "---ENDS---\n"
+        f"{end.isoformat()}\n"
+    )
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        content=body.encode("utf-8"),
+    )
+    if r.status_code != 200:
+        print("FAIL sleep marker status", r.status_code, r.text)
+        return False
+    if not _audit_ok(r.json()):
+        print("FAIL sleep marker missing audit", r.json())
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows or abs((rows[0].sleep_deep_hours or 0) - 1.0) > 0.02:
+        print("FAIL sleep marker daily", rows[0].sleep_deep_hours if rows else None)
+        return False
+    print("OK PHA_SLEEP_V1 marker text")
+    return True
+
+
+def test_sleep_bundle_optional_source_sections(client) -> bool:
+    from pha.sqlite_storage import query_sleep_segments_for_day
+
+    uid = "sleep_bundle_source"
+    today = _local_today()
+    start = _at(today, 2)
+    end = _at(today, 6)
+    body = (
+        "PHA_SLEEP_V1\n"
+        f"user_id={uid}\n"
+        "---VALUES---\n"
+        "Core\n"
+        "---STARTS---\n"
+        f"{start.isoformat()}\n"
+        "---ENDS---\n"
+        f"{end.isoformat()}\n"
+        "---SOURCES---\n"
+        "文辉的 Apple Watch\n"
+        "---DEVICES---\n"
+        "Apple Watch\n"
+    )
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        content=body.encode("utf-8"),
+    )
+    if r.status_code != 200:
+        print("FAIL source bundle status", r.status_code, r.text)
+        return False
+    segs = query_sleep_segments_for_day(uid, today)
+    if not segs or "Watch" not in str(segs[0].get("source_name") or ""):
+        print("FAIL source_name not kept", segs)
+        return False
+    print("OK optional ---SOURCES---/---DEVICES--- do not break ends pairing")
+    return True
+
+
+def test_sleep_shortcut_d1_plist() -> bool:
+    sys.path.insert(0, str(ROOT / "scripts" / "macos"))
+    from build_pha_ingest_shortcuts import build_sleep
+
+    class _Spec:
+        metric_id = "sleep_time_asleep"
+        ingest_key = "sleep_hours"
+        label = "睡眠"
+        unit = "h"
+        health_type = "Sleep"
+        stat = "Sum"
+        unit_health = "In Bed"
+
+    d1 = build_sleep("http://example.local:8788/ingest/healthkit", "t", [_Spec()], variant="d1")
+    today = build_sleep(
+        "http://example.local:8788/ingest/healthkit", "t", [_Spec()], variant="is_today"
+    )
+    dump = str(d1)
+    if "健康 App 锚点（9/6）" in dump or "健康 App 锚点（9/6）" in str(today):
+        print("FAIL 9/6 anchor text must be gone")
+        return False
+    find_d1 = d1["WFWorkflowActions"][0]["WFWorkflowActionParameters"]
+    if not find_d1.get("WFContentItemLimitEnabled") or find_d1.get("WFContentItemLimitNumber") != 150:
+        print("FAIL D1 must Limit 150", find_d1)
+        return False
+    if find_d1.get("WFContentItemSortOrder") != "Latest First":
+        print("FAIL D1 must sort Start Date latest first", find_d1)
+        return False
+    templates = find_d1["WFContentItemFilter"]["Value"]["WFActionParameterFilterTemplates"]
+    if any(t.get("Operator") == 1002 for t in templates):
+        print("FAIL D1 must not use is today")
+        return False
+    last_n = [t for t in templates if t.get("Operator") == 1001]
+    if not last_n or last_n[0].get("Values", {}).get("Number") != 2:
+        print("FAIL D1 must bound Start Date to last 2 days", templates)
+        return False
+    find_today = today["WFWorkflowActions"][0]["WFWorkflowActionParameters"]
+    today_templates = find_today["WFContentItemFilter"]["Value"]["WFActionParameterFilterTemplates"]
+    if not any(t.get("Operator") == 1002 for t in today_templates):
+        print("FAIL is-today fallback missing is-today filter")
+        return False
+    if find_today.get("WFContentItemLimitEnabled"):
+        print("FAIL is-today fallback should not Limit")
+        return False
+    props = [
+        a["WFWorkflowActionParameters"].get("WFContentItemPropertyName")
+        for a in d1["WFWorkflowActions"]
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.properties.health.quantity"
+    ]
+    if props[:5] != ["Value", "Start Date", "End Date", "Source", "Device"]:
+        print("FAIL Get Details props", props)
+        return False
+    from build_pha_ingest_shortcuts import _find_health, _get_detail
+
+    qty = _find_health("Active Calories", "AAAA", "Samples")["WFWorkflowActionParameters"]
+    qty_templates = qty["WFContentItemFilter"]["Value"]["WFActionParameterFilterTemplates"]
+    if qty.get("WFContentItemLimitEnabled"):
+        print("FAIL quantity Find must not Limit", qty)
+        return False
+    if not any(t.get("Operator") == 1002 for t in qty_templates):
+        print("FAIL quantity Find must keep is today")
+        return False
+    detail = _get_detail("AAAA", "Samples", "Value", "BBBB", "Value")
+    if detail["WFWorkflowActionIdentifier"] != "is.workflow.actions.properties.health.quantity":
+        print("FAIL quantity Get Details identifier changed")
+        return False
+    print("OK sleep shortcut D1 Limit 150 + is-today fallback; no 9/6 copy; quantity Find unchanged")
+    return True
+
+
+def test_shortcut_sleep_date_format(client) -> bool:
+    from pha.date_parser import safe_parse_datetime
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    parsed = safe_parse_datetime("7 Sep 2026 at 12:01\u202fAM")
+    if parsed is None or (parsed.year, parsed.month, parsed.day) != (2026, 9, 7):
+        print("FAIL shortcuts date parse", parsed)
+        return False
+
+    def shortcut_dt(dt: datetime) -> str:
+        months = (
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        )
+        hour12 = dt.hour % 12 or 12
+        ampm = "AM" if dt.hour < 12 else "PM"
+        return (
+            f"{dt.day} {months[dt.month - 1]} {dt.year} at "
+            f"{hour12}:{dt.strftime('%M')}\u202f{ampm}"
+        )
+
+    uid = "sleep_shortcut_dates"
+    today = _local_today()
+    t0 = _at(today, 1)
+    t1 = _at(today, 2)
+    t2 = _at(today, 3)
+    t3 = _at(today, 4)
+    t4 = _at(today, 4, 30)
+    body = (
+        "PHA_SLEEP_V1\n"
+        f"user_id={uid}\n"
+        "---VALUES---\n"
+        "Core\nDeep\nREM\nAwake\n"
+        "---STARTS---\n"
+        f"{shortcut_dt(t0)}\n{shortcut_dt(t1)}\n{shortcut_dt(t2)}\n{shortcut_dt(t3)}\n"
+        "---ENDS---\n"
+        f"{shortcut_dt(t1)}\n{shortcut_dt(t2)}\n{shortcut_dt(t3)}\n{shortcut_dt(t4)}\n"
+    )
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        content=body.encode("utf-8"),
+    )
+    if r.status_code != 200:
+        print("FAIL shortcut dates status", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows:
+        print("FAIL shortcut dates missing daily")
+        return False
+    row = rows[0]
+    if abs((row.sleep_core_hours or 0) - 1.0) > 0.02:
+        print("FAIL core hours", row.sleep_core_hours)
+        return False
+    if abs((row.sleep_hours or 0) - 3.0) > 0.02:
+        print("FAIL asleep hours", row.sleep_hours)
+        return False
+    print("OK Shortcuts sleep dates with narrow space")
+    return True
+
+
+def test_sleep_zero_duration_skipped_and_overlap_unioned(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_zero_union"
+    today = _local_today()
+    now = datetime.now(ZoneInfo(TZ)).replace(tzinfo=None, second=0, microsecond=0)
+    core_start = _at(today, 2)
+    core_end = _at(today, 6)
+    blip = _at(today, 4)
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core", "Core", "Core"],
+            "sleep_starts": [
+                core_start.isoformat(),
+                core_start.isoformat(),
+                blip.isoformat(),
+            ],
+            "sleep_ends": [
+                core_end.isoformat(),
+                core_end.isoformat(),
+                blip.isoformat(),
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL zero/union status", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows or abs((rows[0].sleep_core_hours or 0) - 4.0) > 0.02:
+        print("FAIL union core hours", rows[0].sleep_core_hours if rows else None)
+        return False
+    if abs((rows[0].sleep_hours or 0) - 4.0) > 0.02:
+        print("FAIL union asleep hours", rows[0].sleep_hours if rows else None)
+        return False
+    bad = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core"],
+            "sleep_starts": [(now - timedelta(hours=1)).isoformat()],
+            "sleep_ends": [(now - timedelta(hours=3)).isoformat()],
+        },
+    )
+    err = (bad.json() or {}).get("detail", {}).get("error", "")
+    if bad.status_code != 400 or "end_before_start" not in err:
+        print("FAIL inverted pair must 400", bad.status_code, bad.text)
+        return False
+    print("OK skip zero-duration sleep; union overlaps; inverted pair fail-closed")
+    return True
+
+
+def test_sleep_stage_overlap_nulls_stages(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_stage_overlap"
+    today = _local_today()
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core", "REM"],
+            "sleep_starts": [_at(today, 1).isoformat(), _at(today, 3).isoformat()],
+            "sleep_ends": [_at(today, 5).isoformat(), _at(today, 7).isoformat()],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL overlap status", r.status_code, r.text)
+        return False
+    body = r.json()
+    if not body.get("audit", {}).get("stage_overlap"):
+        print("FAIL expected stage_overlap", body)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows:
+        print("FAIL overlap missing daily")
+        return False
+    row = rows[0]
+    if abs((row.sleep_hours or 0) - 6.0) > 0.02:
+        print("FAIL overlap union asleep", row.sleep_hours)
+        return False
+    if row.sleep_core_hours is not None or row.sleep_rem_hours is not None or row.sleep_deep_hours is not None:
+        print(
+            "FAIL overlap must null stages",
+            row.sleep_core_hours,
+            row.sleep_deep_hours,
+            row.sleep_rem_hours,
+        )
+        return False
+    print("OK stage_overlap nulls per-stage hours and keeps asleep union")
+    return True
+
+
+def test_sleep_wake_day_noon_window(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_wake_noon"
+    today = _local_today()
+    yesterday = today - timedelta(days=1)
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core", "Core"],
+            "sleep_starts": [
+                _at(yesterday, 23).isoformat(),
+                _at(today, 23, 30).isoformat(),
+            ],
+            "sleep_ends": [
+                _at(today, 7).isoformat(),
+                _at(today, 23, 45).isoformat(),
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL wake-day status", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows or abs((rows[0].sleep_hours or 0) - 8.0) > 0.02:
+        print("FAIL wake-day hours", rows[0].sleep_hours if rows else None)
+        return False
+    tomorrow = query_wearable_daily_range(uid, today + timedelta(days=1), today + timedelta(days=1))
+    if tomorrow and (tomorrow[0].sleep_hours or 0) > 0:
+        print("FAIL tonight leaked into another day", tomorrow[0].sleep_hours)
+        return False
+    audit = r.json().get("audit") or {}
+    if audit.get("kept") != 1:
+        print("FAIL evening extra should be dropped", audit)
+        return False
+    print("OK wake-day noon window keeps overnight sleep and drops tonight")
+    return True
+
+
+def test_sleep_stale_bundle_rejected(client) -> bool:
+    uid = "sleep_stale"
+    today = _local_today()
+    old = today - timedelta(days=3)
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core"],
+            "sleep_starts": [_at(old - timedelta(days=1), 23).isoformat()],
+            "sleep_ends": [_at(old, 7).isoformat()],
+        },
+    )
+    err = (r.json() or {}).get("detail", {}).get("error", "")
+    if r.status_code != 400 or err != "stale_sleep_bundle":
+        print("FAIL stale bundle must 400", r.status_code, r.text)
+        return False
+    print("OK stale_sleep_bundle rejected")
+    return True
+
+
+def test_sleep_period_not_used_as_in_bed(client) -> bool:
+    from pha.sqlite_storage import query_wearable_daily_range
+
+    uid = "sleep_period"
+    today = _local_today()
+    yesterday = today - timedelta(days=1)
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Deep", "Core"],
+            "sleep_starts": [
+                _at(yesterday, 20, 30).isoformat(),
+                _at(yesterday, 22, 45).isoformat(),
+            ],
+            "sleep_ends": [
+                _at(yesterday, 20, 34).isoformat(),
+                _at(today, 6, 27).isoformat(),
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL sleep_period status", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows:
+        print("FAIL sleep_period missing daily")
+        return False
+    row = rows[0]
+    if row.in_bed_hours is not None:
+        print("FAIL in_bed must stay empty without In Bed samples", row.in_bed_hours)
+        return False
+    if abs((row.sleep_period_hours or 0) - 9.95) > 0.02:
+        print("FAIL sleep_period", row.sleep_period_hours)
+        return False
+    if (r.json().get("audit") or {}).get("sleep_efficiency") is not None:
+        print("FAIL efficiency must wait for in_bed", r.json().get("audit"))
+        return False
+
+    uid2 = "sleep_period_bed"
+    bed = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid2,
+            "sleep_values": ["In Bed", "Core"],
+            "sleep_starts": [
+                _at(yesterday, 22, 3).isoformat(),
+                _at(yesterday, 22, 45).isoformat(),
+            ],
+            "sleep_ends": [
+                _at(today, 7).isoformat(),
+                _at(today, 6, 27).isoformat(),
+            ],
+        },
+    )
+    if bed.status_code != 200:
+        print("FAIL in_bed fixture status", bed.status_code, bed.text)
+        return False
+    rows2 = query_wearable_daily_range(uid2, today, today)
+    if not rows2 or abs((rows2[0].in_bed_hours or 0) - 8.95) > 0.02:
+        print("FAIL in_bed hours", rows2[0].in_bed_hours if rows2 else None)
+        return False
+    print("OK in_bed from In Bed samples only; sleep_period is derived")
+    return True
+
+
+def test_sleep_bundle_clears_old_daily_keys(client) -> bool:
+    from pha.sqlite_storage import list_healthkit_sleep_family_on_day, query_wearable_daily_range
+
+    uid = "sleep_family_cleanup"
+    today = _local_today()
+    stale = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "samples": [
+                {
+                    "metric_type": "sleep_core",
+                    "timestamp": f"{today.isoformat()}T08:00:00+08:00",
+                    "value": 9.9,
+                    "unit": "h",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if stale.status_code != 200:
+        print("FAIL stale daily-key status", stale.status_code, stale.text)
+        return False
+    before = list_healthkit_sleep_family_on_day(uid, today)
+    if not before:
+        print("FAIL expected leftover healthkit sleep daily key")
+        return False
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": uid,
+            "sleep_values": ["Core"],
+            "sleep_starts": [_at(today, 2).isoformat()],
+            "sleep_ends": [_at(today, 6).isoformat()],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL cleanup bundle status", r.status_code, r.text)
+        return False
+    left = list_healthkit_sleep_family_on_day(uid, today)
+    if left:
+        print("FAIL healthkit sleep daily keys should be gone", left)
+        return False
+    rows = query_wearable_daily_range(uid, today, today)
+    if not rows or abs((rows[0].sleep_hours or 0) - 4.0) > 0.02:
+        print("FAIL daily after cleanup", rows[0].sleep_hours if rows else None)
+        return False
+    print("OK sleep bundle deletes leftover healthkit sleep daily keys")
+    return True
+
+
 def main() -> int:
     os.environ["PHA_INGEST_TZ"] = TZ
     db = _bind_temp_db()
     os.environ["PHA_INGEST_TOKEN"] = TOKEN
+    receipt = Path(tempfile.mkdtemp(prefix="pha-hk-receipt-")) / "last.json"
+    os.environ["PHA_HEALTHKIT_INGEST_LAST"] = str(receipt)
     client = _client()
     ok = all(
         [
             test_token_gates(client),
             test_malformed_drops_batch(client, db),
             test_happy_path_and_idempotent(client),
+            test_energy_daily_key_replaces(client),
+            test_hrv_sdnn_does_not_write_rmssd(client),
+            test_sleep_stages_sum_to_asleep(client),
+            test_sleep_stage_bundle_last_24h(client),
+            test_sleep_bundle_marker_text(client),
+            test_sleep_bundle_optional_source_sections(client),
+            test_sleep_shortcut_d1_plist(),
+            test_shortcut_sleep_date_format(client),
+            test_sleep_zero_duration_skipped_and_overlap_unioned(client),
+            test_sleep_stage_overlap_nulls_stages(client),
+            test_sleep_wake_day_noon_window(client),
+            test_sleep_stale_bundle_rejected(client),
+            test_sleep_period_not_used_as_in_bed(client),
+            test_sleep_bundle_clears_old_daily_keys(client),
             test_unknown_metric_dropped(client),
             test_shortcuts_quantity_string(client),
             test_steps_sums_multiple_numbers(client),
@@ -639,6 +1548,7 @@ def main() -> int:
             test_object_replacement_char_fail_closed(client),
             test_empty_value_hole_in_json(client),
             test_get_ingest_explains_post_only(client),
+            test_ingest_last_receipt(client),
             test_empty_timestamp_uses_received_at(client),
             test_zip_clear_preserves_healthkit(client),
             test_skip_llm_reads_healthkit_steps(client),

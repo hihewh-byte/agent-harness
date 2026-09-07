@@ -131,6 +131,7 @@ def test_build_matches_legacy_metric_resolution() -> bool:
         "steps": steps,
         "resting_heart_rate_bpm": agg.rhr_sum / agg.rhr_n,
         "hrv_rmssd_ms": agg.hrv_sum / agg.hrv_n,
+        "hrv_sdnn_ms": None,
         "active_energy_kcal": agg.active_energy_sum,
         "spo2_pct": agg.spo2_sum / agg.spo2_n,
         "respiratory_rate_bpm": agg.respiratory_sum / agg.respiratory_n,

@@ -63,7 +63,14 @@ def render_fact_card_html(
         label = escape(str(row.get("label") or row.get("metric_id") or ""))
         checked = " checked" if row.get("selected") else ""
         ingest = row.get("ingest_key")
-        hint = f' <em>ingest {escape(str(ingest))}</em>' if ingest else ""
+        if row.get("shortcut_sync"):
+            hint = " <em>捷径可同步</em>"
+        elif row.get("shortcut_skip_reason"):
+            hint = " <em>仅展示，捷径暂不同步</em>"
+        elif ingest:
+            hint = f' <em>ingest {escape(str(ingest))}</em>'
+        else:
+            hint = ""
         checks.append(
             f'<label class="pick"><input type="checkbox" name="metric_id" '
             f'value="{mid}"{checked}><span>{label}{hint}</span></label>'
@@ -75,6 +82,34 @@ def render_fact_card_html(
     )
     eval_text = escape(str(summary.get("text") or ""))
     advice_text = escape(str(summary.get("advice") or ""))
+    hk = facts.get("healthkit") or {}
+    if hk.get("reached"):
+        hk_line = (
+            f"最近一次 HealthKit 样本行：{escape(str(hk.get('last_metric')))} "
+            f"@ {escape(str(hk.get('last_timestamp')))}。"
+            "健康 App 有数不等于已进 Mac；请跑「PHA 同步健康 / 睡眠」。"
+        )
+    else:
+        hk_line = "账本里还没有 HealthKit 入库行。健康 App 有数也不会出现在这张卡上。"
+    ingest_last = facts.get("ingest_last") or {}
+    if ingest_last.get("at"):
+        kind = escape(str(ingest_last.get("kind") or ""))
+        at = escape(str(ingest_last.get("at") or ""))
+        if ingest_last.get("ok") is True:
+            audit = ingest_last.get("audit") or {}
+            extra = ""
+            if audit.get("wake_day"):
+                extra = f" · 醒来日 {escape(str(audit.get('wake_day')))}"
+            if audit.get("union_asleep_h") is not None:
+                extra += f" · 入睡 {escape(str(audit.get('union_asleep_h')))}h"
+            sync_line = f"上次同步成功：{at} · {kind}{extra}"
+        elif ingest_last.get("ok") is False:
+            err = escape(str(ingest_last.get("error") or "失败"))
+            sync_line = f"上次同步失败：{at} · {kind} · {err}"
+        else:
+            sync_line = f"上次同步：{at}"
+    else:
+        sync_line = "尚无捷径同步回执（跑过「PHA 同步睡眠 / 健康」后这里会显示上次成功或失败）。"
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -121,6 +156,8 @@ def render_fact_card_html(
   <p class="meta">日历日 {escape(str(calendar_day))} · 截至 {escape(str(as_of))}
     · <span class="{'warn' if stale else ''}">{stale_label}</span>
     · 覆盖 {escape(str(present))}/{escape(str(total))}</p>
+  <p class="fine">{sync_line}</p>
+  <p class="fine">{hk_line}</p>
   <section class="card">
     <h2>事实</h2>
     <ul>{''.join(metrics_html)}</ul>
@@ -134,7 +171,7 @@ def render_fact_card_html(
   </section>
   <section class="card">
     <h2>我要看哪些指标</h2>
-    <p class="fine">从注册表勾选，不是写死五项。未入库的项会显示「无」，不会编数。</p>
+    <p class="fine">从注册表勾选，不是写死五项。标「捷径可同步」的项会进「PHA 同步健康」；其余未入库则显示「无」，不会编数。改勾选后请在 Mac 重新生成捷径。</p>
     <form method="post" action="/proactive/fact-card/prefs?{qs}">
       {token_field}
       {''.join(checks)}

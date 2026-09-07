@@ -73,6 +73,7 @@ def _merge_wearable_same_day(a: WearableDailySummary, b: WearableDailySummary) -
         steps=steps,
         resting_heart_rate_bpm=_avg_optional(a.resting_heart_rate_bpm, b.resting_heart_rate_bpm),
         hrv_rmssd_ms=_avg_optional(a.hrv_rmssd_ms, b.hrv_rmssd_ms),
+        hrv_sdnn_ms=_avg_optional(a.hrv_sdnn_ms, b.hrv_sdnn_ms),
         sleep_hours=_sum_optional(a.sleep_hours, b.sleep_hours),
         awake_duration_hours=_sum_optional(a.awake_duration_hours, b.awake_duration_hours),
         sleep_start_time=_earliest_optional(a.sleep_start_time, b.sleep_start_time),

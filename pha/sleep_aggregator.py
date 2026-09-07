@@ -153,8 +153,14 @@ def sleep_stage_kind_from_hk_value(value: str) -> str:
 
 
 def sleep_stage_kind_from_sample_id(sample_id: str) -> str:
-    """Parse stage from ``make_sleep_sample_id`` pipe-delimited id (value in 4th field)."""
+    """Parse stage from zip ``make_sleep_sample_id`` or HealthKit segment ids.
+
+    Zip: ``{record_type}|{start}|{end}|{value}|{source}`` (value is field 4).
+    HealthKit: ``healthkit|{user}|{stage}|{start}|{end}|{source}`` (stage is field 3).
+    """
     parts = (sample_id or "").split("|")
+    if parts and parts[0] == "healthkit" and len(parts) >= 3:
+        return sleep_stage_kind_from_hk_value(parts[2])
     if len(parts) < 4:
         return "unknown"
     return sleep_stage_kind_from_hk_value(parts[3])

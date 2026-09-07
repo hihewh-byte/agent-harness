@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Any, Optional, Sequence
 
-from pha.fact_card_prefs import FactCardMetricSpec, resolve_metric_specs
+from pha.fact_card_prefs import FactCardMetricSpec, catalog_by_id, resolve_metric_specs
 from pha.health_data import effective_query_reference_date
 from pha.models import WearableDailySummary
 from pha.wearable_time_grain import rolling_n_grain
@@ -27,6 +27,16 @@ _SUMMARY_SYNC = "先把缺项同步进库，有数后再做恢复向评估。"
 _SUMMARY_BASELINE = "个人基线不足7天，只展示数字、不做分档。"
 _SUMMARY_BELOW = "有指标低于近90日个人基线，可考虑偏轻松安排。"
 _SUMMARY_OK = "有数指标相对近90日个人基线大致持平或偏好。"
+_SLEEP_VERIFY_METRIC_IDS = frozenset(
+    {
+        "sleep_time_asleep",
+        "sleep_core",
+        "sleep_deep",
+        "sleep_rem",
+        "sleep_in_bed",
+        "sleep_awake",
+    }
+)
 
 
 def _round_num(value: float, *, unit: str) -> float:
@@ -142,6 +152,29 @@ def _advice(band: str, label: str) -> str:
     return _ADVICE_UNKNOWN
 
 
+def sleep_verify_copy(
+    *,
+    label: str,
+    value: float,
+    unit: str,
+    percentile: Optional[float],
+) -> Optional[str]:
+    """Fixed template when a sleep metric sits outside the personal 90d band."""
+    if percentile is None:
+        return None
+    if percentile < 25:
+        direction = "低于"
+    elif percentile > 75:
+        direction = "高于"
+    else:
+        return None
+    shown = _fmt(value, unit)
+    return (
+        f"{label} {shown}{unit}，明显{direction}你近 90 日的水平，"
+        "请到健康 App 核对这一夜的数据"
+    )
+
+
 def compose_fact_card(
     *,
     calendar_day: date,
@@ -166,12 +199,26 @@ def compose_fact_card(
     metrics: list[dict[str, Any]] = []
     advice_items: list[dict[str, str]] = []
     for spec in specs:
-        metrics.append(_metric_row(spec, as_of, as_of_row, baseline_rows))
+        row = _metric_row(spec, as_of, as_of_row, baseline_rows)
+        metrics.append(row)
+        text = _advice(row["band"], row["label"])
+        if (
+            spec.metric_id in _SLEEP_VERIFY_METRIC_IDS
+            and row.get("value") is not None
+        ):
+            verify = sleep_verify_copy(
+                label=row["label"],
+                value=float(row["value"]),
+                unit=str(row.get("unit") or ""),
+                percentile=row.get("percentile"),
+            )
+            if verify:
+                text = verify
         advice_items.append(
             {
                 "metric": spec.metric_id,
-                "band": metrics[-1]["band"],
-                "text": _advice(metrics[-1]["band"], spec.label),
+                "band": row["band"],
+                "text": text,
             }
         )
 
@@ -220,13 +267,35 @@ def _metric_row(
     as_of_row: Optional[WearableDailySummary],
     baseline_rows: Sequence[WearableDailySummary],
 ) -> dict[str, Any]:
-    value = _row_value(as_of_row, spec.field) if as_of_row is not None else None
+    field = spec.field
+    label = spec.label
+    unit = spec.unit
+    value_kind = spec.field
+    value = _row_value(as_of_row, field) if as_of_row is not None else None
+    if spec.metric_id == "sleep_in_bed" and value is not None and value < 1.0:
+        stages = (
+            _row_value(as_of_row, "sleep_core_hours"),
+            _row_value(as_of_row, "sleep_deep_hours"),
+            _row_value(as_of_row, "sleep_rem_hours"),
+            _row_value(as_of_row, "sleep_hours"),
+        )
+        if all(item is None for item in stages):
+            value = None
+    if value is None and spec.display_fallback_metric_id:
+        fallback = catalog_by_id().get(spec.display_fallback_metric_id)
+        if fallback is not None:
+            fb_value = _row_value(as_of_row, fallback.field) if as_of_row is not None else None
+            if fb_value is not None:
+                value = fb_value
+                field = fallback.field
+                label = fallback.label
+                unit = fallback.unit
+                value_kind = fallback.field
     samples = [
         v
-        for v in (_row_value(row, spec.field) for row in baseline_rows)
+        for v in (_row_value(row, field) for row in baseline_rows)
         if v is not None
     ]
-    unit = spec.unit
     if value is None:
         band = "missing"
         pct = None
@@ -251,9 +320,10 @@ def _metric_row(
         shown = _round_num(value, unit=unit)
     return {
         "metric": spec.metric_id,
-        "label": spec.label,
+        "label": label,
         "value": shown,
         "unit": unit,
+        "value_field": value_kind,
         "day": as_of.isoformat() if as_of is not None else None,
         "baseline_n": len(samples),
         "baseline_mean": mean,
@@ -280,7 +350,14 @@ def _notification(facts: dict[str, Any], assessment: dict[str, Any], *, user_id:
     stamp = f"截至{as_of}"
     if stale:
         stamp += "（非今日）"
-    body = f"{stamp} · {present}/{total}有数\n打开完整卡看清单与评估。{DISCLAIMER}"
+    verify_lines = [
+        item.get("text") or ""
+        for item in (assessment.get("advice") or [])
+        if item.get("metric") in _SLEEP_VERIFY_METRIC_IDS
+        and "请到健康 App 核对" in str(item.get("text") or "")
+    ]
+    extra = f"\n{verify_lines[0]}" if verify_lines else ""
+    body = f"{stamp} · {present}/{total}有数{extra}\n打开完整卡看清单与评估。{DISCLAIMER}"
     return {"title": title, "body": body, "open_path": open_path}
 
 
@@ -309,7 +386,11 @@ def fact_card_numeric_atoms(card: dict[str, Any]) -> set[str]:
 
 
 def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[str, Any]:
-    from pha.sqlite_storage import query_max_wearable_daily_day, query_wearable_daily_range
+    from pha.sqlite_storage import (
+        query_last_healthkit_sample,
+        query_max_wearable_daily_day,
+        query_wearable_daily_range,
+    )
 
     uid = (user_id or "default").strip() or "default"
     ref = reference or effective_query_reference_date()
@@ -317,7 +398,25 @@ def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[st
     start = (max_day or ref) - timedelta(days=BASELINE_DAYS - 1)
     end = max(ref, max_day or ref)
     rows = query_wearable_daily_range(uid, start, end)
-    return compose_fact_card(calendar_day=ref, rows=rows, user_id=uid)
+    card = compose_fact_card(calendar_day=ref, rows=rows, user_id=uid)
+    last = query_last_healthkit_sample(uid)
+    if last is None:
+        card["facts"]["healthkit"] = {"reached": False}
+    else:
+        metric, ts, value = last
+        card["facts"]["healthkit"] = {
+            "reached": True,
+            "last_metric": metric,
+            "last_timestamp": ts,
+            "last_value": value,
+        }
+    try:
+        from pha.healthkit_ingest_receipt import load_healthkit_ingest_last
+
+        card["facts"]["ingest_last"] = load_healthkit_ingest_last(uid)
+    except Exception:
+        card["facts"]["ingest_last"] = {"ok": None, "message": "receipt_unavailable"}
+    return card
 
 
 __all__ = [
@@ -330,4 +429,5 @@ __all__ = [
     "fact_card_numeric_atoms",
     "load_fact_card",
     "percentile_rank",
+    "sleep_verify_copy",
 ]

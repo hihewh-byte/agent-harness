@@ -34,9 +34,24 @@ METRIC_HEART_RATE = "heart_rate"
 # metric_type values stored in wearable_data (timestamp = day-level sample, noon UTC-naive)
 METRIC_STEPS = "steps"
 METRIC_HRV = "hrv"
+METRIC_HRV_SDNN = "hrv_sdnn"
 METRIC_SLEEP = "sleep"
+METRIC_SLEEP_CORE = "sleep_core"
+METRIC_SLEEP_DEEP = "sleep_deep"
+METRIC_SLEEP_REM = "sleep_rem"
+METRIC_SLEEP_IN_BED = "sleep_in_bed"
+METRIC_SLEEP_ASLEEP = "sleep_asleep"
 METRIC_RHR = "rhr"
 METRIC_AWAKE = "awake_duration"
+HEALTHKIT_SLEEP_FAMILY_METRICS = (
+    METRIC_SLEEP,
+    METRIC_SLEEP_CORE,
+    METRIC_SLEEP_DEEP,
+    METRIC_SLEEP_REM,
+    METRIC_SLEEP_IN_BED,
+    METRIC_SLEEP_ASLEEP,
+    METRIC_AWAKE,
+)
 METRIC_ACTIVE_ENERGY = "active_energy"
 METRIC_SPO2 = "spo2"
 METRIC_RESPIRATORY_RATE = "respiratory_rate"
@@ -48,11 +63,15 @@ _WEARABLE_DAILY_EXTENSION_COLS = (
     "respiratory_rate_bpm",
     "vo2max_ml_kg_min",
     "wrist_temp_c",
+    "hrv_sdnn_ms",
     "sleep_deep_hours",
     "sleep_rem_hours",
     "workout_session_count",
     "workout_hr_min_bpm",
     "workout_hr_max_bpm",
+    "sleep_core_hours",
+    "in_bed_hours",
+    "sleep_period_hours",
 )
 _WEARABLE_DAILY_DATA_COLS = (
     "user_id",
@@ -318,6 +337,29 @@ def count_wearable_samples(user_id: str) -> int:
         _release_connection(conn)
 
 
+def query_last_healthkit_sample(user_id: str) -> Optional[tuple[str, str, float]]:
+    """Latest HealthKit ingest row: (metric_type, timestamp, value). None if never ingested."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        row = conn.execute(
+            """
+            SELECT metric_type, timestamp, value
+            FROM wearable_data
+            WHERE user_id = ? AND sample_id LIKE 'healthkit|%'
+            ORDER BY timestamp DESC
+            LIMIT 1
+            """,
+            (uid,),
+        ).fetchone()
+        if not row:
+            return None
+        return (str(row["metric_type"]), str(row["timestamp"]), float(row["value"]))
+    finally:
+        _release_connection(conn)
+
+
 def count_healthkit_samples(user_id: str) -> int:
     init_schema()
     uid = (user_id or "default").strip() or "default"
@@ -385,6 +427,53 @@ def delete_stale_healthkit_metric_on_day(
         )
         conn.commit()
         return int(cur.rowcount or 0)
+    finally:
+        _release_connection(conn)
+
+
+def delete_healthkit_sleep_family_on_day(user_id: str, day: date) -> int:
+    """Drop leftover HealthKit sleep daily-key rows for one wake day."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    placeholders = ",".join("?" for _ in HEALTHKIT_SLEEP_FAMILY_METRICS)
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            f"""
+            DELETE FROM wearable_data
+            WHERE user_id = ?
+              AND substr(timestamp, 1, 10) = ?
+              AND sample_id LIKE 'healthkit|%'
+              AND metric_type IN ({placeholders})
+            """,
+            (uid, day.isoformat(), *HEALTHKIT_SLEEP_FAMILY_METRICS),
+        )
+        conn.commit()
+        return int(cur.rowcount or 0)
+    finally:
+        _release_connection(conn)
+
+
+def list_healthkit_sleep_family_on_day(user_id: str, day: date) -> List[dict]:
+    """HealthKit sleep daily-key rows for one day (cleanup dry-run)."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    placeholders = ",".join("?" for _ in HEALTHKIT_SLEEP_FAMILY_METRICS)
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            f"""
+            SELECT metric_type, timestamp, value, sample_id
+            FROM wearable_data
+            WHERE user_id = ?
+              AND substr(timestamp, 1, 10) = ?
+              AND sample_id LIKE 'healthkit|%'
+              AND metric_type IN ({placeholders})
+            ORDER BY metric_type, timestamp
+            """,
+            (uid, day.isoformat(), *HEALTHKIT_SLEEP_FAMILY_METRICS),
+        )
+        return [dict(r) for r in cur.fetchall()]
     finally:
         _release_connection(conn)
 
@@ -727,6 +816,54 @@ def dedupe_wearable_data(user_id: Optional[str] = None) -> tuple[int, int]:
         _release_connection(conn)
 
 
+def replace_healthkit_sleep_segments_for_day(
+    user_id: str,
+    day: date,
+    segments: Sequence[tuple[datetime, datetime, str, str, bool]],
+) -> tuple[int, int]:
+    """Replace one wake day's HealthKit sleep intervals. Returns (deleted, inserted)."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = open_connection(bulk_import=True)
+    try:
+        cur = conn.execute(
+            """
+            DELETE FROM wearable_sleep_segments
+            WHERE user_id = ? AND day = ? AND sample_id LIKE 'healthkit|%'
+            """,
+            (uid, day.isoformat()),
+        )
+        deleted = int(cur.rowcount or 0)
+        rows = [
+            (
+                uid,
+                day.isoformat(),
+                start.isoformat(),
+                end.isoformat(),
+                source_name or "",
+                sample_id,
+                1 if is_awake else 0,
+            )
+            for start, end, source_name, sample_id, is_awake in segments
+        ]
+        inserted = 0
+        if rows:
+            before = conn.total_changes
+            conn.executemany(
+                """
+                INSERT OR IGNORE INTO wearable_sleep_segments (
+                    user_id, day, start_time, end_time, source_name, sample_id, is_awake
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                rows,
+            )
+            inserted = conn.total_changes - before
+        conn.commit()
+        return deleted, inserted
+    finally:
+        _release_connection(conn)
+
+
 def query_sleep_segments_for_day(user_id: str, day: date) -> List[dict]:
     init_schema()
     uid = user_id.strip() or "default"
@@ -973,10 +1110,14 @@ def _row_to_model(row: sqlite3.Row) -> WearableDailySummary:
         steps=row["steps"],
         resting_heart_rate_bpm=row["resting_heart_rate_bpm"],
         hrv_rmssd_ms=row["hrv_rmssd_ms"],
+        hrv_sdnn_ms=_opt_float("hrv_sdnn_ms"),
         sleep_hours=row["sleep_hours"],
+        sleep_core_hours=_opt_float("sleep_core_hours"),
+        in_bed_hours=_opt_float("in_bed_hours"),
         sleep_deep_hours=_opt_float("sleep_deep_hours"),
         sleep_rem_hours=_opt_float("sleep_rem_hours"),
         awake_duration_hours=row["awake_duration_hours"],
+        sleep_period_hours=_opt_float("sleep_period_hours"),
         sleep_start_time=sleep_start,
         active_energy_kcal=_opt_float("active_energy_kcal"),
         spo2_pct=_opt_float("spo2_pct"),
@@ -1004,11 +1145,15 @@ def _model_to_tuple(row: WearableDailySummary) -> tuple:
         row.respiratory_rate_bpm,
         row.vo2max_ml_kg_min,
         row.wrist_temp_c,
+        row.hrv_sdnn_ms,
         row.sleep_deep_hours,
         row.sleep_rem_hours,
         row.workout_session_count,
         row.workout_hr_min_bpm,
         row.workout_hr_max_bpm,
+        row.sleep_core_hours,
+        row.in_bed_hours,
+        row.sleep_period_hours,
     )
 
 
@@ -1025,8 +1170,18 @@ def _daily_rows_to_wearable_data_tuples(rows: Sequence[WearableDailySummary]) ->
             out.append((uid, METRIC_STEPS, ts, float(row.steps)))
         if row.hrv_rmssd_ms is not None:
             out.append((uid, METRIC_HRV, ts, float(row.hrv_rmssd_ms)))
+        if row.hrv_sdnn_ms is not None:
+            out.append((uid, METRIC_HRV_SDNN, ts, float(row.hrv_sdnn_ms)))
         if row.sleep_hours is not None:
             out.append((uid, METRIC_SLEEP, ts, float(row.sleep_hours)))
+        if row.sleep_core_hours is not None:
+            out.append((uid, METRIC_SLEEP_CORE, ts, float(row.sleep_core_hours)))
+        if row.sleep_deep_hours is not None:
+            out.append((uid, METRIC_SLEEP_DEEP, ts, float(row.sleep_deep_hours)))
+        if row.sleep_rem_hours is not None:
+            out.append((uid, METRIC_SLEEP_REM, ts, float(row.sleep_rem_hours)))
+        if row.in_bed_hours is not None:
+            out.append((uid, METRIC_SLEEP_IN_BED, ts, float(row.in_bed_hours)))
         if row.resting_heart_rate_bpm is not None:
             out.append((uid, METRIC_RHR, ts, float(row.resting_heart_rate_bpm)))
         if row.awake_duration_hours is not None:

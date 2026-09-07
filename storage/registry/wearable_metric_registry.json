@@ -1,6 +1,6 @@
 {
   "schema_version": "wearable_metric_registry_v1",
-  "version": "2026.09.06",
+  "version": "2026.09.07",
   "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。",
   "ingest_modules": [],
   "metrics": [
@@ -19,7 +19,9 @@
         "enabled_default": true,
         "ingest_key": "sleep_hours",
         "unit": "h",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_skip_reason": "derived_from_asleep_stages"
       },
       "intent_hints": [
         "睡眠",
@@ -50,7 +52,9 @@
         "enabled_default": true,
         "ingest_key": "hrv",
         "unit": "ms",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "shortcut_skip_reason": "healthkit_sdnn_vs_warehouse_rmssd",
+        "display_fallback_metric_id": "hrv_sdnn_ms"
       },
       "intent_hints": [
         "hrv",
@@ -61,6 +65,30 @@
         "heart rate variability",
         "heart-rate variability"
       ]
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "l1": { "kind": "wearable_daily", "field": "hrv_sdnn_ms" },
+      "compare": {
+        "comparable_90d": true,
+        "rollup": "mean_minmax",
+        "baseline_source": "wearable.summary"
+      },
+      "snapshot": { "unit": "ms", "parser": "numeric" },
+      "ui": { "label_zh": "HRV (SDNN)" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "hrv_sdnn",
+        "unit": "ms",
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Heart Rate Variability",
+        "shortcut_stat": "Average",
+        "shortcut_unit": "ms",
+        "include_when_selected": ["hrv_rmssd_ms"]
+      },
+      "intent_hints": ["HRV SDNN", "sdnn", "心率变异 SDNN"]
     },
     {
       "metric_id": "resting_heart_rate_bpm",
@@ -77,7 +105,11 @@
         "enabled_default": true,
         "ingest_key": "rhr",
         "unit": "bpm",
-        "higher_is_better": false
+        "higher_is_better": false,
+        "daily_key": true,
+        "shortcut_health_type": "Resting Heart Rate",
+        "shortcut_stat": "Average",
+        "shortcut_unit": "count/min"
       },
       "intent_hints": [
         "静息",
@@ -150,8 +182,15 @@
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
+        "ingest_key": "sleep_deep",
         "unit": "h",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Sleep",
+        "shortcut_sleep_value": "Asleep Deep",
+        "shortcut_stat": "Sum",
+        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
+        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
       },
       "intent_hints": ["深睡", "深度睡眠", "睡眠分期", "deep sleep"]
     },
@@ -169,10 +208,93 @@
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
+        "ingest_key": "sleep_rem",
         "unit": "h",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Sleep",
+        "shortcut_sleep_value": "Asleep REM",
+        "shortcut_stat": "Sum",
+        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
+        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
       },
       "intent_hints": ["REM", "快速眼动", "睡眠分期"]
+    },
+    {
+      "metric_id": "sleep_core",
+      "l1": { "kind": "wearable_daily", "field": "sleep_core_hours" },
+      "compare": {
+        "comparable_90d": true,
+        "rollup": "mean_minmax",
+        "baseline_source": "wearable.summary",
+        "snapshot_only_if_no_baseline": true
+      },
+      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
+      "ui": { "label_zh": "核心睡眠" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "sleep_core",
+        "unit": "h",
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Sleep",
+        "shortcut_sleep_value": "Asleep Core",
+        "shortcut_stat": "Sum",
+        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
+        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+      },
+      "intent_hints": ["核心睡眠", "core sleep"]
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "l1": { "kind": "wearable_daily", "field": "in_bed_hours" },
+      "compare": {
+        "comparable_90d": true,
+        "rollup": "mean_minmax",
+        "baseline_source": "wearable.summary"
+      },
+      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
+      "ui": { "label_zh": "在床" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "sleep_in_bed",
+        "unit": "h",
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Sleep",
+        "shortcut_sleep_value": "In Bed",
+        "shortcut_stat": "Sum",
+        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
+        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+      },
+      "intent_hints": ["在床", "in bed"]
+    },
+    {
+      "metric_id": "sleep_awake",
+      "l1": { "kind": "wearable_daily", "field": "awake_duration_hours" },
+      "compare": {
+        "comparable_90d": true,
+        "rollup": "mean_minmax",
+        "baseline_source": "wearable.summary"
+      },
+      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
+      "ui": { "label_zh": "睡眠清醒" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "sleep_awake",
+        "unit": "h",
+        "higher_is_better": false,
+        "daily_key": true,
+        "shortcut_health_type": "Sleep",
+        "shortcut_sleep_value": "Awake",
+        "shortcut_stat": "Sum",
+        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
+        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+      },
+      "intent_hints": ["睡眠清醒", "waso", "awake"]
     },
     {
       "metric_id": "workout_heart_rate_range_bpm",
@@ -211,7 +333,11 @@
         "enabled_default": true,
         "ingest_key": "steps",
         "unit": "count",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Steps",
+        "shortcut_stat": "Sum",
+        "shortcut_unit": "count"
       },
       "intent_hints": ["步数", "steps", "走了多少", "step count"]
     },
@@ -226,7 +352,11 @@
         "enabled_default": true,
         "ingest_key": "active_energy",
         "unit": "kcal",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Active Calories",
+        "shortcut_stat": "Sum",
+        "shortcut_unit": "kcal"
       },
       "intent_hints": ["活动消耗", "active energy", "卡路里"]
     }

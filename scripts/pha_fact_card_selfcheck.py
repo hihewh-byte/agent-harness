@@ -24,6 +24,7 @@ from pha.fact_card import (  # noqa: E402
 )
 from pha.fact_card_html import render_fact_card_html  # noqa: E402
 from pha.fact_card_prefs import prefs_payload, save_enabled_metric_ids  # noqa: E402
+from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs  # noqa: E402
 from pha.models import WearableDailySummary  # noqa: E402
 
 DEFAULT_FIVE = (
@@ -134,7 +135,7 @@ def main() -> int:
         return _fail("coverage_total must follow the user selection, not a hardcoded five")
 
     html = render_fact_card_html(stale, prefs=prefs_payload("selfcheck"), token=None)
-    for needle in ("步数", "14872", "睡眠", "评估", "我要看哪些指标"):
+    for needle in ("步数", "14872", "睡眠", "评估", "我要看哪些指标", "健康 App"):
         if needle not in html:
             return _fail(f"HTML view missing {needle}")
     if "诊断" in html or "处方" in html:
@@ -153,6 +154,147 @@ def main() -> int:
     spo2 = next(m for m in from_prefs["facts"]["metrics"] if m["metric"] == "spo2_percent")
     if spo2["value"] is not None:
         return _fail("uningested selected metric must stay 无, not invented")
+
+    save_enabled_metric_ids("selfcheck", ["steps", "active_energy", "hrv_rmssd_ms"])
+    plan = shortcut_sync_specs("selfcheck")
+    plan_ids = [s.metric_id for s in plan]
+    if set(plan_ids) != {"steps", "active_energy", "hrv_sdnn_ms"}:
+        return _fail(f"sync plan must be selected ∩ quantity types, got {plan_ids}")
+    if plan_ids[0] != "active_energy":
+        return _fail(f"Sum metrics must POST before Average, got {plan_ids}")
+    energy = next(s for s in plan if s.metric_id == "active_energy")
+    if energy.health_type != "Active Calories":
+        return _fail(
+            "active_energy Find label must be Active Calories, not Active Energy"
+        )
+    hrv_plan = [s for s in plan if s.health_type == "Heart Rate Variability"]
+    if len(hrv_plan) != 1 or hrv_plan[0].ingest_key != "hrv_sdnn":
+        return _fail("selected RMSSD must pull SDNN shortcut, not ingest_key=hrv")
+    if any(s.ingest_key == "hrv" for s in plan):
+        return _fail("HRV SDNN must not POST as warehouse RMSSD")
+
+    save_enabled_metric_ids("selfcheck", ["hrv_rmssd_ms"])
+    sdnn_row = WearableDailySummary(
+        user_id="selfcheck",
+        day=yesterday,
+        hrv_sdnn_ms=41.2,
+    )
+    sdnn_card = compose_fact_card(
+        calendar_day=yesterday,
+        rows=[sdnn_row],
+        user_id="selfcheck",
+        enabled_metric_ids=["hrv_rmssd_ms"],
+    )
+    hrv_m = next(m for m in sdnn_card["facts"]["metrics"] if m["metric"] == "hrv_rmssd_ms")
+    if hrv_m["value"] != 41.2 or hrv_m.get("value_field") != "hrv_sdnn_ms":
+        return _fail(f"empty RMSSD must display SDNN fallback, got {hrv_m}")
+    if hrv_m["label"] != "HRV (SDNN)":
+        return _fail(f"fallback label must say SDNN, got {hrv_m['label']}")
+
+    save_enabled_metric_ids("selfcheck", ["sleep_time_asleep", "steps"])
+    qty = shortcut_sync_specs("selfcheck")
+    if any(s.health_type == "Sleep" for s in qty):
+        return _fail("quantity shortcut must not Find Sleep")
+    sleep_plan = shortcut_sleep_specs("selfcheck")
+    sleep_values = [s.unit_health for s in sleep_plan]
+    if sleep_values != ["In Bed", "Asleep Core", "Asleep Deep", "Asleep REM", "Awake"]:
+        return _fail(f"sleep stages must be ActionKit sleep values, got {sleep_values}")
+    if any(s.ingest_key == "sleep_hours" for s in sleep_plan):
+        return _fail("do not POST derived sleep_hours")
+
+    awake_hist = [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=yesterday - timedelta(days=i),
+            awake_duration_hours=1.0,
+        )
+        for i in range(1, 21)
+    ]
+    high_awake = WearableDailySummary(
+        user_id="selfcheck",
+        day=yesterday,
+        awake_duration_hours=3.58,
+    )
+    high_card = compose_fact_card(
+        calendar_day=yesterday,
+        rows=awake_hist + [high_awake],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_awake"],
+    )
+    advice = " ".join(a["text"] for a in high_card["assessment"]["advice"])
+    if "请到健康 App 核对这一夜的数据" not in advice:
+        return _fail(f"high awake must add verify copy, got {advice}")
+    if "明显高于" not in advice or "3.6h" not in advice:
+        return _fail(f"verify copy must keep the number and 高于, got {advice}")
+    if "请到健康 App 核对" not in high_card["notification"]["body"]:
+        return _fail("notification must include the verify sentence")
+    for word in ("错误", "异常", "采集失误"):
+        if word in advice or word in high_card["notification"]["body"]:
+            return _fail(f"verify copy must not judge with {word}")
+
+    typical_hist = [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=yesterday - timedelta(days=i),
+            awake_duration_hours=1.0 if i <= 10 else 4.0,
+        )
+        for i in range(1, 21)
+    ]
+    typical_row = WearableDailySummary(
+        user_id="selfcheck",
+        day=yesterday,
+        awake_duration_hours=2.0,
+    )
+    typical_card = compose_fact_card(
+        calendar_day=yesterday,
+        rows=typical_hist + [typical_row],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_awake"],
+    )
+    typical_advice = " ".join(a["text"] for a in typical_card["assessment"]["advice"])
+    if "请到健康 App 核对" in typical_advice:
+        return _fail("in-band awake must not add verify copy")
+
+    short_hist = [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=yesterday - timedelta(days=i),
+            awake_duration_hours=1.0,
+        )
+        for i in range(1, 5)
+    ]
+    short_card = compose_fact_card(
+        calendar_day=yesterday,
+        rows=short_hist + [high_awake],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_awake"],
+    )
+    short_m = next(m for m in short_card["facts"]["metrics"] if m["metric"] == "sleep_awake")
+    if short_m["band"] != "unknown":
+        return _fail(f"n<7 must not band, got {short_m}")
+    short_advice = " ".join(a["text"] for a in short_card["assessment"]["advice"])
+    if "请到健康 App 核对" in short_advice:
+        return _fail("n<7 must not remind")
+
+    leftover_bed = WearableDailySummary(
+        user_id="selfcheck",
+        day=yesterday,
+        in_bed_hours=0.728,
+    )
+    leftover_card = compose_fact_card(
+        calendar_day=yesterday,
+        rows=[leftover_bed],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_in_bed"],
+    )
+    bed_m = next(m for m in leftover_card["facts"]["metrics"] if m["metric"] == "sleep_in_bed")
+    if bed_m["value"] is not None:
+        return _fail(f"in_bed<1h without stages must display 无, got {bed_m}")
+    leftover_html = render_fact_card_html(
+        leftover_card, prefs=prefs_payload("selfcheck"), token=None
+    )
+    if ">无<" not in leftover_html:
+        return _fail("HTML must show 无 for leftover in_bed")
 
     print("pha_fact_card_selfcheck: PASS")
     return 0

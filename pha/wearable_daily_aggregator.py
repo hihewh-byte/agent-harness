@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -15,6 +16,13 @@ _METRIC_STEPS = "steps"
 _METRIC_HEART_RATE = "heart_rate"
 _METRIC_RHR = "rhr"
 _METRIC_HRV = "hrv"
+_METRIC_HRV_SDNN = "hrv_sdnn"
+_METRIC_SLEEP_CORE = "sleep_core"
+_METRIC_SLEEP_DEEP = "sleep_deep"
+_METRIC_SLEEP_REM = "sleep_rem"
+_METRIC_SLEEP_IN_BED = "sleep_in_bed"
+_METRIC_SLEEP_ASLEEP = "sleep_asleep"
+_METRIC_AWAKE = "awake_duration"
 _METRIC_ACTIVE_ENERGY = "active_energy"
 _METRIC_SPO2 = "spo2"
 _METRIC_RESPIRATORY_RATE = "respiratory_rate"
@@ -33,6 +41,8 @@ class WearableDayMetricAgg:
     rhr_n: int = 0
     hrv_sum: float = 0.0
     hrv_n: int = 0
+    hrv_sdnn_sum: float = 0.0
+    hrv_sdnn_n: int = 0
     active_energy_sum: float = 0.0
     spo2_sum: float = 0.0
     spo2_n: int = 0
@@ -44,6 +54,12 @@ class WearableDayMetricAgg:
     wrist_temp_n: int = 0
     # Scalar daily sleep (HealthKit ingest). Segments still win when present.
     sleep_hours_max: Optional[float] = None
+    sleep_core_hours: Optional[float] = None
+    sleep_deep_hours: Optional[float] = None
+    sleep_rem_hours: Optional[float] = None
+    sleep_asleep_hours: Optional[float] = None
+    in_bed_hours: Optional[float] = None
+    awake_hours: Optional[float] = None
 
 
 def accumulate_wearable_sample(
@@ -66,6 +82,9 @@ def accumulate_wearable_sample(
     elif mt == _METRIC_HRV:
         agg.hrv_sum += value
         agg.hrv_n += 1
+    elif mt == _METRIC_HRV_SDNN:
+        agg.hrv_sdnn_sum += value
+        agg.hrv_sdnn_n += 1
     elif mt == _METRIC_ACTIVE_ENERGY:
         agg.active_energy_sum += value
     elif mt == _METRIC_SPO2:
@@ -83,6 +102,18 @@ def accumulate_wearable_sample(
     elif mt in ("sleep", "sleep_hours"):
         if value > 0 and (agg.sleep_hours_max is None or value > agg.sleep_hours_max):
             agg.sleep_hours_max = value
+    elif mt == _METRIC_SLEEP_CORE:
+        agg.sleep_core_hours = value
+    elif mt == _METRIC_SLEEP_DEEP:
+        agg.sleep_deep_hours = value
+    elif mt == _METRIC_SLEEP_REM:
+        agg.sleep_rem_hours = value
+    elif mt == _METRIC_SLEEP_ASLEEP:
+        agg.sleep_asleep_hours = value
+    elif mt == _METRIC_SLEEP_IN_BED:
+        agg.in_bed_hours = value
+    elif mt == _METRIC_AWAKE:
+        agg.awake_hours = value
 
 
 def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
@@ -95,6 +126,7 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
     else:
         rhr = None
     hrv = (agg.hrv_sum / agg.hrv_n) if agg.hrv_n > 0 else None
+    hrv_sdnn = (agg.hrv_sdnn_sum / agg.hrv_sdnn_n) if agg.hrv_sdnn_n > 0 else None
     kcal = agg.active_energy_sum if agg.active_energy_sum > 0 else None
     spo2 = (agg.spo2_sum / agg.spo2_n) if agg.spo2_n > 0 else None
     resp = (agg.respiratory_sum / agg.respiratory_n) if agg.respiratory_n > 0 else None
@@ -104,11 +136,113 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
         "steps": steps,
         "resting_heart_rate_bpm": rhr,
         "hrv_rmssd_ms": hrv,
+        "hrv_sdnn_ms": hrv_sdnn,
         "active_energy_kcal": kcal,
         "spo2_pct": spo2,
         "respiratory_rate_bpm": resp,
         "vo2max_ml_kg_min": vo2,
         "wrist_temp_c": wrist,
+    }
+
+
+_ASLEEP_STAGE_KINDS = frozenset({"core", "deep", "rem", "asleep"})
+_STAGE_OVERLAP_RATIO = 0.05
+
+
+def _is_healthkit_sleep_segment(raw: Mapping[str, Any]) -> bool:
+    return str(raw.get("sample_id") or "").startswith("healthkit|")
+
+
+def _interval_hours_union(pairs: Sequence[tuple[datetime, datetime]]) -> float:
+    segs = [SleepSegment(start=start, end=end) for start, end in pairs if end > start]
+    if not segs:
+        return 0.0
+    hours, _ = compute_sleep_hours_union(segs)
+    return hours
+
+
+def _positive_hours(hours: float) -> Optional[float]:
+    return hours if hours > 0 else None
+
+
+def healthkit_sleep_fields_from_segments(
+    raw_segs: Sequence[Mapping[str, Any]],
+) -> Dict[str, Any]:
+    """T2 HealthKit mapping: one asleep union; null stages when they disagree >5%."""
+    from pha.sleep_aggregator import sleep_stage_kind_from_sample_id
+
+    by_kind: Dict[str, List[tuple[datetime, datetime]]] = defaultdict(list)
+    in_bed: List[tuple[datetime, datetime]] = []
+    asleep_all: List[tuple[datetime, datetime]] = []
+    first_sleep_start: Optional[datetime] = None
+    for raw in raw_segs:
+        start = safe_parse_datetime(str(raw.get("start_time") or ""))
+        end = safe_parse_datetime(str(raw.get("end_time") or ""))
+        if start is None or end is None or end <= start:
+            continue
+        sid = str(raw.get("sample_id") or "")
+        parts = sid.split("|")
+        metric = parts[2] if len(parts) >= 3 else ""
+        kind = sleep_stage_kind_from_sample_id(sid)
+        folded_metric = metric.replace("_", "")
+        if metric == _METRIC_SLEEP_IN_BED or "inbed" in folded_metric:
+            in_bed.append((start, end))
+            continue
+        if int(raw.get("is_awake") or 0) or kind == "awake":
+            by_kind["awake"].append((start, end))
+            continue
+        if kind not in _ASLEEP_STAGE_KINDS:
+            continue
+        by_kind[kind].append((start, end))
+        asleep_all.append((start, end))
+        if first_sleep_start is None or start < first_sleep_start:
+            first_sleep_start = start
+
+    core_h = _interval_hours_union(by_kind["core"])
+    deep_h = _interval_hours_union(by_kind["deep"])
+    rem_h = _interval_hours_union(by_kind["rem"])
+    asleep_h = _interval_hours_union(by_kind["asleep"])
+    union_asleep = _interval_hours_union(asleep_all)
+    awake_h = _interval_hours_union(by_kind["awake"])
+    in_bed_h = _interval_hours_union(in_bed)
+    stage_sum = core_h + deep_h + rem_h + asleep_h
+    overlap = False
+    if union_asleep > 0 and abs(stage_sum - union_asleep) / union_asleep > _STAGE_OVERLAP_RATIO:
+        overlap = True
+    per_stage_h: Dict[str, float] = {}
+    if core_h > 0:
+        per_stage_h["sleep_core"] = core_h
+    if deep_h > 0:
+        per_stage_h["sleep_deep"] = deep_h
+    if rem_h > 0:
+        per_stage_h["sleep_rem"] = rem_h
+    if asleep_h > 0:
+        per_stage_h["sleep_asleep"] = asleep_h
+    if awake_h > 0:
+        per_stage_h["sleep_awake"] = awake_h
+    if in_bed_h > 0:
+        per_stage_h["sleep_in_bed"] = in_bed_h
+    period_h = 0.0
+    if asleep_all:
+        period_h = (
+            max(end for _start, end in asleep_all) - min(start for start, _end in asleep_all)
+        ).total_seconds() / 3600.0
+    efficiency = None
+    if in_bed_h > 0 and union_asleep > 0:
+        efficiency = union_asleep / in_bed_h
+    return {
+        "sleep_hours": _positive_hours(union_asleep),
+        "awake": _positive_hours(awake_h),
+        "in_bed": _positive_hours(in_bed_h),
+        "core": None if overlap else _positive_hours(core_h),
+        "deep": None if overlap else _positive_hours(deep_h),
+        "rem": None if overlap else _positive_hours(rem_h),
+        "stage_overlap": overlap,
+        "first_start": first_sleep_start,
+        "per_stage_h": per_stage_h,
+        "union_asleep_h": union_asleep,
+        "sleep_period_h": period_h,
+        "sleep_efficiency": efficiency,
     }
 
 
@@ -217,21 +351,37 @@ def build_wearable_daily_summary(
         row.steps = resolved["steps"]
         row.resting_heart_rate_bpm = resolved["resting_heart_rate_bpm"]
         row.hrv_rmssd_ms = resolved["hrv_rmssd_ms"]
+        row.hrv_sdnn_ms = resolved["hrv_sdnn_ms"]
         row.active_energy_kcal = resolved["active_energy_kcal"]
         row.spo2_pct = resolved["spo2_pct"]
         row.respiratory_rate_bpm = resolved["respiratory_rate_bpm"]
         row.vo2max_ml_kg_min = resolved["vo2max_ml_kg_min"]
         row.wrist_temp_c = resolved["wrist_temp_c"]
 
-    if segment_rows is not None:
-        sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_segment_rows(segment_rows)
-        row.sleep_hours = sleep_h
-        row.awake_duration_hours = awake_h
-        row.sleep_deep_hours = deep_h
-        row.sleep_rem_hours = rem_h
-        row.sleep_start_time = first_start
-        if row.sleep_hours is None and metrics is not None and metrics.sleep_hours_max is not None:
-            row.sleep_hours = metrics.sleep_hours_max
+    if segment_rows:
+        hk_rows = [raw for raw in segment_rows if _is_healthkit_sleep_segment(raw)]
+        other_rows = [raw for raw in segment_rows if not _is_healthkit_sleep_segment(raw)]
+        if hk_rows and not other_rows:
+            fields = healthkit_sleep_fields_from_segments(hk_rows)
+            row.sleep_hours = fields["sleep_hours"]
+            row.awake_duration_hours = fields["awake"]
+            row.in_bed_hours = fields["in_bed"]
+            row.sleep_core_hours = fields["core"]
+            row.sleep_deep_hours = fields["deep"]
+            row.sleep_rem_hours = fields["rem"]
+            row.sleep_start_time = fields["first_start"]
+            row.sleep_period_hours = _positive_hours(float(fields.get("sleep_period_h") or 0.0))
+        else:
+            sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_segment_rows(
+                other_rows or segment_rows,
+            )
+            row.sleep_hours = sleep_h
+            row.awake_duration_hours = awake_h
+            row.sleep_deep_hours = deep_h
+            row.sleep_rem_hours = rem_h
+            row.sleep_start_time = first_start
+            if row.sleep_hours is None and metrics is not None and metrics.sleep_hours_max is not None:
+                row.sleep_hours = metrics.sleep_hours_max
     elif import_sleep is not None:
         segs, deep_s, rem_s, awake_s, first_start = import_sleep
         sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_import_accumulators(
@@ -246,7 +396,30 @@ def build_wearable_daily_summary(
         row.sleep_deep_hours = deep_h
         row.sleep_rem_hours = rem_h
         row.sleep_start_time = first_start
-    elif metrics is not None and metrics.sleep_hours_max is not None and row.sleep_hours is None:
-        row.sleep_hours = metrics.sleep_hours_max
+    elif metrics is not None:
+        if metrics.sleep_core_hours is not None:
+            row.sleep_core_hours = metrics.sleep_core_hours
+        if metrics.sleep_deep_hours is not None:
+            row.sleep_deep_hours = metrics.sleep_deep_hours
+        if metrics.sleep_rem_hours is not None:
+            row.sleep_rem_hours = metrics.sleep_rem_hours
+        if metrics.in_bed_hours is not None:
+            row.in_bed_hours = metrics.in_bed_hours
+        if metrics.awake_hours is not None:
+            row.awake_duration_hours = metrics.awake_hours
+        asleep_parts = [
+            part
+            for part in (
+                metrics.sleep_core_hours,
+                metrics.sleep_deep_hours,
+                metrics.sleep_rem_hours,
+                metrics.sleep_asleep_hours,
+            )
+            if part is not None
+        ]
+        if asleep_parts:
+            row.sleep_hours = float(sum(asleep_parts))
+        elif metrics.sleep_hours_max is not None and row.sleep_hours is None:
+            row.sleep_hours = metrics.sleep_hours_max
 
     return row

@@ -56,6 +56,13 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 | `fact_card.enabled_default` | 无用户偏好时的默认勾选（默认 ≠ 不可改） |
 | `fact_card.ingest_key` | 对应 `POST /ingest/healthkit` 的 `metric_type`（可空） |
 | `fact_card.unit` / `higher_is_better` | 完整卡展示与分档方向 |
+| `fact_card.daily_key` | ingest 按日历日一条 UPSERT |
+| `fact_card.shortcut_health_type` / `shortcut_stat` / `shortcut_unit` | 捷径 **Find Health Samples 选择器标签**（不是 HealthKit SDK 名、也不是健康 App 浏览页标题）。活动消耗必须是 `Active Calories`，禁止 `Active Energy`。`shortcut_stat` = Sum/Average；`shortcut_unit` = kcal / count/min |
+| `fact_card.shortcut_skip_reason` | 有 ingest_key 但捷径故意不同步（须写原因，禁止默默映射） |
+| `fact_card.include_when_selected` | 用户勾了所列 metric_id 时，本行也进捷径（HRV SDNN 在勾了 RMSSD 时同步） |
+| `fact_card.shortcut_sleep_value` | Sleep Analysis 分期标签（`Asleep Deep` 等）。有此字段的行进「PHA 同步睡眠」，不进数量捷径 |
+| `fact_card.reveal_when_selected` | 勾了所列指标时，完整卡多显示本行（睡眠分期） |
+| `fact_card.display_fallback_metric_id` | 本行无数时改展示另一列，且用那一列做基线；标签跟过去，禁止把 SDNN 标成 RMSSD |
 
 ### `no_baseline_reason`（Spec 枚举 · 行级 reason_code 待 ε+）
 

@@ -38,6 +38,15 @@ class FactCardMetricSpec:
     higher_is_better: bool
     ingest_key: str
     enabled_default: bool
+    daily_key: bool = False
+    shortcut_health_type: str = ""
+    shortcut_stat: str = ""
+    shortcut_unit: str = ""
+    shortcut_skip_reason: str = ""
+    include_when_selected: tuple[str, ...] = ()
+    display_fallback_metric_id: str = ""
+    shortcut_sleep_value: str = ""
+    reveal_when_selected: tuple[str, ...] = ()
 
 
 def _unit_from_entry(entry: dict[str, Any]) -> str:
@@ -60,6 +69,14 @@ def _spec_from_entry(entry: dict[str, Any]) -> Optional[FactCardMetricSpec]:
     label = str((entry.get("ui") or {}).get("label_zh") or mid).strip()
     if not mid or not field or field not in WearableDailySummary.model_fields:
         return None
+    include_raw = fc.get("include_when_selected") or []
+    include_when = tuple(
+        str(x).strip() for x in include_raw if str(x).strip()
+    ) if isinstance(include_raw, list) else ()
+    reveal_raw = fc.get("reveal_when_selected") or []
+    reveal_when = tuple(
+        str(x).strip() for x in reveal_raw if str(x).strip()
+    ) if isinstance(reveal_raw, list) else ()
     return FactCardMetricSpec(
         metric_id=mid,
         field=field,
@@ -68,6 +85,15 @@ def _spec_from_entry(entry: dict[str, Any]) -> Optional[FactCardMetricSpec]:
         higher_is_better=bool(fc.get("higher_is_better", True)),
         ingest_key=str(fc.get("ingest_key") or "").strip(),
         enabled_default=bool(fc.get("enabled_default")),
+        daily_key=bool(fc.get("daily_key")),
+        shortcut_health_type=str(fc.get("shortcut_health_type") or "").strip(),
+        shortcut_stat=str(fc.get("shortcut_stat") or "").strip(),
+        shortcut_unit=str(fc.get("shortcut_unit") or "").strip(),
+        shortcut_skip_reason=str(fc.get("shortcut_skip_reason") or "").strip(),
+        include_when_selected=include_when,
+        display_fallback_metric_id=str(fc.get("display_fallback_metric_id") or "").strip(),
+        shortcut_sleep_value=str(fc.get("shortcut_sleep_value") or "").strip(),
+        reveal_when_selected=reveal_when,
     )
 
 
@@ -141,7 +167,17 @@ def resolve_metric_specs(
         ids, _source = load_enabled_metric_ids(user_id)
     else:
         ids = sanitize_metric_ids(enabled_metric_ids)
-    return [known[mid] for mid in ids if mid in known]
+    out = [known[mid] for mid in ids if mid in known]
+    if enabled_metric_ids is not None:
+        return out
+    wanted = set(ids)
+    for spec in catalog_specs():
+        if spec.metric_id in wanted or not spec.reveal_when_selected:
+            continue
+        if wanted.intersection(spec.reveal_when_selected):
+            out.append(spec)
+            wanted.add(spec.metric_id)
+    return out
 
 
 def save_enabled_metric_ids(user_id: str, ids: Sequence[str]) -> list[str]:
@@ -185,6 +221,8 @@ def prefs_payload(user_id: str) -> dict[str, Any]:
                 "ingest_key": spec.ingest_key or None,
                 "enabled_default": spec.enabled_default,
                 "selected": spec.metric_id in enabled,
+                "shortcut_sync": bool(spec.shortcut_health_type and spec.ingest_key),
+                "shortcut_skip_reason": spec.shortcut_skip_reason or None,
             }
             for spec in catalog_specs()
         ],
