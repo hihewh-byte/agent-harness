@@ -33,14 +33,13 @@
 3. 对健康 App 昨晚：在床 / 核心 / 深睡 / REM / 清醒。库中同日对应列应量级合理；`sleep_hours` = 核心+深睡+REM。
 4. 跨夜窗口为昨午→今午，见 [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md)。
 
-### 1b. M1-P7 递进个人基线 + 通用参考层（无 LLM，先做）
+### 1b. M1-P7 递进个人基线 + 通用参考层（无 LLM）· DONE 2026-09-07
 
-- `fact_card.py` 基线窗口 90d → 365d → all（第一个 n ≥ 7），JSON/HTML 写「相对你近 12 个月 268 夜」
-- 注册表 `fact_card.reference_range`（低/高/单位/来源）→ `【参考标准】…（来源：…，请自行查证，非医疗建议）`；HRV 绝对值不给
-- 卡级综合三档由睡眠总时长 / HRV / RHR 分位投票；缺项写「不综合」
-- 依据与验收见 PRD v1.6 FR-2.1 / FR-2.6 / FR-2.8、`handoff-2026-09-07-fact-card-assessment.md`
+- 按指标 90d → 365d → all；卡上写「相对你近 12 个月 N 夜/天」
+- 注册表 `reference_range`（睡眠总时长 / RHR / 步数）→ T1 披露；HRV 不给；深睡/REM 占比 TODO
+- 卡级综合三档；缺项「不综合」
 
-### 1c. M1-P8 HRV 列语义纠正（叠 harness ACK）
+### 1c. M1-P8 HRV 列语义纠正（叠 harness ACK）· 下一刀
 
 - `hrv_rmssd_ms` 历史样本全为 Apple SDNN（`sample_id` 可证）；合并为 SDNN 序列，今日 40.97 对上 7 年基线
 - 先跑 `pha_numerics_manifest_selfcheck` / skip-LLM selfcheck 建回归，再改列语义

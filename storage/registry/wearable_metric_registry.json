@@ -6,14 +6,22 @@
   "metrics": [
     {
       "metric_id": "sleep_time_asleep",
-      "l1": { "kind": "wearable_daily", "field": "sleep_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "sleep_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "睡眠总时长" },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "睡眠总时长"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -21,7 +29,14 @@
         "unit": "h",
         "higher_is_better": true,
         "daily_key": true,
-        "shortcut_skip_reason": "derived_from_asleep_stages"
+        "shortcut_skip_reason": "derived_from_asleep_stages",
+        "reference_range": {
+          "low": 7,
+          "high": 9,
+          "unit": "h",
+          "source": "National Sleep Foundation 成人建议",
+          "note": "成人睡眠常见建议"
+        }
       },
       "intent_hints": [
         "睡眠",
@@ -39,14 +54,22 @@
     },
     {
       "metric_id": "hrv_rmssd_ms",
-      "l1": { "kind": "wearable_daily", "field": "hrv_rmssd_ms" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "hrv_rmssd_ms"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "ms", "parser": "numeric" },
-      "ui": { "label_zh": "HRV" },
+      "snapshot": {
+        "unit": "ms",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "HRV"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -68,14 +91,22 @@
     },
     {
       "metric_id": "hrv_sdnn_ms",
-      "l1": { "kind": "wearable_daily", "field": "hrv_sdnn_ms" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "hrv_sdnn_ms"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "ms", "parser": "numeric" },
-      "ui": { "label_zh": "HRV (SDNN)" },
+      "snapshot": {
+        "unit": "ms",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "HRV (SDNN)"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -86,20 +117,34 @@
         "shortcut_health_type": "Heart Rate Variability",
         "shortcut_stat": "Average",
         "shortcut_unit": "ms",
-        "include_when_selected": ["hrv_rmssd_ms"]
+        "include_when_selected": [
+          "hrv_rmssd_ms"
+        ]
       },
-      "intent_hints": ["HRV SDNN", "sdnn", "心率变异 SDNN"]
+      "intent_hints": [
+        "HRV SDNN",
+        "sdnn",
+        "心率变异 SDNN"
+      ]
     },
     {
       "metric_id": "resting_heart_rate_bpm",
-      "l1": { "kind": "wearable_daily", "field": "resting_heart_rate_bpm" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "resting_heart_rate_bpm"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "bpm", "parser": "numeric" },
-      "ui": { "label_zh": "静息心率" },
+      "snapshot": {
+        "unit": "bpm",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "静息心率"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -109,7 +154,14 @@
         "daily_key": true,
         "shortcut_health_type": "Resting Heart Rate",
         "shortcut_stat": "Average",
-        "shortcut_unit": "count/min"
+        "shortcut_unit": "count/min",
+        "reference_range": {
+          "low": 60,
+          "high": 100,
+          "unit": "bpm",
+          "source": "AHA 静息心率常见成人参考范围摘要",
+          "note": "成人静息心率常见参考"
+        }
       },
       "intent_hints": [
         "静息",
@@ -125,33 +177,55 @@
     },
     {
       "metric_id": "spo2_percent",
-      "l1": { "kind": "wearable_daily", "field": "spo2_pct" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "spo2_pct"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary",
         "omit_row_without_snapshot": true
       },
-      "snapshot": { "unit": "%", "parser": "numeric" },
-      "ui": { "label_zh": "血氧" },
+      "snapshot": {
+        "unit": "%",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "血氧"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
         "unit": "%",
         "higher_is_better": true
       },
-      "intent_hints": ["血氧", "spo2", "SpO2", "blood oxygen", "oxygen saturation"]
+      "intent_hints": [
+        "血氧",
+        "spo2",
+        "SpO2",
+        "blood oxygen",
+        "oxygen saturation"
+      ]
     },
     {
       "metric_id": "respiratory_rate",
-      "l1": { "kind": "wearable_daily", "field": "respiratory_rate_bpm" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "respiratory_rate_bpm"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "breaths/min", "parser": "numeric" },
-      "ui": { "label_zh": "呼吸率" },
+      "snapshot": {
+        "unit": "breaths/min",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "呼吸率"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -170,15 +244,24 @@
     },
     {
       "metric_id": "sleep_deep",
-      "l1": { "kind": "wearable_daily", "field": "sleep_deep_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "sleep_deep_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary",
         "snapshot_only_if_no_baseline": true
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "深睡", "footer_when_snapshot_only": true },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "深睡",
+        "footer_when_snapshot_only": true
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -189,22 +272,44 @@
         "shortcut_health_type": "Sleep",
         "shortcut_sleep_value": "Asleep Deep",
         "shortcut_stat": "Sum",
-        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "include_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ],
+        "reveal_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ]
       },
-      "intent_hints": ["深睡", "深度睡眠", "睡眠分期", "deep sleep"]
+      "intent_hints": [
+        "深睡",
+        "深度睡眠",
+        "睡眠分期",
+        "deep sleep"
+      ]
     },
     {
       "metric_id": "sleep_rem",
-      "l1": { "kind": "wearable_daily", "field": "sleep_rem_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "sleep_rem_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary",
         "snapshot_only_if_no_baseline": true
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "REM", "footer_when_snapshot_only": true },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "REM",
+        "footer_when_snapshot_only": true
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -215,22 +320,42 @@
         "shortcut_health_type": "Sleep",
         "shortcut_sleep_value": "Asleep REM",
         "shortcut_stat": "Sum",
-        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "include_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ],
+        "reveal_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ]
       },
-      "intent_hints": ["REM", "快速眼动", "睡眠分期"]
+      "intent_hints": [
+        "REM",
+        "快速眼动",
+        "睡眠分期"
+      ]
     },
     {
       "metric_id": "sleep_core",
-      "l1": { "kind": "wearable_daily", "field": "sleep_core_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "sleep_core_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary",
         "snapshot_only_if_no_baseline": true
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "核心睡眠" },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "核心睡眠"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -241,21 +366,40 @@
         "shortcut_health_type": "Sleep",
         "shortcut_sleep_value": "Asleep Core",
         "shortcut_stat": "Sum",
-        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "include_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ],
+        "reveal_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ]
       },
-      "intent_hints": ["核心睡眠", "core sleep"]
+      "intent_hints": [
+        "核心睡眠",
+        "core sleep"
+      ]
     },
     {
       "metric_id": "sleep_in_bed",
-      "l1": { "kind": "wearable_daily", "field": "in_bed_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "in_bed_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "在床" },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "在床"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -266,21 +410,40 @@
         "shortcut_health_type": "Sleep",
         "shortcut_sleep_value": "In Bed",
         "shortcut_stat": "Sum",
-        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "include_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ],
+        "reveal_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ]
       },
-      "intent_hints": ["在床", "in bed"]
+      "intent_hints": [
+        "在床",
+        "in bed"
+      ]
     },
     {
       "metric_id": "sleep_awake",
-      "l1": { "kind": "wearable_daily", "field": "awake_duration_hours" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "awake_duration_hours"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "mean_minmax",
         "baseline_source": "wearable.summary"
       },
-      "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "睡眠清醒" },
+      "snapshot": {
+        "unit": "hr",
+        "parser": "sleep_duration"
+      },
+      "ui": {
+        "label_zh": "睡眠清醒"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -291,43 +454,94 @@
         "shortcut_health_type": "Sleep",
         "shortcut_sleep_value": "Awake",
         "shortcut_stat": "Sum",
-        "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "include_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ],
+        "reveal_when_selected": [
+          "sleep_time_asleep",
+          "sleep_deep",
+          "sleep_rem"
+        ]
       },
-      "intent_hints": ["睡眠清醒", "waso", "awake"]
+      "intent_hints": [
+        "睡眠清醒",
+        "waso",
+        "awake"
+      ]
     },
     {
       "metric_id": "workout_heart_rate_range_bpm",
-      "l1": { "kind": "workout_sessions", "rollup": "hr_range_90d" },
+      "l1": {
+        "kind": "workout_sessions",
+        "rollup": "hr_range_90d"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "workout_hr_range",
         "baseline_source": "wearable.workout",
         "conditional_row": true
       },
-      "snapshot": { "unit": "bpm", "parser": "numeric_range" },
-      "ui": { "label_zh": "锻炼心率范围" },
-      "intent_hints": ["锻炼", "workout", "运动", "心率范围", "锻炼心率", "运动心率"]
+      "snapshot": {
+        "unit": "bpm",
+        "parser": "numeric_range"
+      },
+      "ui": {
+        "label_zh": "锻炼心率范围"
+      },
+      "intent_hints": [
+        "锻炼",
+        "workout",
+        "运动",
+        "心率范围",
+        "锻炼心率",
+        "运动心率"
+      ]
     },
     {
       "metric_id": "workout_count_recent",
-      "l1": { "kind": "workout_sessions", "rollup": "rolling_28d_count" },
+      "l1": {
+        "kind": "workout_sessions",
+        "rollup": "rolling_28d_count"
+      },
       "compare": {
         "comparable_90d": true,
         "rollup": "workout_count_mean",
         "baseline_source": "wearable.workout",
         "conditional_row": true
       },
-      "snapshot": { "unit": "count", "parser": "integer" },
-      "ui": { "label_zh": "近期锻炼次数" },
-      "intent_hints": ["次锻炼", "锻炼次数", "锻炼天数", "几次锻炼"]
+      "snapshot": {
+        "unit": "count",
+        "parser": "integer"
+      },
+      "ui": {
+        "label_zh": "近期锻炼次数"
+      },
+      "intent_hints": [
+        "次锻炼",
+        "锻炼次数",
+        "锻炼天数",
+        "几次锻炼"
+      ]
     },
     {
       "metric_id": "steps",
-      "l1": { "kind": "wearable_daily", "field": "steps" },
-      "compare": { "comparable_90d": false },
-      "snapshot": { "unit": "count", "parser": "numeric" },
-      "ui": { "label_zh": "步数", "label_en": "Steps" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "steps"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "count",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步数",
+        "label_en": "Steps"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -337,16 +551,39 @@
         "daily_key": true,
         "shortcut_health_type": "Steps",
         "shortcut_stat": "Sum",
-        "shortcut_unit": "count"
+        "shortcut_unit": "count",
+        "reference_range": {
+          "low": 7000,
+          "high": 10000,
+          "unit": "count",
+          "source": "Lancet Public Health 步数与死亡率观察研究摘要",
+          "note": "成人日常步数常见参考"
+        }
       },
-      "intent_hints": ["步数", "steps", "走了多少", "step count"]
+      "intent_hints": [
+        "步数",
+        "steps",
+        "走了多少",
+        "step count"
+      ]
     },
     {
       "metric_id": "active_energy",
-      "l1": { "kind": "wearable_daily", "field": "active_energy_kcal" },
-      "compare": { "comparable_90d": false },
-      "snapshot": { "unit": "kcal", "parser": "numeric" },
-      "ui": { "label_zh": "活动消耗", "label_en": "Active energy" },
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "active_energy_kcal"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "kcal",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "活动消耗",
+        "label_en": "Active energy"
+      },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -358,7 +595,11 @@
         "shortcut_stat": "Sum",
         "shortcut_unit": "kcal"
       },
-      "intent_hints": ["活动消耗", "active energy", "卡路里"]
+      "intent_hints": [
+        "活动消耗",
+        "active energy",
+        "卡路里"
+      ]
     }
   ]
 }

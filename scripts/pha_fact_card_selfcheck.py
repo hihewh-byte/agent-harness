@@ -23,7 +23,11 @@ from pha.fact_card import (  # noqa: E402
     fact_card_numeric_atoms,
 )
 from pha.fact_card_html import render_fact_card_html  # noqa: E402
-from pha.fact_card_prefs import prefs_payload, save_enabled_metric_ids  # noqa: E402
+from pha.fact_card_prefs import (  # noqa: E402
+    load_enabled_metric_ids,
+    prefs_payload,
+    save_enabled_metric_ids,
+)
 from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs  # noqa: E402
 from pha.models import WearableDailySummary  # noqa: E402
 
@@ -296,8 +300,132 @@ def main() -> int:
     if ">无<" not in leftover_html:
         return _fail("HTML must show 无 for leftover in_bed")
 
+    # M1-P7: progressive baseline 90d empty → 365d hit
+    as_of = yesterday
+    far_hist = [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=as_of - timedelta(days=120 + i),
+            sleep_hours=7.0 + (i % 5) * 0.1,
+        )
+        for i in range(30)
+    ]
+    as_of_sleep = WearableDailySummary(
+        user_id="selfcheck",
+        day=as_of,
+        sleep_hours=7.5,
+    )
+    prog = compose_fact_card(
+        calendar_day=as_of,
+        rows=far_hist + [as_of_sleep],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_time_asleep"],
+    )
+    sleep_m = next(m for m in prog["facts"]["metrics"] if m["metric"] == "sleep_time_asleep")
+    if sleep_m.get("baseline_window") != "365d":
+        return _fail(f"90d-empty sleep must use 365d window, got {sleep_m}")
+    if sleep_m.get("band") == "unknown":
+        return _fail("365d with 30 nights must band")
+    blob = json_blob(prog)
+    if "近90日" in blob or "近 90 日个人" in blob:
+        return _fail("copy must not hardcode 近90日 as the only baseline")
+    if sleep_m.get("reference") is None or sleep_m["reference"].get("status") not in {
+        "within",
+        "below",
+        "above",
+    }:
+        return _fail(f"sleep must carry reference status, got {sleep_m.get('reference')}")
+    ref_text = str(sleep_m["reference"].get("text") or "")
+    if not ref_text.startswith("【参考标准】") or "请自行查证" not in ref_text:
+        return _fail(f"reference must be T1 disclosure, got {ref_text}")
+    atoms = fact_card_numeric_atoms(prog)
+    for needle in ("7", "9"):
+        if needle not in atoms:
+            return _fail(f"reference {needle} must be in numeric atoms, got {atoms}")
+
+    empty_hist = compose_fact_card(
+        calendar_day=as_of,
+        rows=[as_of_sleep],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_time_asleep"],
+    )
+    empty_m = next(m for m in empty_hist["facts"]["metrics"] if m["metric"] == "sleep_time_asleep")
+    if empty_m.get("band") != "unknown" or empty_m.get("baseline_window") is not None:
+        return _fail(f"no history must be unknown without window, got {empty_m}")
+    empty_advice = " ".join(a["text"] for a in empty_hist["assessment"]["advice"])
+    if "0/7" not in empty_advice and "无历史" not in empty_advice:
+        return _fail(f"short history copy must show progress, got {empty_advice}")
+
+    hrv_only = compose_fact_card(
+        calendar_day=as_of,
+        rows=[
+            WearableDailySummary(user_id="selfcheck", day=as_of, hrv_sdnn_ms=40.0),
+            *[
+                WearableDailySummary(
+                    user_id="selfcheck",
+                    day=as_of - timedelta(days=i),
+                    hrv_sdnn_ms=40.0 + i,
+                )
+                for i in range(1, 20)
+            ],
+        ],
+        user_id="selfcheck",
+        enabled_metric_ids=["hrv_sdnn_ms"],
+    )
+    hrv_m2 = next(m for m in hrv_only["facts"]["metrics"] if m["metric"] == "hrv_sdnn_ms")
+    if hrv_m2.get("reference") is not None:
+        return _fail("HRV must not get a population reference_range")
+
+    # composite requires sleep + HRV + RHR all selected and banded
+    composite_rows = [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=as_of - timedelta(days=i),
+            sleep_hours=7.2,
+            hrv_sdnn_ms=42.0,
+            resting_heart_rate_bpm=62.0,
+        )
+        for i in range(1, 20)
+    ] + [
+        WearableDailySummary(
+            user_id="selfcheck",
+            day=as_of,
+            sleep_hours=7.2,
+            hrv_sdnn_ms=42.0,
+            resting_heart_rate_bpm=62.0,
+        )
+    ]
+    full_comp = compose_fact_card(
+        calendar_day=as_of,
+        rows=composite_rows,
+        user_id="selfcheck",
+        enabled_metric_ids=[
+            "sleep_time_asleep",
+            "hrv_sdnn_ms",
+            "resting_heart_rate_bpm",
+        ],
+    )
+    if full_comp["assessment"]["summary"].get("composite") not in {"持平", "偏好", "偏轻松"}:
+        return _fail(
+            f"full composite must vote, got {full_comp['assessment']['summary']}"
+        )
+    missing_comp = compose_fact_card(
+        calendar_day=as_of,
+        rows=composite_rows,
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_time_asleep", "steps"],
+    )
+    if missing_comp["assessment"]["summary"].get("composite") != "不综合":
+        return _fail("missing HRV/RHR selection must 不综合")
+
     print("pha_fact_card_selfcheck: PASS")
     return 0
+
+
+def json_blob(card: dict) -> str:
+    import json
+
+    return json.dumps(card, ensure_ascii=False)
 
 
 if __name__ == "__main__":

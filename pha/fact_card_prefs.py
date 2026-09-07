@@ -47,6 +47,7 @@ class FactCardMetricSpec:
     display_fallback_metric_id: str = ""
     shortcut_sleep_value: str = ""
     reveal_when_selected: tuple[str, ...] = ()
+    reference_range: Optional[dict[str, Any]] = None
 
 
 def _unit_from_entry(entry: dict[str, Any]) -> str:
@@ -77,6 +78,8 @@ def _spec_from_entry(entry: dict[str, Any]) -> Optional[FactCardMetricSpec]:
     reveal_when = tuple(
         str(x).strip() for x in reveal_raw if str(x).strip()
     ) if isinstance(reveal_raw, list) else ()
+    raw_ref = fc.get("reference_range")
+    reference_range = dict(raw_ref) if isinstance(raw_ref, dict) and raw_ref else None
     return FactCardMetricSpec(
         metric_id=mid,
         field=field,
@@ -94,6 +97,7 @@ def _spec_from_entry(entry: dict[str, Any]) -> Optional[FactCardMetricSpec]:
         display_fallback_metric_id=str(fc.get("display_fallback_metric_id") or "").strip(),
         shortcut_sleep_value=str(fc.get("shortcut_sleep_value") or "").strip(),
         reveal_when_selected=reveal_when,
+        reference_range=reference_range,
     )
 
 

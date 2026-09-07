@@ -21,13 +21,13 @@ python scripts/pha_fact_card.py          # 打印当前用户 default 的卡
 |----|------|------|
 | 数字 | `facts.as_of` / `facts.stale` / `facts.metrics` | `as_of = MAX(day)`；日历日无行则 `today.present=false`，**不用末日顶今日** |
 | 选择 | `facts.selection.enabled_metric_ids` | 用户已选；允许集来自注册表，不是 Python 列表 |
-| 评估 | `assessment.advice` | 相对 **递进个人基线**（90 日 → 365 日 → 全历史，取第一个 n ≥ 7 的窗口；JSON 写 `baseline_window` / `baseline_n`）的规则分档 + **固定模板**；三级窗口皆 n&lt;7 才写「历史不足 n/7」。**当前代码仍是固定 90 日**——M1-P7 待改 |
-| 参考 | `assessment.reference[]` | 注册表 `fact_card.reference_range` 有值的已选指标，各一句 `【参考标准】…（来源：…，请自行查证，非医疗建议）` + 范围内/外。HRV 绝对值不给人群范围。**M1-P7 待做** |
+| 评估 | `assessment.advice` | 相对 **递进个人基线**（90 日 → 365 日 → 全历史，取第一个 n ≥ 7 的窗口；JSON 写 `baseline_window` / `baseline_n`）的规则分档 + **固定模板**；三级窗口皆 n&lt;7 才写「历史不足 n/7」。**M1-P7 已落地** |
+| 参考 | `assessment` 内每项 `metrics[].reference` | 注册表 `fact_card.reference_range` 有值的已选指标，各一句 `【参考标准】…（来源：…，请自行查证，非医疗建议）` + 范围内/外。HRV 绝对值不给人群范围。**M1-P7 已落地**（睡眠总时长 / RHR / 步数；深睡/REM 占比 TODO） |
 | 解读 | `interpretation`（仅用户点按钮后） | 走 chat harness + Numerics 审计的 LLM 文本，独立区块、异步缓存、不进通知、不预生成。**M1-P9 待做**，见 PRD FR-6 |
 
 `notification.body` 是锁屏导语；`notification.open_path` 指向完整卡。
 
-**为什么现在评估层几乎是空的（2026-09-07）**：不是数据少。`default` 库里睡眠 642 夜、HRV 1936 天、静息心率 2255 天，但 `BASELINE_DAYS=90` 从 `as_of` 回看，而 zip 导入止于 2026-06-09，窗口里只剩 0–1 天。修法是递进窗口（M1-P7），不是等 7 天。另外 `hrv_rmssd_ms` 列的历史样本 `sample_id` 全是 `…HeartRateVariabilitySDNN|…`，即该列自始就是 SDNN，与今日 `hrv_sdnn_ms` 同一物理量（M1-P8 合并）。
+**M1-P7 之后**：评估层用递进窗口读 Mac 全账本，不再因 90 日空窗误报「基线不足」。`hrv_rmssd_ms` 历史仍是 SDNN 列名错位（M1-P8 合并后 HRV 才能分档）。
 
 「PHA 同步健康」按**当前勾选**生成：步数 Sum、活动消耗 Sum、静息心率 Average，各 POST **一个当日数字**。睡眠 / HRV 勾了也会显示，但捷径**先不同步**（category / SDNN≠RMSSD），卡上继续写「无」。勾选变更后必须重新生成捷径。详见 [路线图 M1-P5](pha-ios-proactive-roadmap.md)。
 

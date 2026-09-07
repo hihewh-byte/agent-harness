@@ -44,9 +44,19 @@ def render_fact_card_html(
         else:
             shown = escape(f"{value}{unit}")
         band = escape(str(item.get("band") or ""))
+        window = item.get("baseline_window")
+        n = item.get("baseline_n")
+        window_bit = ""
+        if window and n is not None:
+            window_bit = f'<span class="b">{escape(str(window))}·n={escape(str(n))}</span>'
+        ref = item.get("reference") or {}
+        ref_line = ""
+        if isinstance(ref, dict) and ref.get("text"):
+            ref_line = f'<p class="fine ref">{escape(str(ref.get("text")))}</p>'
         metrics_html.append(
             f'<li class="metric"><span class="k">{label}</span>'
-            f'<span class="v">{shown}</span><span class="b">{band}</span></li>'
+            f'<span class="v">{shown}</span><span class="b">{band}</span>{window_bit}'
+            f"{ref_line}</li>"
         )
     if not metrics_html:
         metrics_html.append('<li class="metric empty">未选择指标</li>')
@@ -82,6 +92,10 @@ def render_fact_card_html(
     )
     eval_text = escape(str(summary.get("text") or ""))
     advice_text = escape(str(summary.get("advice") or ""))
+    composite = escape(str(summary.get("composite") or ""))
+    composite_line = (
+        f'<p class="fine">卡级综合：{composite}</p>' if composite else ""
+    )
     hk = facts.get("healthkit") or {}
     if hk.get("reached"):
         hk_line = (
@@ -137,6 +151,7 @@ def render_fact_card_html(
     .k {{ font-weight: 600; }}
     .v {{ font-variant-numeric: tabular-nums; }}
     .b {{ color: #8f8778; font-size: .85rem; }}
+    .ref {{ margin: 4px 0 0; grid-column: 1 / -1; }}
     ul {{ list-style: none; margin: 0; padding: 0; }}
     .pick {{
       display: flex; align-items: center; gap: 10px;
@@ -165,6 +180,7 @@ def render_fact_card_html(
   <section class="card">
     <h2>评估</h2>
     <p>{eval_text}</p>
+    {composite_line}
     <p><strong>建议：</strong>{advice_text}</p>
     <ul>{''.join(advice_html)}</ul>
     <p class="fine">{escape(DISCLAIMER)}</p>

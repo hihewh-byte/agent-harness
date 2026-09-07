@@ -4,6 +4,9 @@ Numbers are taken only from ``wearable_daily`` rows passed in (or queried).
 Point-day honesty: a missing calendar day is not filled from MAX(day).
 ``as_of`` may be an earlier day; then ``stale=true`` and copy must not say 今日.
 Metric set comes from the wearable registry + user prefs — not a Python list.
+
+Baseline (v1.6 / M1-P7): per-metric progressive window 90d → 365d → all history.
+Reference ranges come from the registry (Tier-1 disclosure format), not Python constants.
 """
 
 from __future__ import annotations
@@ -21,12 +24,15 @@ BASELINE_DAYS = 90
 MIN_BASELINE_N = 7
 DISCLAIMER = "教育参考，非医疗建议，不能替代医师诊治。"
 
+# Ordered candidates: first window with n >= MIN_BASELINE_N wins.
+BASELINE_CANDIDATES: tuple[tuple[str, Optional[int]], ...] = (
+    ("90d", 90),
+    ("365d", 365),
+    ("all", None),
+)
+
 _ADVICE_MISSING = "该指标当日无记录，不用其他日期的数字代替。"
-_ADVICE_UNKNOWN = "个人基线天数不足，只展示数字、不做分档。"
 _SUMMARY_SYNC = "先把缺项同步进库，有数后再做恢复向评估。"
-_SUMMARY_BASELINE = "个人基线不足7天，只展示数字、不做分档。"
-_SUMMARY_BELOW = "有指标低于近90日个人基线，可考虑偏轻松安排。"
-_SUMMARY_OK = "有数指标相对近90日个人基线大致持平或偏好。"
 _SLEEP_VERIFY_METRIC_IDS = frozenset(
     {
         "sleep_time_asleep",
@@ -37,6 +43,10 @@ _SLEEP_VERIFY_METRIC_IDS = frozenset(
         "sleep_awake",
     }
 )
+_COMPOSITE_SLEEP_ID = "sleep_time_asleep"
+_COMPOSITE_RHR_ID = "resting_heart_rate_bpm"
+_COMPOSITE_HRV_IDS = frozenset({"hrv_rmssd_ms", "hrv_sdnn_ms"})
+_BANDED = frozenset({"below", "typical", "above"})
 
 
 def _round_num(value: float, *, unit: str) -> float:
@@ -84,12 +94,178 @@ def band_from_percentile(percentile: Optional[float], *, higher_is_better: bool)
     return raw
 
 
+def _is_night_metric(metric_id: str) -> bool:
+    return metric_id in _SLEEP_VERIFY_METRIC_IDS or metric_id == _COMPOSITE_SLEEP_ID
+
+
+def window_phrase(
+    window: Optional[str],
+    n: int,
+    *,
+    earliest: Optional[date] = None,
+    night: bool = False,
+) -> str:
+    unit = "夜" if night else "天"
+    if window == "90d":
+        return f"近 90 日 {n} {unit}"
+    if window == "365d":
+        return f"近 12 个月 {n} {unit}"
+    if window == "all":
+        since = earliest.strftime("%Y-%m") if earliest is not None else "?"
+        return f"全部历史（自 {since}）{n} {unit}"
+    return f"个人历史 {n}/7 {unit}"
+
+
+def _samples_for_window(
+    rows: Sequence[WearableDailySummary],
+    *,
+    field: str,
+    as_of: Optional[date],
+    days: Optional[int],
+) -> tuple[list[float], Optional[date]]:
+    earliest: Optional[date] = None
+    samples: list[float] = []
+    if as_of is None:
+        return samples, earliest
+    if days is None:
+        candidates = [row for row in rows if row.day != as_of]
+    else:
+        grain = rolling_n_grain(days, as_of)
+        candidates = [
+            row
+            for row in rows
+            if grain.start <= row.day <= grain.end and row.day != as_of
+        ]
+    for row in candidates:
+        value = _row_value(row, field)
+        if value is None:
+            continue
+        samples.append(value)
+        if earliest is None or row.day < earliest:
+            earliest = row.day
+    return samples, earliest
+
+
+def pick_baseline_samples(
+    rows: Sequence[WearableDailySummary],
+    *,
+    field: str,
+    as_of: Optional[date],
+) -> tuple[Optional[str], list[float], Optional[date]]:
+    """Return (window_key, samples, earliest_day_in_chosen_or_all)."""
+    last_samples: list[float] = []
+    last_earliest: Optional[date] = None
+    for key, days in BASELINE_CANDIDATES:
+        samples, earliest = _samples_for_window(
+            rows, field=field, as_of=as_of, days=days
+        )
+        last_samples, last_earliest = samples, earliest
+        if len(samples) >= MIN_BASELINE_N:
+            return key, samples, earliest
+    return None, last_samples, last_earliest
+
+
+def _reference_status(value: float, low: float, high: float) -> str:
+    if value < low:
+        return "below"
+    if value > high:
+        return "above"
+    return "within"
+
+
+def _reference_text(
+    *,
+    note: str,
+    low: float,
+    high: float,
+    unit: str,
+    shown: str,
+    status: str,
+    source: str,
+) -> str:
+    status_zh = {"within": "在范围内", "below": "低于参考范围", "above": "高于参考范围"}[
+        status
+    ]
+    lo = _fmt(low, unit)
+    hi = _fmt(high, unit)
+    span = f"{lo}–{hi} {unit}".strip()
+    title = (note or "常见建议范围").strip()
+    return (
+        f"【参考标准】{title} {span}，你今日 {shown}{unit} {status_zh}"
+        f"（来源：{source}，请自行查证，非医疗建议）"
+    )
+
+
+def build_reference(
+    spec: FactCardMetricSpec,
+    *,
+    value: Optional[float],
+    unit: str,
+) -> Optional[dict[str, Any]]:
+    rr = spec.reference_range
+    if not rr or value is None:
+        return None
+    try:
+        low = float(rr["low"])
+        high = float(rr["high"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    source = str(rr.get("source") or "").strip()
+    if not source:
+        return None
+    ref_unit = str(rr.get("unit") or unit or "").strip() or unit
+    status = _reference_status(value, low, high)
+    shown = _fmt(value, ref_unit)
+    note = str(rr.get("note") or "常见建议范围").strip()
+    return {
+        "low": _round_num(low, unit=ref_unit),
+        "high": _round_num(high, unit=ref_unit),
+        "unit": ref_unit,
+        "source": source,
+        "note": note,
+        "status": status,
+        "text": _reference_text(
+            note=note,
+            low=low,
+            high=high,
+            unit=ref_unit,
+            shown=shown,
+            status=status,
+            source=source,
+        ),
+    }
+
+
+def _composite_from_metrics(
+    metrics: Sequence[dict[str, Any]],
+) -> tuple[str, Optional[str]]:
+    """Return (label, kind). Missing selection → 不综合."""
+    by_id = {str(m.get("metric") or ""): m for m in metrics}
+    sleep = by_id.get(_COMPOSITE_SLEEP_ID)
+    rhr = by_id.get(_COMPOSITE_RHR_ID)
+    hrv = next(
+        (by_id[mid] for mid in _COMPOSITE_HRV_IDS if mid in by_id),
+        None,
+    )
+    if sleep is None or rhr is None or hrv is None:
+        return "不综合", None
+    bands = [sleep.get("band"), hrv.get("band"), rhr.get("band")]
+    if any(b not in _BANDED for b in bands):
+        return "不综合", None
+    score = sum(1 if b == "above" else -1 if b == "below" else 0 for b in bands)
+    if score <= -1:
+        return "偏轻松", "easy"
+    if score >= 1:
+        return "偏好", "good"
+    return "持平", "typical"
+
+
 def compose_assessment_summary(
     *,
     stale: bool,
     metrics: Sequence[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Card-level analysis: coverage + stale + rule bands. No LLM."""
+    """Card-level analysis: coverage + stale + rule bands + composite. No LLM."""
     present = [m for m in metrics if m.get("value") is not None]
     missing = [m for m in metrics if m.get("value") is None]
     below = [m for m in present if m.get("band") == "below"]
@@ -106,11 +282,30 @@ def compose_assessment_summary(
     if missing:
         labels = "、".join(m["label"] for m in missing)
         bits.append(f"{labels}无记录，不顶。")
+    for item in present:
+        if item.get("band") not in _BANDED:
+            continue
+        phrase = window_phrase(
+            item.get("baseline_window"),
+            int(item.get("baseline_n") or 0),
+            earliest=_parse_iso_day(item.get("baseline_earliest")),
+            night=_is_night_metric(str(item.get("metric") or "")),
+        )
+        direction = {
+            "below": "低于",
+            "above": "高于",
+            "typical": "接近",
+        }[item["band"]]
+        bits.append(f"{item['label']}{direction}你{phrase}的水平。")
     if unknown and not below:
-        bits.append(_SUMMARY_BASELINE)
-    if below:
-        labels = "、".join(m["label"] for m in below)
-        bits.append(f"{labels}低于近90日个人基线。")
+        for item in unknown:
+            n = int(item.get("baseline_n") or 0)
+            if n <= 0:
+                bits.append(f"{item['label']}无历史，暂不分档。")
+            else:
+                bits.append(f"{item['label']}个人历史 {n}/7 天，暂不分档。")
+    composite_label, composite_kind = _composite_from_metrics(metrics)
+    bits.append(f"卡级综合：{composite_label}。")
     if total == 0:
         advice = "到完整卡底部勾选要看的指标。"
         kind = "empty_selection"
@@ -121,13 +316,13 @@ def compose_assessment_summary(
         advice = _SUMMARY_SYNC
         kind = "coverage"
     elif below:
-        advice = _SUMMARY_BELOW
+        advice = "有指标低于个人基线，可考虑偏轻松安排。"
         kind = "below_baseline"
     elif unknown:
-        advice = _SUMMARY_BASELINE
+        advice = "有指标历史不足 7 天，只展示数字、暂不分档。"
         kind = "baseline_short"
     else:
-        advice = _SUMMARY_OK
+        advice = "有数指标相对个人基线大致持平或偏好。"
         kind = "typical"
     return {
         "kind": kind,
@@ -135,21 +330,48 @@ def compose_assessment_summary(
         "coverage_total": total,
         "text": "".join(bits),
         "advice": advice,
+        "composite": composite_label,
+        "composite_kind": composite_kind,
     }
 
 
-def _advice(band: str, label: str) -> str:
+def _parse_iso_day(raw: Any) -> Optional[date]:
+    if not raw:
+        return None
+    try:
+        return date.fromisoformat(str(raw)[:10])
+    except ValueError:
+        return None
+
+
+def _advice(
+    band: str,
+    label: str,
+    *,
+    baseline_window: Optional[str],
+    baseline_n: int,
+    baseline_earliest: Optional[date],
+    night: bool,
+) -> str:
     if band == "missing":
         return _ADVICE_MISSING
     if band == "unknown":
-        return _ADVICE_UNKNOWN
+        if baseline_n <= 0:
+            return f"{label}无历史，暂不分档。"
+        return f"{label}个人历史 {baseline_n}/7 天，暂不分档。"
+    phrase = window_phrase(
+        baseline_window,
+        baseline_n,
+        earliest=baseline_earliest,
+        night=night,
+    )
     if band == "below":
-        return f"{label}低于近90日个人基线。可考虑偏轻松安排。"
+        return f"{label}低于你{phrase}的水平。可考虑偏轻松安排。"
     if band == "above":
-        return f"{label}高于近90日个人基线。"
+        return f"{label}高于你{phrase}的水平。"
     if band == "typical":
-        return f"{label}接近近90日个人中位。"
-    return _ADVICE_UNKNOWN
+        return f"{label}接近你{phrase}的中位。"
+    return f"{label}个人历史 {baseline_n}/7 天，暂不分档。"
 
 
 def sleep_verify_copy(
@@ -158,8 +380,11 @@ def sleep_verify_copy(
     value: float,
     unit: str,
     percentile: Optional[float],
+    baseline_window: Optional[str] = None,
+    baseline_n: int = 0,
+    baseline_earliest: Optional[date] = None,
 ) -> Optional[str]:
-    """Fixed template when a sleep metric sits outside the personal 90d band."""
+    """Fixed template when a sleep metric sits outside the personal baseline band."""
     if percentile is None:
         return None
     if percentile < 25:
@@ -169,8 +394,14 @@ def sleep_verify_copy(
     else:
         return None
     shown = _fmt(value, unit)
+    phrase = window_phrase(
+        baseline_window,
+        baseline_n,
+        earliest=baseline_earliest,
+        night=True,
+    )
     return (
-        f"{label} {shown}{unit}，明显{direction}你近 90 日的水平，"
+        f"{label} {shown}{unit}，明显{direction}你{phrase}的水平，"
         "请到健康 App 核对这一夜的数据"
     )
 
@@ -190,18 +421,20 @@ def compose_fact_card(
     today_row = by_day.get(calendar_day)
     as_of_row = by_day.get(as_of) if as_of is not None else None
 
-    baseline_end = as_of or calendar_day
-    grain = rolling_n_grain(BASELINE_DAYS, baseline_end)
-    baseline_rows = [
-        row for row in rows if grain.start <= row.day <= grain.end and row.day != as_of
-    ]
-
     metrics: list[dict[str, Any]] = []
     advice_items: list[dict[str, str]] = []
     for spec in specs:
-        row = _metric_row(spec, as_of, as_of_row, baseline_rows)
+        row = _metric_row(spec, as_of, as_of_row, rows)
         metrics.append(row)
-        text = _advice(row["band"], row["label"])
+        earliest = _parse_iso_day(row.get("baseline_earliest"))
+        text = _advice(
+            row["band"],
+            row["label"],
+            baseline_window=row.get("baseline_window"),
+            baseline_n=int(row.get("baseline_n") or 0),
+            baseline_earliest=earliest,
+            night=_is_night_metric(spec.metric_id),
+        )
         if (
             spec.metric_id in _SLEEP_VERIFY_METRIC_IDS
             and row.get("value") is not None
@@ -211,6 +444,9 @@ def compose_fact_card(
                 value=float(row["value"]),
                 unit=str(row.get("unit") or ""),
                 percentile=row.get("percentile"),
+                baseline_window=row.get("baseline_window"),
+                baseline_n=int(row.get("baseline_n") or 0),
+                baseline_earliest=earliest,
             )
             if verify:
                 text = verify
@@ -265,12 +501,13 @@ def _metric_row(
     spec: FactCardMetricSpec,
     as_of: Optional[date],
     as_of_row: Optional[WearableDailySummary],
-    baseline_rows: Sequence[WearableDailySummary],
+    rows: Sequence[WearableDailySummary],
 ) -> dict[str, Any]:
     field = spec.field
     label = spec.label
     unit = spec.unit
     value_kind = spec.field
+    higher_is_better = spec.higher_is_better
     value = _row_value(as_of_row, field) if as_of_row is not None else None
     if spec.metric_id == "sleep_in_bed" and value is not None and value < 1.0:
         stages = (
@@ -281,6 +518,7 @@ def _metric_row(
         )
         if all(item is None for item in stages):
             value = None
+    active_spec = spec
     if value is None and spec.display_fallback_metric_id:
         fallback = catalog_by_id().get(spec.display_fallback_metric_id)
         if fallback is not None:
@@ -291,24 +529,25 @@ def _metric_row(
                 label = fallback.label
                 unit = fallback.unit
                 value_kind = fallback.field
-    samples = [
-        v
-        for v in (_row_value(row, field) for row in baseline_rows)
-        if v is not None
-    ]
+                higher_is_better = fallback.higher_is_better
+                active_spec = fallback
+    window, samples, earliest = pick_baseline_samples(
+        rows, field=field, as_of=as_of
+    )
     if value is None:
         band = "missing"
         pct = None
         mean = min_v = max_v = None
-    elif len(samples) < MIN_BASELINE_N:
+    elif window is None or len(samples) < MIN_BASELINE_N:
         band = "unknown"
         pct = None
         mean = _round_num(sum(samples) / len(samples), unit=unit) if samples else None
         min_v = _round_num(min(samples), unit=unit) if samples else None
         max_v = _round_num(max(samples), unit=unit) if samples else None
+        window = None
     else:
         pct = percentile_rank(value, samples)
-        band = band_from_percentile(pct, higher_is_better=spec.higher_is_better)
+        band = band_from_percentile(pct, higher_is_better=higher_is_better)
         mean = _round_num(sum(samples) / len(samples), unit=unit)
         min_v = _round_num(min(samples), unit=unit)
         max_v = _round_num(max(samples), unit=unit)
@@ -318,6 +557,7 @@ def _metric_row(
         shown = int(round(value))
     else:
         shown = _round_num(value, unit=unit)
+    reference = build_reference(active_spec, value=value, unit=unit)
     return {
         "metric": spec.metric_id,
         "label": label,
@@ -326,11 +566,14 @@ def _metric_row(
         "value_field": value_kind,
         "day": as_of.isoformat() if as_of is not None else None,
         "baseline_n": len(samples),
+        "baseline_window": window,
+        "baseline_earliest": earliest.isoformat() if earliest is not None else None,
         "baseline_mean": mean,
         "baseline_min": min_v,
         "baseline_max": max_v,
         "percentile": pct,
         "band": band,
+        "reference": reference,
     }
 
 
@@ -382,6 +625,14 @@ def fact_card_numeric_atoms(card: dict[str, Any]) -> set[str]:
                 continue
             unit = item.get("unit") or ""
             atoms.add(_fmt(float(raw), unit if key != "percentile" else "h"))
+        ref = item.get("reference") or {}
+        if isinstance(ref, dict):
+            ref_unit = str(ref.get("unit") or item.get("unit") or "")
+            for key in ("low", "high"):
+                raw = ref.get(key)
+                if raw is None:
+                    continue
+                atoms.add(_fmt(float(raw), ref_unit))
     return atoms
 
 
@@ -395,7 +646,8 @@ def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[st
     uid = (user_id or "default").strip() or "default"
     ref = reference or effective_query_reference_date()
     max_day = query_max_wearable_daily_day(uid)
-    start = (max_day or ref) - timedelta(days=BASELINE_DAYS - 1)
+    # Progressive baseline may need full history (M1-P7); SQLite local ~3k rows is fine.
+    start = date(2000, 1, 1)
     end = max(ref, max_day or ref)
     rows = query_wearable_daily_range(uid, start, end)
     card = compose_fact_card(calendar_day=ref, rows=rows, user_id=uid)
@@ -420,14 +672,18 @@ def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[st
 
 
 __all__ = [
+    "BASELINE_CANDIDATES",
     "BASELINE_DAYS",
     "DISCLAIMER",
     "SCHEMA",
     "band_from_percentile",
+    "build_reference",
     "compose_assessment_summary",
     "compose_fact_card",
     "fact_card_numeric_atoms",
     "load_fact_card",
     "percentile_rank",
+    "pick_baseline_samples",
     "sleep_verify_copy",
+    "window_phrase",
 ]

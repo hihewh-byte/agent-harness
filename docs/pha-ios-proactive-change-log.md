@@ -7,6 +7,16 @@
 
 ---
 
+
+## 2026-09-07 (M1-P7 递进个人基线 + 通用参考层)
+
+- **类别**：事实卡规则评估（无 LLM）。
+- **证据**：`python3 scripts/pha_fact_card_selfcheck.py` PASS（含 90d 空→365d、无历史 `/7`、T1 参考三态、HRV 无参考、卡级综合/不综合）。真机 `default`：睡眠总时长 `baseline_window=365d` n=267 band=typical，参考 within；REM/清醒 band=below；`sleep_core` 无历史 unknown；HRV/RHR 当日无数 missing（不顶）。
+- **改动**：`fact_card.py` 按指标递进 90d→365d→all；JSON 写 `baseline_window` / `baseline_earliest`；文案「相对你近 12 个月 N 夜/天」；unknown 写「个人历史 n/7」；卡级综合需睡眠+HRV+RHR 均已选且已分档否则「不综合」。注册表 `reference_range` 进睡眠总时长 / RHR / 步数；T1 披露句；深睡/REM 占比参考本轮不做（TODO）。`load_fact_card` 拉全历史。占比型参考与 HRV 列合并仍属 M1-P8。
+- **回滚**：还原 `pha/fact_card.py` / `fact_card_prefs.py` / `fact_card_html.py` / 注册表三处 `reference_range` / selfcheck；官方重启。
+
+---
+
 ## 2026-09-07 (PRD v1.6：递进基线 + 通用参考层 + 我的评估要求 + 按钮式解读；HRV 列语义；只改文档)
 
 - **类别**：产品共识 / 文档（无代码）。
