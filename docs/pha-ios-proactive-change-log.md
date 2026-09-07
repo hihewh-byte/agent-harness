@@ -7,6 +7,14 @@
 
 ---
 
+## 2026-09-07 (M1-P8 HRV 列语义纠正：RMSSD 列 → SDNN)
+
+- **类别**：账本语义 / 穿戴读取路径（叠 harness ACK）。
+- **证据**：迁移前 `wearable_data` 11652 条 `metric_type=hrv`，其中 9714 条 `sample_id` 含 `HeartRateVariabilitySDNN`，其余多为 `default|hrv|` 日镜；库中无真 RMSSD。`python3 scripts/pha_migrate_hrv_rmssd_to_sdnn.py`：日表复制 1937 行 → `hrv_sdnn_ms`（现 1938），样本改标 11651→`hrv_sdnn`。9/6 卡：`hrv_sdnn_ms=40.97`，`baseline_window=365d` n=275 band=above。自检：fact_card / healthkit_ingest / compare_table / chat_turn_fsm / numerics / aggregator PASS。
+- **改动**：方案 A。迁移脚本幂等；聚合器把遗留 `hrv` 样本写入 SDNN 桶；zip 导入与 ingest 别名 `hrv`→`hrv_sdnn`；注册表主指标改 `hrv_sdnn_ms`（label HRV），`hrv_rmssd_ms` 标 deprecated/非 eligible；prefs 自动 remap；`health_data`/patient_state/compare/OCR 快照兼容旧 id。深睡/REM 占比参考仍 TODO。
+- **回滚**：还原代码与注册表；日表可用备份或从 `wearable_data` 重算（迁移不删 `hrv_rmssd_ms` 历史值）。
+
+---
 
 ## 2026-09-07 (M1-P7 递进个人基线 + 通用参考层)
 

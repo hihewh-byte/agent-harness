@@ -713,7 +713,7 @@ def test_single_metric_focus() -> bool:
         infer_single_metric_focus_ids,
     )
 
-    if infer_single_metric_focus_ids("HRV 怎么样") != ["hrv_rmssd_ms"]:
+    if infer_single_metric_focus_ids("HRV 怎么样") != ["hrv_sdnn_ms"]:
         print("FAIL focus ids hrv", infer_single_metric_focus_ids("HRV 怎么样"))
         return False
     if infer_single_metric_focus_ids("指标是否都正常"):
@@ -753,7 +753,7 @@ def test_single_metric_focus() -> bool:
     table = CompareTableV1(
         rows=[
             CompareRowV1(
-                metric_id="hrv_rmssd_ms",
+                metric_id="hrv_sdnn_ms",
                 row_kind="comparable_90d",
                 snapshot_value="34",
                 baseline_90d_value="33.0",

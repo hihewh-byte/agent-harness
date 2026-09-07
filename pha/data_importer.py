@@ -24,7 +24,7 @@ from pha.sqlite_storage import (
     METRIC_ACTIVE_ENERGY,
     METRIC_AWAKE,
     METRIC_HEART_RATE,
-    METRIC_HRV,
+    METRIC_HRV_SDNN,
     METRIC_RESPIRATORY_RATE,
     METRIC_RHR,
     METRIC_SPO2,
@@ -755,7 +755,8 @@ class AppleHealthParser:
                 return
             per_day[day].hrv_sum += v
             per_day[day].hrv_n += 1
-            writer.add_sample(METRIC_HRV, start_dt, v, sample_id=sample_id)
+            # M1-P8: Apple HRV is SDNN; stop labeling warehouse samples as RMSSD ``hrv``.
+            writer.add_sample(METRIC_HRV_SDNN, start_dt, v, sample_id=sample_id)
             return
 
         if rtype == HK_ACTIVE_ENERGY:

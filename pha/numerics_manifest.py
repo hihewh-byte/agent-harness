@@ -349,6 +349,7 @@ def _wearable_entries(
             _focus_to_cat = {
                 "sleep_time_asleep": "sleep",
                 "hrv_rmssd_ms": "hrv",
+                "hrv_sdnn_ms": "hrv",
                 "resting_heart_rate_bpm": "rhr",
                 "spo2_percent": "spo2",
                 "respiratory_rate": "respiratory_rate",

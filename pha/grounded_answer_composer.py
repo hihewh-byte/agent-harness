@@ -337,6 +337,7 @@ _WAREHOUSE_FOCUS_LABELS_BY_CAT: dict[str, tuple[str, ...]] = {
 _REGISTRY_TO_WAREHOUSE_LABELS: dict[str, tuple[str, ...]] = {
     "sleep_time_asleep": _WAREHOUSE_FOCUS_LABELS_BY_CAT["sleep"],
     "hrv_rmssd_ms": _WAREHOUSE_FOCUS_LABELS_BY_CAT["hrv"],
+    "hrv_sdnn_ms": _WAREHOUSE_FOCUS_LABELS_BY_CAT["hrv"],
     "resting_heart_rate_bpm": _WAREHOUSE_FOCUS_LABELS_BY_CAT["rhr"],
     "spo2_percent": _WAREHOUSE_FOCUS_LABELS_BY_CAT["spo2"],
     "respiratory_rate": _WAREHOUSE_FOCUS_LABELS_BY_CAT["respiratory_rate"],

@@ -25,7 +25,7 @@ def _selfcheck_compare_table():
     return CompareTableV1(
         rows=[
             CompareRowV1(
-                metric_id="hrv_rmssd_ms",
+                metric_id="hrv_sdnn_ms",
                 row_kind="snapshot_only",
                 snapshot_value="34",
                 snapshot_unit="ms",

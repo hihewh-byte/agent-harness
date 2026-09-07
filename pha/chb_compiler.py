@@ -194,7 +194,11 @@ def read_wearable_facts(
         return []
 
     sleep_vals = [float(r.sleep_hours) for r in rows if r.sleep_hours is not None]
-    hrv_vals = [float(r.hrv_rmssd_ms) for r in rows if r.hrv_rmssd_ms is not None]
+    hrv_vals = [
+        float(r.hrv_sdnn_ms if r.hrv_sdnn_ms is not None else r.hrv_rmssd_ms)
+        for r in rows
+        if r.hrv_sdnn_ms is not None or r.hrv_rmssd_ms is not None
+    ]
     steps_vals = [float(r.steps) for r in rows if r.steps is not None]
     rhr_vals = [float(r.resting_heart_rate_bpm) for r in rows if r.resting_heart_rate_bpm is not None]
 

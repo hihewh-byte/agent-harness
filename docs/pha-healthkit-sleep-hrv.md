@@ -34,7 +34,7 @@
 | 健康 App 上看见的 | HealthKit 真源 | 说明 |
 |-------------------|----------------|------|
 | HRV 点、日均线 | Find 标签 `Heart Rate Variability` = **SDNN（毫秒）** | Watch 在夜间/呼吸时打点，一天多条 |
-| RMSSD | **Apple 不提供** | 第三方 App 才可能写；本仓库日列 `hrv_rmssd_ms` 来自 zip/旧导入，**不能**把 SDNN 写进去。**2026-09-07 查实**：该列的 11650 条历史样本 `sample_id` 全为 `HKQuantityTypeIdentifierHeartRateVariabilitySDNN|…`，即列名错、内容就是 Apple SDNN，库中从未有 RMSSD。列语义纠正（合并为 SDNN 序列）= PRD **M1-P8**，叠 harness ACK；P8 完成前本行隔离规则不变 |
+| RMSSD | **Apple 不提供** | 第三方才可能写。**M1-P8 DONE**：历史误标列已迁到 `hrv_sdnn_ms`；注册表 `hrv_rmssd_ms` 标 deprecated、非 fact_card eligible；新写入一律 SDNN |
 
 可从 SDNN 点算出、且应用来分析的：**条数、当时日均、最低、最高、夜间窗均值**。这些是聚合，不是健康里另一条原始类型。
 

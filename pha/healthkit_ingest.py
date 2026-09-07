@@ -25,7 +25,6 @@ from pydantic import BaseModel, Field
 from pha.date_parser import safe_parse_datetime
 from pha.sqlite_storage import (
     METRIC_ACTIVE_ENERGY,
-    METRIC_HRV,
     METRIC_HRV_SDNN,
     METRIC_RHR,
     METRIC_AWAKE,
@@ -56,7 +55,7 @@ _VALUE_TOKEN_RE = re.compile(r"[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?")
 
 # Public v1 names → stored ``wearable_data.metric_type``.
 _CANONICAL: dict[str, str] = {
-    "hrv": METRIC_HRV,
+    "hrv": METRIC_HRV_SDNN,
     "hrv_sdnn": METRIC_HRV_SDNN,
     "rhr": METRIC_RHR,
     "steps": METRIC_STEPS,

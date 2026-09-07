@@ -27,7 +27,7 @@ python scripts/pha_fact_card.py          # 打印当前用户 default 的卡
 
 `notification.body` 是锁屏导语；`notification.open_path` 指向完整卡。
 
-**M1-P7 之后**：评估层用递进窗口读 Mac 全账本，不再因 90 日空窗误报「基线不足」。`hrv_rmssd_ms` 历史仍是 SDNN 列名错位（M1-P8 合并后 HRV 才能分档）。
+**M1-P7/P8 之后**：评估层用递进窗口；HRV 主列为 `hrv_sdnn_ms`（历史已从误标 RMSSD 列迁入）。当日无数仍写「无」，不顶其他日。
 
 「PHA 同步健康」按**当前勾选**生成：步数 Sum、活动消耗 Sum、静息心率 Average，各 POST **一个当日数字**。睡眠 / HRV 勾了也会显示，但捷径**先不同步**（category / SDNN≠RMSSD），卡上继续写「无」。勾选变更后必须重新生成捷径。详见 [路线图 M1-P5](pha-ios-proactive-roadmap.md)。
 

@@ -80,8 +80,9 @@ def accumulate_wearable_sample(
         agg.rhr_sum += value
         agg.rhr_n += 1
     elif mt == _METRIC_HRV:
-        agg.hrv_sum += value
-        agg.hrv_n += 1
+        # M1-P8: legacy metric_type=hrv samples are Apple SDNN, not RMSSD.
+        agg.hrv_sdnn_sum += value
+        agg.hrv_sdnn_n += 1
     elif mt == _METRIC_HRV_SDNN:
         agg.hrv_sdnn_sum += value
         agg.hrv_sdnn_n += 1
@@ -135,6 +136,7 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
     return {
         "steps": steps,
         "resting_heart_rate_bpm": rhr,
+        # Legacy RMSSD column: no Apple sample writes here after M1-P8.
         "hrv_rmssd_ms": hrv,
         "hrv_sdnn_ms": hrv_sdnn,
         "active_energy_kcal": kcal,

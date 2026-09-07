@@ -98,7 +98,8 @@ def metric_labels_zh() -> Dict[str, str]:
 
 _METRIC_LABEL_EN_FALLBACK: Dict[str, str] = {
     "sleep_time_asleep": "Sleep duration",
-    "hrv_rmssd_ms": "HRV",
+    "hrv_rmssd_ms": "HRV (legacy)",
+    "hrv_sdnn_ms": "HRV",
     "resting_heart_rate_bpm": "Resting HR",
     "spo2_percent": "SpO2",
     "respiratory_rate": "Respiratory rate",

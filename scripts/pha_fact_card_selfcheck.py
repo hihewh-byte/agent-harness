@@ -33,7 +33,7 @@ from pha.models import WearableDailySummary  # noqa: E402
 
 DEFAULT_FIVE = (
     "steps",
-    "hrv_rmssd_ms",
+    "hrv_sdnn_ms",
     "sleep_time_asleep",
     "resting_heart_rate_bpm",
     "active_energy",
@@ -45,7 +45,7 @@ def _row(day: date, *, steps: int | None = None, hrv: float | None = None) -> We
         user_id="selfcheck",
         day=day,
         steps=steps,
-        hrv_rmssd_ms=hrv,
+        hrv_sdnn_ms=hrv,
     )
 
 
@@ -159,7 +159,7 @@ def main() -> int:
     if spo2["value"] is not None:
         return _fail("uningested selected metric must stay 无, not invented")
 
-    save_enabled_metric_ids("selfcheck", ["steps", "active_energy", "hrv_rmssd_ms"])
+    save_enabled_metric_ids("selfcheck", ["steps", "active_energy", "hrv_sdnn_ms"])
     plan = shortcut_sync_specs("selfcheck")
     plan_ids = [s.metric_id for s in plan]
     if set(plan_ids) != {"steps", "active_energy", "hrv_sdnn_ms"}:
@@ -173,11 +173,15 @@ def main() -> int:
         )
     hrv_plan = [s for s in plan if s.health_type == "Heart Rate Variability"]
     if len(hrv_plan) != 1 or hrv_plan[0].ingest_key != "hrv_sdnn":
-        return _fail("selected RMSSD must pull SDNN shortcut, not ingest_key=hrv")
+        return _fail("HRV shortcut must POST ingest_key=hrv_sdnn")
     if any(s.ingest_key == "hrv" for s in plan):
-        return _fail("HRV SDNN must not POST as warehouse RMSSD")
+        return _fail("HRV must not POST as warehouse legacy hrv/RMSSD key")
 
+    # Prefs migration: old RMSSD id remaps to SDNN
     save_enabled_metric_ids("selfcheck", ["hrv_rmssd_ms"])
+    remapped, _src = load_enabled_metric_ids("selfcheck")
+    if remapped != ["hrv_sdnn_ms"]:
+        return _fail(f"hrv_rmssd prefs must remap to hrv_sdnn, got {remapped}")
     sdnn_row = WearableDailySummary(
         user_id="selfcheck",
         day=yesterday,
@@ -187,13 +191,13 @@ def main() -> int:
         calendar_day=yesterday,
         rows=[sdnn_row],
         user_id="selfcheck",
-        enabled_metric_ids=["hrv_rmssd_ms"],
+        enabled_metric_ids=["hrv_sdnn_ms"],
     )
-    hrv_m = next(m for m in sdnn_card["facts"]["metrics"] if m["metric"] == "hrv_rmssd_ms")
+    hrv_m = next(m for m in sdnn_card["facts"]["metrics"] if m["metric"] == "hrv_sdnn_ms")
     if hrv_m["value"] != 41.2 or hrv_m.get("value_field") != "hrv_sdnn_ms":
-        return _fail(f"empty RMSSD must display SDNN fallback, got {hrv_m}")
-    if hrv_m["label"] != "HRV (SDNN)":
-        return _fail(f"fallback label must say SDNN, got {hrv_m['label']}")
+        return _fail(f"HRV must read SDNN column, got {hrv_m}")
+    if hrv_m["label"] != "HRV":
+        return _fail(f"primary HRV label must be HRV, got {hrv_m['label']}")
 
     save_enabled_metric_ids("selfcheck", ["sleep_time_asleep", "steps"])
     qty = shortcut_sync_specs("selfcheck")

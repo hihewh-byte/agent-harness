@@ -136,8 +136,11 @@ def test_happy_path_and_idempotent(client) -> bool:
         print("FAIL daily rows", rows)
         return False
     row = rows[0]
-    if row.hrv_rmssd_ms != 42.0:
-        print("FAIL daily hrv", row.hrv_rmssd_ms)
+    if row.hrv_sdnn_ms != 42.0:
+        print("FAIL daily hrv_sdnn", row.hrv_sdnn_ms)
+        return False
+    if row.hrv_rmssd_ms is not None:
+        print("FAIL legacy hrv key must write SDNN column only", row.hrv_rmssd_ms)
         return False
     if row.resting_heart_rate_bpm != 54.0:
         print("FAIL daily rhr", row.resting_heart_rate_bpm)

@@ -48,7 +48,9 @@ def compose_hero_wearable(
     week_grain = rolling_n_grain(7, ref)
     bounded_week = rows_inside_grain(week_rows, week_grain)
     today_steps = today_row.steps if today_row is not None and today_row.day == ref else None
-    hrv = mean_present(bounded_week, "hrv_rmssd_ms")
+    hrv = mean_present(bounded_week, "hrv_sdnn_ms")
+    if hrv is None:
+        hrv = mean_present(bounded_week, "hrv_rmssd_ms")
     sleep = mean_present(bounded_week, "sleep_hours")
     return {
         "today_steps": today_steps,

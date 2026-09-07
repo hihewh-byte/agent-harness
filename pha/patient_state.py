@@ -115,7 +115,11 @@ def _wearable_ledger_lines(
 
     lines: List[str] = [f"【穿戴 · {span_label} wearable_daily 日均 · n={len(rows)}天】"]
     steps = [r.steps for r in rows if r.steps is not None]
-    hrv = [float(r.hrv_rmssd_ms) for r in rows if r.hrv_rmssd_ms is not None]
+    hrv = [
+        float(r.hrv_sdnn_ms if r.hrv_sdnn_ms is not None else r.hrv_rmssd_ms)
+        for r in rows
+        if r.hrv_sdnn_ms is not None or r.hrv_rmssd_ms is not None
+    ]
     sleep = [float(r.sleep_hours) for r in rows if r.sleep_hours is not None]
     rhr = [float(r.resting_heart_rate_bpm) for r in rows if r.resting_heart_rate_bpm is not None]
     spo2 = [float(r.spo2_pct) for r in rows if r.spo2_pct is not None]

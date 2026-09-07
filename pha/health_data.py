@@ -270,7 +270,12 @@ def _metric_value(row: Any, metric: str) -> Optional[float]:
     if metric == "sleep":
         return float(row.sleep_hours) if row.sleep_hours is not None else None
     if metric == "hrv":
-        return float(row.hrv_rmssd_ms) if row.hrv_rmssd_ms is not None else None
+        # M1-P8: prefer SDNN; fall back to legacy mislabeled RMSSD column.
+        if row.hrv_sdnn_ms is not None:
+            return float(row.hrv_sdnn_ms)
+        if row.hrv_rmssd_ms is not None:
+            return float(row.hrv_rmssd_ms)
+        return None
     if metric == "steps":
         return float(row.steps) if row.steps is not None else None
     if metric == "rhr":

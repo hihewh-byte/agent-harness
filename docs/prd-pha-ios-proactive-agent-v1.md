@@ -119,7 +119,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-1.1 | ingest JSON：`metric_type, timestamp, value, source=healthkit` | selfcheck 假数据入库 |
 | FR-1.2 | 鉴权 token；无 token 401 | 单测或 selfcheck |
 | FR-1.3 | 真机：捷径推送 Watch 已有指标 | 库中 `as_of` 与健康 App 同日、数值量级合理 |
-| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`。SDNN 不进 RMSSD（**M1-P8 完成前**；P8 查明 `hrv_rmssd_ms` 列自始即 Apple SDNN，届时两列合并为 SDNN 序列）；入睡总时长由分期相加 |
+| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`。**M1-P8 后**：`hrv` 与 `hrv_sdnn` 均写入 `hrv_sdnn_ms`（Apple SDNN）；遗留 `hrv_rmssd_ms` 列保留但不进新写入。入睡总时长由分期相加 |
 | FR-1.5 | **多指标入库**（数量型：步数 / 消耗 / RHR） | 捷径对用户已选且有 `shortcut_health_type` 的项，各 POST 一个当日数字；禁止 Find 原始列表 |
 | FR-1.6 | **睡眠分期 + HRV SDNN**（另卡 M1-P6） | 见 [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md)。SDNN 不得写入 RMSSD 列。睡眠：分段落库、入睡 = 核心∪深∪REM 一次总并集、清醒 = 健康 App 原值不拆、在床只取 In Bed 样本（健康 App 无则 PHA 必须空）、醒来日由数据推导；**PHA 不判定某夜是否异常、不修正、不排除**，偏离个人基线时只出「请到健康 App 核对」提醒句；`入睡 + 清醒 ≤ 会话跨度`。验收：**只比健康 App 当天有、且用户已勾选的项**，各 ≤ ±10 分钟；健康 App 没有的项双方皆空算过，禁止为凑项硬编码必采列表（与 FR-2.7 一致）。产品真源 = **健康 App 展现**；M1 过渡可简化为单写入源（如仅 Watch），多源按系统优先级对齐属 M2 |
 | FR-1.7 | **同步回执** | `GET /ingest/healthkit/last?user_id=` 返回最近一次成功/失败时间、指标、审计摘要；完整卡顶部显示「上次同步」。捷径 POST 成功响应含审计行，手机上可直接与健康 App 比对（呼应 §10「UI 必须显示上次成功时间」） |
@@ -242,7 +242,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P5** | 多指标入库（数量型） | `DONE` | 2026-09-06 18:58：真机 `active_energy` **701.69** kcal + `rhr` **60** 同日入库（日键 UPSERT）。先 Allow Access 后 Find 标签须为 `Active Calories`。睡眠/HRV 仍 **M1-P6**。 |
 | **M1-P6** | 睡眠各项 + HRV SDNN | `IN_PROGRESS` | HRV 真机 40.97 已对上（健康 41）。睡眠：删近两日 Pillow 历史后（15:41）9/7 入睡 7.60 / 清醒 3.45 / 核心 4.90 / 深 1.65 / REM 1.05（相对健康 App 差 ≤8 分钟）；健康 App 与 PHA **在床皆无**（原 8.95 来自 Pillow，已删）。根因曾是 Pillow+Watch 双轨并集；捷径 Source 取不到。门禁改为「有则比、无则空」+ 真源=健康 App 展现。仍欠：连续多夜同口径、T7 回执、文档偏差表收口。见 review / 任务卡。 |
 | **M1-P7** | **递进个人基线 + 通用参考层**（无 LLM） | `DONE` | 2026-09-07：按指标 90d→365d→all；真机睡眠 `365d` n=267；注册表 `reference_range`（睡眠/RHR/步数）+ T1 披露；卡级综合/不综合；selfcheck PASS。深睡/REM 占比参考未做（TODO）。 |
-| **M1-P8** | **HRV 列语义纠正（SDNN）** | `TODO` | 依据：`wearable_data` 中 11650 条 `metric_type=hrv` 的 `sample_id` 全为 `HKQuantityTypeIdentifierHeartRateVariabilitySDNN|…|Apple Watch`；库中 **从未有 RMSSD**。做：日列 `hrv_rmssd_ms` → 语义改为 SDNN（重命名或迁移到 `hrv_sdnn_ms`），注册表/事实卡/问答别名同步，今日 SDNN 40.97 直接对上 7 年基线。触碰数值路径：**叠 `CONSENSUS_ACK: harness-opus48-v2026-06-08 read`**，先跑 numerics/skip-LLM selfcheck 建立回归再改 |
+| **M1-P8** | **HRV 列语义纠正（SDNN）** | `DONE` | 2026-09-07：日表 1937→`hrv_sdnn_ms`；样本改标 `hrv_sdnn`；注册表主指标 SDNN；9/6 band=above n=275；ingest `hrv`→SDNN。叠 harness ACK。 |
 | **M1-P9** | **我的评估要求 + 按钮式解读**（FR-2.9 / FR-6） | `TODO` | 顺序：① prefs 文本框保存 + 回显（无 LLM）；② `POST /proactive/fact-card/interpret` 异步入队 + `GET …/interpret` 读缓存；③ 走 `chat_service` 管线 + Numerics 审计；④ 完整卡独立区块。禁止裸 Ollama、禁止预生成、禁止进通知 |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |

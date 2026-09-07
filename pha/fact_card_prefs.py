@@ -135,6 +135,9 @@ def sanitize_metric_ids(ids: Sequence[str]) -> list[str]:
     out: list[str] = []
     for raw in ids:
         mid = str(raw or "").strip()
+        # M1-P8: prefs that still list the deprecated RMSSD id → SDNN.
+        if mid == "hrv_rmssd_ms":
+            mid = "hrv_sdnn_ms"
         if not mid or mid in seen or mid not in known:
             continue
         seen.add(mid)

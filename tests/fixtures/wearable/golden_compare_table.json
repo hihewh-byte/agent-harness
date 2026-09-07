@@ -32,7 +32,7 @@
         "verdict": "within_range"
       },
       {
-        "metric_id": "hrv_rmssd_ms",
+        "metric_id": "hrv_sdnn_ms",
         "row_kind": "comparable_90d",
         "snapshot_value": "30",
         "baseline_90d_value": "32.8",

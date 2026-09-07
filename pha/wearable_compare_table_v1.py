@@ -97,6 +97,7 @@ def parse_snapshot_numeric(metric_id: str, value: str) -> Optional[float]:
         return None
     if metric_id in (
         "hrv_rmssd_ms",
+        "hrv_sdnn_ms",
         "resting_heart_rate_bpm",
         "spo2_percent",
         "workout_count_recent",
@@ -161,6 +162,9 @@ def _snapshot_map(parsed_payload: Mapping[str, Any]) -> Dict[str, str]:
         if not isinstance(m, dict):
             continue
         mid = str(m.get("metric_id") or "").strip()
+        # M1-P8: OCR/fixtures still emit legacy RMSSD id; compare rows use SDNN.
+        if mid == "hrv_rmssd_ms":
+            mid = "hrv_sdnn_ms"
         val = str(m.get("value") or "").strip()
         if mid and val:
             out[mid] = val
@@ -173,6 +177,8 @@ def _baseline_from_override(
     out: Dict[str, Tuple[float, float, float, str]] = {}
     for metric_id, field, unit in COMPARABLE_METRIC_SPECS:
         spec = baseline_override.get(metric_id) or {}
+        if not spec and metric_id == "hrv_sdnn_ms":
+            spec = baseline_override.get("hrv_rmssd_ms") or {}
         if not spec:
             continue
         mean = float(spec["mean"])
@@ -662,7 +668,7 @@ def _format_snapshot_display(
 ) -> str:
     if metric_id in ("sleep_time_asleep", "sleep_deep", "sleep_rem"):
         return _format_duration_human(value, locale=locale)
-    if metric_id == "hrv_rmssd_ms":
+    if metric_id in ("hrv_rmssd_ms", "hrv_sdnn_ms"):
         return f"{value} ms"
     if metric_id == "resting_heart_rate_bpm":
         return f"{value} bpm"
@@ -1023,7 +1029,7 @@ _EPISODIC_DELTA_RE = re.compile(
 
 _CATALOG_PRIMARY_METRIC: Dict[str, str] = {
     "sleep": "sleep_time_asleep",
-    "hrv": "hrv_rmssd_ms",
+    "hrv": "hrv_sdnn_ms",
     "rhr": "resting_heart_rate_bpm",
     "spo2": "spo2_percent",
     "respiratory_rate": "respiratory_rate",
@@ -1481,7 +1487,14 @@ def _deterministic_exercise_advisory(
     """Brief exercise guidance from CompareTable verdicts (no LLM)."""
     loc = _ui_locale(locale)
     sleep_row = next((r for r in table.rows if r.metric_id == "sleep_time_asleep"), None)
-    hrv_row = next((r for r in table.rows if r.metric_id == "hrv_rmssd_ms"), None)
+    hrv_row = next(
+        (
+            r
+            for r in table.rows
+            if r.metric_id in ("hrv_sdnn_ms", "hrv_rmssd_ms")
+        ),
+        None,
+    )
     if loc == "en":
         lines = ["### Exercise guidance", ""]
         notes: List[str] = []

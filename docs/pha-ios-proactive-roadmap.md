@@ -39,12 +39,12 @@
 - 注册表 `reference_range`（睡眠总时长 / RHR / 步数）→ T1 披露；HRV 不给；深睡/REM 占比 TODO
 - 卡级综合三档；缺项「不综合」
 
-### 1c. M1-P8 HRV 列语义纠正（叠 harness ACK）· 下一刀
+### 1c. M1-P8 HRV 列语义纠正（叠 harness ACK）· DONE 2026-09-07
 
-- `hrv_rmssd_ms` 历史样本全为 Apple SDNN（`sample_id` 可证）；合并为 SDNN 序列，今日 40.97 对上 7 年基线
-- 先跑 `pha_numerics_manifest_selfcheck` / skip-LLM selfcheck 建回归，再改列语义
+- 日表历史复制进 `hrv_sdnn_ms`；样本 `hrv`→`hrv_sdnn`；注册表主指标 SDNN
+- 脚本：`scripts/pha_migrate_hrv_rmssd_to_sdnn.py`（先 `--dry-run`）
 
-### 1d. M1-P9 我的评估要求 + 按钮式解读（FR-2.9 / FR-6）
+### 1d. M1-P9 我的评估要求 + 按钮式解读（FR-2.9 / FR-6）· 下一刀
 
 - prefs `assessment_prompt` 保存回显 → `POST/GET /proactive/fact-card/interpret` 异步 + 缓存 → 走 `chat_service` + Numerics 审计 → 完整卡独立区块
 - 禁止裸 Ollama、预生成、进通知；M3 App 只接同一端点
