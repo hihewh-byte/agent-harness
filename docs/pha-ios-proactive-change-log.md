@@ -7,6 +7,15 @@
 
 ---
 
+## 2026-09-07 (PRD v1.6：递进基线 + 通用参考层 + 我的评估要求 + 按钮式解读；HRV 列语义；只改文档)
+
+- **类别**：产品共识 / 文档（无代码）。
+- **证据**：完整卡评估层只写「基线不足」。查 `data/pha_storage.db`（`default`）：`wearable_daily` 2016-09-26～2026-09-07 共 3504 行；`sleep_hours` 642 夜（近 365 日 268，近 90 日 **1**）、`hrv_rmssd_ms` 1936 天（近 90 日 **0**）、`resting_heart_rate_bpm` 2255、`active_energy_kcal` 2286。`fact_card.py` `BASELINE_DAYS=90` 从 as_of 回看，zip 数据止于 2026-06-09，正好全落窗外。另：`wearable_data` 11650 条 `metric_type=hrv` 的 `sample_id` 全为 `HKQuantityTypeIdentifierHeartRateVariabilitySDNN|…|Wind’s Apple Watch`——RMSSD 列自始就是 Apple SDNN。维护者定：主动 agent 与 Mac PHA 不割裂，「基线不足」不成立；同意「我的评估要求（自由文本，给 LLM）」；M3 与按钮式解读不冲突。
+- **改动**：PRD v1.6：§1.3 定义「主动路径」、§1.3a 不割裂；FR-2.1 / FR-2.6 基线窗口递进 90d→365d→all + 卡上披露窗口与 n，卡级综合三档/「不综合」；FR-2.8 通用参考层（`manifest-tier-v1` T1 披露句，范围放注册表 `fact_card.reference_range`，HRV 绝对值不给人群范围）；FR-2.9 `assessment_prompt` 保存回显；FR-6 用户触发 LLM 解读（复用 `chat_service` harness + Numerics 审计、异步 + 按 `(user, as_of, sha256(prompt))` 缓存、独立区块、fail-closed、禁止预生成/裸奔）；§3/§8 M3 改为 App 接线；立 **M1-P7**（基线+参考层）、**M1-P8**（HRV 列语义纠正，叠 harness ACK）、**M1-P9**（评估要求+解读）。同步 `pha-fact-card.md`、`pha-ios-proactive-roadmap.md`、`pha-healthkit-sleep-hrv.md` RMSSD 行。新增交接文档 `handoff-2026-09-07-fact-card-assessment.md`。
+- **回滚**：还原上述文档至 v1.5 口径；删交接文档。无运行时影响。
+
+---
+
 ## 2026-09-07 (T7 FR-1.7 同步回执)
 
 - **类别**：可运维性 / ingest 契约。
