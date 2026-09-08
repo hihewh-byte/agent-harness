@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.10 · 2026-09-08  
+> **版本**：v1.11 · 2026-09-08  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -176,7 +176,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-6.5 | **时延**：本机 Ollama 一轮 30–170s（既有 e2e 记录）。网页必须 **异步**：点后立即返回「生成中」，结果按 `(user_id, as_of, calendar_day, card_digest, locale, sha256(assessment_prompt))` 缓存到本机 `data/`，刷新即见；同键重复点击复用缓存，不重复调 LLM | 点击后 HTTP < 1s 返回；缓存命中不产生 LLM 日志；改勾选后 `card_digest` 变、旧解读不命中；跨日 `calendar_day` 变、旧解读不命中 |
 | FR-6.6 | **fail-closed**：Ollama 未启动 / 超时 / 审计拒绝 → 区块显示原因（含被拒 token），规则层照常；绝不回退成「模板文字冒充 AI」 | 停 Ollama 再点 → 区块写「模型不可用」，其余卡不变 |
 | FR-6.7 | **M3 关系**：M2 App 的「解读」按钮调 **同一** 端点，不另写逻辑 | M3 任务卡只含 UI 接线 |
-| FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致 | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
+| FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致。**解读轮不套三步看诊法**（`PHA_FACT_CARD_SOUL_MINIMAL`，见 M1-P9.5） | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
 | FR-6.9 | **日期与语言**：机器层 ISO 8601；展示层按 `locale` 渲染，禁止纯数字斜杠日期；LLM 文本优先相对表达，绝对日期仅允许 as_of / 各行实际 day；审计把日期作为独立词类归一化后比对 | `unauthorized_date` 用例；中英 locale HTML 属 M1-P9.2 |
 | FR-6.10 | **卡外数字分级**（v1.10 放宽，取代 v1.7「只进 T1」）：按 **语境** 不按数值大小分三级。**S 级（必须 ⊆ manifest）**：日期/时刻；任何 1–2 位小数；子句含归属词（你/您/your）、时间归属词（今天/昨天/近 N/today/last N）或测量动词（测得/记录/基线/均值）的数字；子句含卡上指标标签或单位却无教育/建议词的数字（歧义 fail-closed）。**E 级（放行，记 telemetry）**：子句含人群词/建议词/参考词（一般/通常/建议/控制在/范围/usually/recommend）的整数，以及无归属、无标签、无单位的裸整数。**T1 块**：块内数字不验真伪，中英同权，块内出现归属词 → 拒。标识符里的数字（`SpO2`/`VO2max`）不计。词表放语言表，指标标签/单位来自卡；Python 不写指标名。用户评估要求不能解锁 S 级 | selfcheck：「一般成年人血氧高于 95%」→ 过；「你的 HRV 接近 35 ms」→ 拒；「静息心率 65 bpm 偏高」→ 拒；「建议睡 7.5 小时」→ 拒；「今天血氧 96.0%，SpO2 正常」→ 过。用例全表见 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2.4 |
 
@@ -258,6 +258,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P9.2** | 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band/文案方向统一 | `DONE` | 2026-09-08：prefs `locale`；HTML 中英日期；解读剥 Markdown；`numeric_band` 标签；缓存键含 locale。通知 body 日期仍 ISO（P9.3） |
 | **M1-P9.3** | 真机与边界验收 | `IN_PROGRESS` | 2026-09-08：Mac+iPhone Safari 解读已出。评估要求走 TASK 大纲（非整卡叙事、不解析指标 id）。git 默认 en-US。欠：停 Ollama、跨日真看 |
 | **M1-P9.4** | **卡外数字分级放宽 + 单一审计 + review 优化**（FR-6.3 / FR-6.10 v1.10） | `DONE` | 2026-09-08：`fact_card` 审计策略住 `numerics_manifest`；卡侧删字面量正则；标识符/`.0`/窗口口语归一；TASK 分条 + locale T1；Tier0 `min` 保留 values；失败存 `rejected_text` + 归并文案。selfcheck PASS |
+| **M1-P9.5** | **解读专用 soul（焦点跑偏）** | `DONE` | 2026-09-08：`PHA_FACT_CARD_SOUL_MINIMAL` + `select_soul_base`；禁三步看诊；缓存键含 soul。交接 v4。验收见 change-log |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
@@ -340,3 +341,4 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-08 | v1.8 | zip 为最终真值（FR-1.8）+ 优先级包一期（血氧/呼吸率/VO2max/腕温）+ `pack_version` + VO2max `latest` 不计覆盖率。轨道 B / Pulso 留 M2。立 M1-P12 |
 | 2026-09-08 | v1.9 | Find 总表为捷径真源；腕温跳过捷径；数量包 7 项；§8 P12 DONE* / P9.2 DONE |
 | 2026-09-08 | v1.10 | FR-6.10 卡外数字由「只进 T1」放宽为语境三级（S 必对账 / E 放行记 telemetry / T1 中英同权）；FR-6.3 审计只有一道（harness `fact_card` 策略）；立 M1-P9.4；§11 一条。文档改动，无代码。交接：[`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) |
+| 2026-09-08 | v1.11 | FR-6.8 备注解读轮不套三步看诊；§8 M1-P9.5 DONE。交接：[`handoff-2026-09-08-fact-card-interpret-v4-soul.md`](handoff-2026-09-08-fact-card-interpret-v4-soul.md) |

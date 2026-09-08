@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-09-08 (M1-P9.5：fact_card_interpret 专用 minimal soul)
+
+- **类别**：**P1（解读大纲）**。`fact_card_interpret` 不再套完整医疗 soul 的三步看诊。
+- **改动**：`PHA_FACT_CARD_SOUL_MINIMAL`（`harness_plan`）；`chat_turn_slots.select_soul_base`；解读缓存键含 soul。`harness_report.dry_run_harness_report` 仍用完整 soul（不经解读路径，待并轨）。
+- **证据**：`pha_fact_card_selfcheck` soul 路由 / 反硬编码 / 缓存 rev；registry 无 diff。
+- **回滚**：去掉 fact_card 分支。
+
 ## 2026-09-08 (M1-P9.4.1：英文无年日期)
 
 - **类别**：**P1（audit）**。无年 `September 3` 对齐卡上 allowed_dates 后整段遮罩。

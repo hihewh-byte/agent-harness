@@ -49,6 +49,27 @@ from pha.chat_attachments import _message_needs_lab_ledger
 from pha.chat_turn_fsm import ChatTurnPhase, ChatTurnPhaseRecorder
 
 
+def select_soul_base(profile: str, qtype: QuestionType) -> Optional[str]:
+    """Pick profile-local soul; None ⇒ full medical soul at call site."""
+    from pha.attachment_asset_qa import is_attachment_qa_profile
+    from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
+    from pha.wearable_harness import is_wearable_screenshot_profile
+
+    if is_attachment_qa_profile(profile):
+        from pha.attachment_asset_qa import PHA_ATTACHMENT_SOUL_MINIMAL
+
+        return PHA_ATTACHMENT_SOUL_MINIMAL
+    if is_wearable_screenshot_profile(profile):
+        from pha.wearable_harness import PHA_WEARABLE_SOUL_MINIMAL
+
+        return PHA_WEARABLE_SOUL_MINIMAL
+    if (profile or "").strip() == "fact_card_interpret":
+        return PHA_FACT_CARD_SOUL_MINIMAL
+    if qtype == QuestionType.CASUAL:
+        return PHA_MEDICAL_SOUL_LITE_SYSTEM_PROMPT
+    return None
+
+
 @dataclass
 class TurnSlotContext:
     """Mutable harness slot assembly context (SLOT_ASSEMBLY → message stack)."""
@@ -554,18 +575,7 @@ def iter_turn_harness_assembly_phase(
                 reference_date=effective_query_reference_date(),
             )
 
-    if is_attachment_qa_profile(plan.profile):
-        from pha.attachment_asset_qa import PHA_ATTACHMENT_SOUL_MINIMAL
-
-        ctx.soul_base = PHA_ATTACHMENT_SOUL_MINIMAL
-    elif is_wearable_screenshot_profile(plan.profile):
-        from pha.wearable_harness import PHA_WEARABLE_SOUL_MINIMAL
-
-        ctx.soul_base = PHA_WEARABLE_SOUL_MINIMAL
-    else:
-        ctx.soul_base = (
-            PHA_MEDICAL_SOUL_LITE_SYSTEM_PROMPT if ctx.qtype == QuestionType.CASUAL else None
-        )
+    ctx.soul_base = select_soul_base(plan.profile, ctx.qtype)
 
     soul = (ctx.soul_base or PHA_MEDICAL_SOUL_SYSTEM_PROMPT).strip()
     ref = effective_query_reference_date()

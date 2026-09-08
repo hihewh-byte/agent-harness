@@ -1,3 +1,18 @@
+## 2026-09-08 22:50 (M1-P9.5：解读专用 soul，消三步看诊焦点跑偏)
+
+- **类别**：P1（解读大纲）。英文解读强制 `Trend review / Related markers / Recommendations`，把卡上 SpO2/呼吸率当「相关指标」念出。
+- **根因**：`fact_card_interpret` 走完整 `PHA_MEDICAL_SOUL_SYSTEM_PROMPT` 三步看诊法第二步。
+- **改动**：`PHA_FACT_CARD_SOUL_MINIMAL`；`select_soul_base`；缓存键哈希含 soul；`harness_report` dry-run 路径未并轨（解读不经该入口，记待办）。
+- **证据**：selfcheck PASS。运行验收（build `pha-v2.3.33-fact-card-soul-p95`）中英各 3 轮：
+
+| id | 审计 | 三步标题 | SpO2/呼吸率 | RHR | HRV | VO2 |
+|---|---|---|---|---|---|---|
+| enP1–3 | 3/3 过 | 0/3 | 0/3 | 3/3 | 3/3 | 2/3 |
+| zhP1–3 | 3/3 过 | 0/3 | 0/3 | 3/3 | 3/3 | 0/3 |
+
+  VO2 漏提为已知模型偶发，非本轮门槛。prefs 已恢复 zh-CN。
+- **回滚**：删 `select_soul_base` 中 fact_card 分支；缓存键自动失效。
+
 ## 2026-09-08 22:20 (M1-P9.4.1：英文无年日期遮罩)
 
 - **类别**：P1（audit）。`September 3` 无年时未当日期，日数字 `3` 被拒。

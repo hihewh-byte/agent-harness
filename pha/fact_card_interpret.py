@@ -26,7 +26,13 @@ _INFLIGHT: set[str] = set()
 
 
 def _interpret_prompt_rev() -> str:
-    blob = f"{fact_card_interpret_task_text('en')}|{FACT_CARD_AUDIT_POLICY_REV}"
+    from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
+
+    blob = (
+        f"{fact_card_interpret_task_text('en')}|"
+        f"{FACT_CARD_AUDIT_POLICY_REV}|"
+        f"{PHA_FACT_CARD_SOUL_MINIMAL}"
+    )
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 

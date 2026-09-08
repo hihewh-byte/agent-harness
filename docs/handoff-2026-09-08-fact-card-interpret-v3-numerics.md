@@ -258,3 +258,4 @@ Fact-card interpretation: dedicated profile, card manifest, locale rendering
 | 3 | 规则 5「卡标签/单位 + 无教育词 → 拒」是否过严 | 保留；观察 `educational_ints` 与真机失败率两周再议 |
 | 4 | P9.4b 自动修复轮（失败后把 violations 回灌、再调一次模型、仍失败才显示失败态） | 不做；登记 §11，M3 前再议 |
 | 5 | 失败记录存原文 `rejected_text` | 存（本机数据） |
+| 6 | 焦点跑偏（评估点名仍念 SpO2/呼吸率） | → [`handoff-2026-09-08-fact-card-interpret-v4-soul.md`](handoff-2026-09-08-fact-card-interpret-v4-soul.md)（M1-P9.5 专用 soul） |

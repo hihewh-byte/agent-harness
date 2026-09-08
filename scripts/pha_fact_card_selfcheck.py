@@ -1110,6 +1110,50 @@ def main() -> int:
         return _fail("TASK source must not hardcode Chinese T1 template")
     if "resting_heart_rate" in task or "静息心率" in task:
         return _fail("TASK must not name specific metrics")
+
+    from pha.chat_turn_slots import select_soul_base
+    from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
+    from pha.attachment_asset_qa import PHA_ATTACHMENT_SOUL_MINIMAL
+    from pha.wearable_harness import PHA_WEARABLE_SOUL_MINIMAL
+    from pha.intent_gates import QuestionType as _QT
+    import re as _re
+
+    if select_soul_base("fact_card_interpret", _QT.WEARABLE) is not PHA_FACT_CARD_SOUL_MINIMAL:
+        return _fail("fact_card_interpret must use PHA_FACT_CARD_SOUL_MINIMAL")
+    if select_soul_base("wearable_screenshot_review", _QT.WEARABLE) is not PHA_WEARABLE_SOUL_MINIMAL:
+        return _fail("wearable_screenshot_review soul regression")
+    if select_soul_base("attachment_asset_qa", _QT.WEARABLE) is not PHA_ATTACHMENT_SOUL_MINIMAL:
+        return _fail("attachment_asset_qa soul regression")
+    if select_soul_base("lab_cross_year", _QT.LAB) is not None:
+        return _fail("other profiles must fall through to full medical soul")
+    soul = PHA_FACT_CARD_SOUL_MINIMAL
+    for banned in (
+        "resting_heart_rate",
+        "静息心率",
+        "HRV",
+        "SpO2",
+        "VO2",
+        "【参考标准",
+        "[Reference Standard",
+    ):
+        if banned in soul:
+            return _fail(f"FACT_CARD soul must not hardcode {banned!r}")
+    if _re.search(r"[\u4e00-\u9fff]", soul):
+        return _fail("FACT_CARD soul must not contain CJK")
+    from pha.fact_card_interpret import _interpret_prompt_rev
+
+    rev_a = _interpret_prompt_rev()
+    _orig_soul = _hp.PHA_FACT_CARD_SOUL_MINIMAL
+    try:
+        _hp.PHA_FACT_CARD_SOUL_MINIMAL = _orig_soul + "\n# rev-bump"
+        rev_b = _interpret_prompt_rev()
+    finally:
+        _hp.PHA_FACT_CARD_SOUL_MINIMAL = _orig_soul
+    if rev_a == rev_b:
+        return _fail("interpret cache rev must change when soul text changes")
+    if _interpret_prompt_rev() != rev_a:
+        return _fail("interpret cache rev must restore after soul monkeypatch")
+
     ctx = build_fact_card_context_block(p91_card)
     if "7.6" not in ctx:
         return _fail("interpret context must keep the full card, not a parsed subset")
