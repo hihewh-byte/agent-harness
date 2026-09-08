@@ -129,6 +129,8 @@ P9.1 与 P10/P11 互不依赖，可由两个 agent 并行。**P10 与 P11 必须
 
 ### 4.4 卡侧审计重做（`fact_card_interpret.py`）
 
+> **2026-09-08 20:11 起被 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2–§3 取代**：本节「每个数字必须 ∈ 原子集」与「两道审计独立」两条已废止（假阳性：`SpO2`/`VO2max` 标签、`96.0`、科普整数；en-US 下 T1 必败）。以下保留作历史记录。
+
 撤掉「≥100 阈值」和「日期片段白名单」，改为两步：
 
 1. **日期步**：复用 `numerics_manifest._extract_normalized_dates`（已支持 ISO 与「2026年9月7日」中文式；若 P9.2 引入英文月名格式，在同一函数加英文解析，属加严）。归一化后的每个日期必须 ∈ {as_of, calendar_day, baseline_earliest…}，否则 `audit_rejected` / `unauthorized_date:<d>`。然后把这些日期串从正文里遮掉。

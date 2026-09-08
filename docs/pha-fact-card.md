@@ -24,7 +24,7 @@ python scripts/pha_fact_card.py          # 打印当前用户 default 的卡
 | 选择 | `facts.selection.enabled_metric_ids` | 用户已选；允许集来自注册表，不是 Python 列表 |
 | 评估 | `assessment.advice` | 相对 **递进个人基线**（90 日 → 365 日 → 全历史，取第一个 n ≥ 7 的窗口；JSON 写 `baseline_window` / `baseline_n`）的规则分档 + **固定模板**；三级窗口皆 n&lt;7 才写「历史不足 n/7」。**M1-P7 已落地** |
 | 参考 | `assessment` 内每项 `metrics[].reference` | 注册表 `fact_card.reference_range` 有值的已选指标，各一句 `【参考标准】…（来源：…，请自行查证，非医疗建议）` + 范围内/外。HRV 绝对值不给人群范围。**M1-P7 已落地**（睡眠总时长 / RHR / 步数；深睡/REM 占比 TODO） |
-| 解读 | `interpretation`（仅用户点按钮后） | 走 `chat_service` + 原子数审计；`POST/GET /proactive/fact-card/interpret` 异步缓存；完整卡独立区块。**M1-P9 已落地**（FR-6） |
+| 解读 | `interpretation`（仅用户点按钮后） | 走 `chat_service` + **单一** harness `fact_card` 数字审计（个人/小数必对账；科普整数可放行记 telemetry；T1 中英同权）；`POST/GET /proactive/fact-card/interpret` 异步缓存；完整卡独立区块。**M1-P9 / P9.4 已落地**（FR-6） |
 
 `notification.body` 是锁屏导语；`notification.open_path` 指向完整卡。
 

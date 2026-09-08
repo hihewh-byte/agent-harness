@@ -39,6 +39,18 @@ combined E2E 黄灯（`unauthorized_value:3.4`）暴露的是 **C 层审计域�
 
 该规则 **不区分**「用户化验值」与「指南参考值」，因此误杀 T1。
 
+### 1.2a fact_card 策略（`manifest.profile == "fact_card_interpret"`，M1-P9.4）
+
+事实卡解读走独立审计策略（`audit_scope=fact_card`），**不**套用 0.5～15 小数区间。按**子句语境**分级：
+
+| 级 | 规则 | 行为 |
+|----|------|------|
+| S | 日期/时刻；非零小数；个人主张子句（归属/时间/测量词）；卡标签或单位且无教育词 | `unauthorized_*`，整段拒 |
+| E | 人群/建议/参考词下的整数；无归属无标签无单位的裸整数 | 放行，telemetry `educational_ints` |
+| T1 | 完整披露块（中英 `LANG_DISCLOSURE_MAP`） | 块内不验数值；块内归属词 → `t0_forgery_in_t1_block` |
+
+标识符内数字（字母紧贴）不计。词表在 `LANG_T0_CLAIM_MAP`；标签/单位来自卡，Python 不写指标名。细则与 18 条用例见 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2。
+
 ### 1.3 本方案 **不** 解决的问题
 
 - 不验证 3.4 是否符合最新《中国成人血脂异常防治指南》——**有意不做**。

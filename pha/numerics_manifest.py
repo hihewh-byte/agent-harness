@@ -144,6 +144,8 @@ LANG_DISCLOSURE_MAP: Tuple[_LangDisclosureSpec, ...] = (
 )
 
 # T0 claim cues — evaluated on masked text; T0 always wins over T1 (see audit priority).
+FACT_CARD_AUDIT_POLICY_REV = "v1"
+
 LANG_T0_CLAIM_MAP: Dict[str, Tuple[str, ...]] = {
     "owner_cues": (
         "您的",
@@ -187,6 +189,74 @@ LANG_T0_CLAIM_MAP: Dict[str, Tuple[str, ...]] = {
         "mg/dL",
         "report",
         "lab",
+    ),
+    "temporal_cues": (
+        "今天",
+        "今晨",
+        "昨天",
+        "昨夜",
+        "本周",
+        "上周",
+        "最近",
+        "过去",
+        "近",
+        "today",
+        "tonight",
+        "yesterday",
+        "this week",
+        "recent",
+        "last",
+    ),
+    "educational_cues": (
+        "一般",
+        "通常",
+        "常见",
+        "多数人",
+        "健康成年人",
+        "人群",
+        "建议",
+        "推荐",
+        "可以",
+        "尽量",
+        "控制在",
+        "保持在",
+        "目标",
+        "不超过",
+        "参考",
+        "范围",
+        "区间",
+        "阈值",
+        "指南",
+        "typical",
+        "usually",
+        "most adults",
+        "general population",
+        "recommend",
+        "aim for",
+        "keep",
+        "try to",
+        "target",
+        "up to",
+        "reference",
+        "range",
+        "threshold",
+        "guideline",
+    ),
+    "measurement_cues": (
+        "测得",
+        "记录",
+        "显示",
+        "读数",
+        "卡上",
+        "均值",
+        "中位",
+        "基线",
+        "measured",
+        "recorded",
+        "shows",
+        "reading",
+        "baseline",
+        "median",
     ),
 }
 
@@ -264,6 +334,10 @@ class NumericsManifest:
     wearable_grain_source: str = "default"
     wearable_window_start: str = ""
     wearable_window_end: str = ""
+    card_labels: Set[str] = field(default_factory=set)
+    card_units: Set[str] = field(default_factory=set)
+    window_day_tokens: Set[str] = field(default_factory=set)
+    card_times: Set[str] = field(default_factory=set)
 
     @property
     def allowed_dates(self) -> Set[str]:
@@ -305,6 +379,10 @@ class NumericsManifest:
             "wearable_grain_source": self.wearable_grain_source,
             "wearable_window_start": self.wearable_window_start,
             "wearable_window_end": self.wearable_window_end,
+            "card_labels": sorted(self.card_labels),
+            "card_units": sorted(self.card_units),
+            "window_day_tokens": sorted(self.window_day_tokens),
+            "card_times": sorted(self.card_times),
         }
 
 
@@ -511,6 +589,9 @@ def _is_night_metric_id(metric_id: str) -> bool:
     return metric_id.startswith("sleep_") or metric_id == "sleep_time_asleep"
 
 
+_BASELINE_WINDOW_DAYS_RE = re.compile(r"^(\d+)d$")
+
+
 def build_fact_card_numerics_manifest(
     card: Dict[str, Any],
     *,
@@ -521,18 +602,43 @@ def build_fact_card_numerics_manifest(
     as_of = str(facts.get("as_of") or "")[:10]
     calendar_day = str(facts.get("calendar_day") or "")[:10]
     entries: List[ManifestEntry] = []
+    card_labels: Set[str] = set()
+    card_units: Set[str] = set()
+    window_day_tokens: Set[str] = set()
+    card_times: Set[str] = set()
     for item in facts.get("metrics") or []:
         if not isinstance(item, dict):
             continue
         label = str(item.get("label") or item.get("metric") or "").strip()
+        if label:
+            card_labels.add(label)
+        for loc_key in ("label_en", "label_zh"):
+            loc_label = str(item.get(loc_key) or "").strip()
+            if loc_label:
+                card_labels.add(loc_label)
         metric_id = str(item.get("metric") or "")
         unit = str(item.get("unit") or "-") or "-"
+        if unit and unit != "-":
+            card_units.add(unit)
         day = str(item.get("day") or as_of or "")[:10]
+        stamp = str(item.get("as_of_time") or "").strip()
+        if stamp:
+            card_times.add(stamp)
+        bw = str(item.get("baseline_window") or "").strip()
+        bw_m = _BASELINE_WINDOW_DAYS_RE.match(bw)
+        if bw_m:
+            window_day_tokens.add(bw_m.group(1))
+            if bw == "365d":
+                window_day_tokens.add("12")
+            elif bw == "7d":
+                window_day_tokens.add("7")
+            elif bw == "90d":
+                window_day_tokens.add("90")
         value = item.get("value")
         if value is not None:
             anchor = day or as_of or "-"
-            if item.get("partial_day") and item.get("as_of_time"):
-                anchor = f"{anchor}·截至{item.get('as_of_time')}"
+            if item.get("partial_day") and stamp:
+                anchor = f"{anchor}·截至{stamp}"
             entries.append(
                 ManifestEntry(
                     domain="fact_card",
@@ -544,7 +650,7 @@ def build_fact_card_numerics_manifest(
                 )
             )
         night = _is_night_metric_id(metric_id)
-        short = _window_short(str(item.get("baseline_window") or ""), night=night)
+        short = _window_short(bw, night=night)
         earliest = str(item.get("baseline_earliest") or "")[:10]
         end = as_of or day
         baseline_anchor = f"{earliest}~{end}" if earliest and end else (end or earliest or "-")
@@ -606,6 +712,26 @@ def build_fact_card_numerics_manifest(
                         source=src,
                     )
                 )
+
+    cov_total: Any = None
+    cov = facts.get("coverage")
+    if isinstance(cov, dict):
+        cov_total = cov.get("total") or cov.get("coverage_total")
+    elif cov is not None and not isinstance(cov, (str, bytes)):
+        try:
+            cov_total = int(cov)
+        except (TypeError, ValueError):
+            cov_total = None
+    if cov_total is None:
+        summary = (card.get("assessment") or {}).get("summary") or {}
+        if isinstance(summary, dict):
+            cov_total = summary.get("coverage_total")
+    if cov_total is not None:
+        try:
+            window_day_tokens.add(str(int(cov_total)))
+        except (TypeError, ValueError):
+            pass
+
     return NumericsManifest(
         profile="fact_card_interpret",
         user_id=(user_id or "default").strip() or "default",
@@ -615,6 +741,10 @@ def build_fact_card_numerics_manifest(
         wearable_grain_source="default",
         wearable_window_start="",
         wearable_window_end="",
+        card_labels=card_labels,
+        card_units=card_units,
+        window_day_tokens=window_day_tokens,
+        card_times=card_times,
     )
 
 
@@ -1040,6 +1170,292 @@ def format_wearable_grain_refusal(
     return f"库内没有 {span} 的可核验穿戴记录，不会用其他日期的数字代替。"
 
 
+_FULLWIDTH_DIGITS = str.maketrans("０１２３４５６７８９", "0123456789")
+_IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\d[A-Za-z0-9_]*|\d+[A-Za-z_][A-Za-z0-9_]*")
+_CLAUSE_SPLIT_RE = re.compile(r"[。！？；，.!?;,\n]+")
+_WINDOW_PHRASE_RE = re.compile(
+    r"(?:近|过去|最近|last|near)\s*(\d+)\s*(?:天|日|夜|个月|月|days?|nights?|months?)",
+    re.I,
+)
+# Numbers with optional thousands separators and 1-2 decimal places; not part of identifiers after mask
+_FACT_NUM_RE = re.compile(r"(?<![\d.])(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?(?![\d.])")
+
+
+def _mask_identifiers(text: str) -> str:
+    return _IDENTIFIER_RE.sub(lambda m: " " * len(m.group(0)), text or "")
+
+
+def _normalize_num_token(token: str) -> Set[str]:
+    raw = (token or "").translate(_FULLWIDTH_DIGITS).replace(",", "").strip()
+    if not raw:
+        return set()
+    out: Set[str] = {raw}
+    if "." in raw:
+        try:
+            fv = float(raw)
+        except ValueError:
+            return out
+        if abs(fv - round(fv)) < 1e-9:
+            out.add(str(int(round(fv))))
+    return out
+
+
+def _token_in_allowed(token: str, allowed: Set[str]) -> bool:
+    if not token or not allowed:
+        return False
+    norms = _normalize_num_token(token)
+    if norms & allowed:
+        return True
+    # also accept if an allowed variant normalizes into the token set
+    for a in allowed:
+        if _normalize_num_token(a) & norms:
+            return True
+    return False
+
+
+def _is_nonzero_fraction_decimal(token: str) -> bool:
+    raw = (token or "").translate(_FULLWIDTH_DIGITS).replace(",", "").strip()
+    if "." not in raw:
+        return False
+    frac = raw.split(".", 1)[1]
+    return bool(frac) and any(ch != "0" for ch in frac)
+
+
+def _clause_has_cues(clause: str, cues: Sequence[str]) -> bool:
+    cl = clause or ""
+    if not cl or not cues:
+        return False
+    cl_lower = cl.lower()
+    for cue in cues:
+        if not cue:
+            continue
+        if cue.isascii():
+            if cue.lower() in cl_lower:
+                return True
+        elif cue in cl:
+            return True
+    return False
+
+
+def _personal_clause(clause: str) -> bool:
+    return (
+        _clause_has_cues(clause, LANG_T0_CLAIM_MAP["owner_cues"])
+        or _clause_has_cues(clause, LANG_T0_CLAIM_MAP["temporal_cues"])
+        or _clause_has_cues(clause, LANG_T0_CLAIM_MAP["measurement_cues"])
+    )
+
+
+def _educational_clause(clause: str) -> bool:
+    return _clause_has_cues(clause, LANG_T0_CLAIM_MAP["educational_cues"])
+
+
+def _metric_clause(clause: str, labels: Set[str], units: Set[str]) -> bool:
+    cl = clause or ""
+    for lab in labels:
+        if len(lab) >= 2 and lab in cl:
+            return True
+    for unit in units:
+        if len(unit) >= 1 and unit in cl:
+            return True
+    return False
+
+
+def _complete_disclosure_blocks(
+    text: str,
+) -> List[Tuple[int, int, str, str]]:
+    """T1 blocks with open + source + verify. Incomplete opens stay for E-level."""
+    out: List[Tuple[int, int, str, str]] = []
+    for start, end, block_text, lang_id in extract_disclosure_blocks(text):
+        pat = _disclosure_spec_for_lang(lang_id)
+        has_open = bool(pat["block_open"].search(block_text))
+        has_source = bool(pat["source"].search(block_text))
+        has_verify = any(v in block_text for v in pat["verify"])
+        if has_open and has_source and has_verify:
+            out.append((start, end, block_text, lang_id))
+    return out
+
+
+def _blank_spans(text: str, spans: Sequence[Tuple[int, int]]) -> str:
+    if not spans:
+        return text or ""
+    chars = list(text or "")
+    for start, end in spans:
+        for i in range(max(0, start), min(len(chars), end)):
+            chars[i] = " "
+    return "".join(chars)
+
+
+def _blank_substrings(text: str, needles: Sequence[str]) -> str:
+    raw = text or ""
+    if not needles:
+        return raw
+    for needle in sorted({n for n in needles if n}, key=len, reverse=True):
+        if needle not in raw:
+            continue
+        raw = raw.replace(needle, " " * len(needle))
+    return raw
+
+
+def _date_surface_forms(text: str, iso: str) -> List[str]:
+    """Surface strings in text that normalize to the given ISO date."""
+    forms: List[str] = [iso]
+    for y, m, d in _DATE_CN_RE.findall(text or ""):
+        if _normalize_cn_date(y, m, d) == iso:
+            forms.append(f"{y}年{int(m)}月{int(d)}日")
+            forms.append(f"{y}年{m}月{d}日")
+            forms.append(f"{y}年 {int(m)}月 {int(d)}日")
+    for mon, d, y in _DATE_EN_RE.findall(text or ""):
+        if _normalize_en_date(mon, d, y) == iso:
+            forms.append(f"{mon} {d}")
+            if y:
+                forms.append(f"{mon} {d}, {y}")
+                forms.append(f"{mon} {d} {y}")
+    return forms
+
+
+def _split_clauses(text: str) -> List[Tuple[int, int, str]]:
+    raw = text or ""
+    clauses: List[Tuple[int, int, str]] = []
+    last = 0
+    for m in _CLAUSE_SPLIT_RE.finditer(raw):
+        if m.start() > last:
+            clauses.append((last, m.start(), raw[last : m.start()]))
+        last = m.end()
+    if last < len(raw):
+        clauses.append((last, len(raw), raw[last:]))
+    return clauses
+
+
+def _clause_for_pos(clauses: Sequence[Tuple[int, int, str]], pos: int) -> str:
+    for start, end, body in clauses:
+        if start <= pos < end:
+            return body
+    return ""
+
+
+def _audit_response_numerics_fact_card(
+    answer_text: str,
+    manifest: NumericsManifest,
+    *,
+    require_citation: bool = False,
+) -> Dict[str, Any]:
+    """Fact-card policy: whitelist personal/decimal numbers; educational ints via clause cues."""
+    del require_citation  # fact_card path does not require citation
+    text = answer_text or ""
+    violations: List[str] = []
+    warnings: List[str] = []
+    educational_ints: Set[str] = set()
+    cited_values: List[str] = []
+    allowed_values = manifest.allowed_values
+    allowed_dates = manifest.allowed_dates
+    labels = set(manifest.card_labels)
+    units = set(manifest.card_units)
+    window_ok = set(manifest.window_day_tokens) | set(allowed_values)
+    value_ok = set(allowed_values) | set(manifest.window_day_tokens)
+    m4_mode = numerics_t1_m4_mode()
+
+    complete_blocks = _complete_disclosure_blocks(text)
+    for _, _, block_text, lang_id in complete_blocks:
+        if block_contains_t0_forgery(block_text, lang_id, manifest):
+            violations.append("t0_forgery_in_t1_block")
+        b_v, b_w = audit_disclosure_block(block_text, lang_id, m4_mode=m4_mode)
+        violations.extend(b_v)
+        warnings.extend(b_w)
+
+    working = mask_disclosure_blocks(text, complete_blocks)
+
+    normalized_dates = _extract_normalized_dates(working)
+    cited_dates = sorted({d for d in normalized_dates if d in allowed_dates})
+    forbidden = set(manifest.forbidden_dates)
+    for d in set(normalized_dates):
+        if d in forbidden:
+            violations.append(f"forbidden_date:{d}")
+    for d in forbidden:
+        if d in working:
+            violations.append(f"forbidden_date:{d}")
+
+    ref = manifest.reference_date
+    if ref:
+        try:
+            ref_d = date.fromisoformat(ref[:10])
+            for d in set(normalized_dates):
+                try:
+                    dd = date.fromisoformat(d)
+                except ValueError:
+                    continue
+                if dd > ref_d and d not in allowed_dates:
+                    violations.append(f"future_date:{d}")
+        except ValueError:
+            pass
+
+    for d in set(normalized_dates):
+        if d in allowed_dates or d in forbidden:
+            continue
+        violations.append(f"unauthorized_date:{d}")
+
+    # Blank every recognized date surface (allowed or not) so year/month/day
+    # fragments are not re-scanned as bare integers.
+    date_blank_needles: List[str] = []
+    for d in set(normalized_dates):
+        date_blank_needles.extend(_date_surface_forms(working, d))
+    working = _blank_substrings(working, date_blank_needles)
+    working = _blank_substrings(working, sorted(manifest.card_times))
+
+    window_spans: List[Tuple[int, int]] = []
+    for m in _WINDOW_PHRASE_RE.finditer(working):
+        num = m.group(1)
+        if not _token_in_allowed(num, window_ok):
+            violations.append(f"unauthorized_window:{num}")
+        # blank the matched number only (keep cue words for clause classification)
+        window_spans.append((m.start(1), m.end(1)))
+    working = _blank_spans(working, window_spans)
+
+    working = _mask_identifiers(working)
+    clauses = _split_clauses(working)
+
+    for m in _FACT_NUM_RE.finditer(working):
+        whole = m.group(0)
+        token = whole
+        if m.group(2) is not None:
+            token = f"{m.group(1)}.{m.group(2)}"
+        else:
+            token = m.group(1)
+        clause = _clause_for_pos(clauses, m.start())
+        if _token_in_allowed(token, value_ok):
+            hit = _normalize_num_token(token) & value_ok
+            cited_values.extend(hit if hit else [token])
+            continue
+        if _is_nonzero_fraction_decimal(token):
+            violations.append(f"unauthorized_value:{token}")
+            continue
+        if _personal_clause(clause):
+            violations.append(f"unauthorized_value:{token}")
+            continue
+        if _educational_clause(clause):
+            educational_ints.update(_normalize_num_token(token) or {token})
+            continue
+        if _metric_clause(clause, labels, units):
+            violations.append(f"unauthorized_value:{token}")
+            continue
+        educational_ints.update(_normalize_num_token(token) or {token})
+
+    passed = len(violations) == 0
+    return {
+        "passed": passed,
+        "violations": sorted(set(violations)),
+        "warnings": sorted(set(warnings)),
+        "cited_dates": cited_dates,
+        "cited_values": sorted(set(cited_values)),
+        "cited_lipid_values": [],
+        "manifest_entry_count": len(manifest.entries),
+        "allowed_dates": sorted(allowed_dates),
+        "audit_scope": "fact_card",
+        "educational_ints": sorted(educational_ints),
+        "disclosure_block_count": len(complete_blocks),
+        "policy_rev": FACT_CARD_AUDIT_POLICY_REV,
+    }
+
+
 def _audit_response_numerics_strict(
     answer_text: str,
     manifest: NumericsManifest,
@@ -1150,6 +1566,12 @@ def audit_response_numerics(
     require_citation: bool = False,
 ) -> Dict[str, Any]:
     """C-layer post-check: response numerics/dates must stay within manifest."""
+    if manifest.profile == "fact_card_interpret":
+        return _audit_response_numerics_fact_card(
+            answer_text,
+            manifest,
+            require_citation=require_citation,
+        )
     if numerics_audit_scope() == "t0_plus_disclosure":
         return _audit_response_numerics_t0_plus_disclosure(
             answer_text,
@@ -1201,6 +1623,7 @@ def apply_numerics_audit_to_answer(
 
 
 __all__ = [
+    "FACT_CARD_AUDIT_POLICY_REV",
     "LANG_DISCLOSURE_MAP",
     "LANG_T0_CLAIM_MAP",
     "ManifestEntry",

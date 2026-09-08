@@ -4,12 +4,19 @@
 
 ---
 
-## 2026-09-08 (M1-P9.3：fact_card_interpret 按评估要求收焦)
+## 2026-09-08 (M1-P9.4：fact_card 审计策略)
 
-- **类别**：**P2（Profile 槽序）+ C 层审计加维度**。
-- **改动**：`fact_card_interpret` T0 改为 TASK / USER_ASSESSMENT_PROMPT / FACT_CARD_CONTEXT / NUMERICS_MANIFEST。TASK 以评估要求为大纲；`focus` 非空时只解读这些指标。卡侧对焦点外数字与「有值称缺失」fail-closed。`build_fact_card_numerics_manifest(..., metric_ids=)` 可收窄白名单。
-- **证据**：`python3 scripts/pha_harness_profile_registry_generate.py --write`；`pha_chat_turn_fsm_selfcheck.py`、`pha_numerics_manifest_selfcheck.py`、`pha_fact_card_selfcheck.py` PASS。
-- **回滚**：还原槽序与 TASK + `--write`；还原 `metric_ids` 过滤。
+- **类别**：**P1（audit）**。`manifest.profile == fact_card_interpret` 时走子句级 S/E/T1，不再套用 0.5–15 小数区间。
+- **改动**：`LANG_T0_CLAIM_MAP` 增 temporal/educational/measurement；标识符遮罩；窗口口语 token；`educational_ints` telemetry。
+- **证据**：`pha_numerics_manifest_selfcheck.py` FC-* 用例 PASS。
+- **回滚**：去掉 `audit_response_numerics` 的 fact_card 分派。
+
+## 2026-09-08 (M1-P9.3：fact_card_interpret 大纲改在 TASK)
+
+- **类别**：**P2（Profile TASK）**。撤掉评估要求→指标 id 解析器（反硬编码）。
+- **改动**：TASK 规定 USER_ASSESSMENT_PROMPT 为大纲；点名则只谈这些行；有值不得说缺失。T0 顺序 TASK / USER_ASSESSMENT_PROMPT / FACT_CARD_CONTEXT / NUMERICS_MANIFEST。Numerics 仍由整张卡生成。
+- **证据**：`pha_fact_card_selfcheck.py` PASS（TASK 契约）；`pha_chat_turn_fsm_selfcheck.py`、`pha_numerics_manifest_selfcheck.py` PASS。
+- **回滚**：还原 `_FACT_CARD_INTERPRET_TASK` 与槽序 + `--write`。
 
 ## 2026-09-08 (M1-P9.1：fact_card_interpret profile + 卡侧日期词类)
 

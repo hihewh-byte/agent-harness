@@ -315,8 +315,117 @@ def main() -> int:
     elif "2025-09-08" not in fc_manifest.allowed_dates:
         print("FAIL F-fact-card allowed_dates missing baseline_earliest")
         failed += 1
+    elif "365" not in fc_manifest.window_day_tokens or "12" not in fc_manifest.window_day_tokens:
+        print("FAIL F-fact-card window_day_tokens", fc_manifest.window_day_tokens)
+        failed += 1
     else:
         print("OK F-fact-card allowed_dates")
+
+    # --- fact_card audit strategy (M1-P9.4) ---
+    fc_audit_m = NumericsManifest(
+        profile="fact_card_interpret",
+        user_id="selfcheck",
+        entries=[
+            ManifestEntry(
+                domain="fact_card",
+                metric="血氧",
+                value=96.0,
+                unit="%",
+                anchor="2026-09-08",
+                source="selfcheck",
+            ),
+            ManifestEntry(
+                domain="fact_card",
+                metric="静息心率",
+                value=63.0,
+                unit="bpm",
+                anchor="2026-09-08",
+                source="selfcheck",
+            ),
+            ManifestEntry(
+                domain="fact_card",
+                metric="HRV",
+                value=32.9,
+                unit="ms",
+                anchor="2026-09-08",
+                source="selfcheck",
+            ),
+        ],
+        reference_date="2026-09-08",
+        forbidden_dates={"2026-04-30", "2025-01-13"},
+        card_labels={"血氧", "静息心率", "HRV"},
+        card_units={"%", "bpm", "ms"},
+        window_day_tokens={"365", "12", "267"},
+    )
+    fc_cases = [
+        (
+            "FC-spo2-id",
+            "今天血氧 96%，SpO2 处于正常范围。",
+            True,
+            "",
+        ),
+        (
+            "FC-edu-95",
+            "一般成年人血氧饱和度高于 95% 视为正常。",
+            True,
+            "",
+        ),
+        (
+            "FC-personal-35",
+            "你的 HRV 接近 35 ms。",
+            False,
+            "unauthorized_value:35",
+        ),
+        (
+            "FC-decimal-7.5",
+            "建议睡 7.5 小时。",
+            False,
+            "unauthorized_value:7.5",
+        ),
+        (
+            "FC-t1-en",
+            "[Reference Standard] SpO2 above 95% is typical "
+            "(source: WHO, verify by yourself, not medical advice)",
+            True,
+            "",
+        ),
+        (
+            "FC-t0-forgery",
+            "【参考标准】你的血氧 94% 偏低（来源：WHO，请自行查证，非医疗建议）",
+            False,
+            "t0_forgery_in_t1_block",
+        ),
+        (
+            "FC-window-90",
+            "近 90 天睡眠均值 7.6 小时。",
+            False,
+            "unauthorized_window:90",
+        ),
+    ]
+    for cid, ans, exp_pass, vsub in fc_cases:
+        if not _run_case(
+            cid,
+            ans,
+            fc_audit_m,
+            require_citation=False,
+            expect_pass=exp_pass,
+            expect_violation_substr=vsub,
+        ):
+            failed += 1
+    edu_audit = audit_response_numerics(
+        "一般成年人血氧饱和度高于 95% 视为正常。",
+        fc_audit_m,
+    )
+    if "95" not in (edu_audit.get("educational_ints") or []):
+        print("FAIL FC-edu-95 missing educational_ints", edu_audit)
+        failed += 1
+    else:
+        print("OK FC-edu-95 educational_ints")
+    if edu_audit.get("audit_scope") != "fact_card":
+        print("FAIL FC audit_scope", edu_audit.get("audit_scope"))
+        failed += 1
+    else:
+        print("OK FC audit_scope=fact_card")
 
     print("\n" + ("OK all" if not failed else f"FAILED {failed} case(s)"))
     return failed

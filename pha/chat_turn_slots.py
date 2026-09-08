@@ -30,6 +30,7 @@ from pha.harness_plan import (
     TurnEvidencePlan,
     assemble_tiered_supplemental,
     build_wearable_90d_summary_block,
+    fact_card_interpret_task_text,
     plan_allows_heuristic_snapshot,
 )
 from pha.health_data import build_system_date_block, effective_query_reference_date
@@ -386,8 +387,13 @@ def iter_turn_harness_assembly_phase(
                 profile=plan.profile,
             )
 
+    _task_locale = ctx.request_locale or ctx.response_locale or "en"
     ctx.slot_contents = {
-        "TASK": plan.task_text,
+        "TASK": (
+            fact_card_interpret_task_text(_task_locale)
+            if plan.profile == "fact_card_interpret"
+            else plan.task_text
+        ),
         "EPISODIC_BRIDGE": ctx.episodic_bridge_block,
         "ATTACHMENT_LABEL": ctx.attachment_label_block,
         "WEARABLE_SNAPSHOT": ctx.wearable_snapshot_block,

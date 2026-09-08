@@ -1,9 +1,23 @@
-## 2026-09-08 (M1-P9.3：解读按评估要求收焦)
+## 2026-09-08 20:40 (M1-P9.4 落地：fact_card 数字分级审计)
 
-- **类别**：事实卡解读。维护者评估要求「只看静息心率与HRV，血氧」，16:46 解读仍写核心睡眠 3.7/4.9，并称这三项「未提供/缺失」。卡上当日有 RHR 63、HRV 32.9、血氧 96.0。
-- **证据**：TASK 原要求「解读整张卡」+ 上下文带规则层 summary/advice（睡眠优先）+ 点名指标无值时套「无记录」。7b 忽略评估要求。selfcheck：点名焦点不收睡眠；焦点外 7.6 拒；有值却写「未提供」拒；只引静息心率 62 过。registry `--write`；fsm / numerics selfcheck PASS。
-- **改动**：评估要求点名的指标写入 `FACT_CARD_CONTEXT.focus` 并过滤 manifest/上下文；去掉 summary/advice 进解读槽；T0 顺序改为 TASK → USER_ASSESSMENT_PROMPT → FACT_CARD_CONTEXT → NUMERICS_MANIFEST。卡侧审计：焦点外数字拒；有值称缺失 `focus_missing_but_present`。缓存键加 `focus_v1`（旧 16:46 缓存失效）。
-- **回滚**：还原 `fact_card_interpret.py` / `harness_plan.py` 槽序与 TASK + `--write`。
+- **类别**：P1（audit）/ 事实卡解读。
+- **改动**：`numerics_manifest` 新增 `fact_card` 策略（子句级 S/E/T1）；卡侧 `_audit_interpretation_text` 委托同一函数；`rejected_text`；TASK 分条 + `{T1_TEMPLATE}` 按 locale；Tier0 `slot_floor` + min 保留 values；失败文案归并。
+- **证据**：`pha_numerics_manifest_selfcheck.py` / `pha_fact_card_selfcheck.py` / `pha_chat_turn_fsm_selfcheck.py` PASS；§2.4 十八例本机复现对齐。
+- **回滚**：还原 `numerics_manifest` fact_card 分支与 `fact_card_interpret` 委托；缓存键随 TASK/policy hash 自动失效。
+
+## 2026-09-08 20:11 (M1-P9.4 立卡：卡外数字分级放宽 + 单一审计 · 仅文档)
+
+- **类别**：产品共识 / 审计契约。**无代码改动。**
+- **发现**：真机解读连续被拒 `2、95、2、3、95`。`2` 来自 `SpO2`/`VO2max` 标签（卡侧 `\d+` 无边界）；`96.0` 因上下文块给原值、白名单只有 `96`；`95`/`70–80`/`2–3` 是科普整数，7b 写不出 T1 模板；卡侧 T1 正则只认中文。harness 审计对同文本 `passed=True`。
+- **决定**：PRD v1.10 FR-6.10 由「只进 T1」改为语境三级（S 必对账 / E 放行记 telemetry / T1 中英同权）；FR-6.3 审计只有一道。尺度与 18 条用例见交接 v3 §2。
+- **待执行**：[`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §9 执行顺序；8462695 未推送，先 amend。
+
+## 2026-09-08 (M1-P9.3：解读大纲改在 TASK，撤掉指标解析器)
+
+- **类别**：事实卡解读 / 反硬编码。上一刀用评估要求别名匹配收窄 manifest，并拒焦点外数字，是针对「只看 RHR/HRV/血氧」的路由，违反宪法第四条与 FR-6.8（整张卡是证据源）。
+- **证据**：交接 §4.3：TASK 写在 profile，评估要求是大纲不是数值来源。selfcheck：TASK 含 outline 句、不含具体指标名、不含 `FACT_CARD_CONTEXT.focus`；上下文仍保留卡上全部行。
+- **改动**：`fact_card_interpret` TASK：USER_ASSESSMENT_PROMPT 为大纲；点名则只谈这些行；`value` 非空不得说缺失。槽序仍是 TASK → 评估要求 → 卡 → manifest（注意力顺序，不是指标白名单）。撤掉 alias/deny list/focus 过滤与 `focus_missing_but_present`。缓存键 `task_outline_v2`。
+- **回滚**：还原 `harness_plan._FACT_CARD_INTERPRET_TASK`。
 - **维护者下一步**：刷新完整卡后重新点「生成解读」。仍欠停 Ollama 与跨日真看。
 
 ## 2026-09-08 (i18n：仪表盘黄金指标 + 主动卡 git 默认英文)

@@ -833,8 +833,9 @@ def main() -> int:
         model="selfcheck-model",
         stream_fn=_done("近 90 天睡眠均值 7.6h，基线 267 夜。"),
     )
-    if near90.get("status") != "failed" or "unauthorized_value:90" not in (
-        near90.get("violations") or []
+    near90_v = near90.get("violations") or []
+    if near90.get("status") != "failed" or not (
+        "unauthorized_window:90" in near90_v or "unauthorized_value:90" in near90_v
     ):
         return _fail(f"365d card must reject 90, got {near90}")
 
@@ -879,28 +880,36 @@ def main() -> int:
         card=p91_card,
         assessment_prompt="",
         model="selfcheck-model",
-        stream_fn=_done(
-            "睡眠 7.6h。",
-            passed=False,
-            violations=["future_date:2099-01-01"],
-        ),
+        stream_fn=_done("睡眠 7.6h，日期 2099-01-01。"),
     )
     if future.get("status") != "failed" or future.get("error") != "audit_rejected":
-        return _fail(f"harness future_date must reject, got {future}")
+        return _fail(f"future_date in body must reject, got {future}")
+    if not any("2099-01-01" in str(v) for v in (future.get("violations") or [])):
+        return _fail(f"future_date violation missing, got {future}")
 
     hr_out = run_interpretation(
         user_id="selfcheck",
         card=p91_card,
         assessment_prompt="给运动强度建议",
         model="selfcheck-model",
-        stream_fn=_done("今天可练，心率 120–140。"),
+        stream_fn=_done("你的训练心率今天是 120–140。"),
     )
     if hr_out.get("status") != "failed":
-        return _fail(f"HR zone outside T1 must reject, got {hr_out}")
+        return _fail(f"personal HR zone must reject, got {hr_out}")
     if "unauthorized_value:120" not in (hr_out.get("violations") or []) and (
         "unauthorized_value:140" not in (hr_out.get("violations") or [])
     ):
         return _fail(f"HR zone violations missing, got {hr_out}")
+
+    edu_zone = run_interpretation(
+        user_id="selfcheck",
+        card=p91_card,
+        assessment_prompt="给运动强度建议",
+        model="selfcheck-model",
+        stream_fn=_done("训练心率控制在最大心率的 70–80%。"),
+    )
+    if edu_zone.get("status") != "done":
+        return _fail(f"educational HR zone integers must done, got {edu_zone}")
 
     t1_zone = run_interpretation(
         user_id="selfcheck",
@@ -931,12 +940,12 @@ def main() -> int:
         card=p91_card,
         assessment_prompt="",
         model="selfcheck-model",
-        stream_fn=_done("静息心率目标 80。"),
+        stream_fn=_done("静息心率 80 bpm。"),
     )
     if extra80.get("status") != "failed" or "unauthorized_value:80" not in (
         extra80.get("violations") or []
     ):
-        return _fail(f"off-card extra must reject, got {extra80}")
+        return _fail(f"off-card metric+unit claim must reject, got {extra80}")
 
     k1 = current_interpret_key("selfcheck", card=p91_card)
     slim_card = {
@@ -1088,20 +1097,56 @@ def main() -> int:
         return _fail("calendar_day must change interpret cache key")
 
     from pha.fact_card_interpret import build_fact_card_context_block
-    from pha.harness_plan import _fact_card_interpret_turn_plan
+    from pha.harness_plan import fact_card_interpret_task_text
+    from pha.harness_tier0_assembly import _compress_fact_card_context
+    from pha.numerics_manifest import build_fact_card_numerics_manifest, audit_response_numerics
 
-    task = _fact_card_interpret_turn_plan().task_text
-    if "USER_ASSESSMENT_PROMPT is the outline" not in task:
-        return _fail("TASK must treat USER_ASSESSMENT_PROMPT as the outline")
-    if "FACT_CARD_CONTEXT.focus" in task:
-        return _fail("TASK must not depend on an extracted focus list")
-    if "resting_heart_rate" in task or "静息心率" in task or "spo2" in task.lower():
+    task = fact_card_interpret_task_text("en")
+    if "{T1_TEMPLATE}" in task:
+        return _fail("TASK must expand T1_TEMPLATE for locale")
+    from pha import harness_plan as _hp
+
+    if "【参考标准" in _hp._FACT_CARD_INTERPRET_TASK:
+        return _fail("TASK source must not hardcode Chinese T1 template")
+    if "resting_heart_rate" in task or "静息心率" in task:
         return _fail("TASK must not name specific metrics")
     ctx = build_fact_card_context_block(p91_card)
     if "7.6" not in ctx:
         return _fail("interpret context must keep the full card, not a parsed subset")
     if "大纲是 USER_ASSESSMENT_PROMPT" not in ctx:
         return _fail("context header must defer to USER_ASSESSMENT_PROMPT")
+    min_ctx = _compress_fact_card_context(ctx, "min")
+    if "7.6" not in min_ctx or "metrics omitted" in min_ctx:
+        return _fail("Tier0 min must keep metric values, got " + min_ctx[:200])
+    manifest = build_fact_card_numerics_manifest(p91_card, user_id="selfcheck")
+    # Behavioral: SpO2 identifier + .0 normalize must pass; educational 95 must pass;
+    # personal off-card must fail; harness audit == card path status.
+    for text, want_pass in (
+        ("今天血氧 7.6%，SpO2 正常。", True),  # 7.6 is on card sleep value — ok
+        ("一般成年人血氧高于 95% 视为正常。", True),
+        ("你的 HRV 接近 35 ms。", False),
+        ("建议睡 7.5 小时。", False),
+        (
+            "[Reference Standard] SpO2 above 95% is typical "
+            "(source: WHO, verify by yourself, not medical advice)",
+            True,
+        ),
+    ):
+        audit = audit_response_numerics(text, manifest)
+        if bool(audit.get("passed")) != want_pass:
+            return _fail(f"fact_card audit want pass={want_pass} for {text!r}, got {audit}")
+        streamed = run_interpretation(
+            user_id="selfcheck",
+            card=p91_card,
+            assessment_prompt="",
+            model="selfcheck-model",
+            stream_fn=_done(text),
+        )
+        status_pass = streamed.get("status") == "done"
+        if status_pass != want_pass:
+            return _fail(
+                f"run_interpretation status must match audit for {text!r}: {streamed}"
+            )
 
     boom_html = render_fact_card_html(
         {

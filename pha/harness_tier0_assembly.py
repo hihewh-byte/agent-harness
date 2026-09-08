@@ -133,6 +133,7 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
         "protected": {"TASK", "NUMERICS_MANIFEST", "USER_ASSESSMENT_PROMPT"},
         "degradation_order": ["FACT_CARD_CONTEXT"],
         "supplement_start": "full",
+        "slot_floor": {"FACT_CARD_CONTEXT": "summary"},
     },
 }
 
@@ -263,7 +264,7 @@ def _compress_supplement(raw: str, level: TierLevel) -> str:
 
 
 def _compress_fact_card_context(raw: str, level: TierLevel) -> str:
-    """Drop advice → summary → metrics; never used for manifest or assessment."""
+    """Drop advice → summary → compact metrics; never omit metric values under budget."""
     text = (raw or "").strip()
     if not text:
         return ""
@@ -282,11 +283,22 @@ def _compress_fact_card_context(raw: str, level: TierLevel) -> str:
     slim.pop("advice", None)
     if level == "min":
         slim.pop("summary", None)
+        metrics = slim.get("metrics")
+        if isinstance(metrics, list):
+            compact = []
+            for item in metrics:
+                if not isinstance(item, dict):
+                    continue
+                compact.append(
+                    {
+                        "label": item.get("label") or item.get("metric"),
+                        "value": item.get("value"),
+                        "unit": item.get("unit"),
+                        "day": item.get("day"),
+                    }
+                )
+            slim["metrics"] = compact
         body = header + json.dumps(slim, ensure_ascii=False)
-        if len(body) > 1200:
-            slim["metrics"] = []
-            slim["note"] = "metrics omitted under Tier0 budget"
-            body = header + json.dumps(slim, ensure_ascii=False)
         return body
     return header + json.dumps(slim, ensure_ascii=False)
 
@@ -400,8 +412,14 @@ def _join_tier0(assemblies: List[_SlotAssembly]) -> str:
     return _TIER0_SEP.join(parts)
 
 
-def _degrade_one(assemblies: List[_SlotAssembly], slot_id: str) -> bool:
+def _degrade_one(
+    assemblies: List[_SlotAssembly],
+    slot_id: str,
+    *,
+    slot_floor: Optional[Dict[str, TierLevel]] = None,
+) -> bool:
     order: List[TierLevel] = ["full", "summary", "min"]
+    floors = slot_floor or {}
     for asm in assemblies:
         if asm.slot_id != slot_id:
             continue
@@ -410,7 +428,11 @@ def _degrade_one(assemblies: List[_SlotAssembly], slot_id: str) -> bool:
         idx = order.index(asm.level)
         if idx >= len(order) - 1:
             return False
-        asm.level = order[idx + 1]
+        nxt = order[idx + 1]
+        floor = floors.get(asm.slot_id)
+        if floor is not None and order.index(nxt) > order.index(floor):
+            return False
+        asm.level = nxt
         return True
     return False
 
@@ -425,6 +447,7 @@ def assemble_tiered_supplemental_v2(
     cap = budget if budget is not None else PHA_HARNESS_TIER0_MAX_CHARS
     cfg = _PROFILE_CONFIG.get(_assembly_profile_key(plan), _PROFILE_CONFIG["lifestyle"])
     degradation_order: List[str] = list(cfg.get("degradation_order") or [])
+    slot_floor: Dict[str, TierLevel] = dict(cfg.get("slot_floor") or {})
 
     assemblies, protected = _build_slot_assemblies(plan, slot_contents)
     missing: List[str] = []
@@ -439,7 +462,7 @@ def assemble_tiered_supplemental_v2(
         guard += 1
         degraded = False
         for slot_id in degradation_order:
-            if _degrade_one(assemblies, slot_id):
+            if _degrade_one(assemblies, slot_id, slot_floor=slot_floor):
                 degraded = True
                 tier0 = _join_tier0(assemblies)
                 if len(tier0) <= cap:

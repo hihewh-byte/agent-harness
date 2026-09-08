@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.8 · 2026-09-08  
+> **版本**：v1.10 · 2026-09-08  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -171,14 +171,14 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 |----|------|------|
 | FR-6.1 | **触发**：仅用户在完整卡点「生成解读」。通知、卡级评估、定时任务 **不含** LLM 文字；不预生成 | 未点按钮时 JSON/HTML 无解读区块；日志无 LLM 调用 |
 | FR-6.2 | **输入**：当日 `facts` JSON + 递进基线摘要（含窗口与 n）+ 通用参考层 + 用户 `assessment_prompt`。Mac 账本全部历史对 harness 可见（这是「不割裂」的落点） | 请求体只引用 facts / 基线 / prefs，不另查库编数 |
-| FR-6.3 | **路径**：复用既有 chat harness（`/api/chat` 同一 `chat_service` 管线：TurnEvidencePlan → Compose → Numerics 审计），**禁止** 新开裸 Ollama 调用。输出中的精确数字必须 ⊆ facts ∪ 基线 ∪ 参考范围；否则整段丢弃，显示「未生成（审计未通过）」 | selfcheck：注入含外来数字的假回复 → 被拒；含 T1 块 → 通过 |
+| FR-6.3 | **路径**：复用既有 chat harness（`/api/chat` 同一 `chat_service` 管线：TurnEvidencePlan → Compose → Numerics 审计），**禁止** 新开裸 Ollama 调用。**审计只有一道**（harness Numerics 审计的 `fact_card` 策略，卡侧不得另写数字抽取）；凡属用户数据形态的数字必须 ⊆ facts ∪ 基线 ∪ 参考范围 ∪ 卡上窗口/日期（分级见 FR-6.10）；否则整段丢弃，显示「未生成（审计未通过）」 | selfcheck：注入含外来个人数值的假回复 → 被拒；含 T1 块 → 通过；harness 审计结论与卡侧展示状态必须一致 |
 | FR-6.4 | **展示**：独立区块「AI 解读（实验）· 非医疗建议」，位于规则评估之后，不混排、不替代规则层；必须显示生成时间与所用模型名 | HTML 两块分离；规则层文案与未点按钮时逐字相同 |
 | FR-6.5 | **时延**：本机 Ollama 一轮 30–170s（既有 e2e 记录）。网页必须 **异步**：点后立即返回「生成中」，结果按 `(user_id, as_of, calendar_day, card_digest, locale, sha256(assessment_prompt))` 缓存到本机 `data/`，刷新即见；同键重复点击复用缓存，不重复调 LLM | 点击后 HTTP < 1s 返回；缓存命中不产生 LLM 日志；改勾选后 `card_digest` 变、旧解读不命中；跨日 `calendar_day` 变、旧解读不命中 |
 | FR-6.6 | **fail-closed**：Ollama 未启动 / 超时 / 审计拒绝 → 区块显示原因（含被拒 token），规则层照常；绝不回退成「模板文字冒充 AI」 | 停 Ollama 再点 → 区块写「模型不可用」，其余卡不变 |
 | FR-6.7 | **M3 关系**：M2 App 的「解读」按钮调 **同一** 端点，不另写逻辑 | M3 任务卡只含 UI 接线 |
 | FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致 | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
 | FR-6.9 | **日期与语言**：机器层 ISO 8601；展示层按 `locale` 渲染，禁止纯数字斜杠日期；LLM 文本优先相对表达，绝对日期仅允许 as_of / 各行实际 day；审计把日期作为独立词类归一化后比对 | `unauthorized_date` 用例；中英 locale HTML 属 M1-P9.2 |
-| FR-6.10 | **卡外数字出口**：解读中任何不在事实卡 manifest 的数字（运动强度、心率区间、目标步数等）只能以 T1 披露块形式出现并注明来源；块外只允许定性描述。用户评估要求不能解锁该限制 | selfcheck 块外「120–140」→ 拒，T1 块内 → 过 |
+| FR-6.10 | **卡外数字分级**（v1.10 放宽，取代 v1.7「只进 T1」）：按 **语境** 不按数值大小分三级。**S 级（必须 ⊆ manifest）**：日期/时刻；任何 1–2 位小数；子句含归属词（你/您/your）、时间归属词（今天/昨天/近 N/today/last N）或测量动词（测得/记录/基线/均值）的数字；子句含卡上指标标签或单位却无教育/建议词的数字（歧义 fail-closed）。**E 级（放行，记 telemetry）**：子句含人群词/建议词/参考词（一般/通常/建议/控制在/范围/usually/recommend）的整数，以及无归属、无标签、无单位的裸整数。**T1 块**：块内数字不验真伪，中英同权，块内出现归属词 → 拒。标识符里的数字（`SpO2`/`VO2max`）不计。词表放语言表，指标标签/单位来自卡；Python 不写指标名。用户评估要求不能解锁 S 级 | selfcheck：「一般成年人血氧高于 95%」→ 过；「你的 HRV 接近 35 ms」→ 拒；「静息心率 65 bpm 偏高」→ 拒；「建议睡 7.5 小时」→ 拒；「今天血氧 96.0%，SpO2 正常」→ 过。用例全表见 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2.4 |
 
 ### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
@@ -256,7 +256,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P11** | **勾选即所见 + 捷径全集同步**（FR-1.5 v1.7 / FR-2.7 v1.7） | `DONE` | 2026-09-08：去掉 `reveal_when_selected`；卡 = 勾选；`shortcut_sync_specs` 不读 prefs；catalog 三态提示。与 P10 同一套捷径生成器。selfcheck PASS |
 | **M1-P12** | **优先级包一期**：闭合 zip 日表（血氧 / 呼吸率 / VO2max / 腕温）+ zip 为最终真值 + pack_version | `DONE*` | 2026-09-08：7 项数量 Find 真机入库；Find 总表 `shortcut_health_find_catalog.json`；腕温无权限开关，捷径跳过（`*`）。VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。pack `2026.09.08.priority-1e` |
 | **M1-P9.2** | 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band/文案方向统一 | `DONE` | 2026-09-08：prefs `locale`；HTML 中英日期；解读剥 Markdown；`numeric_band` 标签；缓存键含 locale。通知 body 日期仍 ISO（P9.3） |
-| **M1-P9.3** | 真机与边界验收 | `IN_PROGRESS` | 2026-09-08：Mac+iPhone Safari 解读已出。评估要求点名指标收焦（16:46 假缺失已修）。git 默认 en-US。欠：停 Ollama、跨日真看 |
+| **M1-P9.3** | 真机与边界验收 | `IN_PROGRESS` | 2026-09-08：Mac+iPhone Safari 解读已出。评估要求走 TASK 大纲（非整卡叙事、不解析指标 id）。git 默认 en-US。欠：停 Ollama、跨日真看 |
+| **M1-P9.4** | **卡外数字分级放宽 + 单一审计 + review 优化**（FR-6.3 / FR-6.10 v1.10） | `DONE` | 2026-09-08：`fact_card` 审计策略住 `numerics_manifest`；卡侧删字面量正则；标识符/`.0`/窗口口语归一；TASK 分条 + locale T1；Tier0 `min` 保留 values；失败存 `rejected_text` + 归并文案。selfcheck PASS |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
@@ -317,6 +318,7 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-08 08:47 | P10+P11 落地：卡 = 勾选 5 行；活动消耗标进行中不分档；RHR 仍空（9/6 超 2 日窗，须新捷径带日期入库）；selfcheck 两套 PASS | 决定 7–12 按默认/拍板执行；§8 P10/P11 DONE。P9.1 未开 |
 | 2026-09-08 14:10 | 维护者拍板：zip 为最终真值、季度回灌；不启动 Pulso（M2 再议）；VO2max 进一期勾选。不单独注册呼吸率 | v1.8：FR-1.4/1.5/1.8；优先级包一期；立 M1-P12 |
 | 2026-09-08 | P12 代码落地：eligible 闭环；ingest 单位门；捷径 8 个 Find；VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。Find 标签 `Blood Oxygen` / `Respiratory Rate` / `VO2 Max` / `Wrist Temperature` **真机未验** | §8 M1-P12 保持 TODO（真机门禁）；轨道 B 不启动 |
+| 2026-09-08 17:06 | 真机解读连续被拒 `2、95、2、3、95` / `70、80、2、2、95、2、3`。查明：`2` 来自 `SpO2`/`VO2max` 标签（卡侧 `\d+` 无边界）；`96.0` 因上下文块给原值、白名单只有 `96`；`95`/`70–80`/`2–3` 是科普与训练建议整数，7b 写不出 T1 模板；卡侧 T1 正则只认中文，en-US 下科普数字必败。harness 审计对同文本 `passed=True`，两道审计结论相反。review 另见 8462695 历史含被撤回的 focus 过滤、`{"7","12"}` 魔数、Tier0 `min` 清空 metrics 与 TASK 矛盾、失败记录不存原文 | 维护者授权放宽，尺度由 agent 定：v1.10 FR-6.10 改为语境三级（S/E/T1）、FR-6.3 改为单一审计；立 M1-P9.4；交接 v3。不改代码 |
 
 ---
 
@@ -337,3 +339,4 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-08 | v1.7 | §4.1 / FR-2.1 / FR-2.2 / FR-2.10 时效语义落地；§8 M1-P10 / P11 → DONE。代码：注册表 `temporal`、卡按 kind 取值、捷径全集 + last-2-days RHR + count=0 跳过、ingest `empty_sample` |
 | 2026-09-08 | v1.8 | zip 为最终真值（FR-1.8）+ 优先级包一期（血氧/呼吸率/VO2max/腕温）+ `pack_version` + VO2max `latest` 不计覆盖率。轨道 B / Pulso 留 M2。立 M1-P12 |
 | 2026-09-08 | v1.9 | Find 总表为捷径真源；腕温跳过捷径；数量包 7 项；§8 P12 DONE* / P9.2 DONE |
+| 2026-09-08 | v1.10 | FR-6.10 卡外数字由「只进 T1」放宽为语境三级（S 必对账 / E 放行记 telemetry / T1 中英同权）；FR-6.3 审计只有一道（harness `fact_card` 策略）；立 M1-P9.4；§11 一条。文档改动，无代码。交接：[`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) |

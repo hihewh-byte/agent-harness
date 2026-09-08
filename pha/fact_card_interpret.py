@@ -1,44 +1,33 @@
-"""M1-P9.1: user-triggered fact-card interpretation via fact_card_interpret profile."""
+"""M1-P9.1/P9.4: user-triggered fact-card interpretation via fact_card_interpret profile."""
 
 from __future__ import annotations
 
 import hashlib
 import json
 import os
-import re
 import tempfile
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from pha.fact_card import _fmt, fact_card_numeric_atoms, load_fact_card
+from pha.fact_card import load_fact_card
 from pha.fact_card_locale import DEFAULT_LOCALE as _DEFAULT_LOCALE, strip_markdown_markers
 from pha.fact_card_prefs import load_assessment_prompt, load_fact_card_locale
-from pha.harness_plan import FACT_CARD_INTERPRET_USER_MESSAGE
+from pha.harness_plan import FACT_CARD_INTERPRET_USER_MESSAGE, fact_card_interpret_task_text
 from pha.numerics_manifest import (
-    _DATE_CN_MD_RE,
-    _DATE_CN_RE,
-    _DATE_EN_RE,
-    _DATE_ISO_RE,
-    _EN_MONTH_NUM,
-    _extract_normalized_dates,
-    _normalize_cn_date,
-    _normalize_en_date,
+    FACT_CARD_AUDIT_POLICY_REV,
+    audit_response_numerics,
+    build_fact_card_numerics_manifest,
 )
 
-_T1_BLOCK_RE = re.compile(
-    r"【参考标准[^】]*】.*?"
-    r"[（(]来源[:：][^）)]{2,}[，,][^）)]*?"
-    r"(?:请自行查证|请自行核对)[^）)]*?[）)]",
-    re.S,
-)
-_NUM_RE = re.compile(r"\d+(?:\.\d+)?")
-_WINDOW_NUM_RE = re.compile(r"^(\d+)d$", re.I)
-_ISO_DATE_RE = re.compile(r"\b20\d{2}-\d{2}-\d{2}\b")
 _LOCK = threading.Lock()
 _INFLIGHT: set[str] = set()
-_INTERPRET_PROMPT_REV = "task_outline_v2"
+
+
+def _interpret_prompt_rev() -> str:
+    blob = f"{fact_card_interpret_task_text('en')}|{FACT_CARD_AUDIT_POLICY_REV}"
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:12]
 
 
 def interpret_dir() -> Path:
@@ -81,7 +70,7 @@ def interpret_cache_key(
         f"{card_digest or ''}|"
         f"{(locale or _DEFAULT_LOCALE).strip() or _DEFAULT_LOCALE}|"
         f"{assessment_prompt or ''}|"
-        f"{_INTERPRET_PROMPT_REV}"
+        f"{_interpret_prompt_rev()}"
     )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -138,161 +127,15 @@ def build_fact_card_context_block(card: dict[str, Any]) -> str:
     )
 
 
-def _strip_t1_blocks(text: str) -> str:
-    return _T1_BLOCK_RE.sub(" ", text or "")
-
-
-def _allowed_card_dates(card: dict[str, Any]) -> set[str]:
-    facts = card.get("facts") or {}
-    out: set[str] = set()
-    for key in ("as_of", "calendar_day"):
-        val = str(facts.get(key) or "")[:10]
-        if _ISO_DATE_RE.fullmatch(val):
-            out.add(val)
-    for item in facts.get("metrics") or []:
-        if not isinstance(item, dict):
-            continue
-        for key in ("day", "baseline_earliest"):
-            val = str(item.get(key) or "")[:10]
-            if _ISO_DATE_RE.fullmatch(val):
-                out.add(val)
-    return out
-
-
-def _month_day_hits(month: int, day: int, allowed: set[str]) -> list[str]:
-    suffix = f"-{month:02d}-{day:02d}"
-    return sorted(iso for iso in allowed if iso.endswith(suffix))
-
-
-def _guess_month_day_iso(month: int, day: int, allowed: set[str]) -> str:
-    hits = _month_day_hits(month, day, allowed)
-    if hits:
-        return hits[-1]
-    year = "2026"
-    for iso in sorted(allowed, reverse=True):
-        if _ISO_DATE_RE.fullmatch(iso):
-            year = iso[:4]
-            break
-    return f"{year}-{month:02d}-{day:02d}"
-
-
-def _extract_card_dates(text: str, allowed: set[str]) -> list[str]:
-    found = list(_extract_normalized_dates(text))
-    for month_s, day_s in _DATE_CN_MD_RE.findall(text or ""):
-        found.append(_guess_month_day_iso(int(month_s), int(day_s), allowed))
-    for mon, day_s, year in _DATE_EN_RE.findall(text or ""):
-        if year:
-            continue
-        month = _EN_MONTH_NUM.get((mon or "").strip(".").lower())
-        if month is None:
-            continue
-        found.append(_guess_month_day_iso(month, int(day_s), allowed))
-    return found
-
-
-def _blank_dates(text: str, allowed: set[str]) -> str:
-    def iso_sub(match: re.Match[str]) -> str:
-        return " " if match.group(1) in allowed else match.group(0)
-
-    body = _DATE_ISO_RE.sub(iso_sub, text or "")
-
-    def cn_sub(match: re.Match[str]) -> str:
-        iso = _normalize_cn_date(match.group(1), match.group(2), match.group(3))
-        return " " if iso in allowed else match.group(0)
-
-    body = _DATE_CN_RE.sub(cn_sub, body)
-
-    def en_sub(match: re.Match[str]) -> str:
-        year = match.group(3) or ""
-        iso = _normalize_en_date(match.group(1), match.group(2), year)
-        if iso and iso in allowed:
-            return " "
-        if not year:
-            month = _EN_MONTH_NUM.get((match.group(1) or "").strip(".").lower())
-            if month is not None and _month_day_hits(month, int(match.group(2)), allowed):
-                return " "
-        return match.group(0)
-
-    body = _DATE_EN_RE.sub(en_sub, body)
-
-    def md_sub(match: re.Match[str]) -> str:
-        if _month_day_hits(int(match.group(1)), int(match.group(2)), allowed):
-            return " "
-        return match.group(0)
-
-    return _DATE_CN_MD_RE.sub(md_sub, body)
-
-
-def _blank_card_times(text: str, card: dict[str, Any]) -> str:
-    body = text
-    facts = card.get("facts") or {}
-    for item in facts.get("metrics") or []:
-        if not isinstance(item, dict):
-            continue
-        stamp = str(item.get("as_of_time") or "").strip()
-        if stamp:
-            body = body.replace(stamp, " ")
-    return body
-
-
-def _reference_tokens(card: dict[str, Any]) -> set[str]:
-    facts = card.get("facts") or {}
-    out: set[str] = set()
-    for item in facts.get("metrics") or []:
-        if not isinstance(item, dict):
-            continue
-        ref = item.get("reference") or {}
-        if not isinstance(ref, dict):
-            continue
-        unit = str(ref.get("unit") or item.get("unit") or "")
-        for key in ("low", "high"):
-            raw = ref.get(key)
-            if raw is None:
-                continue
-            out.add(_fmt(float(raw), unit))
-            if abs(float(raw) - round(float(raw))) < 1e-6:
-                out.add(str(int(round(float(raw)))))
-    return out
-
-
-def _body_numeric_atoms(card: dict[str, Any]) -> set[str]:
-    """Numbers allowed outside T1: facts ∪ baseline ∪ on-card reference range.
-
-    FR-6.3 lets the model cite registry reference bounds that already appear on
-    the card. T1 remains the only exit for off-card extras (training zones).
-    """
-    atoms = fact_card_numeric_atoms(card)
-    atoms = {a for a in atoms if not _ISO_DATE_RE.fullmatch(a)}
-    atoms |= _reference_tokens(card)
-    facts = card.get("facts") or {}
-    for item in facts.get("metrics") or []:
-        if not isinstance(item, dict):
-            continue
-        window = str(item.get("baseline_window") or "")
-        match = _WINDOW_NUM_RE.fullmatch(window)
-        if match:
-            atoms.add(match.group(1))
-    atoms.update({"7", "12"})
-    return atoms
-
-
-def _audit_interpretation_text(text: str, card: dict[str, Any]) -> list[str]:
-    body = _strip_t1_blocks(text)
-    allowed_dates = _allowed_card_dates(card)
-    violations: list[str] = []
-    for day in _extract_card_dates(body, allowed_dates):
-        if day not in allowed_dates:
-            violations.append(f"unauthorized_date:{day}")
-    if violations:
-        return violations
-    body = _blank_dates(body, allowed_dates)
-    body = _blank_card_times(body, card)
-    atoms = _body_numeric_atoms(card)
-    for token in _NUM_RE.findall(body):
-        if token in atoms:
-            continue
-        violations.append(f"unauthorized_value:{token}")
-    return violations
+def _audit_interpretation_text(
+    text: str,
+    card: dict[str, Any],
+    *,
+    user_id: str = "default",
+) -> dict[str, Any]:
+    """Single audit: harness fact_card strategy on the day's card manifest."""
+    manifest = build_fact_card_numerics_manifest(card, user_id=user_id)
+    return audit_response_numerics(text or "", manifest)
 
 
 def _numerics_rejected(audit: Optional[dict[str, Any]]) -> bool:
@@ -302,20 +145,16 @@ def _numerics_rejected(audit: Optional[dict[str, Any]]) -> bool:
 
 
 def humanize_interpret_failure(payload: dict[str, Any], *, locale: str = _DEFAULT_LOCALE) -> str:
-    from pha.fact_card_copy import card_copy
+    from pha.fact_card_copy import card_copy, format_audit_violations
 
     err = str(payload.get("error") or "failed")
     if err == "model_unavailable":
         return card_copy(locale, "model_unavailable")
     if err != "audit_rejected":
         return err
-    toks: list[str] = []
-    for raw in payload.get("violations") or []:
-        item = str(raw)
-        toks.append(item.split(":", 1)[1] if ":" in item else item)
-    if toks:
-        shown = "、".join(toks[:8])
-        return card_copy(locale, "audit_rejected_toks", toks=shown)
+    summary = format_audit_violations(payload.get("violations") or [], locale=locale)
+    if summary:
+        return card_copy(locale, "audit_rejected_toks", toks=summary)
     return card_copy(locale, "audit_rejected")
 
 
@@ -400,24 +239,19 @@ def run_interpretation(
             "text": None,
             **base_meta,
         }
-    if _numerics_rejected(numerics_audit):
-        violations = [str(v) for v in (numerics_audit or {}).get("violations") or []]
+    # Single source of truth: always re-audit with the card manifest (fact_card policy).
+    # Stream/harness audit may be mocked in selfcheck; card audit must still run.
+    audit = _audit_interpretation_text(text, card, user_id=user_id)
+    base_meta["numerics_audit"] = audit
+    if _numerics_rejected(audit):
+        violations = [str(v) for v in (audit or {}).get("violations") or []]
         return {
             "status": "failed",
             "error": "audit_rejected",
             "message": "numerics_audit",
             "text": None,
+            "rejected_text": text,
             "violations": violations,
-            **base_meta,
-        }
-    bad = _audit_interpretation_text(text, card)
-    if bad:
-        return {
-            "status": "failed",
-            "error": "audit_rejected",
-            "message": "unauthorized_value" if any("value:" in v for v in bad) else "unauthorized_date",
-            "text": None,
-            "violations": bad,
             **base_meta,
         }
     return {

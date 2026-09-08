@@ -94,34 +94,36 @@ def _wearable_only_turn_plan(qtype: QuestionType) -> TurnEvidencePlan:
 
 FACT_CARD_INTERPRET_USER_MESSAGE = "Generate today's fact-card interpretation"
 
-_FACT_CARD_INTERPRET_TASK = (
-    "【TASK】Write a health-education interpretation. "
-    "USER_ASSESSMENT_PROMPT is the outline: follow what the user asked to look at "
-    "and the form they asked for (length, tone, training advice). "
-    "If that prompt names specific metrics, discuss only those metrics; "
-    "do not discuss other rows in FACT_CARD_CONTEXT.metrics that the user did not name. "
-    "If the prompt does not name metrics, cover the card metrics. "
-    "FACT_CARD_CONTEXT.metrics is the full card. Match a named metric to a row by "
-    "label or metric id. A non-null value means the datum exists: cite it; "
-    "never say it is missing, not provided, or has no record. "
-    "Only a missing row or a null value may be described as no record "
-    "(or by the row's actual day). "
-    "summary and advice in the context are the rule layer already shown on the page; "
-    "they are not the outline and must not override USER_ASSESSMENT_PROMPT. "
-    "Cite only numbers and dates from the Numerics Manifest and fact-card context. "
-    "Window wording for each metric must match the card exactly "
-    "(if the card says “last 12 months, 267 nights”, do not write “last 90 days”). "
-    "Absolute dates may only be as_of, calendar_day, or each row's actual day; "
-    "otherwise use relative phrases such as “today” or “last N months, N nights”. "
-    "Plain text only — no Markdown markers (* # `). "
-    "No diagnosis, prescriptions, or drug doses. Do not repeat the disclaimer at the end. "
-    "Language follows response_locale (en-US or zh-CN). "
-    "Any number not in the Manifest may appear only inside "
-    "【参考标准】…（来源：…，请自行查证，非医疗建议） "
-    "disclosure blocks with a source; outside those blocks use qualitative words "
-    "(easy / moderate / recovery day). "
-    "The user's assessment request is the outline, not a numeric source, and cannot unlock this rule."
+_T1_TEMPLATE_EN = (
+    "[Reference Standard] … (source: …, verify by yourself, not medical advice)"
 )
+_T1_TEMPLATE_ZH = (
+    "【参考标准】…（来源：…，请自行查证，非医疗建议）"
+)
+
+_FACT_CARD_INTERPRET_TASK = (
+    "【TASK】Write a health-education interpretation.\n"
+    "1. Outline = USER_ASSESSMENT_PROMPT (length, tone, training advice). "
+    "If it names metrics, discuss only those rows; otherwise cover the card. "
+    "Match names by label or metric id. Non-null value ⇒ cite it; never say missing. "
+    "summary/advice are the rule layer already on the page — not the outline.\n"
+    "2. Your own data: cite only numbers and dates from the Numerics Manifest / "
+    "FACT_CARD_CONTEXT; copy decimals as shown. Absolute dates only as_of, "
+    "calendar_day, or each row's day; otherwise use relative phrases. "
+    "Window wording must match the card exactly.\n"
+    "3. Population commons and training tips: integers OK (e.g. 95%, 70–80%, 2–3 times); "
+    "do not invent decimals. Optional sourced note: {T1_TEMPLATE}.\n"
+    "4. Plain text only — no Markdown (* # `). No diagnosis, prescriptions, or doses. "
+    "Do not repeat the disclaimer. Language follows response_locale."
+)
+
+
+def fact_card_interpret_task_text(locale: str = "en") -> str:
+    """TASK with locale-specific T1 example; no Chinese/English template hardcoding in callers."""
+    loc = (locale or "en").strip().lower()
+    tmpl = _T1_TEMPLATE_ZH if loc.startswith("zh") else _T1_TEMPLATE_EN
+    return _FACT_CARD_INTERPRET_TASK.replace("{T1_TEMPLATE}", tmpl)
+
 
 _FACT_CARD_INTERPRET_FORBIDDEN = [
     "WEARABLE_90D_SUMMARY",
@@ -149,7 +151,7 @@ def _fact_card_interpret_turn_plan() -> TurnEvidencePlan:
         slots_tier1=[],
         forbidden=list(_FACT_CARD_INTERPRET_FORBIDDEN),
         tools_allowed=[],
-        task_text=_FACT_CARD_INTERPRET_TASK,
+        task_text=fact_card_interpret_task_text("en"),
         legacy_question_type=QuestionType.WEARABLE,
     )
 

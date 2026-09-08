@@ -36,11 +36,16 @@ _EN: dict[str, str] = {
     "model_unavailable": "Local model did not respond",
     "audit_rejected_toks": "The model wrote numbers that are not on the card ({toks}); the whole paragraph was discarded. You can retry.",
     "audit_rejected": "Not generated (failed audit)",
+    "audit_hint_after_fail": "Interpretation may only cite numbers on this card. Population commons may use integers; do not invent decimals.",
+    "audit_cat_value": "off-card measurement: {toks}",
+    "audit_cat_date": "off-card date: {toks}",
+    "audit_cat_window": "window not on card: {toks}",
+    "audit_cat_forgery": "personal data inside a reference-standard block",
     "model_meta": "Model {model} · generated {at}",
     "metrics_h2": "Metrics I want to see",
     "metrics_help": "Checkboxes only control what this card shows and assesses. Shortcuts sync the priority pack. Refresh after changing checks; new values appear after the next shortcut run. Rebuild shortcuts only when the pack version changes. A zip import overwrites same-day shortcut rows; re-import export.zip about once a quarter.",
     "prompt_h3": "My assessment request",
-    "prompt_help": "Interpretation may only cite numbers on this card. Intensity and heart-rate zones stay qualitative or in a sourced reference block. Max {max} characters.",
+    "prompt_help": "Interpretation may only cite numbers on this card. Population commons may use integers; decimals and personal claims must match the card. Max {max} characters.",
     "prompt_ph": "e.g. Focus on sleep, plain tone, don't scare me",
     "save": "Save and refresh full card",
     "language": "Language",
@@ -138,11 +143,16 @@ _ZH: dict[str, str] = {
     "model_unavailable": "本机模型未响应",
     "audit_rejected_toks": "模型写了卡上没有的数字（{toks}），已整段丢弃，可重试",
     "audit_rejected": "未生成（审计未通过）",
+    "audit_hint_after_fail": "解读只能引用卡上的数字；一般常识可写整数，不要写小数。",
+    "audit_cat_value": "卡上没有的测量值：{toks}",
+    "audit_cat_date": "不在卡上的日期：{toks}",
+    "audit_cat_window": "卡上没有的窗口：{toks}",
+    "audit_cat_forgery": "参考标准块里写了你的数据",
     "model_meta": "模型 {model} · 生成于 {at}",
     "metrics_h2": "我要看哪些指标",
     "metrics_help": "勾选只决定卡上显示与评估；数据由捷径按优先级包同步。改勾选后刷新即可；新勾选项的当日值在下一次捷径运行后出现。只有注册表新增健康类型（捷径包版本变化）时才需要重新生成捷径。zip 导入会覆盖同日捷径增量，建议每季度回灌一次 export.zip。",
     "prompt_h3": "我的评估要求",
-    "prompt_help": "解读只能引用卡上的数字；运动强度、心率区间这类建议会用定性描述或带来源的参考标准给出。最多 {max} 字。",
+    "prompt_help": "解读只能引用卡上的数字；一般常识可写整数，个人小数必须与卡一致。最多 {max} 字。",
     "prompt_ph": "例如：重点看睡眠，语气平实，别吓人",
     "save": "保存并刷新完整卡",
     "language": "语言",
@@ -224,6 +234,48 @@ def is_en_locale(locale: Optional[str]) -> bool:
     return normalize_fact_card_locale(locale) == "en-US"
 
 
+def format_audit_violations(violations: list[Any], *, locale: Optional[str] = None) -> str:
+    """Dedupe and group audit tokens for UI (no raw repeated SpO2 '2' spam)."""
+    values: list[str] = []
+    dates: list[str] = []
+    windows: list[str] = []
+    forgery = False
+    other: list[str] = []
+    seen: set[str] = set()
+    for raw in violations or []:
+        item = str(raw)
+        if item in seen:
+            continue
+        seen.add(item)
+        if item == "t0_forgery_in_t1_block":
+            forgery = True
+            continue
+        if ":" not in item:
+            other.append(item)
+            continue
+        kind, tok = item.split(":", 1)
+        if kind == "unauthorized_value":
+            values.append(tok)
+        elif kind == "unauthorized_date":
+            dates.append(tok)
+        elif kind == "unauthorized_window":
+            windows.append(tok)
+        else:
+            other.append(tok if tok else item)
+    parts: list[str] = []
+    if values:
+        parts.append(card_copy(locale, "audit_cat_value", toks="、".join(values[:6])))
+    if dates:
+        parts.append(card_copy(locale, "audit_cat_date", toks="、".join(dates[:4])))
+    if windows:
+        parts.append(card_copy(locale, "audit_cat_window", toks="、".join(windows[:4])))
+    if forgery:
+        parts.append(card_copy(locale, "audit_cat_forgery"))
+    if other:
+        parts.append("、".join(other[:4]))
+    return "；".join(parts)
+
+
 def card_copy(locale: Optional[str], key: str, **kwargs: Any) -> str:
     bag = _EN if is_en_locale(locale) else _ZH
     template = bag.get(key) or _EN.get(key) or _ZH.get(key) or key
@@ -239,6 +291,7 @@ def js_copy(locale: Optional[str]) -> dict[str, str]:
         "model_unavailable",
         "audit_rejected_toks",
         "audit_rejected",
+        "audit_hint_after_fail",
         "model_meta",
         "generate",
         "retry",
