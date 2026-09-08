@@ -413,7 +413,7 @@ def test_unknown_metric_dropped(client) -> bool:
             "user_id": "selfcheck",
             "samples": [
                 {
-                    "metric_type": "vo2max",
+                    "metric_type": "not_a_real_metric",
                     "timestamp": "2026-08-30T12:00:00+08:00",
                     "value": 40,
                     "source": "healthkit",
@@ -570,6 +570,160 @@ def test_object_replacement_char_fail_closed(client) -> bool:
     return True
 
 
+def test_empty_sample_receipt(client) -> bool:
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": "selfcheck",
+            "samples": [
+                {
+                    "metric_type": "rhr",
+                    "timestamp": "",
+                    "value": "",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if r.status_code != 400:
+        print("FAIL empty sample should 400", r.status_code, r.text)
+        return False
+    body = r.json()
+    detail = body.get("detail") if isinstance(body, dict) else None
+    err = detail.get("error") if isinstance(detail, dict) else None
+    if err != "empty_sample":
+        print("FAIL empty sample detail", body)
+        return False
+    print("OK empty sample is empty_sample not unreadable_value")
+    return True
+
+
+def test_quantity_shortcut_p10_p11() -> bool:
+    sys.path.insert(0, str(ROOT / "scripts" / "macos"))
+    from build_pha_ingest_shortcuts import build_health
+    from pha.healthkit_sync_plan import shortcut_sync_specs
+
+    specs = shortcut_sync_specs("anyone")
+    ids = {s.metric_id for s in specs}
+    expected = {
+        "steps",
+        "active_energy",
+        "hrv_sdnn_ms",
+        "resting_heart_rate_bpm",
+        "spo2_percent",
+        "respiratory_rate",
+        "vo2max",
+    }
+    if ids != expected:
+        print("FAIL quantity universe size", [s.metric_id for s in specs])
+        return False
+    from pha.wearable_metric_registry import shortcut_pack_version
+
+    pack = shortcut_pack_version()
+    wf = build_health("http://example.local:8788/ingest/healthkit", "t", specs, pack_version=pack)
+    finds = [
+        a
+        for a in wf["WFWorkflowActions"]
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.filter.health.quantity"
+    ]
+    if len(finds) != 7:
+        print("FAIL expected 7 quantity Finds", len(finds))
+        return False
+    blob = str(wf)
+    if pack not in blob or "Oxygen Saturation" not in blob or "VO2 Max" not in blob:
+        print("FAIL pack_version or new Find labels missing")
+        return False
+    forbidden = (
+        "Blood Oxygen",
+        "Apple Sleeping Wrist Temperature",
+        "Active Energy",
+        "Wrist Temperature",
+        "Cardio Fitness",
+    )
+    for label in forbidden:
+        if label in blob:
+            print(f"FAIL forbidden Find label in shortcut: {label}")
+            return False
+    conds = [
+        a
+        for a in wf["WFWorkflowActions"]
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.conditional"
+    ]
+    if len(conds) < 14:
+        print("FAIL each quantity Find should have If/EndIf", len(conds))
+        return False
+    opens = [
+        a
+        for a in conds
+        if a["WFWorkflowActionParameters"].get("WFControlFlowMode") == 0
+    ]
+    if len(opens) != 7:
+        print("FAIL expected 7 If starts", len(opens))
+        return False
+    for op in opens:
+        params = op["WFWorkflowActionParameters"]
+        wf_in = params.get("WFInput") or {}
+        if params.get("WFCondition") != 100:
+            print("FAIL If must be has-any-value (100)", params)
+            return False
+        if wf_in.get("Type") != "Variable" or not isinstance(wf_in.get("Variable"), dict):
+            print("FAIL If WFInput must wrap Type=Variable", wf_in)
+            return False
+    rhr = next(
+        a
+        for a in finds
+        if any(
+            t.get("Values", {}).get("Enumeration", {}).get("Value") == "Resting Heart Rate"
+            for t in a["WFWorkflowActionParameters"]["WFContentItemFilter"]["Value"][
+                "WFActionParameterFilterTemplates"
+            ]
+        )
+    )
+    params = rhr["WFWorkflowActionParameters"]
+    templates = params["WFContentItemFilter"]["Value"]["WFActionParameterFilterTemplates"]
+    last_n = [t for t in templates if t.get("Operator") == 1001]
+    if not last_n or last_n[0].get("Values", {}).get("Number") != 2:
+        print("FAIL RHR must last-2-days", templates)
+        return False
+    if params.get("WFContentItemLimitNumber") != 1:
+        print("FAIL RHR must Limit 1 latest", params)
+        return False
+    props = [
+        a["WFWorkflowActionParameters"].get("WFContentItemPropertyName")
+        for a in wf["WFWorkflowActions"]
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.properties.health.quantity"
+    ]
+    if "Start Date" not in props:
+        print("FAIL lagged metric must Get Details Start Date", props)
+        return False
+    if "Unit" in props:
+        print("FAIL do not Get Details Unit from sample lists", props)
+        return False
+    blob = str(wf)
+    if '"unit":"count"' not in blob or '"unit":"kcal"' not in blob:
+        print("FAIL JSON must embed registry unit literals")
+        return False
+    if "is.workflow.actions.getitemfromlist" not in blob:
+        print("FAIL overnight metrics must take First Item for Start Date")
+        return False
+    resp = next(
+        a
+        for a in finds
+        if any(
+            t.get("Values", {}).get("Enumeration", {}).get("Value") == "Respiratory Rate"
+            for t in a["WFWorkflowActionParameters"]["WFContentItemFilter"]["Value"][
+                "WFActionParameterFilterTemplates"
+            ]
+        )
+    )
+    if resp["WFWorkflowActionParameters"].get("WFContentItemLimitNumber") != 150:
+        print("FAIL overnight Find must Limit 150", resp["WFWorkflowActionParameters"])
+        return False
+    print("OK quantity shortcut universe + RHR last-2-days + count skip")
+    return True
+
+
 def test_empty_value_hole_in_json(client) -> bool:
     r = client.post(
         "/ingest/healthkit",
@@ -703,6 +857,117 @@ def test_zip_clear_preserves_healthkit(client) -> bool:
         print("FAIL rebuilt daily after preserve", rows)
         return False
     print("OK zip clear preserves healthkit rows + daily rebuild")
+    return True
+
+
+def test_priority_pack_units_and_zip_wins(client) -> bool:
+    from pha.models import WearableDailySummary
+    from pha.sqlite_storage import count_healthkit_samples, query_wearable_daily_range
+    from pha.zip_healthkit_overlay import apply_zip_wins_overlay
+
+    r = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": "unitpack",
+            "pack_version": "2026.09.08.priority-1",
+            "samples": [
+                {
+                    "metric_type": "spo2",
+                    "timestamp": "2026-08-30T04:00:00+08:00",
+                    "value": 0.97,
+                    "unit": "%",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if r.status_code != 200:
+        print("FAIL spo2 fraction ingest", r.status_code, r.text)
+        return False
+    rows = query_wearable_daily_range("unitpack", DAY, DAY)
+    if not rows or rows[0].spo2_pct is None or abs(rows[0].spo2_pct - 97.0) > 0.05:
+        print("FAIL spo2 stored percent", rows)
+        return False
+    bad = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": "unitpack",
+            "samples": [
+                {
+                    "metric_type": "spo2",
+                    "timestamp": "2026-08-30T05:00:00+08:00",
+                    "value": 97,
+                    "unit": "stone",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if bad.status_code != 400:
+        print("FAIL unknown unit must 400", bad.status_code, bad.text)
+        return False
+    glued = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": "unitpack",
+            "samples": [
+                {
+                    "metric_type": "steps",
+                    "timestamp": "2026-08-30T12:00:00+08:00",
+                    "value": 100,
+                    "unit": "count\ncount\ncount",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if glued.status_code != 200:
+        print("FAIL concatenated unit should take first token", glued.status_code, glued.text)
+        return False
+    rr = client.post(
+        "/ingest/healthkit",
+        headers={"X-PHA-Ingest-Token": TOKEN},
+        json={
+            "user_id": "unitpack",
+            "samples": [
+                {
+                    "metric_type": "respiratory_rate",
+                    "timestamp": "2026-08-30T04:10:00+08:00",
+                    "value": 0.25,
+                    "unit": "count/s",
+                    "source": "healthkit",
+                }
+            ],
+        },
+    )
+    if rr.status_code != 200:
+        print("FAIL respiratory count/s", rr.status_code, rr.text)
+        return False
+    rows = query_wearable_daily_range("unitpack", DAY, DAY)
+    if not rows or abs(float(rows[0].respiratory_rate_bpm or 0) - 15.0) > 0.05:
+        print("FAIL respiratory stored bpm", rows)
+        return False
+    before = count_healthkit_samples("unitpack")
+    overlay = apply_zip_wins_overlay(
+        "unitpack",
+        xml_max_dt=datetime(2026, 8, 30, 12, 0, 0),
+        zip_rows=[
+            WearableDailySummary(
+                user_id="unitpack",
+                day=DAY,
+                spo2_pct=96.0,
+                respiratory_rate_bpm=14.0,
+            )
+        ],
+    )
+    after = count_healthkit_samples("unitpack")
+    if after >= before or overlay.get("healthkit_deleted", 0) < 1:
+        print("FAIL zip overlay should drop overlapping healthkit", before, after, overlay)
+        return False
+    print("OK priority pack units + zip wins overlay")
     return True
 
 
@@ -1549,11 +1814,14 @@ def main() -> int:
             test_newline_json_uses_leading_total(client),
             test_quantity_dict_magnitude(client),
             test_object_replacement_char_fail_closed(client),
+            test_empty_sample_receipt(client),
+            test_quantity_shortcut_p10_p11(),
             test_empty_value_hole_in_json(client),
             test_get_ingest_explains_post_only(client),
             test_ingest_last_receipt(client),
             test_empty_timestamp_uses_received_at(client),
             test_zip_clear_preserves_healthkit(client),
+            test_priority_pack_units_and_zip_wins(client),
             test_skip_llm_reads_healthkit_steps(client),
             test_time_grain_binds_time_anchor_slots(),
             test_skip_llm_time_grain_not_90d_mean(client),

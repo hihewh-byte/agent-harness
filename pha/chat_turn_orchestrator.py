@@ -142,6 +142,10 @@ def orchestrate_chat_turn_events(
     attachment_parsed_parts: Optional[List[Dict[str, Any]]] = None,
     clarify_choice_id: Optional[str] = None,
     response_locale: Optional[str] = None,
+    profile_override: Optional[str] = None,
+    fact_card_payload: Optional[Dict[str, Any]] = None,
+    fact_card_context: str = "",
+    user_assessment_prompt: str = "",
 ) -> Iterator[str]:
     """
     Yield SSE payloads (JSON per ``data:`` line content):
@@ -151,6 +155,11 @@ def orchestrate_chat_turn_events(
     _phase_rec = ChatTurnPhaseRecorder()
     _phase_rec.enter(ChatTurnPhase.INIT)
     msg = (user_message or "").strip()
+    from pha.harness_plan import resolve_profile_override
+
+    _resolved_override = resolve_profile_override(profile_override)
+    if (profile_override or "").strip() and _resolved_override is None:
+        logger.warning("profile_override_rejected name=%s", (profile_override or "").strip())
     _paths_in = [p.strip() for p in (attachment_paths or []) if (p or "").strip()]
     if not _paths_in and (attachment_path or "").strip():
         _paths_in = [(attachment_path or "").strip()]
@@ -362,7 +371,7 @@ def orchestrate_chat_turn_events(
         )
 
         _lab_years_available = available_lab_years_for_user(uid)
-        if health_episodic_runtime_enabled() or clarify_turns_enabled():
+        if not _resolved_override and (health_episodic_runtime_enabled() or clarify_turns_enabled()):
             _health_episodic_focus = (
                 revive_health_session_focus(sid or "", raw_user_msg)
                 or load_health_session_focus(sid or "")
@@ -410,7 +419,7 @@ def orchestrate_chat_turn_events(
 
         from pha.goal_classifier import goal_classifier_enabled
 
-        if goal_classifier_enabled():
+        if not _resolved_override and goal_classifier_enabled():
             from pha.harness_arbiter import merge_arbiter_turn_scope, resolve_harness_arbiter
             from pha.intent_gates import resolve_schema_intent as _resolve_schema_for_arbiter
 
@@ -432,7 +441,8 @@ def orchestrate_chat_turn_events(
                     _arbiter_auth_profile = _auth
 
         if (
-            clarify_turns_enabled()
+            not _resolved_override
+            and clarify_turns_enabled()
             and _health_turn_scope
             and _health_turn_scope.needs_clarification
             and not (clarify_choice_id or "").strip()
@@ -562,7 +572,7 @@ def orchestrate_chat_turn_events(
             wearable_screenshot_review=wearable_screenshot_review,
             attachment_grounded_review=attachment_grounded_review,
             turn_scope=_health_turn_scope,
-            authoritative_profile=_arbiter_auth_profile,
+            authoritative_profile=_resolved_override or _arbiter_auth_profile,
         )
         _phase_rec.enter(ChatTurnPhase.PLAN)
         qtype = plan.legacy_question_type
@@ -635,6 +645,9 @@ def orchestrate_chat_turn_events(
             health_episodic_focus=_health_episodic_focus,
             episodic_bridge_block=_episodic_bridge_block,
             request_locale=response_locale,
+            fact_card_payload=fact_card_payload,
+            fact_card_context=fact_card_context,
+            user_assessment_prompt=user_assessment_prompt,
         )
         yield from iter_turn_harness_assembly_phase(_slot_ctx, _phase_rec)
         plan = _slot_ctx.plan

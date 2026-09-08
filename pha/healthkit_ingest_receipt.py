@@ -62,6 +62,7 @@ def record_healthkit_ingest_receipt(
     audit: Optional[dict[str, Any]] = None,
     metrics: Optional[list[str]] = None,
     at: Optional[datetime] = None,
+    pack_version: Optional[str] = None,
 ) -> dict[str, Any]:
     """Overwrite this user's last ingest receipt. Never stores tokens or raw bodies."""
     uid = (user_id or "default").strip() or "default"
@@ -76,6 +77,7 @@ def record_healthkit_ingest_receipt(
         "dropped": int(dropped),
         "days_rebuilt": [str(d) for d in (days_rebuilt or [])],
         "metrics": [str(m) for m in (metrics or []) if str(m).strip()],
+        "pack_version": (pack_version or "").strip() or None,
     }
     if audit:
         # Keep a short audit slice for the phone / fact-card line.

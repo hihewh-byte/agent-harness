@@ -35,6 +35,10 @@ from pha.sqlite_storage import (
     METRIC_SLEEP_IN_BED,
     METRIC_SLEEP_REM,
     METRIC_STEPS,
+    METRIC_SPO2,
+    METRIC_RESPIRATORY_RATE,
+    METRIC_VO2MAX,
+    METRIC_WRIST_TEMP,
     WearableDataBatchWriter,
     delete_healthkit_sleep_family_on_day,
     delete_stale_healthkit_metric_on_day,
@@ -68,6 +72,10 @@ _CANONICAL: dict[str, str] = {
     "sleep_asleep": METRIC_SLEEP_ASLEEP,
     "sleep_awake": METRIC_AWAKE,
     "active_energy": METRIC_ACTIVE_ENERGY,
+    "spo2": METRIC_SPO2,
+    "respiratory_rate": METRIC_RESPIRATORY_RATE,
+    "vo2max": METRIC_VO2MAX,
+    "wrist_temp": METRIC_WRIST_TEMP,
 }
 
 _SLEEP_HOUR_METRICS = frozenset(
@@ -102,6 +110,15 @@ _ALIASES: dict[str, str] = {
     "sleepanalysis": METRIC_SLEEP,
     "hkquantitytypeidentifieractiveenergyburned": METRIC_ACTIVE_ENERGY,
     "activeenergyburned": METRIC_ACTIVE_ENERGY,
+    "hkquantitytypeidentifieroxygensaturation": METRIC_SPO2,
+    "oxygensaturation": METRIC_SPO2,
+    "bloodoxygen": METRIC_SPO2,
+    "hkquantitytypeidentifierrespiratoryrate": METRIC_RESPIRATORY_RATE,
+    "respiratoryrate": METRIC_RESPIRATORY_RATE,
+    "hkquantitytypeidentifiervo2max": METRIC_VO2MAX,
+    "hkquantitytypeidentifierapplesleepingwristtemperature": METRIC_WRIST_TEMP,
+    "applesleepingwristtemperature": METRIC_WRIST_TEMP,
+    "wristtemperature": METRIC_WRIST_TEMP,
 }
 
 
@@ -128,6 +145,7 @@ class IngestResult:
     sample_ids: list[str]
     timestamp_defaulted: int = 0
     audit: Optional[dict[str, Any]] = None
+    pack_version: str = ""
 
 
 def ingest_token_configured() -> str:
@@ -165,6 +183,16 @@ def normalize_timestamp(raw: str, tz_name: str) -> datetime:
     s = (raw or "").strip()
     if not s:
         raise ValueError("empty_timestamp")
+    if "\n" in s or "|" in s:
+        parts = [p.strip() for p in re.split(r"[\n|]+", s) if p.strip()]
+        parsed_many = []
+        for part in parts:
+            try:
+                parsed_many.append(normalize_timestamp(part, tz_name))
+            except ValueError:
+                continue
+        if parsed_many:
+            return max(parsed_many)
     tz = _load_zoneinfo(tz_name)
     parsed = safe_parse_datetime(s)
     if parsed is None:
@@ -636,8 +664,11 @@ def ingest_healthkit_samples(
     samples: list[HealthKitSample] | list[dict[str, Any]],
     *,
     tz_name: Optional[str] = None,
+    pack_version: str = "",
 ) -> IngestResult:
     """Validate entire batch then write. Parse errors raise ValueError (caller → 400)."""
+    from pha.healthkit_units import normalize_ingest_value
+
     uid = (user_id or "default").strip() or "default"
     tz = tz_name or ingest_tz_name()
     if not samples:
@@ -655,11 +686,13 @@ def ingest_healthkit_samples(
             ts_raw = item.timestamp
             value_raw = item.value
             source_raw = item.source
+            unit_raw = item.unit
         else:
             metric_raw = str(item.get("metric_type") or "")
             ts_raw = str(item.get("timestamp") or "")
             value_raw = item.get("value")
             source_raw = str(item.get("source") or INGEST_SOURCE)
+            unit_raw = item.get("unit")
 
         src = (source_raw or INGEST_SOURCE).strip().lower() or INGEST_SOURCE
         if src != INGEST_SOURCE:
@@ -675,6 +708,10 @@ def ingest_healthkit_samples(
             logger.warning("healthkit_ingest empty timestamp; using received_at=%s", ts.isoformat())
         else:
             ts = normalize_timestamp(ts_raw, tz)
+        if value_raw in (None, "") or (
+            isinstance(value_raw, str) and not value_raw.strip()
+        ):
+            raise ValueError("empty_sample")
         try:
             value = _finite_number(value_raw, sum_all=(metric == METRIC_STEPS))
         except ValueError:
@@ -686,6 +723,8 @@ def ingest_healthkit_samples(
             raise ValueError("unreadable_value") from None
         if metric in _SLEEP_HOUR_METRICS:
             value = _as_sleep_hours(metric, value)
+        else:
+            value = normalize_ingest_value(metric, value, None if unit_raw is None else str(unit_raw))
         if metric in daily_keys:
             ts = datetime.combine(ts.date(), datetime.min.time())
         sid = make_sample_id(uid, metric, ts, daily_keys=daily_keys)
@@ -708,12 +747,13 @@ def ingest_healthkit_samples(
     days = sorted({ts.date() for _m, ts, _v, _sid in prepared})
     days_rebuilt = rebuild_wearable_daily_for_days(uid, days) if days else 0
     logger.info(
-        "healthkit_ingest user_id=%s inserted=%s ignored=%s dropped=%s days=%s",
+        "healthkit_ingest user_id=%s inserted=%s ignored=%s dropped=%s days=%s pack=%s",
         uid,
         writer.total_written,
         writer.total_ignored,
         dropped,
         days_rebuilt,
+        pack_version,
     )
     return IngestResult(
         inserted=writer.total_written,
@@ -722,6 +762,7 @@ def ingest_healthkit_samples(
         days_rebuilt=days_rebuilt,
         sample_ids=[sid for _m, _ts, _v, sid in prepared],
         timestamp_defaulted=timestamp_defaulted,
+        pack_version=pack_version,
     )
 
 
@@ -818,8 +859,8 @@ def _loads_ingest_json(raw: bytes) -> Any:
 
 def parse_ingest_payload(
     raw: bytes,
-) -> tuple[str, Optional[str], list[dict[str, Any]], Optional[dict[str, Any]]]:
-    """Decode Shortcuts / JSON body into (user_id, token, sample dicts, sleep lists)."""
+) -> tuple[str, Optional[str], list[dict[str, Any]], Optional[dict[str, Any]], str]:
+    """Decode Shortcuts / JSON body into (user_id, token, samples, sleep lists, pack_version)."""
     if not raw or not raw.strip():
         raise ValueError("empty_body")
     text = raw.decode("utf-8-sig", errors="replace")
@@ -862,7 +903,8 @@ def parse_ingest_payload(
         if not isinstance(item, dict):
             raise ValueError("unreadable_json")
         out.append(item)
-    return user_id, token_s, out, sleep_lists
+    pack_version = str(payload.get("pack_version") or "").strip()
+    return user_id, token_s, out, sleep_lists, pack_version
 
 
 @router.get("/ingest/healthkit")
@@ -899,7 +941,7 @@ async def post_ingest_healthkit(
 
     raw = await request.body()
     try:
-        user_id, body_token, samples, sleep_lists = parse_ingest_payload(raw)
+        user_id, body_token, samples, sleep_lists, pack_version = parse_ingest_payload(raw)
     except ValueError as extra:
         logger.warning(
             "healthkit_ingest reject content_type=%s err=%s preview=%r",
@@ -940,7 +982,7 @@ async def post_ingest_healthkit(
             kind = "sleep"
             metrics = ["sleep"]
         elif samples:
-            result = ingest_healthkit_samples(user_id, samples)
+            result = ingest_healthkit_samples(user_id, samples, pack_version=pack_version)
             kind = "quantity"
             metrics = sorted(
                 {
@@ -963,6 +1005,7 @@ async def post_ingest_healthkit(
             ok=False,
             kind="sleep" if sleep_lists is not None else "quantity",
             error=str(extra),
+            pack_version=pack_version,
         )
         raise HTTPException(
             status_code=400,
@@ -979,6 +1022,7 @@ async def post_ingest_healthkit(
         days_rebuilt=[days] if days else [],
         audit=result.audit,
         metrics=metrics,
+        pack_version=pack_version or getattr(result, "pack_version", ""),
     )
     body: dict[str, Any] = {
         "ok": True,
@@ -989,6 +1033,7 @@ async def post_ingest_healthkit(
         "dropped": result.dropped,
         "days_rebuilt": result.days_rebuilt,
         "timestamp_defaulted": result.timestamp_defaulted,
+        "pack_version": pack_version or None,
     }
     if result.audit:
         body["audit"] = result.audit

@@ -44,10 +44,19 @@
 - 日表历史复制进 `hrv_sdnn_ms`；样本 `hrv`→`hrv_sdnn`；注册表主指标 SDNN
 - 脚本：`scripts/pha_migrate_hrv_rmssd_to_sdnn.py`（先 `--dry-run`）
 
-### 1d. M1-P9 我的评估要求 + 按钮式解读（FR-2.9 / FR-6）· 下一刀
+### 1d. M1-P9 我的评估要求 + 按钮式解读（FR-2.9 / FR-6）· DONE 2026-09-07
 
-- prefs `assessment_prompt` 保存回显 → `POST/GET /proactive/fact-card/interpret` 异步 + 缓存 → 走 `chat_service` + Numerics 审计 → 完整卡独立区块
+- prefs `assessment_prompt` 保存回显；`POST/GET /proactive/fact-card/interpret` 异步缓存；`chat_service` + 原子数审计；完整卡独立区块
 - 禁止裸 Ollama、预生成、进通知；M3 App 只接同一端点
+
+### 1e. M1-P9.1 → P10 → P11 → P9.2 → P9.3（交接：[`handoff-2026-09-08-fact-card-interpret-v2.md`](handoff-2026-09-08-fact-card-interpret-v2.md)）
+
+- **P9.1** 解读专属 harness profile `fact_card_interpret`：manifest 由卡生成；日期成为独立审计词类；卡外数字只能进 T1 块；撤销 9/7 晚「只拦 ≥100」放松
+- **P10** 注册表 `temporal.kind`（accrual / daily_lagged / overnight / rolling_mean）：早上的卡能显示「静息心率 60（9月7日，最近一次）」，累计型进行中不分档；捷径空集不 POST
+- **P11** 勾选即所见 + 捷径全集同步（**维护者 9/8 08:27 拍板，PRD v1.7 FR-1.5 / FR-2.7**）：去掉睡眠分期隐式展开；捷径按注册表全集出 Find、不读 prefs；改勾选后刷新即切换、不重装捷径。**与 P10 同一 agent 一次做完、一次重装**
+- **P12** 优先级包一期：血氧/呼吸率/VO2max 真机入库；Find 总表 `shortcut_health_find_catalog.json`；腕温捷径跳过。zip 为最终真值。
+- **P9.2** 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band 数值方向标签（DONE 2026-09-08）
+- **P9.3** iPhone Safari 已跑通解读；停 Ollama、跨日缓存未完。git 默认 en-US。
 
 ### 2. M2 薄 App（捷径同步已不可忍受时）
 

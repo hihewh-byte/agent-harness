@@ -76,6 +76,34 @@ def test_plan_before_llm_contract() -> bool:
     return True
 
 
+def test_fact_card_interpret_override() -> bool:
+    from pha.harness_plan import resolve_profile_override
+
+    plan = build_turn_evidence_plan(
+        "请生成今日事实卡解读",
+        authoritative_profile="fact_card_interpret",
+    )
+    if plan.profile != "fact_card_interpret":
+        print("FAIL fact_card_interpret profile", plan.profile)
+        return False
+    if "WEARABLE_90D_SUMMARY" not in plan.forbidden:
+        print("FAIL 90d summary not forbidden")
+        return False
+    if "NUMERICS_MANIFEST" not in plan.slots_tier0:
+        print("FAIL numerics slot missing")
+        return False
+    if plan.tools_allowed:
+        print("FAIL tools_allowed should be empty", plan.tools_allowed)
+        return False
+    if resolve_profile_override("not_a_real_profile") is not None:
+        print("FAIL unknown override accepted")
+        return False
+    if resolve_profile_override("fact_card_interpret") != "fact_card_interpret":
+        print("FAIL known override rejected")
+        return False
+    return True
+
+
 def test_skip_llm_warehouse_hrv() -> bool:
     from pha.chat_skip_llm import evaluate_skip_llm_path
 
@@ -249,6 +277,7 @@ def main() -> int:
         [
             test_phase_order_guards(),
             test_plan_before_llm_contract(),
+            test_fact_card_interpret_override(),
             test_skip_llm_warehouse_hrv(),
             test_skip_llm_weak_episodic_followup(),
             test_skip_llm_episodic_delta_before_weak(),

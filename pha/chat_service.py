@@ -146,6 +146,10 @@ def stream_pha_chat_events(
     attachment_parsed_parts: Optional[List[Dict[str, Any]]] = None,
     clarify_choice_id: Optional[str] = None,
     response_locale: Optional[str] = None,
+    profile_override: Optional[str] = None,
+    fact_card_payload: Optional[Dict[str, Any]] = None,
+    fact_card_context: str = "",
+    user_assessment_prompt: str = "",
 ) -> Iterator[str]:
     """Yield SSE payloads; delegates to P0 turn orchestrator state machine."""
     from pha.chat_turn_orchestrator import orchestrate_chat_turn_events
@@ -163,4 +167,8 @@ def stream_pha_chat_events(
         attachment_parsed_parts=attachment_parsed_parts,
         clarify_choice_id=clarify_choice_id,
         response_locale=response_locale,
+        profile_override=profile_override,
+        fact_card_payload=fact_card_payload,
+        fact_card_context=fact_card_context,
+        user_assessment_prompt=user_assessment_prompt,
     )

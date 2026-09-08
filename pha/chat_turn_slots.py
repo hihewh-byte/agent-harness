@@ -114,6 +114,9 @@ class TurnSlotContext:
     response_locale: str = "en"
     grounded_fallback_applied: bool = False
     grounded_fallback_from_profile: str = ""
+    fact_card_payload: Optional[Dict[str, Any]] = None
+    fact_card_context: str = ""
+    user_assessment_prompt: str = ""
 
 
 def iter_turn_harness_assembly_phase(
@@ -267,10 +270,14 @@ def iter_turn_harness_assembly_phase(
         # 物理隔离数仓历史 + 补剂背景，强制就图论事。
         ctx.data_availability_block = build_data_availability_block(uid, user_message=msg)
         ctx.background_block = ""
+    elif plan.profile == "fact_card_interpret":
+        ctx.background_block = ""
     else:
         ctx.background_block = build_user_background_block(uid, user_message=msg)
 
-    if not (
+    if plan.profile == "fact_card_interpret":
+        ctx.recalled_snippets = ""
+    elif not (
         is_attachment_qa_profile(plan.profile)
         or is_attachment_grounded_profile(plan.profile)
     ):
@@ -310,16 +317,37 @@ def iter_turn_harness_assembly_phase(
         )
 
     if "NUMERICS_MANIFEST" in plan.slots_tier0:
-        ctx.numerics_manifest = build_numerics_manifest(
-            uid,
-            profile=plan.profile,
-            user_message=msg,
-            include_wearable=not ctx.catalog_turn,
-        )
-        ctx.manifest_block = format_manifest_tier0_block(
-            ctx.numerics_manifest,
-            profile=plan.profile,
-        )
+        if plan.profile == "fact_card_interpret":
+            from pha.numerics_manifest import build_fact_card_numerics_manifest
+
+            card = ctx.fact_card_payload
+            if not isinstance(card, dict) or not card:
+                from pha.fact_card import load_fact_card
+
+                card = load_fact_card(uid)
+                ctx.fact_card_payload = card
+            ctx.numerics_manifest = build_fact_card_numerics_manifest(
+                card,
+                user_id=uid,
+            )
+            ctx.manifest_block = format_manifest_tier0_block(
+                ctx.numerics_manifest,
+                profile=plan.profile,
+            )
+            from pha.fact_card_interpret import build_fact_card_context_block
+
+            ctx.fact_card_context = build_fact_card_context_block(card)
+        else:
+            ctx.numerics_manifest = build_numerics_manifest(
+                uid,
+                profile=plan.profile,
+                user_message=msg,
+                include_wearable=not ctx.catalog_turn,
+            )
+            ctx.manifest_block = format_manifest_tier0_block(
+                ctx.numerics_manifest,
+                profile=plan.profile,
+            )
 
     supplement_slot = ctx.background_block
     if ctx.extra_system_context.strip():
@@ -381,6 +409,13 @@ def iter_turn_harness_assembly_phase(
         "AUDIT": ctx.audit_warn,
         "RECALL": ctx.recalled_snippets,
         "USER_CONTEXT_BRIEF": user_context_brief_block,
+        "FACT_CARD_CONTEXT": ctx.fact_card_context,
+        "USER_ASSESSMENT_PROMPT": (
+            "【用户评估要求 · 本轮解读大纲，不是数值来源】\n"
+            + ctx.user_assessment_prompt.strip()
+            if (ctx.user_assessment_prompt or "").strip()
+            else ""
+        ),
     }
 
     from pha.health_intent_catalog import profile_allows_active_recall_ledger

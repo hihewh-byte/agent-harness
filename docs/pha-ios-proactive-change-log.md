@@ -1,9 +1,138 @@
-# PHA iOS / 主动 Agent 变更日志
+## 2026-09-08 (M1-P9.3：解读按评估要求收焦)
 
-> Purpose: 本轨道（HealthKit ingest、事实卡、iOS 同步、主动通知）的强制共享上下文。  
-> 共识真源：[`prd-pha-ios-proactive-agent-v1.md`](prd-pha-ios-proactive-agent-v1.md)
+- **类别**：事实卡解读。维护者评估要求「只看静息心率与HRV，血氧」，16:46 解读仍写核心睡眠 3.7/4.9，并称这三项「未提供/缺失」。卡上当日有 RHR 63、HRV 32.9、血氧 96.0。
+- **证据**：TASK 原要求「解读整张卡」+ 上下文带规则层 summary/advice（睡眠优先）+ 点名指标无值时套「无记录」。7b 忽略评估要求。selfcheck：点名焦点不收睡眠；焦点外 7.6 拒；有值却写「未提供」拒；只引静息心率 62 过。registry `--write`；fsm / numerics selfcheck PASS。
+- **改动**：评估要求点名的指标写入 `FACT_CARD_CONTEXT.focus` 并过滤 manifest/上下文；去掉 summary/advice 进解读槽；T0 顺序改为 TASK → USER_ASSESSMENT_PROMPT → FACT_CARD_CONTEXT → NUMERICS_MANIFEST。卡侧审计：焦点外数字拒；有值称缺失 `focus_missing_but_present`。缓存键加 `focus_v1`（旧 16:46 缓存失效）。
+- **回滚**：还原 `fact_card_interpret.py` / `harness_plan.py` 槽序与 TASK + `--write`。
+- **维护者下一步**：刷新完整卡后重新点「生成解读」。仍欠停 Ollama 与跨日真看。
 
-改动 ingest 契约、日表来源、事实卡模板、通知文案或 iOS 同步协议时，**须同 PR 追加条目**。
+## 2026-09-08 (i18n：仪表盘黄金指标 + 主动卡 git 默认英文)
+
+- **类别**：Dashboard / 事实卡展示。维护者：英文界面下黄金指标条仍是中文；主动 agent 需要中英两套，仓库默认英文。
+- **证据**：`GOLDEN_WEARABLE` 曾写死「每日步数」等；`label_zh` 未随顶栏语言切换。iPhone Safari 16:21 解读已出（与 Mac 同文）。
+- **改动**：黄金指标 / 分组 git 默认英文 + `label_zh`/`label_en`；`GET /available_metrics?locale=` 把 `label`/`unit`/`hint` 收成当前语言；切语言后先按内存双语字段重绘再重拉目录。静态资源 cache bust `i18n1`。事实卡 `DEFAULT_LOCALE=en-US`；`fact_card_copy.py` 中英两套 chrome/规则/通知文案。现有 `data/fact_card_prefs.json` 仍是 zh-CN，真机中文不变。T1 披露块外壳仍是 `【参考标准】…（来源：…请自行查证）`（审计正则依赖）。化验项名仍来自 SQLite 原文，不在此轮英化。
+- **回滚**：还原 `metric_catalog_ui.py` / `metrics_api.py` / `app.js` / `fact_card_copy.py` / `DEFAULT_LOCALE`。
+- **维护者下一步**：仪表盘切 English 后黄金条应为 Daily steps / Resting HR；切回中文应为「每日步数」。事实卡底部改 English 会换解读缓存。仍欠停 Ollama 与跨日缓存真看。
+
+## 2026-09-08 (M1-P9.3：卡上参考范围可进解读正文)
+
+- **类别**：事实卡解读审计。Mac Safari 点「生成解读」被卡侧第二道审计以 `unauthorized_value:60/100` 整段丢弃。
+- **证据**：harness `numerics_audit.passed=true` 且 cited 60/100（manifest `domain=reference`）；卡面 T1 已写「60–100 bpm」。卡侧曾把参考上下限从正文白名单抠掉，与 FR-6.3「⊆ facts ∪ 基线 ∪ 参考范围」和 harness 不一致。失败文案「卡上没有的数字」对这两数不成立。selfcheck PASS；`pha_restart_accept.sh` PASS（pid 863）。Mac Safari 第三轮「重试」于 16:21 生成成功（前两轮分别因 60/100 卡侧过严、模型编了 1.2 被 harness 拒）。
+- **改动**：`_body_numeric_atoms` 保留卡上 `reference.low/high`。selfcheck：正文「60–100」过；卡外「80」仍拒；T1 包 120–140 仍拒。
+- **回滚**：还原 `_body_numeric_atoms` 对参考 token 的剔除。
+- **维护者下一步**：仍欠 iPhone Safari 全流程、停 Ollama 真测（确认时间窗）。跨日缓存需过 0 点或改 `calendar_day` 真看。
+
+## 2026-09-08 (M1-P9.3：跨日缓存 + 英文日期审计；真机门禁未完)
+
+- **类别**：事实卡解读边界。P9.2 后继续。
+- **证据**：`pha_fact_card_selfcheck.py` PASS：`Sep 7, 2026` / `9月7日` 视为 as_of；`Jun 10, 2026` 拒；`calendar_day` 进缓存键；失败态 HTML「本机模型未响应」+「重试」。16:03 真机数量捷径已带 `pack_version=2026.09.08.priority-1e`。
+- **改动**：解读缓存键加入 `calendar_day`（跨日即使 as_of 未变也失效）。`_extract_normalized_dates` 收英文月名带年；卡侧再收无年「9月7日 / Sep 7」。§6 决定 5：通知 body 日期**仍用 ISO**（捷径与 selfcheck 依赖），不本地化。
+- **回滚**：还原 `fact_card_interpret.py` 缓存键与日期抽取；还原 `numerics_manifest.py` 的 `_DATE_EN_RE`。
+- **维护者下一步**：同一 Wi-Fi 用 iPhone Safari 打开完整卡走一遍解读；若要验收「模型不可用」，确认时间窗后停 Ollama 再点「生成解读」（不停 PHA）。en-US 可在完整卡底部改语言后刷新。
+
+---
+
+## 2026-09-08 (Find 总表 + 腕温跳过捷径 + M1-P9.2 展示层)
+
+- **类别**：捷径 Find 真源 / 事实卡展示。维护者再跑一次后腕温仍无权限开关；事实卡已能同步。
+- **证据**：9/8 日表有步数 6219、消耗 144.6、RHR 65、HRV 32.9、血氧 96.0、呼吸率 13.0、入睡 6.2h；VO2max 51.48 @ 9/3；`wrist_temp_c` 仍空。Find 标签错一次权限开关就不会出现。
+- **改动**：新增 `storage/registry/shortcut_health_find_catalog.json`，只有 `device_verified` 写入捷径。腕温 `shortcut_skip_reason=shortcuts_find_unverified`。数量捷径 7 个 Find。`shortcut_pack_version` → `2026.09.08.priority-1e`。VO2 `latest` 不再算「前一日值」。P9.2：prefs `locale`、HTML 日期按语言、解读剥 Markdown、band 标签改数值方向（高于/持平/低于）、缓存键含 locale。
+- **回滚**：还原 Find 总表 / 注册表 pack / `healthkit_sync_plan` / `fact_card_html` / `fact_card_locale.py`。
+- **维护者下一步**：桌面 `PHA同步健康.shortcut` **替换一次**（腕温 Find 已去掉）。同一 Wi-Fi 打开完整卡核对中文日期。P9.3 再做 iPhone Safari / 停 Ollama / en-US 真机。
+
+---
+
+## 2026-09-08 (腕温 Find 标签：Wrist Temperature)
+
+- **类别**：捷径 Find。15:16 跑完 7/8 入库；腕温无 POST。真机报无权限且面板无开关。
+- **证据**：`Apple Sleeping Wrist Temperature` 是 SDK 名；Find 选择器与权限面板用 `Wrist Temperature`（与 Blood Oxygen / Oxygen Saturation 同坑）。
+- **改动**：注册表腕温 Find 改为 `Wrist Temperature`。`shortcut_pack_version` → `2026.09.08.priority-1d`。
+- **维护者下一步**：再替换一次「PHA 同步健康」；腕温 Find 上点 Allow Access。
+
+---
+
+## 2026-09-08 (Find 标签：血氧是 Oxygen Saturation)
+
+- **类别**：捷径 Find 选择器标签。真机：权限面板无 Blood Oxygen；Find Type=`Blood Oxygen` 报 No Samples Found；VO2 报无 Cardio Fitness 权限。
+- **证据**：iOS 26.2 ActionKit 选择器真名是 `Oxygen Saturation` / `Apple Sleeping Wrist Temperature` / `VO2 Max`。健康 App 英文 UI「Blood Oxygen」不能当 Find 标签（与 Active Calories 同坑）。账本血氧最后一日 2026-06-09，近 2 天本就空。
+- **改动**：注册表 Find 改为上述真名；VO2 `freshness_days` 90→180（最后一次 6/3 已超 90 天）。`shortcut_pack_version` → `2026.09.08.priority-1c`。
+- **维护者下一步**：替换「PHA 同步健康」；血氧/腕温/VO2 的 Find 上点 **Allow Access**（开关会在授权后才出现在面板里）。
+
+---
+
+## 2026-09-08 (捷径 Get Details Unit 把整表单位拼在一起)
+
+- **类别**：ingest 单位 / 捷径包。真机：事实卡顶栏 `unknown_unit:count count count…`；「PHA 同步健康」在呼吸率 Find 处 *There's a problem*。
+- **证据**：14:52 POST 步数 5985 / 消耗 130.339 被拒，`unit` 为每条样本单位用换行拼成；呼吸率 last-2-days 无 Limit，Get Details 拖垮捷径。自检 PASS。
+- **改动**：JSON `unit` 改为注册表字面量，不再 Get Details Unit；一夜指标 Find Limit 150（与睡眠同帽）+ First Item 取 Start Date；服务端对拼接单位只取第一个词。`shortcut_pack_version` → `2026.09.08.priority-1b`。
+- **回滚**：还原 `build_pha_ingest_shortcuts.py` / `healthkit_units.py` / 注册表 pack 版本。
+- **维护者下一步**：桌面 `PHA同步健康.shortcut` **再替换一次**。事实卡捷径不必为这次再换。5G 下 `.local` 会超时，须同一 Wi-Fi。
+
+---
+
+## 2026-09-08 (M1-P12：优先级包一期 + zip 为最终真值)
+
+- **类别**：注册表 / ingest 单位 / 捷径包 / zip 覆盖增量 / 事实卡覆盖率。
+- **证据**：`pha_wearable_registry_selfcheck.py`、`pha_fact_card_selfcheck.py`、`pha_healthkit_ingest_selfcheck.py` PASS。
+- **改动**：血氧/呼吸率/VO2max/腕温进入 eligible 并接线捷径；POST 带 `unit` 与 `pack_version`；未知单位/越界 400；VO2max `temporal.kind=latest` 不计覆盖率；zip 导入删除 `xml_max` 当日及之前的 healthkit 行并写对账 JSON。PRD v1.8。不启动 Pulso。
+- **回滚**：还原注册表 `shortcut_pack_version`、ingest 白名单、捷径生成器、`zip_healthkit_overlay.py`。
+- **维护者下一步**：真机核对 Find 标签（血氧 / 呼吸率 / VO2 Max / 腕温）后替换「PHA 同步健康」；每季度回灌 export.zip。
+
+---
+
+## 2026-09-08 (捷径 If 空 Condition：WFInput 必须 Type=Variable)
+
+- **类别**：捷径生成器。
+- **证据**：真机「PHA 同步健康」打开即报 *Please choose a value for each parameter*，If 的 Condition 空白。plist 里 `WFInput` 是裸 `WFTextTokenAttachment`，编辑器当空参数。`python3 scripts/pha_healthkit_ingest_selfcheck.py` PASS（If `WFCondition=100` has any value + `Type=Variable`）。
+- **改动**：空集跳过改为「Find 结果 has any value」；`WFInput` 包一层 `Type=Variable`。重签 `pha-sync-health.shortcut`。
+- **回滚**：还原 `_if_has_any` / `_variable_input`。
+- **维护者下一步**：桌面 `PHA同步健康.shortcut` 再传到 iPhone **替换一次**。
+
+---
+
+## 2026-09-08 (M1-P9.1：解读专属 profile + 日期归一化审计)
+
+- **类别**：事实卡按钮式解读叠 harness（非主动路径）。
+- **证据**：`python3 scripts/pha_fact_card_selfcheck.py` PASS（365d 卡拒「近 90 天」；拒卡外日期；中文 as_of 通过；T1 参考范围通过；harness `future_date` 拒；块外 120–140 拒 / T1 ACSM 过；块外「参考范围 60–100」拒；改勾选 cache key 变）；`pha_chat_turn_fsm_selfcheck.py` / `pha_numerics_manifest_selfcheck.py` PASS。
+- **改动**：`fact_card_interpret` profile；user_message 固定短句，评估要求进 `USER_ASSESSMENT_PROMPT` 槽；撤掉 9/7 晚「harness 已过则只拦 ≥100」；失败态把被拒 token 写给用户。PRD FR-6.8/6.9/6.10、§4.2、§8 P9.1 DONE。
+- **回滚**：还原 `fact_card_interpret.py` 审计与 chat `profile_override` 接线；registry `--write` 去掉该 profile。
+
+---
+
+## 2026-09-08 (M1-P10 + M1-P11：时效语义 + 勾选即所见 + 捷径全集)
+
+- **类别**：注册表 / 事实卡 prefs / 捷径生成器 / ingest 数量路径。
+- **证据**：`python3 scripts/pha_fact_card_selfcheck.py` PASS（卡 = 勾选、只勾深睡不带出在床、sync plan 与 prefs 无关、RHR D-1 有 band、D-3 空、累计型 08:00 进行中不分档、通知含「前一日」）；`python3 scripts/pha_healthkit_ingest_selfcheck.py` PASS（`empty_sample`、数量捷径 4 个 Find、RHR last-2-days + Limit 1 + Start Date、count=0 If 跳过）。
+- **改动**：删 `reveal_when_selected`；`shortcut_sync_specs` 改为注册表全集；`temporal.kind` 驱动取值；数量捷径空集不 POST；ingest 空值回执 `empty_sample`。PRD §4.1 / FR-2.10 / §8 P10 P11 DONE。
+- **回滚**：还原注册表、`fact_card.py` / `fact_card_prefs.py` / `healthkit_sync_plan.py` / 捷径生成器 / ingest 数量路径；重新生成捷径。
+- **维护者下一步**：在 Mac 导出并在 iPhone **替换一次**「PHA 同步健康」。之后改勾选不再重装。
+
+---
+
+## 2026-09-08 (PRD v1.7：捷径全集同步 + 勾选即所见 + 立 P9.1 / P10 / P11 / P9.2 / P9.3；只改文档)
+
+- **类别**：PRD 共识变更（FR-1.5 / FR-2.7）+ 交接文档。**无代码。**
+- **证据**：9/8 08:12 真机截图勾 5 项、卡列 9 项（注册表 `reveal_when_selected` 隐式展开）；页面要求改勾选后重装捷径；08:00 静息心率空值 POST 400、消耗零头判 below、解读被 harness 以 `unauthorized_wearable_count:100` 拒。可能性分析：Mac 不能触达 HealthKit、iOS「查找健康样本」类型不可变量化，故「刷新即有新数据」与「按服务端名单动态 Find」不可能；可行 A（捷径全集 + 卡按勾选过滤）/ B（全集 Find + 运行时 If 门控）。**维护者 08:27 拍板 A。**
+- **改动**：PRD v1.7：FR-1.5 改「捷径按注册表 `eligible ∧ shortcut_health_type` 全集同步，与勾选无关；累计型一数、每日一次型带日期、空集跳过」；FR-2.7 补「卡 = 勾选、禁止隐式展开、分母 = 勾选数」；§8 登记 M1-P9.1 / P10 / P11 / P9.2 / P9.3；§11 三条。`handoff-2026-09-08-fact-card-interpret-v2.md` 定稿（含 §5c.5 执行清单）；`pha-fact-card.md` 同步段重写；路线图 1e。
+- **回滚**：还原上述文档至 v1.6。
+
+---
+
+## 2026-09-07 (M1-P9 浏览器验收 + 审计收紧)
+
+- **类别**：完整卡真机/浏览器验收。
+- **证据**：浏览器打开 `/proactive/fact-card/view`：评估要求保存回显；点「生成解读」先「生成中」；失败态显示「未生成（审计未通过）」可重试；最终 `status=done`，页面渲染模型名与时间。根因：补充原子审计把 harness T0「近90日 / 区间锚点」当成外来数；且 `failed` 缓存曾挡住重试。
+- **改动**：日期片段白名单；`failed` 可再 POST；harness `numerics_audit.passed` 时仅拦截 ≥100 的外来大数；解读指令强调勿编造日期。selfcheck PASS；官方重启 PASS。
+- **回滚**：还原 `fact_card_interpret.py` 审计逻辑。
+
+---
+
+## 2026-09-07 (M1-P9 我的评估要求 + 按钮式解读)
+
+- **类别**：完整卡用户触发解读（非主动路径；叠 harness）。
+- **证据**：`python3 scripts/pha_fact_card_selfcheck.py` PASS（prefs 回显 / 超长 400；假 stream：外来数字 `audit_rejected`、T1 块 `done`、异常 `model_unavailable`；未点按钮 `interpretation is None`；同键二次 POST `started=False` 不二调）。通知与 `assessment` 不含解读。
+- **改动**：`fact_card_prefs.assessment_prompt`（≤2000）；`pha/fact_card_interpret.py` 缓存 `data/fact_card_interpret/{sha256}.json`，经 `stream_pha_chat_events` 生成；`POST/GET /proactive/fact-card/interpret`；`load_fact_card` 顶层 `interpretation`；HTML「我的评估要求」+「AI 解读（实验）」轮询。禁止裸 Ollama、禁止预生成、禁止进通知。
+- **回滚**：去掉 interpret 模块与路由；还原 prefs/HTML/load_fact_card/selfcheck；删缓存目录。
 
 ---
 

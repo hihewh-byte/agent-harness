@@ -162,6 +162,26 @@ def is_registered_comparable_metric(metric_id: str) -> bool:
     return bool((entry.get("compare") or {}).get("comparable_90d"))
 
 
+def shortcut_pack_version() -> str:
+    doc = load_wearable_metric_registry()
+    raw = str(doc.get("shortcut_pack_version") or doc.get("version") or "").strip()
+    return raw or "unknown"
+
+
+def fact_card_sync_complete(entry: Mapping[str, Any]) -> bool:
+    """Eligible row must be shortcut-complete or explicitly skipped."""
+    fc = entry.get("fact_card") or {}
+    if not isinstance(fc, dict) or not fc.get("eligible"):
+        return True
+    if str(fc.get("shortcut_skip_reason") or "").strip():
+        return True
+    if str(fc.get("shortcut_sleep_value") or "").strip() and str(fc.get("ingest_key") or "").strip():
+        return True
+    if str(fc.get("shortcut_health_type") or "").strip() and str(fc.get("ingest_key") or "").strip():
+        return True
+    return False
+
+
 def fact_card_eligible_entries() -> List[Dict[str, Any]]:
     """Daily metrics the fact card may render. Selection is user prefs, not code lists."""
     out: List[Dict[str, Any]] = []
@@ -205,6 +225,9 @@ def fact_card_daily_ingest_keys() -> Tuple[str, ...]:
 
 def clear_registry_cache() -> None:
     load_wearable_metric_registry.cache_clear()
+    from pha.shortcut_find_catalog import clear_find_catalog_cache
+
+    clear_find_catalog_cache()
 
 
 __all__ = [
@@ -213,6 +236,8 @@ __all__ = [
     "default_fact_card_metric_ids",
     "fact_card_daily_ingest_keys",
     "fact_card_eligible_entries",
+    "fact_card_sync_complete",
+    "shortcut_pack_version",
     "ingest_module",
     "is_registered_comparable_metric",
     "list_ingest_modules",

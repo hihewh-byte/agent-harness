@@ -29,6 +29,7 @@ _KNOWN_ASSEMBLY_PROFILES: Set[str] = {
     "wearable_screenshot_review",
     "casual",
     "lifestyle",
+    "fact_card_interpret",
 }
 
 # Slot invariants: profile contract, not per-session hardcoding.
@@ -62,6 +63,20 @@ _PROFILE_SLOT_INVARIANTS: Dict[str, Dict[str, Set[str]]] = {
         "required_tier0": {"ATTACHMENT_LABEL", "TASK"},
         "required_tools": set(),
         "forbidden_tools": {"fetch_evidence_by_id"},
+    },
+    "fact_card_interpret": {
+        "required_tier0": {
+            "TASK",
+            "NUMERICS_MANIFEST",
+            "FACT_CARD_CONTEXT",
+            "USER_ASSESSMENT_PROMPT",
+        },
+        "required_tools": set(),
+        "forbidden_tools": {
+            "fetch_evidence_by_id",
+            "get_health_data",
+            "get_temporal_history_dossier",
+        },
     },
 }
 
@@ -144,6 +159,13 @@ def _profile_build_probes() -> List[tuple[str, TurnEvidencePlan]]:
             build_turn_evidence_plan("我每天早上吃这些补剂，帮我看看时间安排"),
         ),
         ("combined_review", build_turn_evidence_plan("根据血脂和穿戴数据综合看看")),
+        (
+            "fact_card_interpret",
+            build_turn_evidence_plan(
+                "请生成今日事实卡解读",
+                authoritative_profile="fact_card_interpret",
+            ),
+        ),
     ]
     if catalog_mode_enabled():
         probes.append(
@@ -277,6 +299,16 @@ def validate_representative_routes() -> RegistryValidationResult:
                 wearable_screenshot_review=True,
             ),
             "wearable_screenshot_review",
+        ),
+    )
+    probes.append(
+        (
+            "fact_card_interpret",
+            build_turn_evidence_plan(
+                "请生成今日事实卡解读",
+                authoritative_profile="fact_card_interpret",
+            ),
+            "fact_card_interpret",
         ),
     )
     if catalog_mode_enabled():

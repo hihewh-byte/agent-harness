@@ -335,11 +335,14 @@ class AppleHealthParser:
 
             rebuild_workout_daily_rollup(self._user_id)
 
-        from pha.sqlite_storage import query_healthkit_days, rebuild_wearable_daily_for_days
+        from pha.zip_healthkit_overlay import apply_zip_wins_overlay
 
-        hk_days = query_healthkit_days(self._user_id)
-        if hk_days:
-            rebuild_wearable_daily_for_days(self._user_id, hk_days)
+        overlay = apply_zip_wins_overlay(
+            self._user_id,
+            xml_max_dt=xml_max_dt,
+            zip_rows=incoming_rows,
+        )
+        if overlay.get("leftover_healthkit_days") or overlay.get("healthkit_deleted"):
             store.hydrate_from_sqlite()
 
         integrity = verify_import_completeness(

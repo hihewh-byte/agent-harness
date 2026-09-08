@@ -560,8 +560,12 @@
 
   applyDom();
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLocaleSwitcher);
+    document.addEventListener('DOMContentLoaded', function () {
+      applyDom();
+      initLocaleSwitcher();
+    });
   } else {
+    applyDom();
     initLocaleSwitcher();
   }
 

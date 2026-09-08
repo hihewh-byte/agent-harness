@@ -92,6 +92,83 @@ def _wearable_only_turn_plan(qtype: QuestionType) -> TurnEvidencePlan:
     )
 
 
+FACT_CARD_INTERPRET_USER_MESSAGE = "Generate today's fact-card interpretation"
+
+_FACT_CARD_INTERPRET_TASK = (
+    "【TASK】Write a health-education interpretation. "
+    "USER_ASSESSMENT_PROMPT is the outline: follow what the user asked to look at "
+    "and the form they asked for (length, tone, training advice). "
+    "If that prompt names specific metrics, discuss only those metrics; "
+    "do not discuss other rows in FACT_CARD_CONTEXT.metrics that the user did not name. "
+    "If the prompt does not name metrics, cover the card metrics. "
+    "FACT_CARD_CONTEXT.metrics is the full card. Match a named metric to a row by "
+    "label or metric id. A non-null value means the datum exists: cite it; "
+    "never say it is missing, not provided, or has no record. "
+    "Only a missing row or a null value may be described as no record "
+    "(or by the row's actual day). "
+    "summary and advice in the context are the rule layer already shown on the page; "
+    "they are not the outline and must not override USER_ASSESSMENT_PROMPT. "
+    "Cite only numbers and dates from the Numerics Manifest and fact-card context. "
+    "Window wording for each metric must match the card exactly "
+    "(if the card says “last 12 months, 267 nights”, do not write “last 90 days”). "
+    "Absolute dates may only be as_of, calendar_day, or each row's actual day; "
+    "otherwise use relative phrases such as “today” or “last N months, N nights”. "
+    "Plain text only — no Markdown markers (* # `). "
+    "No diagnosis, prescriptions, or drug doses. Do not repeat the disclaimer at the end. "
+    "Language follows response_locale (en-US or zh-CN). "
+    "Any number not in the Manifest may appear only inside "
+    "【参考标准】…（来源：…，请自行查证，非医疗建议） "
+    "disclosure blocks with a source; outside those blocks use qualitative words "
+    "(easy / moderate / recovery day). "
+    "The user's assessment request is the outline, not a numeric source, and cannot unlock this rule."
+)
+
+_FACT_CARD_INTERPRET_FORBIDDEN = [
+    "WEARABLE_90D_SUMMARY",
+    "PATIENT_STATE_WEARABLE",
+    "PATIENT_STATE_LAB",
+    "USER_SNAPSHOT",
+    "SUPPLEMENT_BG",
+    "DOSSIER_LAB",
+    "DOSSIER_CLINICAL_COMPACT",
+    "GET_HEALTH_DATA",
+    "GET_TEMPORAL_HISTORY_DOSSIER",
+    "EVIDENCE_CATALOG",
+]
+
+
+def _fact_card_interpret_turn_plan() -> TurnEvidencePlan:
+    return TurnEvidencePlan(
+        profile="fact_card_interpret",
+        slots_tier0=[
+            "TASK",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+            "NUMERICS_MANIFEST",
+        ],
+        slots_tier1=[],
+        forbidden=list(_FACT_CARD_INTERPRET_FORBIDDEN),
+        tools_allowed=[],
+        task_text=_FACT_CARD_INTERPRET_TASK,
+        legacy_question_type=QuestionType.WEARABLE,
+    )
+
+
+def resolve_profile_override(name: str | None) -> str | None:
+    """Accept only registry-known profiles that have an authoritative builder."""
+    raw = (name or "").strip()
+    if not raw:
+        return None
+    from pha.harness_profile_registry import _KNOWN_ASSEMBLY_PROFILES
+
+    known = set(_KNOWN_ASSEMBLY_PROFILES) | {"clarify"}
+    if raw not in known:
+        return None
+    if _plan_for_authoritative_profile(raw, "") is None:
+        return None
+    return raw
+
+
 def _combined_review_turn_plan(
     qtype: QuestionType,
     msg: str,
@@ -150,6 +227,8 @@ def _plan_for_authoritative_profile(
         return _lab_cross_year_turn_plan(qtype)
     if name == "wearable_only":
         return _wearable_only_turn_plan(qtype)
+    if name == "fact_card_interpret":
+        return _fact_card_interpret_turn_plan()
     if name == "casual":
         return TurnEvidencePlan(
             profile="casual",

@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-09-08 (M1-P9.3：fact_card_interpret 按评估要求收焦)
+
+- **类别**：**P2（Profile 槽序）+ C 层审计加维度**。
+- **改动**：`fact_card_interpret` T0 改为 TASK / USER_ASSESSMENT_PROMPT / FACT_CARD_CONTEXT / NUMERICS_MANIFEST。TASK 以评估要求为大纲；`focus` 非空时只解读这些指标。卡侧对焦点外数字与「有值称缺失」fail-closed。`build_fact_card_numerics_manifest(..., metric_ids=)` 可收窄白名单。
+- **证据**：`python3 scripts/pha_harness_profile_registry_generate.py --write`；`pha_chat_turn_fsm_selfcheck.py`、`pha_numerics_manifest_selfcheck.py`、`pha_fact_card_selfcheck.py` PASS。
+- **回滚**：还原槽序与 TASK + `--write`；还原 `metric_ids` 过滤。
+
+## 2026-09-08 (M1-P9.1：fact_card_interpret profile + 卡侧日期词类)
+
+- **类别**：**P2（Profile/Registry 扩展）+ C 层审计加维度**（主路由 deterministic 不变；审计只加严，不设阈值放行）。
+- **改动**：新增 `fact_card_interpret`（T0：TASK / NUMERICS_MANIFEST / FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；T1 空；forbidden 含 `WEARABLE_90D_SUMMARY` / `GET_HEALTH_DATA` / `EVIDENCE_CATALOG` 等；tools 空）。`stream_pha_chat_events` / `orchestrate_chat_turn_events` 增加内部 `profile_override`（不进公开 `/api/chat` body）。`NumericsManifest.allowed_dates` 同时收 `fact_card` 域 ISO 日期。卡侧审计：日期归一化后比对，撤掉 ≥100 放松与日期片段白名单。
+- **证据**：`python3 scripts/pha_harness_profile_registry_generate.py --write` 后 registry 可见新 profile；`python3 scripts/pha_chat_turn_fsm_selfcheck.py`、`python3 scripts/pha_numerics_manifest_selfcheck.py`、`python3 scripts/pha_fact_card_selfcheck.py` PASS。
+- **回滚**：删 profile 声明 + `--write` 重生 + 还原 `allowed_dates` 与 `fact_card_interpret.py` 审计。
+
+---
+
 ## 2026-09-05 (Patient State 今日步数走点日绑定)
 
 - **类别**：证据切片诚实性（不改 `harness_core`）。

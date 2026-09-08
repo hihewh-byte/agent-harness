@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.6 · 2026-09-07  
+> **版本**：v1.8 · 2026-09-08  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -19,7 +19,8 @@
 1. **产品目标**：用户打开（或被通知）的是一台 **主动、本地优先的健康管理 Agent**，而不是「先导出 zip 再在浏览器里问答」的研究原型。  
 2. **演进方式**：Mac 上的 PHA（FastAPI + SQLite + harness + 可选 Ollama）在中长期仍是 **账本与审计内核**；iOS 先做 **采集 + 通知 + 展示壳**，再视算力决定是否把推理搬进手机。禁止幻想「一个 PR 把 Python 仓编译成 App」。  
 3. **主动 ≠ 诊疗**：主动推送的是 **无 LLM 事实卡（数字层）+ 规则分档与固定模板建议（评估层）+ 用户自登记提醒**。禁止诊断口吻、禁止编造数字、禁止把一次 HRV 写成处方。**主动路径不得用 LLM 写评估**；开口问答属 M3。**「主动路径」= 未经用户当次触发就生成/推送的内容**（定时通知、卡级评估、预生成）。用户在完整卡上**点按钮**要求解读，等价于「开口」，走既有 chat harness（TurnEvidencePlan + Numerics 审计），不属主动路径（v1.6，见 FR-6）。  
-3a. **主动 agent 与 Mac PHA 是同一个产品，不得割裂**：事实卡评估必须用到 Mac 账本里 **全部** 可比历史（zip 导入 + HealthKit），不能因窄窗口把多年数据判成「基线不足」。个人基线按可用量递进回看（90 日 → 365 日 → 全历史），并在卡上明写用了哪段；个人基线之外再给 **通用参考层**（Tier 1 披露制，只做「参考范围内/外」，非医疗判定），保证用户从第一天起就能读懂数字（v1.6，见 FR-2.6 / FR-2.8）。  
+3a. **主动 agent 与 Mac PHA 是同一个产品，不得割裂**：事实卡评估必须用到 Mac 账本里 **全部** 可比历史（zip 导入 + HealthKit），不能因窄窗口把多年数据判成「基线不足」。个人基线按可用量递进回看（90 日 → 365 日 → 全历史），并在卡上明写用了哪段；个人基线之外再给 **通用参考层**（Tier 1 披露制，只做「参考范围内/外」，非医疗判定），保证用户从第一天起就能读懂数字（v1.6，见 FR-2.6 / FR-2.8）。**zip 全量快照是最终真值**：导入覆盖同日 HealthKit 增量；建议每季度回灌一次 export.zip 做校正（v1.8）。  
+3b. **账本与增量是同一套指标**：同一 `metric_id`、同一日列、同一聚合器；捷径只写新日期。M1 增量通道仍是捷径；开源 HealthKit App（轨道 B）留到 M2。  
 4. **数据物理事实**：Watch 数据只存在 **iPhone HealthKit**。实时/近实时 = iPhone 网关 → 本机（或用户自有组网）上的 PHA。Mac **不能**直连 Watch。  
 5. **第一刀冻结**：打通 **HealthKit 样本 → Mac `wearable_data` / `wearable_daily`**。未绿之前不得宣称「今日主动 Agent 已上线」。
 
@@ -82,7 +83,7 @@ Watch → iPhone HealthKit → [捷径 | iOS App]
 
 - `POST /ingest/healthkit` 及幂等写入、当日滚日表  
 - iOS 捷径验证，随后薄原生 App（HealthKit + 同步 + 通知）  
-- 无 LLM 每日事实卡：`as_of=MAX(day)` + **日历日当日行（缺则空，不顶）** + **递进个人基线（90 日 → 365 日 → 全历史，卡上标明所用窗口）**；规则分档  
+- 无 LLM 每日事实卡：`as_of=MAX(day)` + **按注册表 `temporal` 取值并明写实际日期/截至时间（超窗才空；不把非当日值标成当日）** + **递进个人基线（90 日 → 365 日 → 全历史，卡上标明所用窗口）**；规则分档  
 - 事实卡两层：① 数字 / `as_of` / `stale` ② 规则分档 + **通用参考层（Tier 1 披露制）** + **固定模板建议**（非 LLM）  
 - **我的评估要求**（用户自由文本，落本机 prefs）+ **按钮式解读**：用户点击后走既有 chat harness 生成、经 Numerics 审计、独立区块展示、按（日期 + 要求哈希）缓存；不进通知、不预生成  
 - HRV 列语义纠正：zip 导入的 `hrv` 样本 `sample_id` 证明全为 Apple SDNN，`hrv_rmssd_ms` 列须改名/迁移为 SDNN 序列（单卡、叠 harness ACK）  
@@ -102,6 +103,7 @@ Watch → iPhone HealthKit → [捷径 | iOS App]
 - **主动推送 LLM 健康评估/建议**（属 M3 开口问答，或另立任务卡）  
 - **LLM 解读的「每日自动预生成」**：会把 FR-6 重新变成主动路径；如需做，另立决定并登记 §11，默认不做  
 - 让 LLM 解读绕开 chat harness 直接调 Ollama（「裸奔」）；解读中出现 facts / 基线之外的精确数字  
+- 让固定窗口穿戴摘要（`WEARABLE_90D_SUMMARY`）进入事实卡解读路径  
 - APNs / 第三方推送云（v1 用 iPhone 本地通知）
 
 ### 4.3 与 zip 导入的关系
@@ -119,8 +121,9 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-1.1 | ingest JSON：`metric_type, timestamp, value, source=healthkit` | selfcheck 假数据入库 |
 | FR-1.2 | 鉴权 token；无 token 401 | 单测或 selfcheck |
 | FR-1.3 | 真机：捷径推送 Watch 已有指标 | 库中 `as_of` 与健康 App 同日、数值量级合理 |
-| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`。**M1-P8 后**：`hrv` 与 `hrv_sdnn` 均写入 `hrv_sdnn_ms`（Apple SDNN）；遗留 `hrv_rmssd_ms` 列保留但不进新写入。入睡总时长由分期相加 |
-| FR-1.5 | **多指标入库**（数量型：步数 / 消耗 / RHR） | 捷径对用户已选且有 `shortcut_health_type` 的项，各 POST 一个当日数字；禁止 Find 原始列表 |
+| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`, **`spo2`, `respiratory_rate`, `vo2max`, `wrist_temp`（M1-P12）**。`hrv` 与 `hrv_sdnn` 均写入 `hrv_sdnn_ms`（Apple SDNN）。入睡总时长由分期相加。POST 应带 `unit`；未知单位或量级越界 400 |
+| FR-1.5 | **多指标入库**（数量型优先级包） | **v1.9**：捷径对 Find 总表 `device_verified` 的优先级包同步（步数 / 消耗 / RHR / HRV / 血氧 / 呼吸率 / VO2max），与勾选无关。腕温 `shortcuts_find_unverified`，暂不进捷径。累计型当日 Sum；`daily_lagged` / `latest` last-N Limit 1 带日期；`overnight` last-N Average 带日期。空集跳过。JSON 含 `pack_version`（注册表 `shortcut_pack_version`）；卡顶在设备包版本落后时提示重装。只有包版本变化才需重装捷径。新增指标必须先写入 `shortcut_health_find_catalog.json` 并真机验证 Find 标签，禁止猜 SDK / 健康 App 标题。 |
+| FR-1.8 | **zip 覆盖捷径增量** | 全量 export.zip 导入后：对账报告写入 `data/zip_vs_healthkit_reconcile.json`；删除 `xml_max` 当日及之前的 `sample_id LIKE healthkit|%` 行（含睡眠分段）；该日之后的增量保留。验收：selfcheck 覆盖日后 HealthKit 行被删、zip 日值保留 |
 | FR-1.6 | **睡眠分期 + HRV SDNN**（另卡 M1-P6） | 见 [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md)。SDNN 不得写入 RMSSD 列。睡眠：分段落库、入睡 = 核心∪深∪REM 一次总并集、清醒 = 健康 App 原值不拆、在床只取 In Bed 样本（健康 App 无则 PHA 必须空）、醒来日由数据推导；**PHA 不判定某夜是否异常、不修正、不排除**，偏离个人基线时只出「请到健康 App 核对」提醒句；`入睡 + 清醒 ≤ 会话跨度`。验收：**只比健康 App 当天有、且用户已勾选的项**，各 ≤ ±10 分钟；健康 App 没有的项双方皆空算过，禁止为凑项硬编码必采列表（与 FR-2.7 一致）。产品真源 = **健康 App 展现**；M1 过渡可简化为单写入源（如仅 Watch），多源按系统优先级对齐属 M2 |
 | FR-1.7 | **同步回执** | `GET /ingest/healthkit/last?user_id=` 返回最近一次成功/失败时间、指标、审计摘要；完整卡顶部显示「上次同步」。捷径 POST 成功响应含审计行，手机上可直接与健康 App 比对（呼应 §10「UI 必须显示上次成功时间」） |
 
@@ -128,15 +131,16 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 
 | ID | 需求 | 验收 |
 |----|------|------|
-| FR-2.1 | 读 `MAX(day)` + 当日行 + **递进基线窗口** 的 mean/min/max/分位 | 脚本输出 JSON，数字 ⊆ 查询结果；JSON 写出 `baseline_window`（`90d` / `365d` / `all`）与 `baseline_n` |
-| FR-2.2 | HRV 等分档仅为规则（如 vs 分位），文案模板固定 | 无模型进程 |
+| FR-2.1 | 读 `MAX(day)` + **按 `temporal` 取值的指标行** + **递进基线窗口** 的 mean/min/max/分位 | 脚本输出 JSON，数字 ⊆ 查询结果；JSON 写出 `baseline_window`（`90d` / `365d` / `all`）与 `baseline_n`；行上写实际 `day` / `freshness` / `partial_day` |
+| FR-2.2 | HRV 等分档仅为规则（如 vs 分位），文案模板固定；`partial_day` 不分档 | 无模型进程 |
 | FR-2.3 | 过期：`as_of` 早于本地日历日则 `stale=true` | 卡片可见；通知须写「非今日」，禁止把末日标成今日 |
 | FR-2.4 | 卡分两层：`facts`（数字）与 `assessment`（规则分档 + 模板建议 + 免责） | JSON 同时有两层；评估句不含诊断/处方 |
 | FR-2.5 | JSON / 完整卡枚举 **用户已选** 的注册表指标；无记录写「无」，禁止省略、禁止用其他日顶 | 已选项都出现；未选不出现；默认五项可被用户改掉 |
 | FR-2.6 | **卡级评估（v1.6 重写）**：覆盖率 + stale + **递进个人基线**分档 + 一句建议。基线窗口按可用量递进：近 90 日 ≥ 7 天用 90 日；否则近 365 日 ≥ 7 天用 365 日；否则全历史 ≥ 7 天用全历史；三者皆 < 7 才写「历史不足 n/7」。**同一定义才合并**：zip 时代与 HealthKit 的睡眠总时长/深/REM/清醒并集口径一致，视为同一序列；`sleep_core` / `in_bed` 历史为空就诚实写「无历史」。卡级综合三档（偏轻松 / 持平 / 偏好）由睡眠总时长、HRV、静息心率对个人基线的分位投票；任一缺项则写「不综合」而不是猜。分析 = 相对自己，不是 LLM 长文 | `assessment.summary` 含「相对你近 12 个月 268 夜」式的窗口说明；`baseline_short` 只在三级窗口都 < 7 时出现；selfcheck 覆盖 90d 空 → 365d 命中 |
-| FR-2.7 | 指标集由用户指定，禁止 Python 硬编码死列表 | `GET/PUT /proactive/fact-card/prefs`；完整卡底部勾选；落 `data/fact_card_prefs.json`；允许集 = `wearable_metric_registry.json` 的 `fact_card.eligible` |
+| FR-2.7 | 指标集由用户指定，禁止 Python 硬编码死列表 | `GET/PUT /proactive/fact-card/prefs`；完整卡底部分组勾选；允许集 = 注册表 `fact_card.eligible`。卡 = 勾选。覆盖率分母 = 勾选中 `coverage_denominator != false` 的项（VO2max 为稀疏型，不计分母） |
 | FR-2.8 | **通用参考层（Tier 1 披露制）**：个人基线之外，对 **有人群参考意义** 的指标给一行参考范围内/外，格式沿用 `manifest-tier-v1` 的 T1 披露块：`【参考标准】<描述>（来源：<指南/组织>，请自行查证，非医疗建议）`。参考范围是 **数据**，放注册表 `fact_card.reference_range`（低/高/单位/来源），Python 不写死数字。v1 适用：睡眠总时长、深睡占比、REM 占比、静息心率、步数；**不适用**：HRV 绝对值（个体差异过大，只跟自己比）、清醒、在床 | 完整卡每个适用指标多一行参考句；数字 ⊆ 注册表；`fact_card_numeric_atoms` 把参考范围也纳入原子集；非医疗措辞；HRV 无参考句 |
 | FR-2.9 | **我的评估要求**：完整卡有一个自由文本框，用户写「我想重点看什么 / 用什么口气 / 我在意的目标」，落 `data/fact_card_prefs.json` 的 `assessment_prompt`（本机、不出设备圈）。v1 只做 **保存 + 回显**，规则层不解析它（规则层不会因它变），它是 FR-6 解读的输入 | `GET/PUT /proactive/fact-card/prefs` 多一个字段；刷新回显；空字符串合法 |
+| FR-2.10 | **指标时效语义** | `temporal.kind ∈ {accrual, daily_lagged, overnight, rolling_mean, latest}`。卡按声明取值并写实际 `day`。`overnight` 与 `daily_lagged` 均在 `freshness_days` 内回看（一夜指标默认 2 天）。`latest` 回看窗口内最近一次（VO2max 默认 90 天），标「最近一次」，不计覆盖率。`accrual` 当日进行中不分档 |
 
 ### FR-3 主动触达
 
@@ -169,9 +173,12 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-6.2 | **输入**：当日 `facts` JSON + 递进基线摘要（含窗口与 n）+ 通用参考层 + 用户 `assessment_prompt`。Mac 账本全部历史对 harness 可见（这是「不割裂」的落点） | 请求体只引用 facts / 基线 / prefs，不另查库编数 |
 | FR-6.3 | **路径**：复用既有 chat harness（`/api/chat` 同一 `chat_service` 管线：TurnEvidencePlan → Compose → Numerics 审计），**禁止** 新开裸 Ollama 调用。输出中的精确数字必须 ⊆ facts ∪ 基线 ∪ 参考范围；否则整段丢弃，显示「未生成（审计未通过）」 | selfcheck：注入含外来数字的假回复 → 被拒；含 T1 块 → 通过 |
 | FR-6.4 | **展示**：独立区块「AI 解读（实验）· 非医疗建议」，位于规则评估之后，不混排、不替代规则层；必须显示生成时间与所用模型名 | HTML 两块分离；规则层文案与未点按钮时逐字相同 |
-| FR-6.5 | **时延**：本机 Ollama 一轮 30–170s（既有 e2e 记录）。网页必须 **异步**：点后立即返回「生成中」，结果按 `(user_id, as_of, sha256(assessment_prompt))` 缓存到本机 `data/`，刷新即见；同键重复点击复用缓存，不重复调 LLM | 点击后 HTTP < 1s 返回；缓存命中不产生 LLM 日志 |
-| FR-6.6 | **fail-closed**：Ollama 未启动 / 超时 / 审计拒绝 → 区块显示原因，规则层照常；绝不回退成「模板文字冒充 AI」 | 停 Ollama 再点 → 区块写「模型不可用」，其余卡不变 |
+| FR-6.5 | **时延**：本机 Ollama 一轮 30–170s（既有 e2e 记录）。网页必须 **异步**：点后立即返回「生成中」，结果按 `(user_id, as_of, calendar_day, card_digest, locale, sha256(assessment_prompt))` 缓存到本机 `data/`，刷新即见；同键重复点击复用缓存，不重复调 LLM | 点击后 HTTP < 1s 返回；缓存命中不产生 LLM 日志；改勾选后 `card_digest` 变、旧解读不命中；跨日 `calendar_day` 变、旧解读不命中 |
+| FR-6.6 | **fail-closed**：Ollama 未启动 / 超时 / 审计拒绝 → 区块显示原因（含被拒 token），规则层照常；绝不回退成「模板文字冒充 AI」 | 停 Ollama 再点 → 区块写「模型不可用」，其余卡不变 |
 | FR-6.7 | **M3 关系**：M2 App 的「解读」按钮调 **同一** 端点，不另写逻辑 | M3 任务卡只含 UI 接线 |
+| FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致 | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
+| FR-6.9 | **日期与语言**：机器层 ISO 8601；展示层按 `locale` 渲染，禁止纯数字斜杠日期；LLM 文本优先相对表达，绝对日期仅允许 as_of / 各行实际 day；审计把日期作为独立词类归一化后比对 | `unauthorized_date` 用例；中英 locale HTML 属 M1-P9.2 |
+| FR-6.10 | **卡外数字出口**：解读中任何不在事实卡 manifest 的数字（运动强度、心率区间、目标步数等）只能以 T1 披露块形式出现并注明来源；块外只允许定性描述。用户评估要求不能解锁该限制 | selfcheck 块外「120–140」→ 拒，T1 块内 → 过 |
 
 ### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
@@ -186,7 +193,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **免责** | 固定：教育参考，非医疗建议，不能替代医师诊治 | 加长法律文 |
 | **AI 解读**（仅按钮后） | 标题「AI 解读（实验）· 非医疗建议」；生成时间、模型名；正文经 Numerics 审计 | 混进规则层；进通知；预生成；外来精确数字 |
 
-**数据完整性**：M0 捷径目前只 POST **步数**。已选但未入库的项必须打成「无」，不能假装评估完整。要把评估做实，须做 **FR-1.5 多指标入库**（任务卡 **M1-P5**）：每个已选且 ∈ FR-1.4 的指标，用与步数相同的「当日合计一个数字」再 POST。不要 Find 原始样本列表。未入库时禁止编数。
+**数据完整性**：M0 捷径目前只 POST **步数**。已选但未入库的项必须打成「无」，不能假装评估完整。要把评估做实，须做 **FR-1.5 多指标入库**（任务卡 **M1-P5**，v1.7 起由 **M1-P11** 改为全集同步）：注册表里每个有 `shortcut_health_type` 且 ∈ FR-1.4 的指标，累计型用与步数相同的「当日合计一个数字」POST，每日一次型按样本带日期 POST。累计型不要 Find 原始样本列表。未入库时禁止编数。
 
 **两层触达**：
 
@@ -243,7 +250,13 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P6** | 睡眠各项 + HRV SDNN | `IN_PROGRESS` | HRV 真机 40.97 已对上（健康 41）。睡眠：删近两日 Pillow 历史后（15:41）9/7 入睡 7.60 / 清醒 3.45 / 核心 4.90 / 深 1.65 / REM 1.05（相对健康 App 差 ≤8 分钟）；健康 App 与 PHA **在床皆无**（原 8.95 来自 Pillow，已删）。根因曾是 Pillow+Watch 双轨并集；捷径 Source 取不到。门禁改为「有则比、无则空」+ 真源=健康 App 展现。仍欠：连续多夜同口径、T7 回执、文档偏差表收口。见 review / 任务卡。 |
 | **M1-P7** | **递进个人基线 + 通用参考层**（无 LLM） | `DONE` | 2026-09-07：按指标 90d→365d→all；真机睡眠 `365d` n=267；注册表 `reference_range`（睡眠/RHR/步数）+ T1 披露；卡级综合/不综合；selfcheck PASS。深睡/REM 占比参考未做（TODO）。 |
 | **M1-P8** | **HRV 列语义纠正（SDNN）** | `DONE` | 2026-09-07：日表 1937→`hrv_sdnn_ms`；样本改标 `hrv_sdnn`；注册表主指标 SDNN；9/6 band=above n=275；ingest `hrv`→SDNN。叠 harness ACK。 |
-| **M1-P9** | **我的评估要求 + 按钮式解读**（FR-2.9 / FR-6） | `TODO` | 顺序：① prefs 文本框保存 + 回显（无 LLM）；② `POST /proactive/fact-card/interpret` 异步入队 + `GET …/interpret` 读缓存；③ 走 `chat_service` 管线 + Numerics 审计；④ 完整卡独立区块。禁止裸 Ollama、禁止预生成、禁止进通知 |
+| **M1-P9** | **我的评估要求 + 按钮式解读**（FR-2.9 / FR-6） | `DONE` | 2026-09-07：`assessment_prompt` prefs+HTML；`POST/GET /proactive/fact-card/interpret` 异步缓存；走 `chat_service` + 原子数审计；完整卡「AI 解读」区块；selfcheck（外来数字拒 / T1 过 / 异常 model_unavailable / 同键不二调）PASS |
+| **M1-P9.1** | **解读专属 profile + 事实卡 manifest + 日期归一化审计 + 卡外数字 T1 出口** | `DONE` | 2026-09-08：`fact_card_interpret` profile；卡生成 Numerics Manifest；日期独立词类；撤掉 ≥100 放松；卡外数字只进 T1。selfcheck + harness registry `--write` PASS |
+| **M1-P10** | **指标时效语义**（`temporal.kind`：滞后日值 / 进行中累计 / 一夜 / 滚动均值） | `DONE` | 2026-09-08：注册表 `temporal`；卡按 kind 取值并写 `day`/`freshness`/`partial_day`；RHR 回看 2 天；累计型当日进行中不分档；捷径空集跳过 POST；ingest `empty_sample`。selfcheck PASS |
+| **M1-P11** | **勾选即所见 + 捷径全集同步**（FR-1.5 v1.7 / FR-2.7 v1.7） | `DONE` | 2026-09-08：去掉 `reveal_when_selected`；卡 = 勾选；`shortcut_sync_specs` 不读 prefs；catalog 三态提示。与 P10 同一套捷径生成器。selfcheck PASS |
+| **M1-P12** | **优先级包一期**：闭合 zip 日表（血氧 / 呼吸率 / VO2max / 腕温）+ zip 为最终真值 + pack_version | `DONE*` | 2026-09-08：7 项数量 Find 真机入库；Find 总表 `shortcut_health_find_catalog.json`；腕温无权限开关，捷径跳过（`*`）。VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。pack `2026.09.08.priority-1e` |
+| **M1-P9.2** | 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band/文案方向统一 | `DONE` | 2026-09-08：prefs `locale`；HTML 中英日期；解读剥 Markdown；`numeric_band` 标签；缓存键含 locale。通知 body 日期仍 ISO（P9.3） |
+| **M1-P9.3** | 真机与边界验收 | `IN_PROGRESS` | 2026-09-08：Mac+iPhone Safari 解读已出。评估要求点名指标收焦（16:46 假缺失已修）。git 默认 en-US。欠：停 Ollama、跨日真看 |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
@@ -298,6 +311,12 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-07 | 完整卡评估层空/只写「基线不足」。查库：`default` 睡眠 642 夜（近 365 日 268）、HRV 1936 天、RHR 2255 天、消耗 2286 天，但 `BASELINE_DAYS=90` 从 as_of 回看正好把 zip（止 6/9）全排除，n=0/1。维护者定：**主动 agent 是 PHA 一部分，不得与 Mac 账本割裂**；「基线不足」不成立；需要通用评估规则让信息有意义 | v1.6：§1.3a；FR-2.1 / FR-2.6 递进基线 + 窗口披露；FR-2.8 通用参考层（T1 披露制、注册表数据）；立 M1-P7。不改代码 |
 | 2026-09-07 | zip 导入的 `metric_type=hrv` 11650 条 `sample_id` 全为 `HKQuantityTypeIdentifierHeartRateVariabilitySDNN|…|Wind’s Apple Watch`：`hrv_rmssd_ms` 列自始就是 Apple SDNN，库中没有 RMSSD。9/6 起「SDNN 不进 RMSSD」的隔离是对的，但两列其实同一物理量，HRV 7 年基线被列名挡住 | 立 M1-P8 列语义纠正（叠 harness ACK，单卡）；FR-1.4 的「SDNN 不进 RMSSD」保留到 P8 完成前 |
 | 2026-09-07 | 维护者同意「我的评估要求（自由文本，给 LLM）」；问 M3 原计划阶段与「按钮式解读」是否冲突。结论：M3 原为 M2 稳定后的 App 内问答；按钮式解读 = 用户开口，不属主动路径；复用 chat harness 而非裸 Ollama；M3 缩成 App 接线，顺序不变 | v1.6：§1.3 定义「主动路径」；§3 M3 改义；FR-2.9 / FR-6；立 M1-P9；§4.2 增「禁止预生成 / 禁止裸奔」。不改代码 |
+| 2026-09-07 23:30 | 浏览器验收按钮式解读：走了 `supplement_manifest` 路由、只引 harness 90 日 KV、与卡上「近 12 个月 267 夜」口径割裂；卡侧 `\d+` 审计把日期片段误拒，放松后又能放过编数；时间戳原样吐 ISO、`**` 星号裸露 | 立 M1-P9.1（专属 profile + 卡 manifest + 日期归一化审计）/ P9.2（本地时区 + locale 渲染 + 纯文本）/ P9.3（真机边界）。交接 [`handoff-2026-09-08-fact-card-interpret-v2.md`](handoff-2026-09-08-fact-card-interpret-v2.md) |
+| 2026-09-08 08:00 | 真机：静息心率勾了却「无」，顶部「同步失败 unreadable_value」= 捷径把 Apple 尚未算出的当日 RHR 空集 POST 上来被正确拒掉；昨日 RHR 健康 App 有但捷径不带样本日期、无路可进。活动消耗 13.5 kcal / 一夜 HRV 被拿去与 274 个整日比出 below。解读第二次被 harness C 层以 `unauthorized_wearable_count:100` 拒 | 立 M1-P10 指标时效语义（注册表 `temporal.kind`，§4.1「缺则空」解绑「不显示」但保留「不冒充」）；P9.1 补「卡外数字只能进 T1 块」。不改代码 |
+| 2026-09-08 08:27 | 截图：勾 5 项卡列 9 项，来自注册表 `reveal_when_selected` 隐式展开，违反 FR-2.7；页面要求改勾选后重装捷径。分析：Mac 不能触达 HealthKit、iOS「查找健康样本」类型不可变量化，故「刷新即有新数据」与「按服务端名单动态 Find」都不可能；可行为 A 捷径全集同步 + 卡按勾选过滤，或 B 全集 Find + 运行时 If 门控。**维护者拍板 A** | v1.7：FR-1.5 改为全集同步、允许每日一次型带日期 POST；FR-2.7 补「卡 = 勾选，禁止隐式展开」；立 M1-P11；§8 登记 P9.1 / P10 / P11 / P9.2 / P9.3。不改代码 |
+| 2026-09-08 08:47 | P10+P11 落地：卡 = 勾选 5 行；活动消耗标进行中不分档；RHR 仍空（9/6 超 2 日窗，须新捷径带日期入库）；selfcheck 两套 PASS | 决定 7–12 按默认/拍板执行；§8 P10/P11 DONE。P9.1 未开 |
+| 2026-09-08 14:10 | 维护者拍板：zip 为最终真值、季度回灌；不启动 Pulso（M2 再议）；VO2max 进一期勾选。不单独注册呼吸率 | v1.8：FR-1.4/1.5/1.8；优先级包一期；立 M1-P12 |
+| 2026-09-08 | P12 代码落地：eligible 闭环；ingest 单位门；捷径 8 个 Find；VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。Find 标签 `Blood Oxygen` / `Respiratory Rate` / `VO2 Max` / `Wrist Temperature` **真机未验** | §8 M1-P12 保持 TODO（真机门禁）；轨道 B 不启动 |
 
 ---
 
@@ -313,3 +332,8 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-07 | v1.4 | FR-1.6 验收细化（分段落库、总并集、醒来日推导、清醒取原值、在床只取 In Bed、不判定异常只提醒核对、±10 分钟）；增 FR-1.7 同步回执；M1-P6 行更新为真机 200 但未对上；§11 追加发现。文档改动，无代码 |
 | 2026-09-07 | v1.5 | FR-1.6 / M1-P6：验收「有则比、无则空」；真源=健康 App 展现；M1 单源过渡、多源属 M2；与 FR-2.7 勾选一致，禁止硬编码必采睡眠项。文档改动，无代码 |
 | 2026-09-07 | v1.6 | §1.3 定义主动路径 + §1.3a 不割裂原则；FR-2.1 / FR-2.6 递进个人基线（90d→365d→all）+ 窗口披露；FR-2.8 通用参考层（T1 披露、注册表 `reference_range`）；FR-2.9 我的评估要求；FR-6 用户触发 LLM 解读（harness 复用、审计、异步缓存、fail-closed）；M3 改为 App 接线；立 M1-P7 / P8 / P9；§4.2 增禁止预生成与裸奔；§11 三条。文档改动，无代码。交接：[`handoff-2026-09-07-fact-card-assessment.md`](handoff-2026-09-07-fact-card-assessment.md) |
+| 2026-09-07 | v1.6 | §8 M1-P9 → DONE：prefs `assessment_prompt` + interpret 异步端点 + 完整卡 HTML 区块；selfcheck PASS |
+| 2026-09-08 | v1.7 | FR-1.5 改为「捷径按注册表全集同步，勾选只管显示」+ 每日一次型带日期 POST；FR-2.7 补「卡 = 勾选、禁止隐式展开、分母 = 勾选数」；§4.1 数据完整性段同步；§8 登记 M1-P9.1 / P10 / P11 / P9.2 / P9.3；§11 三条。文档改动，无代码。P10 对 §4.1「缺则空」冻结行的改写与 FR-2.10 / FR-6.8–6.10 措辞待执行 agent 落地时随 PR 写入 |
+| 2026-09-08 | v1.7 | §4.1 / FR-2.1 / FR-2.2 / FR-2.10 时效语义落地；§8 M1-P10 / P11 → DONE。代码：注册表 `temporal`、卡按 kind 取值、捷径全集 + last-2-days RHR + count=0 跳过、ingest `empty_sample` |
+| 2026-09-08 | v1.8 | zip 为最终真值（FR-1.8）+ 优先级包一期（血氧/呼吸率/VO2max/腕温）+ `pack_version` + VO2max `latest` 不计覆盖率。轨道 B / Pulso 留 M2。立 M1-P12 |
+| 2026-09-08 | v1.9 | Find 总表为捷径真源；腕温跳过捷径；数量包 7 项；§8 P12 DONE* / P9.2 DONE |

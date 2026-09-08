@@ -57,11 +57,11 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 | `fact_card.ingest_key` | 对应 `POST /ingest/healthkit` 的 `metric_type`（可空） |
 | `fact_card.unit` / `higher_is_better` | 完整卡展示与分档方向 |
 | `fact_card.daily_key` | ingest 按日历日一条 UPSERT |
-| `fact_card.shortcut_health_type` / `shortcut_stat` / `shortcut_unit` | 捷径 **Find Health Samples 选择器标签**（不是 HealthKit SDK 名、也不是健康 App 浏览页标题）。活动消耗必须是 `Active Calories`，禁止 `Active Energy`。`shortcut_stat` = Sum/Average；`shortcut_unit` = kcal / count/min |
+| `fact_card.shortcut_health_type` / `shortcut_stat` / `shortcut_unit` | 必须与 Find 总表 `device_verified` 行一致。真源是 [`shortcut_health_find_catalog.json`](../storage/registry/shortcut_health_find_catalog.json)。禁止 SDK 名与健康 App 浏览标题。 |
 | `fact_card.shortcut_skip_reason` | 有 ingest_key 但捷径故意不同步（须写原因，禁止默默映射） |
-| `fact_card.include_when_selected` | 用户勾了所列 metric_id 时，本行也进捷径（HRV SDNN 在勾了 RMSSD 时同步） |
+| `fact_card.include_when_selected` | 用户勾了所列 metric_id 时，本行也进**睡眠捷径整包**（数据层，不影响卡上显示） |
 | `fact_card.shortcut_sleep_value` | Sleep Analysis 分期标签（`Asleep Deep` 等）。有此字段的行进「PHA 同步睡眠」，不进数量捷径 |
-| `fact_card.reveal_when_selected` | 勾了所列指标时，完整卡多显示本行（睡眠分期） |
+| `fact_card.temporal` | 时效语义：`kind ∈ {accrual, daily_lagged, overnight, rolling_mean, latest}`；`daily_lagged` / `overnight` 可带 `freshness_days`（默认 2）；`latest` 回看最近一次（VO2max 默认 90 天）且 `coverage_denominator: false`；`rolling_mean` 可带 `window_days`。缺省 = 只取 as_of 当日行 |
 | `fact_card.display_fallback_metric_id` | 本行无数时改展示另一列，且用那一列做基线；标签跟过去，禁止把 SDNN 标成 RMSSD |
 
 ### `no_baseline_reason`（Spec 枚举 · 行级 reason_code 待 ε+）
@@ -80,6 +80,21 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 | `POST /data/backfill-workouts` | **已下线**（410） |
 
 新增模块时：实现 L0 解析 + 在 JSON 增加 `ingest_modules` 条目 + 在 `main.data_sync_module` 接线 **一次**，不要新增 `/data/backfill-xxx` 专用路径。
+
+---
+
+### D. 晋升为捷径同步指标（优先级包）
+
+对象是维护者，不是终端用户在页面上自定义指标名。Find 类型不能是变量。
+
+1. 确认 `wearable_daily` 已有列；没有则先做 L1（zip 解析器 + 聚合器 + 日列）。增量类型必须是账本已有类型。  
+2. **先查 Find 总表** [`shortcut_health_find_catalog.json`](../storage/registry/shortcut_health_find_catalog.json)。`shortcut_find_type` 必须是快捷指令 Find 选择器字面量，且 `status=device_verified`。健康 App 标题、SDK 名、权限面板别名一律禁止（`never_use_find_labels`：`Active Energy` / `Blood Oxygen` / `Apple Sleeping Wrist Temperature` / `Cardio Fitness`）。未验证的行写 `skipped`，**不要猜着写进捷径**。  
+3. 注册表：`fact_card.eligible`、`ingest_key`、`temporal`，以及与总表一致的 `shortcut_health_type`（或 `shortcut_skip_reason`）。`eligible` 行不得半成品。  
+4. ingest：`_CANONICAL` / FR-1.4；单位随值 POST，未知单位拒收。  
+5. bump `shortcut_pack_version`，生成并在 iPhone **替换一次**「PHA 同步健康」。卡顶会提示包过期。勾选只过滤卡片，不改捷径。  
+6. 健康 App 对账：当天有值才比；没有则双方皆空。随后用 zip 回灌校正同日增量。
+
+稀疏型（如 VO2max）用 `temporal.kind=latest` 且 `coverage_denominator: false`。
 
 ---
 

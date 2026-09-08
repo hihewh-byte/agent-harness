@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple
@@ -38,6 +39,8 @@ _SLOT_MARKERS: Dict[str, str] = {
     "DATA_AVAILABILITY": "数据可用性（库内概况）",
     "EPISODIC_BRIDGE": "上轮对话摘要（单会话续焦）",
     "USER_CONTEXT_BRIEF": "慢性健康简报（CHB · 只读）",
+    "FACT_CARD_CONTEXT": "唯一可引用数字与日期",
+    "USER_ASSESSMENT_PROMPT": "用户评估要求",
 }
 
 _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
@@ -118,6 +121,17 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
         "priority": ["TASK"],
         "protected": {"TASK"},
         "degradation_order": [],
+        "supplement_start": "full",
+    },
+    "fact_card_interpret": {
+        "priority": [
+            "TASK",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+            "NUMERICS_MANIFEST",
+        ],
+        "protected": {"TASK", "NUMERICS_MANIFEST", "USER_ASSESSMENT_PROMPT"},
+        "degradation_order": ["FACT_CARD_CONTEXT"],
         "supplement_start": "full",
     },
 }
@@ -248,6 +262,35 @@ def _compress_supplement(raw: str, level: TierLevel) -> str:
     return summarize_supplement_bg_for_tier0(text, max_chars=800)
 
 
+def _compress_fact_card_context(raw: str, level: TierLevel) -> str:
+    """Drop advice → summary → metrics; never used for manifest or assessment."""
+    text = (raw or "").strip()
+    if not text:
+        return ""
+    if level == "full":
+        return text
+    idx = text.find("{")
+    header = text[:idx] if idx >= 0 else text
+    blob = text[idx:] if idx >= 0 else ""
+    try:
+        payload = json.loads(blob) if blob else {}
+    except json.JSONDecodeError:
+        return text[:800] if level == "summary" else text[:400]
+    if not isinstance(payload, dict):
+        return text[:800]
+    slim = dict(payload)
+    slim.pop("advice", None)
+    if level == "min":
+        slim.pop("summary", None)
+        body = header + json.dumps(slim, ensure_ascii=False)
+        if len(body) > 1200:
+            slim["metrics"] = []
+            slim["note"] = "metrics omitted under Tier0 budget"
+            body = header + json.dumps(slim, ensure_ascii=False)
+        return body
+    return header + json.dumps(slim, ensure_ascii=False)
+
+
 def _compress_task(raw: str, plan: TurnEvidencePlan, level: TierLevel) -> str:
     text = (raw or plan.task_text or "").strip()
     if level == "min" and len(text) > 400:
@@ -318,6 +361,14 @@ def _build_slot_assemblies(
             asm.text_full = _compress_supplement(raw, "full")
             asm.text_summary = _compress_supplement(raw, "summary")
             asm.text_min = _compress_supplement(raw, "min")
+        elif slot_id == "FACT_CARD_CONTEXT":
+            asm.text_full = _compress_fact_card_context(raw, "full")
+            asm.text_summary = _compress_fact_card_context(raw, "summary")
+            asm.text_min = _compress_fact_card_context(raw, "min")
+        elif slot_id == "USER_ASSESSMENT_PROMPT":
+            asm.text_full = raw
+            asm.text_summary = raw
+            asm.text_min = raw
         else:
             asm.text_full = raw
             asm.text_summary = raw

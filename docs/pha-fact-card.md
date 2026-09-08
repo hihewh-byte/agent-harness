@@ -19,17 +19,22 @@ python scripts/pha_fact_card.py          # 打印当前用户 default 的卡
 
 | 层 | 字段 | 含义 |
 |----|------|------|
-| 数字 | `facts.as_of` / `facts.stale` / `facts.metrics` | `as_of = MAX(day)`；日历日无行则 `today.present=false`，**不用末日顶今日** |
+| 数字 | `facts.as_of` / `facts.stale` / `facts.metrics` | `as_of = MAX(day)`；每行按注册表 `temporal` 取值并写实际 `day` / `freshness` / `partial_day`，**不把非当日值标成当日** |
+| 时效 | `metrics[].freshness` / `partial_day` / `as_of_time` | `accrual` 当日进行中不分档；`daily_lagged` / `overnight` 在 `freshness_days` 内回看（一夜指标默认 2 天，务实近似，未改 zip 归醒来日）；`latest` 回看最近一次（VO2max 90 天）不计覆盖率。**M1-P10 / P12 已落地** |
 | 选择 | `facts.selection.enabled_metric_ids` | 用户已选；允许集来自注册表，不是 Python 列表 |
 | 评估 | `assessment.advice` | 相对 **递进个人基线**（90 日 → 365 日 → 全历史，取第一个 n ≥ 7 的窗口；JSON 写 `baseline_window` / `baseline_n`）的规则分档 + **固定模板**；三级窗口皆 n&lt;7 才写「历史不足 n/7」。**M1-P7 已落地** |
 | 参考 | `assessment` 内每项 `metrics[].reference` | 注册表 `fact_card.reference_range` 有值的已选指标，各一句 `【参考标准】…（来源：…，请自行查证，非医疗建议）` + 范围内/外。HRV 绝对值不给人群范围。**M1-P7 已落地**（睡眠总时长 / RHR / 步数；深睡/REM 占比 TODO） |
-| 解读 | `interpretation`（仅用户点按钮后） | 走 chat harness + Numerics 审计的 LLM 文本，独立区块、异步缓存、不进通知、不预生成。**M1-P9 待做**，见 PRD FR-6 |
+| 解读 | `interpretation`（仅用户点按钮后） | 走 `chat_service` + 原子数审计；`POST/GET /proactive/fact-card/interpret` 异步缓存；完整卡独立区块。**M1-P9 已落地**（FR-6） |
 
 `notification.body` 是锁屏导语；`notification.open_path` 指向完整卡。
 
-**M1-P7/P8 之后**：评估层用递进窗口；HRV 主列为 `hrv_sdnn_ms`（历史已从误标 RMSSD 列迁入）。当日无数仍写「无」，不顶其他日。
+**M1-P7/P8/P10/P11 之后**：评估层用递进窗口；HRV 主列为 `hrv_sdnn_ms`；指标按注册表 `temporal` 取值并写实际日期。卡上指标集合 = 勾选集合。
 
-「PHA 同步健康」按**当前勾选**生成：步数 Sum、活动消耗 Sum、静息心率 Average，各 POST **一个当日数字**。睡眠 / HRV 勾了也会显示，但捷径**先不同步**（category / SDNN≠RMSSD），卡上继续写「无」。勾选变更后必须重新生成捷径。详见 [路线图 M1-P5](pha-ios-proactive-roadmap.md)。
+**捷径与勾选解绑（PRD v1.9 FR-1.5）**：「PHA 同步健康」按 Find 总表 `device_verified` 生成（步数、活动消耗、静息心率、HRV、血氧、呼吸率、VO2max），与用户勾选无关。腕温暂不进捷径。JSON 带 `pack_version`；包变了才重装。勾选只决定卡上显示。新增指标先查 [`shortcut_health_find_catalog.json`](../storage/registry/shortcut_health_find_catalog.json)，禁止猜 Find 标签。zip 导入覆盖同日捷径增量。
+
+**M1-P12**：VO2max 用最近一次（180 日窗），不计覆盖率。完整卡勾选按睡眠 / 心脏 / 活动 / 呼吸与血氧 / 体能分组。
+
+**M1-P9.2 / P9.3**：完整卡日期与 chrome 按 prefs `locale`（zh-CN / en-US）显示；**git 默认 en-US**。机器层 JSON 日期仍是 ISO。页面没有单独的日期格式选项。iPhone Safari 已跑通解读（16:21）。停 Ollama / 跨日缓存待维护者。
 
 ## 指标怎么改（不要改代码）
 

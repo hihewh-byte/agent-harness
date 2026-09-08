@@ -402,6 +402,72 @@ def query_healthkit_days(user_id: str) -> list[date]:
         _release_connection(conn)
 
 
+def query_healthkit_metric_on_day(
+    user_id: str, metric_type: str, day: date
+) -> Optional[float]:
+    """Latest HealthKit sample value for one metric on a calendar day, if any."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        row = conn.execute(
+            """
+            SELECT value FROM wearable_data
+            WHERE user_id = ?
+              AND metric_type = ?
+              AND substr(timestamp, 1, 10) = ?
+              AND sample_id LIKE 'healthkit|%'
+            ORDER BY timestamp DESC
+            LIMIT 1
+            """,
+            (uid, metric_type, day.isoformat()),
+        ).fetchone()
+        if row is None or row["value"] is None:
+            return None
+        return float(row["value"])
+    finally:
+        _release_connection(conn)
+
+
+def delete_healthkit_through_day(user_id: str, through: date) -> int:
+    """Remove HealthKit incrementals on and before ``through`` (zip is the snapshot)."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    cut = through.isoformat()
+    conn = _connect()
+    try:
+        data_cur = conn.execute(
+            """
+            DELETE FROM wearable_data
+            WHERE user_id = ?
+              AND sample_id LIKE 'healthkit|%'
+              AND substr(timestamp, 1, 10) <= ?
+            """,
+            (uid, cut),
+        )
+        deleted = int(data_cur.rowcount or 0)
+        seg_cur = conn.execute(
+            """
+            DELETE FROM wearable_sleep_segments
+            WHERE user_id = ?
+              AND sample_id LIKE 'healthkit|%'
+              AND day <= ?
+            """,
+            (uid, cut),
+        )
+        deleted += int(seg_cur.rowcount or 0)
+        conn.commit()
+        logger.info(
+            "delete_healthkit_through_day user=%s through=%s removed=%s",
+            uid,
+            cut,
+            deleted,
+        )
+        return deleted
+    finally:
+        _release_connection(conn)
+
+
 def delete_stale_healthkit_metric_on_day(
     user_id: str,
     metric_type: str,

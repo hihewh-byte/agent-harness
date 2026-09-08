@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Sequence
 from fastapi import APIRouter, HTTPException, Query
 
 from pha.health_data import effective_query_reference_date
-from pha.metric_catalog_ui import build_metrics_catalog_payload
+from pha.metric_catalog_ui import apply_catalog_ui_locale, build_metrics_catalog_payload
 from pha.medical_storage import list_available_metrics_catalog, query_metric_timeseries
 from pha.sqlite_storage import init_schema
 
@@ -16,12 +16,16 @@ router = APIRouter(prefix="/api/v1", tags=["metrics"])
 
 
 @router.get("/available_metrics")
-def available_metrics(user_id: str = Query("default")) -> dict[str, Any]:
+def available_metrics(
+    user_id: str = Query("default"),
+    locale: str = Query("en"),
+) -> dict[str, Any]:
     """``SELECT DISTINCT`` medical + wearable metrics for UI multi-select."""
     init_schema()
     uid = (user_id or "default").strip() or "default"
     medical = list_available_metrics_catalog(uid)
     payload = build_metrics_catalog_payload(medical)
+    payload = apply_catalog_ui_locale(payload, locale)
     payload["user_id"] = uid
     payload["count"] = len(payload.get("metrics") or [])
     return payload

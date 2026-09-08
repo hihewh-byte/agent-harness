@@ -643,11 +643,24 @@ window.pdfParsing = false;
     return DYNAMIC_CHART_COLORS[(Math.abs(h) + idx) % DYNAMIC_CHART_COLORS.length];
   }
 
+  function uiZh() {
+    return window.phaI18n && window.phaI18n.getLocale() === 'zh';
+  }
+
+  function locText(obj, key) {
+    if (!obj) return '';
+    if (uiZh() && obj[key + '_zh']) return obj[key + '_zh'];
+    if (!uiZh() && obj[key + '_en']) return obj[key + '_en'];
+    return obj[key] || '';
+  }
+
   function catalogLabel(metricId) {
     var hit = metricCatalog.find(function (m) { return m.id === metricId; });
     if (!hit) return metricId;
-    var u = hit.unit ? ' (' + hit.unit + ')' : '';
-    return (hit.label || hit.id) + u;
+    var label = locText(hit, 'label') || hit.id;
+    var unit = locText(hit, 'unit') || hit.unit;
+    var u = unit ? ' (' + unit + ')' : '';
+    return label + u;
   }
 
   function loadAlertsCache() {
@@ -725,8 +738,9 @@ window.pdfParsing = false;
     btn.type = 'button';
     btn.className = 'pha-metric-tag' + (selectedMetricIds.has(m.id) ? ' on' : '');
     btn.dataset.metricId = m.id;
-    var label = m.label || m.id;
-    var hint = m.hint ? '<span class="hint">' + esc(m.hint) + '</span>' : '';
+    var label = locText(m, 'label') || m.id;
+    var hintRaw = locText(m, 'hint');
+    var hint = hintRaw ? '<span class="hint">' + esc(hintRaw) + '</span>' : '';
     btn.innerHTML = esc(label) + hint;
     btn.addEventListener('click', function (e) {
       e.preventDefault();
@@ -755,13 +769,13 @@ window.pdfParsing = false;
       var visible = (g.metrics || []).filter(function (m) {
         if (isUiPollutedMetricTag(m)) return false;
         if (!q) return true;
-        var blob = ((m.label || '') + ' ' + (m.id || '')).toLowerCase();
+        var blob = ((locText(m, 'label') || '') + ' ' + (m.label_zh || '') + ' ' + (m.id || '')).toLowerCase();
         return blob.indexOf(q) >= 0;
       });
       if (!visible.length) return;
       var sec = document.createElement('div');
       sec.className = 'pha-metric-group';
-      sec.innerHTML = '<h4>' + esc(g.label || g.id) + '</h4><div class="pha-metric-group-tags"></div>';
+      sec.innerHTML = '<h4>' + esc(locText(g, 'label') || g.id) + '</h4><div class="pha-metric-group-tags"></div>';
       var host = sec.querySelector('.pha-metric-group-tags');
       visible.forEach(function (m) {
         var tag = makeMetricTag(m);
@@ -779,7 +793,9 @@ window.pdfParsing = false;
   async function loadMetricCatalog() {
     var uid = (userIdInput.value || 'default').trim() || 'default';
     try {
-      var res = await fetch('/api/v1/available_metrics?user_id=' + encodeURIComponent(uid));
+      var lang = (window.phaI18n && window.phaI18n.getLocale()) || 'en';
+      var res = await fetch('/api/v1/available_metrics?user_id=' + encodeURIComponent(uid)
+        + '&locale=' + encodeURIComponent(lang));
       if (!res.ok) throw new Error((await readHttpErrorDetail(res)).detail);
       metricsPayload = await res.json();
       metricCatalog = metricsPayload.metrics || [];
@@ -3427,11 +3443,16 @@ window.pdfParsing = false;
 
   function refreshUiLocale() {
     if (window.phaI18n) window.phaI18n.applyDom();
+    if (metricsPayload) {
+      renderGoldenTags(metricsPayload.golden || []);
+      renderGroupedMetrics(metricsPayload.groups || [], metricSearchBar ? metricSearchBar.value : '');
+    }
     loadModels();
     loadSyncStatus();
     loadHealth();
     refreshVisionStatus();
     loadChatSessions();
+    loadMetricCatalog();
     if (moreMetricsSummary && metricsPayload) {
       var extra = Math.max(0, (metricCatalog.length || 0) - DEFAULT_METRIC_PICKS.length);
       moreMetricsSummary.textContent = t('trends.more', { extra: extra });

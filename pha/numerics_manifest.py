@@ -44,6 +44,41 @@ ORDER BY report_date ASC, metric_name
 
 _DATE_ISO_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 _DATE_CN_RE = re.compile(r"(20\d{2})年\s*(\d{1,2})月\s*(\d{1,2})日")
+_DATE_CN_MD_RE = re.compile(r"(?<!年)(\d{1,2})月\s*(\d{1,2})日")
+_DATE_EN_RE = re.compile(
+    r"\b("
+    r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+    r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|"
+    r"Nov(?:ember)?|Dec(?:ember)?"
+    r")\.?\s+(\d{1,2})(?:,?\s*(20\d{2}))?\b",
+    re.I,
+)
+_EN_MONTH_NUM = {
+    "jan": 1,
+    "january": 1,
+    "feb": 2,
+    "february": 2,
+    "mar": 3,
+    "march": 3,
+    "apr": 4,
+    "april": 4,
+    "may": 5,
+    "jun": 6,
+    "june": 6,
+    "jul": 7,
+    "july": 7,
+    "aug": 8,
+    "august": 8,
+    "sep": 9,
+    "sept": 9,
+    "september": 9,
+    "oct": 10,
+    "october": 10,
+    "nov": 11,
+    "november": 11,
+    "dec": 12,
+    "december": 12,
+}
 # 中文语境无词边界：用前后非数字锚定，避免 \b 失效
 _DECIMAL_RE = re.compile(r"(?<!\d)(\d+\.\d{1,2})(?!\d)")
 _DOSE_RE = re.compile(
@@ -236,6 +271,11 @@ class NumericsManifest:
         for e in self.entries:
             if e.domain == "lipid" and len(e.anchor) == 10:
                 dates.add(e.anchor)
+            elif e.domain == "fact_card":
+                for iso in _DATE_ISO_RE.findall(e.anchor or ""):
+                    dates.add(iso)
+        if self.profile == "fact_card_interpret" and len(self.reference_date or "") == 10:
+            dates.add(self.reference_date)
         return dates
 
     @property
@@ -457,6 +497,127 @@ def build_numerics_manifest(
     )
 
 
+def _window_short(window: Optional[str], *, night: bool) -> str:
+    if window == "90d":
+        return "近 90 日"
+    if window == "365d":
+        return "近 12 个月"
+    if window == "all":
+        return "全部历史"
+    return "个人历史"
+
+
+def _is_night_metric_id(metric_id: str) -> bool:
+    return metric_id.startswith("sleep_") or metric_id == "sleep_time_asleep"
+
+
+def build_fact_card_numerics_manifest(
+    card: Dict[str, Any],
+    *,
+    user_id: str = "default",
+) -> NumericsManifest:
+    """Whitelist built only from the day's fact card — not the 90-day wearable summary."""
+    facts = card.get("facts") or {}
+    as_of = str(facts.get("as_of") or "")[:10]
+    calendar_day = str(facts.get("calendar_day") or "")[:10]
+    entries: List[ManifestEntry] = []
+    for item in facts.get("metrics") or []:
+        if not isinstance(item, dict):
+            continue
+        label = str(item.get("label") or item.get("metric") or "").strip()
+        metric_id = str(item.get("metric") or "")
+        unit = str(item.get("unit") or "-") or "-"
+        day = str(item.get("day") or as_of or "")[:10]
+        value = item.get("value")
+        if value is not None:
+            anchor = day or as_of or "-"
+            if item.get("partial_day") and item.get("as_of_time"):
+                anchor = f"{anchor}·截至{item.get('as_of_time')}"
+            entries.append(
+                ManifestEntry(
+                    domain="fact_card",
+                    metric=label or metric_id,
+                    value=float(value),
+                    unit=unit,
+                    anchor=anchor,
+                    source="fact_card",
+                )
+            )
+        night = _is_night_metric_id(metric_id)
+        short = _window_short(str(item.get("baseline_window") or ""), night=night)
+        earliest = str(item.get("baseline_earliest") or "")[:10]
+        end = as_of or day
+        baseline_anchor = f"{earliest}~{end}" if earliest and end else (end or earliest or "-")
+        n_unit = "nights" if night else "days"
+        for key, suffix in (
+            ("baseline_mean", f"{short}均值"),
+            ("baseline_min", f"{short}最低"),
+            ("baseline_max", f"{short}最高"),
+            ("percentile", "百分位"),
+        ):
+            raw = item.get(key)
+            if raw is None:
+                continue
+            entries.append(
+                ManifestEntry(
+                    domain="fact_card",
+                    metric=f"{label}·{suffix}",
+                    value=float(raw),
+                    unit="pct" if key == "percentile" else unit,
+                    anchor=baseline_anchor,
+                    source="fact_card_baseline",
+                )
+            )
+        baseline_n = item.get("baseline_n")
+        if baseline_n is not None:
+            entries.append(
+                ManifestEntry(
+                    domain="fact_card",
+                    metric=f"{label}·基线{'夜数' if night else '天数'}",
+                    value=float(int(baseline_n)),
+                    unit=n_unit,
+                    anchor=baseline_anchor,
+                    source="fact_card_baseline",
+                )
+            )
+        ref = item.get("reference") or {}
+        if isinstance(ref, dict):
+            ref_unit = str(ref.get("unit") or unit or "-") or "-"
+            src = str(ref.get("source") or "registry")
+            if ref.get("low") is not None:
+                entries.append(
+                    ManifestEntry(
+                        domain="reference",
+                        metric=f"{label}·参考下限",
+                        value=float(ref["low"]),
+                        unit=ref_unit,
+                        anchor="-",
+                        source=src,
+                    )
+                )
+            if ref.get("high") is not None:
+                entries.append(
+                    ManifestEntry(
+                        domain="reference",
+                        metric=f"{label}·参考上限",
+                        value=float(ref["high"]),
+                        unit=ref_unit,
+                        anchor="-",
+                        source=src,
+                    )
+                )
+    return NumericsManifest(
+        profile="fact_card_interpret",
+        user_id=(user_id or "default").strip() or "default",
+        entries=entries,
+        reference_date=as_of or calendar_day,
+        forbidden_dates=set(_GLOBAL_FORBIDDEN_DATES),
+        wearable_grain_source="default",
+        wearable_window_start="",
+        wearable_window_end="",
+    )
+
+
 def format_manifest_tier0_block(
     manifest: NumericsManifest,
     *,
@@ -508,13 +669,27 @@ def _normalize_cn_date(y: str, m: str, d: str) -> str:
     return f"{int(y):04d}-{int(m):02d}-{int(d):02d}"
 
 
+def _normalize_en_date(month_token: str, day: str, year: str) -> Optional[str]:
+    month = _EN_MONTH_NUM.get((month_token or "").strip(".").lower())
+    if month is None or not year:
+        return None
+    try:
+        return f"{int(year):04d}-{month:02d}-{int(day):02d}"
+    except ValueError:
+        return None
+
+
 def _extract_normalized_dates(text: str) -> List[str]:
-    """Extract ISO + 中文日期并统一为 YYYY-MM-DD。"""
+    """Extract ISO + 中文/英文日期并统一为 YYYY-MM-DD。无年份的月日不在这里解析。"""
     found: List[str] = []
     for iso in _DATE_ISO_RE.findall(text or ""):
         found.append(iso)
     for y, m, d in _DATE_CN_RE.findall(text or ""):
         found.append(_normalize_cn_date(y, m, d))
+    for mon, d, y in _DATE_EN_RE.findall(text or ""):
+        iso = _normalize_en_date(mon, d, y)
+        if iso:
+            found.append(iso)
     return found
 
 
@@ -1033,6 +1208,7 @@ __all__ = [
     "apply_numerics_audit_to_answer",
     "audit_disclosure_block",
     "audit_response_numerics",
+    "build_fact_card_numerics_manifest",
     "build_numerics_manifest",
     "extract_disclosure_blocks",
     "format_wearable_grain_refusal",

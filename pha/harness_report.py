@@ -68,6 +68,22 @@ _MATRIX_TARGETS: Dict[str, Dict[str, Any]] = {
         "forbidden": [],
         "tools_allowed": [],
     },
+    "fact_card_interpret": {
+        "slots_ordered": [
+            "TASK",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+            "NUMERICS_MANIFEST",
+        ],
+        "forbidden": [
+            "WEARABLE_90D_SUMMARY",
+            "USER_SNAPSHOT",
+            "GET_HEALTH_DATA",
+            "GET_TEMPORAL_HISTORY_DOSSIER",
+            "EVIDENCE_CATALOG",
+        ],
+        "tools_allowed": [],
+    },
 }
 
 

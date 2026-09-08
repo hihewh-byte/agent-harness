@@ -10,6 +10,7 @@ import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -86,6 +87,14 @@ def _output_ref(output_uuid: str, name: str) -> dict:
             "Type": "ActionOutput",
         },
         "WFSerializationType": "WFTextTokenAttachment",
+    }
+
+
+def _variable_input(output_uuid: str, name: str) -> dict:
+    """If/Repeat WFInput must wrap the attachment; bare tokens import as a blank Condition."""
+    return {
+        "Type": "Variable",
+        "Variable": _output_ref(output_uuid, name),
     }
 
 
@@ -250,8 +259,27 @@ def _find_health(
     out_name: str = "Health Samples",
     *,
     unit: str = "",
+    last_days: Optional[int] = None,
+    limit: Optional[int] = None,
 ) -> dict:
-    """Today's samples of one Health type. Only this type is requested from Health."""
+    """Health quantity Find. Default = today. ``last_days`` uses the sleep D1 predicate."""
+    date_pred: dict
+    if last_days is not None:
+        date_pred = {
+            "Bounded": True,
+            "Operator": 1001,
+            "Property": "Start Date",
+            "Removable": False,
+            "Values": {"Number": int(last_days), "Unit": 16384},
+        }
+    else:
+        date_pred = {
+            "Bounded": True,
+            "Operator": 1002,
+            "Property": "Start Date",
+            "Removable": False,
+            "Values": {"Number": "7", "Unit": 16},
+        }
     params: dict = {
             "UUID": action_uuid,
             "CustomOutputName": out_name,
@@ -273,23 +301,64 @@ def _find_health(
                                 }
                             },
                         },
-                        {
-                            "Bounded": True,
-                            "Operator": 1002,
-                            "Property": "Start Date",
-                            "Removable": False,
-                            "Values": {"Number": "7", "Unit": 16},
-                        },
+                        date_pred,
                     ],
                 },
                 "WFSerializationType": "WFContentPredicateTableTemplate",
             },
     }
-    # Find picker label must be registry shortcut_health_type (Active Calories,
-    # not Active Energy). Only set the unit that already works on device (RHR).
+    if limit is not None:
+        params["WFContentItemLimitEnabled"] = True
+        params["WFContentItemLimitNumber"] = int(limit)
+        params["WFContentItemSortProperty"] = "Start Date"
+        params["WFContentItemSortOrder"] = "Latest First"
+    # Find picker label must come from shortcut_health_find_catalog.json
+    # (device_verified only). Never guess SDK / Health-app titles.
     if unit == "count/min":
         params["WFHealthActionUnit"] = unit
     return _action("is.workflow.actions.filter.health.quantity", params)
+
+
+def _item_from_list(
+    src_uuid: str,
+    src_name: str,
+    action_uuid: str,
+    out_name: str,
+    *,
+    specifier: str = "First Item",
+) -> dict:
+    return _action(
+        "is.workflow.actions.getitemfromlist",
+        {
+            "UUID": action_uuid,
+            "CustomOutputName": out_name,
+            "WFItemSpecifier": specifier,
+            "WFInput": _output_ref(src_uuid, src_name),
+        },
+    )
+
+
+def _if_has_any(src_uuid: str, src_name: str, grouping: str) -> dict:
+    """Skip the block when Find returned no Health samples (Condition = has any value)."""
+    return _action(
+        "is.workflow.actions.conditional",
+        {
+            "GroupingIdentifier": grouping,
+            "WFControlFlowMode": 0,
+            "WFCondition": 100,
+            "WFInput": _variable_input(src_uuid, src_name),
+        },
+    )
+
+
+def _endif(grouping: str) -> dict:
+    return _action(
+        "is.workflow.actions.conditional",
+        {
+            "GroupingIdentifier": grouping,
+            "WFControlFlowMode": 2,
+        },
+    )
 
 
 def _get_detail(src_uuid: str, src_name: str, prop: str, action_uuid: str, out_name: str) -> dict:
@@ -335,13 +404,20 @@ def _statistics(
     )
 
 
-def _sync_one_metric(url: str, token: str, spec) -> tuple[list[dict], str, str, str, str]:
-    """Same chain as the working steps shortcut: Find → Value → Numbers → Stat → one POST."""
+def _sync_one_metric(url: str, token: str, spec, *, pack_version: str = "") -> tuple[list[dict], str, str, str, str]:
+    """Find → if empty skip POST. Accrual = today Sum; lagged/latest = last N + date; overnight = last N Average.
+
+    Unit is the registry literal. Get Details Unit on a Find list concatenates
+    every sample (``count\\ncount\\n…``) and iOS dies on large overnight lists.
+    """
     find_id = _uuid()
+    group = _uuid()
     val_id = _uuid()
     num_id = _uuid()
     stat_id = _uuid()
     plain_id = _uuid()
+    start_id = _uuid()
+    first_id = _uuid()
     text_id = _uuid()
     json_id = _uuid()
     resp_id = _uuid()
@@ -350,45 +426,126 @@ def _sync_one_metric(url: str, token: str, spec) -> tuple[list[dict], str, str, 
     numbers_name = f"{spec.metric_id} Numbers"
     stat_name = f"{spec.metric_id} Stat"
     plain_name = f"{spec.metric_id} Number"
+    start_name = f"{spec.metric_id} Start"
+    first_name = f"{spec.metric_id} First"
     text_name = f"{spec.metric_id} Text"
     json_name = f"{spec.metric_id} JSON"
     resp_name = f"{spec.metric_id} Response"
     post = _downloadurl(url, token, json_id, json_name, resp_id)
     post["WFWorkflowActionParameters"]["CustomOutputName"] = resp_name
     unit = spec.unit_health or spec.unit or "count"
+    kind = getattr(spec, "temporal_kind", "") or ""
+    dated = kind in {"daily_lagged", "latest", "overnight"}
+    last_days = int(getattr(spec, "freshness_days", 2) or 2) if dated else None
+    single = kind in {"daily_lagged", "latest"}
+    find_limit = 1 if single else (150 if kind == "overnight" else None)
+    pack = pack_version or ""
+    find = _find_health(
+        spec.health_type,
+        find_id,
+        samples_name,
+        unit=unit,
+        last_days=last_days,
+        limit=find_limit,
+    )
+    json_unit_parts: list[str | tuple[str, str]] = [
+        '{"user_id":"default","pack_version":"',
+        pack,
+        '","samples":[{"metric_type":"',
+        spec.ingest_key,
+        '","timestamp":"',
+    ]
+    if dated:
+        inner: list[dict] = []
+        if single:
+            inner.append(_get_detail(find_id, samples_name, "Start Date", start_id, start_name))
+        else:
+            inner.append(_item_from_list(find_id, samples_name, first_id, first_name))
+            inner.append(_get_detail(first_id, first_name, "Start Date", start_id, start_name))
+        inner.extend(
+            [
+                _get_detail(find_id, samples_name, "Value", val_id, value_name),
+                _detect_number(val_id, value_name, num_id, numbers_name),
+            ]
+        )
+        if single:
+            inner.append(_detect_number(val_id, value_name, plain_id, plain_name))
+            stat_id, stat_name = plain_id, plain_name
+        else:
+            inner.append(_statistics(num_id, numbers_name, spec.stat, stat_id, stat_name))
+            inner.append(_detect_number(stat_id, stat_name, plain_id, plain_name))
+        json_unit_parts.extend(
+            [
+                (start_id, start_name),
+                '","value":"',
+                (text_id, text_name),
+                '","unit":"',
+                unit,
+                '","source":"healthkit"}]}',
+            ]
+        )
+        inner.extend(
+            [
+            _action(
+                "is.workflow.actions.gettext",
+                {
+                    "UUID": text_id,
+                    "CustomOutputName": text_name,
+                    "WFTextActionText": _text_with_refs([(plain_id, plain_name)]),
+                },
+            ),
+            _action(
+                "is.workflow.actions.gettext",
+                {
+                    "UUID": json_id,
+                    "CustomOutputName": json_name,
+                    "WFTextActionText": _text_with_refs(json_unit_parts),
+                },
+            ),
+            post,
+            ]
+        )
+    else:
+        inner = [
+            _get_detail(find_id, samples_name, "Value", val_id, value_name),
+            _detect_number(val_id, value_name, num_id, numbers_name),
+            _statistics(num_id, numbers_name, spec.stat, stat_id, stat_name),
+            _detect_number(stat_id, stat_name, plain_id, plain_name),
+            _action(
+                "is.workflow.actions.gettext",
+                {
+                    "UUID": text_id,
+                    "CustomOutputName": text_name,
+                    "WFTextActionText": _text_with_refs([(plain_id, plain_name)]),
+                },
+            ),
+            _action(
+                "is.workflow.actions.gettext",
+                {
+                    "UUID": json_id,
+                    "CustomOutputName": json_name,
+                    "WFTextActionText": _text_with_refs(
+                        [
+                            '{"user_id":"default","pack_version":"',
+                            pack,
+                            '","samples":[{"metric_type":"',
+                            spec.ingest_key,
+                            '","timestamp":"","value":"',
+                            (text_id, text_name),
+                            '","unit":"',
+                            unit,
+                            '","source":"healthkit"}]}',
+                        ]
+                    ),
+                },
+            ),
+            post,
+        ]
     actions = [
-        _find_health(spec.health_type, find_id, samples_name, unit=unit),
-        _get_detail(find_id, samples_name, "Value", val_id, value_name),
-        _detect_number(val_id, value_name, num_id, numbers_name),
-        _statistics(num_id, numbers_name, spec.stat, stat_id, stat_name),
-        _detect_number(stat_id, stat_name, plain_id, plain_name),
-        _action(
-            "is.workflow.actions.gettext",
-            {
-                "UUID": text_id,
-                "CustomOutputName": text_name,
-                "WFTextActionText": _text_with_refs([(plain_id, plain_name)]),
-            },
-        ),
-        _action(
-            "is.workflow.actions.gettext",
-            {
-                "UUID": json_id,
-                "CustomOutputName": json_name,
-                "WFTextActionText": _text_with_refs(
-                    [
-                        '{"user_id":"default","samples":[{"metric_type":"',
-                        spec.ingest_key,
-                        '","timestamp":"","value":"',
-                        (text_id, text_name),
-                        '","unit":"',
-                        spec.unit,
-                        '","source":"healthkit"}]}',
-                    ]
-                ),
-            },
-        ),
-        post,
+        find,
+        _if_has_any(find_id, samples_name, group),
+        *inner,
+        _endif(group),
     ]
     return actions, stat_id, stat_name, resp_id, resp_name
 
@@ -517,8 +674,7 @@ def build_sleep(
                     {
                         "Text": _text_with_refs(
                             [
-                                "当前勾选没有可同步的睡眠分期。"
-                                "请在完整卡勾选睡眠总时长或深睡后，在 Mac 上重新生成本捷径。",
+                                "注册表里没有可同步的睡眠分期。",
                             ]
                         )
                     },
@@ -581,8 +737,8 @@ def build_sleep(
     return _workflow(name, actions)
 
 
-def build_health(url: str, token: str, specs: list) -> dict:
-    """iPhone-only: one POST per selected quantity metric (do not POST Health items)."""
+def build_health(url: str, token: str, specs: list, *, pack_version: str = "") -> dict:
+    """iPhone-only: one POST per registry quantity type (do not POST Health items)."""
     if not specs:
         return _workflow(
             "PHA 同步健康",
@@ -592,8 +748,7 @@ def build_health(url: str, token: str, specs: list) -> dict:
                     {
                         "Text": _text_with_refs(
                             [
-                                "当前勾选的指标没有可按日合计的 Health 数量类型。"
-                                "请在完整卡勾选步数、活动消耗或静息心率后，在 Mac 上重新生成本捷径。",
+                                "注册表里没有可按日合计的 Health 数量类型。",
                             ]
                         )
                     },
@@ -603,7 +758,9 @@ def build_health(url: str, token: str, specs: list) -> dict:
     actions: list[dict] = []
     result_parts: list[str | tuple[str, str]] = []
     for spec in specs:
-        block, stat_id, stat_name, resp_id, resp_name = _sync_one_metric(url, token, spec)
+        block, stat_id, stat_name, resp_id, resp_name = _sync_one_metric(
+            url, token, spec, pack_version=pack_version
+        )
         actions.extend(block)
         if result_parts:
             result_parts.append("\n")
@@ -669,9 +826,20 @@ def main() -> int:
     port = env.get("PHA_PORT", "8788").strip() or "8788"
     url = f"http://{host_ip}:{port}/ingest/healthkit"
     from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs
+    from pha.shortcut_find_catalog import never_use_find_labels
+    from pha.wearable_metric_registry import shortcut_pack_version
 
+    pack = shortcut_pack_version()
     sync_specs = shortcut_sync_specs("default")
     sleep_specs = shortcut_sleep_specs("default")
+    banned = set(never_use_find_labels())
+    bad = [s.health_type for s in sync_specs if s.health_type in banned]
+    if bad:
+        print(f"FAIL forbidden Find labels in sync plan: {bad}", file=sys.stderr)
+        return 1
+    if any(s.metric_id == "wrist_temp" for s in sync_specs):
+        print("FAIL wrist_temp is not device_verified; do not emit Find", file=sys.stderr)
+        return 1
     print(
         "sync_plan",
         [(s.metric_id, s.health_type, s.stat) for s in sync_specs],
@@ -693,7 +861,7 @@ def main() -> int:
 
     jobs = [
         ("pha-ingest-probe", build_probe(url, token), "anyone"),
-        ("pha-sync-health", build_health(url, token, sync_specs), "people-who-know-me"),
+        ("pha-sync-health", build_health(url, token, sync_specs, pack_version=pack), "people-who-know-me"),
         ("pha-sync-sleep", build_sleep(url, token, sleep_specs, variant="d1"), "people-who-know-me"),
         (
             "pha-sync-sleep-is-today",

@@ -24,7 +24,7 @@ python scripts/pha_healthkit_ingest_selfcheck.py
 | 当前局域网 IP | 会变；2026-09-04 为 `192.168.77.125`（旧捷径里的 `192.168.77.21` 已失效，会 timeout） |
 | Token | `.env` 的 `PHA_INGEST_TOKEN`（不要写进文档/不要 commit） |
 | 时区 | `PHA_INGEST_TZ=Asia/Shanghai` |
-| 健康权限 | **「PHA 同步健康」只请求步数（Steps）**，不要求 HRV/睡眠等 |
+| 健康权限 | 「PHA 同步健康」按优先级包请求：步数、活动消耗、静息心率、HRV、血氧、呼吸率、VO2max、腕温。睡眠另走「PHA 同步睡眠」。Find 新标签真机未验 |
 
 已签名捷径（含 URL + token，勿提交 git）：
 
@@ -72,6 +72,7 @@ curl -sS -X POST "http://<Mac的Tailscale或局域网IP>:8788/ingest/healthkit" 
 ```json
 {
   "user_id": "default",
+  "pack_version": "2026.09.08.priority-1",
   "token": "可选；更推荐用 Header",
   "samples": [
     {
@@ -87,13 +88,14 @@ curl -sS -X POST "http://<Mac的Tailscale或局域网IP>:8788/ingest/healthkit" 
 
 | 字段 | 规则 |
 |------|------|
-| `metric_type` | v1：`hrv` `hrv_sdnn` `rhr` `steps` `sleep_hours` `sleep_core` `sleep_deep` `sleep_rem` `sleep_in_bed` `sleep_awake` `active_energy`。SDNN 不进 RMSSD。睡眠小时须在 (0, 16]。未知类型：**丢该样本**，不猜测。 |
+| `metric_type` | `hrv` `hrv_sdnn` `rhr` `steps` `sleep_hours` `sleep_core` `sleep_deep` `sleep_rem` `sleep_in_bed` `sleep_awake` `active_energy` **`spo2` `respiratory_rate` `vo2max` `wrist_temp`（M1-P12）**。SDNN 不进 RMSSD。睡眠小时须在 (0, 16]。未知类型：**丢该样本**，不猜测。 |
 | `timestamp` | ISO-8601。按 `PHA_INGEST_TZ` 落到本地日历日。无法解析 → **整批丢弃**（400）。 |
-| `value` | 有限数字。单位见下表，**v1 不做换算**。 |
+| `value` | 有限数字。未知单位或量级越界 → **整批 400**。服务端会把血氧分数→%、呼吸率 count/s→bpm、腕温 °F→°C。 |
+| `pack_version` | 捷径包版本（注册表 `shortcut_pack_version`）。落后时完整卡提示重装。 |
 | `source` | 必须是 `healthkit`。 |
 | 鉴权 | Header `X-PHA-Ingest-Token` 或 body `token`。 |
 
-**单位（Shortcuts 里先换好再 POST）：**
+**单位（POST 随值带 `unit`；未知单位拒收）：**
 
 | 指标 | 值 |
 |------|----|
@@ -103,6 +105,10 @@ curl -sS -X POST "http://<Mac的Tailscale或局域网IP>:8788/ingest/healthkit" 
 | `steps` | 当日步数（建议每天一条累计，不要把同一累计值按小时重复 POST） |
 | `sleep_hours` | **小时**（不是秒） |
 | `active_energy` | kcal |
+| `spo2` | 百分数或 0–1 分数（服务端归一成 %） |
+| `respiratory_rate` | breaths/min；`count/s` 会 ×60 |
+| `vo2max` | mL/kg/min |
+| `wrist_temp` | °C；°F 会换算 |
 
 幂等键：`healthkit|{user}|{metric}|{本地时间iso}|healthkit`。同一秒同一指标重复推送会被 `INSERT OR IGNORE`。
 

@@ -1,0 +1,193 @@
+{
+  "schema_version": "shortcut_health_find_catalog_v1",
+  "updated": "2026-09-08",
+  "rule": "shortcut_find_type 只能是 iOS 快捷指令「查找健康样本」选择器里的字面量，从真机抄录。禁止用 HealthKit SDK 名、健康 App 浏览页英文标题、权限面板别名去猜。status 不是 device_verified 的行禁止写入任何捷径。新增或勾选指标时先查本表，再 bump shortcut_pack_version。",
+  "never_use_find_labels": [
+    "Active Energy",
+    "Blood Oxygen",
+    "Apple Sleeping Wrist Temperature",
+    "Cardio Fitness"
+  ],
+  "entries": [
+    {
+      "metric_id": "steps",
+      "ingest_key": "steps",
+      "channel": "quantity",
+      "shortcut_find_type": "Steps",
+      "shortcut_stat": "Sum",
+      "shortcut_unit": "count",
+      "health_app_en": "Steps",
+      "permission_panel": "Steps",
+      "hk_identifier": "HKQuantityTypeIdentifierStepCount",
+      "status": "device_verified",
+      "verified_on": "2026-09-05",
+      "notes": "M0-P2 真机入库。"
+    },
+    {
+      "metric_id": "active_energy",
+      "ingest_key": "active_energy",
+      "channel": "quantity",
+      "shortcut_find_type": "Active Calories",
+      "shortcut_stat": "Sum",
+      "shortcut_unit": "kcal",
+      "health_app_en": "Active Energy",
+      "permission_panel": "Active Energy",
+      "hk_identifier": "HKQuantityTypeIdentifierActiveEnergyBurned",
+      "status": "device_verified",
+      "verified_on": "2026-09-06",
+      "notes": "健康 App / SDK 叫 Active Energy；Find 必须是 Active Calories。"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "ingest_key": "hrv_sdnn",
+      "channel": "quantity",
+      "shortcut_find_type": "Heart Rate Variability",
+      "shortcut_stat": "Average",
+      "shortcut_unit": "ms",
+      "health_app_en": "Heart Rate Variability",
+      "permission_panel": "Heart Rate Variability",
+      "hk_identifier": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "POST ingest_key=hrv_sdnn，禁止 warehouse 遗留 hrv/RMSSD。"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "ingest_key": "rhr",
+      "channel": "quantity",
+      "shortcut_find_type": "Resting Heart Rate",
+      "shortcut_stat": "Average",
+      "shortcut_unit": "count/min",
+      "health_app_en": "Resting Heart Rate",
+      "permission_panel": "Resting Heart Rate",
+      "hk_identifier": "HKQuantityTypeIdentifierRestingHeartRate",
+      "status": "device_verified",
+      "verified_on": "2026-09-06",
+      "notes": "Find Unit=count/min 真机可用；last-2-days Limit 1。"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "ingest_key": "spo2",
+      "channel": "quantity",
+      "shortcut_find_type": "Oxygen Saturation",
+      "shortcut_stat": "Average",
+      "shortcut_unit": "%",
+      "health_app_en": "Blood Oxygen",
+      "permission_panel": "Blood Oxygen",
+      "hk_identifier": "HKQuantityTypeIdentifierOxygenSaturation",
+      "status": "device_verified",
+      "verified_on": "2026-09-08",
+      "notes": "健康 App 英文是 Blood Oxygen；Find 必须是 Oxygen Saturation。15:16 真机 96% 入库。"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "ingest_key": "respiratory_rate",
+      "channel": "quantity",
+      "shortcut_find_type": "Respiratory Rate",
+      "shortcut_stat": "Average",
+      "shortcut_unit": "count/min",
+      "health_app_en": "Respiratory Rate",
+      "permission_panel": "Respiratory Rate",
+      "hk_identifier": "HKQuantityTypeIdentifierRespiratoryRate",
+      "status": "device_verified",
+      "verified_on": "2026-09-08",
+      "notes": "Find 标签与健康 App 一致；overnight Limit 150。"
+    },
+    {
+      "metric_id": "vo2max",
+      "ingest_key": "vo2max",
+      "channel": "quantity",
+      "shortcut_find_type": "VO2 Max",
+      "shortcut_stat": "Average",
+      "shortcut_unit": "mL/kg·min",
+      "health_app_en": "Cardio Fitness",
+      "permission_panel": "Cardio Fitness",
+      "hk_identifier": "HKQuantityTypeIdentifierVO2Max",
+      "status": "device_verified",
+      "verified_on": "2026-09-08",
+      "notes": "权限面板叫 Cardio Fitness；Find 必须是 VO2 Max。latest，不计覆盖率。"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "ingest_key": "wrist_temp",
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "tried_labels": [
+        "Wrist Temperature",
+        "Apple Sleeping Wrist Temperature"
+      ],
+      "health_app_en": "Wrist Temperature / Sleeping Wrist Temperature",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierAppleSleepingWristTemperature",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "2026-09-08 真机：两种 Find 标签均无权限开关、无 POST。卡上仍可勾选看 zip 历史。晋升捷径前必须在本表改成 device_verified。"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "ingest_key": "sleep_hours",
+      "channel": "sleep",
+      "shortcut_find_type": null,
+      "shortcut_sleep_value": null,
+      "status": "skipped",
+      "skip_reason": "derived_from_asleep_stages",
+      "notes": "入睡总时长由分期相加，禁止单独 Find Asleep。"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "ingest_key": "sleep_in_bed",
+      "channel": "sleep",
+      "shortcut_find_type": "Sleep",
+      "shortcut_sleep_value": "In Bed",
+      "shortcut_stat": "Sum",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "睡眠捷径整包。"
+    },
+    {
+      "metric_id": "sleep_core",
+      "ingest_key": "sleep_core",
+      "channel": "sleep",
+      "shortcut_find_type": "Sleep",
+      "shortcut_sleep_value": "Asleep Core",
+      "shortcut_stat": "Sum",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "睡眠捷径整包。"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "ingest_key": "sleep_deep",
+      "channel": "sleep",
+      "shortcut_find_type": "Sleep",
+      "shortcut_sleep_value": "Asleep Deep",
+      "shortcut_stat": "Sum",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "睡眠捷径整包。"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "ingest_key": "sleep_rem",
+      "channel": "sleep",
+      "shortcut_find_type": "Sleep",
+      "shortcut_sleep_value": "Asleep REM",
+      "shortcut_stat": "Sum",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "睡眠捷径整包。"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "ingest_key": "sleep_awake",
+      "channel": "sleep",
+      "shortcut_find_type": "Sleep",
+      "shortcut_sleep_value": "Awake",
+      "shortcut_stat": "Sum",
+      "status": "device_verified",
+      "verified_on": "2026-09-07",
+      "notes": "睡眠捷径整包。"
+    }
+  ]
+}

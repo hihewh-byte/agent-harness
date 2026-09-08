@@ -1,7 +1,8 @@
 {
   "schema_version": "wearable_metric_registry_v1",
-  "version": "2026.09.07",
-  "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。",
+  "version": "2026.09.08",
+  "shortcut_pack_version": "2026.09.08.priority-1e",
+  "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。捷径包版本见 shortcut_pack_version；zip 为最终真值。",
   "ingest_modules": [],
   "metrics": [
     {
@@ -13,7 +14,7 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "睡眠总时长" },
+      "ui": { "label_zh": "睡眠总时长", "label_en": "Sleep duration", "group_zh": "睡眠" },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -22,6 +23,7 @@
         "higher_is_better": true,
         "daily_key": true,
         "shortcut_skip_reason": "derived_from_asleep_stages",
+        "temporal": { "kind": "overnight" },
         "reference_range": {
           "low": 7,
           "high": 9,
@@ -73,7 +75,7 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "ms", "parser": "numeric" },
-      "ui": { "label_zh": "HRV" },
+      "ui": { "label_zh": "HRV", "label_en": "HRV", "group_zh": "心脏" },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -83,7 +85,8 @@
         "daily_key": true,
         "shortcut_health_type": "Heart Rate Variability",
         "shortcut_stat": "Average",
-        "shortcut_unit": "ms"
+        "shortcut_unit": "ms",
+        "temporal": { "kind": "overnight", "min_samples": 2 }
       },
       "intent_hints": [
         "hrv",
@@ -106,7 +109,7 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "bpm", "parser": "numeric" },
-      "ui": { "label_zh": "静息心率" },
+      "ui": { "label_zh": "静息心率", "label_en": "Resting HR", "group_zh": "心脏" },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -117,6 +120,7 @@
         "shortcut_health_type": "Resting Heart Rate",
         "shortcut_stat": "Average",
         "shortcut_unit": "count/min",
+        "temporal": { "kind": "daily_lagged", "freshness_days": 2 },
         "reference_range": {
           "low": 60,
           "high": 100,
@@ -147,12 +151,18 @@
         "omit_row_without_snapshot": true
       },
       "snapshot": { "unit": "%", "parser": "numeric" },
-      "ui": { "label_zh": "血氧" },
+      "ui": { "label_zh": "血氧", "label_en": "SpO2", "group_zh": "呼吸与血氧" },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
+        "ingest_key": "spo2",
         "unit": "%",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Oxygen Saturation",
+        "shortcut_stat": "Average",
+        "shortcut_unit": "%",
+        "temporal": { "kind": "overnight", "freshness_days": 2 }
       },
       "intent_hints": ["血氧", "spo2", "SpO2", "blood oxygen", "oxygen saturation"]
     },
@@ -165,12 +175,18 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "breaths/min", "parser": "numeric" },
-      "ui": { "label_zh": "呼吸率" },
+      "ui": { "label_zh": "呼吸率", "label_en": "Respiratory rate", "group_zh": "呼吸与血氧" },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
+        "ingest_key": "respiratory_rate",
         "unit": "breaths/min",
-        "higher_is_better": true
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_health_type": "Respiratory Rate",
+        "shortcut_stat": "Average",
+        "shortcut_unit": "count/min",
+        "temporal": { "kind": "overnight", "freshness_days": 2 }
       },
       "intent_hints": [
         "呼吸率",
@@ -192,7 +208,7 @@
         "snapshot_only_if_no_baseline": true
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "深睡", "footer_when_snapshot_only": true },
+      "ui": { "label_zh": "深睡", "label_en": "Deep sleep", "group_zh": "睡眠", "footer_when_snapshot_only": true },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -204,7 +220,7 @@
         "shortcut_sleep_value": "Asleep Deep",
         "shortcut_stat": "Sum",
         "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "temporal": { "kind": "overnight" }
       },
       "intent_hints": ["深睡", "深度睡眠", "睡眠分期", "deep sleep"]
     },
@@ -218,7 +234,7 @@
         "snapshot_only_if_no_baseline": true
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "REM", "footer_when_snapshot_only": true },
+      "ui": { "label_zh": "REM", "label_en": "REM", "group_zh": "睡眠", "footer_when_snapshot_only": true },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -230,7 +246,7 @@
         "shortcut_sleep_value": "Asleep REM",
         "shortcut_stat": "Sum",
         "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "temporal": { "kind": "overnight" }
       },
       "intent_hints": ["REM", "快速眼动", "睡眠分期"]
     },
@@ -244,7 +260,7 @@
         "snapshot_only_if_no_baseline": true
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "核心睡眠" },
+      "ui": { "label_zh": "核心睡眠", "label_en": "Core sleep", "group_zh": "睡眠" },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -256,7 +272,7 @@
         "shortcut_sleep_value": "Asleep Core",
         "shortcut_stat": "Sum",
         "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "temporal": { "kind": "overnight" }
       },
       "intent_hints": ["核心睡眠", "core sleep"]
     },
@@ -269,7 +285,7 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "在床" },
+      "ui": { "label_zh": "在床", "label_en": "In bed", "group_zh": "睡眠" },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -281,7 +297,7 @@
         "shortcut_sleep_value": "In Bed",
         "shortcut_stat": "Sum",
         "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "temporal": { "kind": "overnight" }
       },
       "intent_hints": ["在床", "in bed"]
     },
@@ -294,7 +310,7 @@
         "baseline_source": "wearable.summary"
       },
       "snapshot": { "unit": "hr", "parser": "sleep_duration" },
-      "ui": { "label_zh": "睡眠清醒" },
+      "ui": { "label_zh": "睡眠清醒", "label_en": "Awake", "group_zh": "睡眠" },
       "fact_card": {
         "eligible": true,
         "enabled_default": false,
@@ -306,7 +322,7 @@
         "shortcut_sleep_value": "Awake",
         "shortcut_stat": "Sum",
         "include_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"],
-        "reveal_when_selected": ["sleep_time_asleep", "sleep_deep", "sleep_rem"]
+        "temporal": { "kind": "overnight" }
       },
       "intent_hints": ["睡眠清醒", "waso", "awake"]
     },
@@ -341,7 +357,7 @@
       "l1": { "kind": "wearable_daily", "field": "steps" },
       "compare": { "comparable_90d": false },
       "snapshot": { "unit": "count", "parser": "numeric" },
-      "ui": { "label_zh": "步数", "label_en": "Steps" },
+      "ui": { "label_zh": "步数", "label_en": "Steps", "group_zh": "活动" },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -352,6 +368,7 @@
         "shortcut_health_type": "Steps",
         "shortcut_stat": "Sum",
         "shortcut_unit": "count",
+        "temporal": { "kind": "accrual" },
         "reference_range": {
           "low": 7000,
           "high": 10000,
@@ -367,7 +384,7 @@
       "l1": { "kind": "wearable_daily", "field": "active_energy_kcal" },
       "compare": { "comparable_90d": false },
       "snapshot": { "unit": "kcal", "parser": "numeric" },
-      "ui": { "label_zh": "活动消耗", "label_en": "Active energy" },
+      "ui": { "label_zh": "活动消耗", "label_en": "Active energy", "group_zh": "活动" },
       "fact_card": {
         "eligible": true,
         "enabled_default": true,
@@ -377,9 +394,49 @@
         "daily_key": true,
         "shortcut_health_type": "Active Calories",
         "shortcut_stat": "Sum",
-        "shortcut_unit": "kcal"
+        "shortcut_unit": "kcal",
+        "temporal": { "kind": "accrual" }
       },
       "intent_hints": ["活动消耗", "active energy", "卡路里"]
+    },
+    {
+      "metric_id": "vo2max",
+      "l1": { "kind": "wearable_daily", "field": "vo2max_ml_kg_min" },
+      "compare": { "comparable_90d": false },
+      "snapshot": { "unit": "mL/kg/min", "parser": "numeric" },
+      "ui": { "label_zh": "VO2max", "label_en": "VO2max", "group_zh": "体能" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "vo2max",
+        "unit": "mL/kg/min",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_health_type": "VO2 Max",
+        "shortcut_stat": "Average",
+        "shortcut_unit": "mL/kg·min",
+        "temporal": { "kind": "latest", "freshness_days": 180 }
+      },
+      "intent_hints": ["vo2max", "VO2", "最大摄氧量", "cardio fitness"]
+    },
+    {
+      "metric_id": "wrist_temp",
+      "l1": { "kind": "wearable_daily", "field": "wrist_temp_c" },
+      "compare": { "comparable_90d": false },
+      "snapshot": { "unit": "°C", "parser": "numeric" },
+      "ui": { "label_zh": "睡眠腕温", "label_en": "Sleeping wrist temp", "group_zh": "体能" },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "wrist_temp",
+        "unit": "°C",
+        "higher_is_better": true,
+        "daily_key": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": { "kind": "overnight", "freshness_days": 2 }
+      },
+      "intent_hints": ["腕温", "手腕温度", "wrist temperature", "sleeping wrist"]
     }
   ]
 }

@@ -285,6 +285,39 @@ def main() -> int:
     else:
         print("OK W-manifest-forbidden footer")
 
+    from pha.numerics_manifest import build_fact_card_numerics_manifest
+
+    fc_manifest = build_fact_card_numerics_manifest(
+        {
+            "facts": {
+                "as_of": "2026-09-07",
+                "calendar_day": "2026-09-07",
+                "metrics": [
+                    {
+                        "metric": "sleep_time_asleep",
+                        "label": "睡眠总时长",
+                        "value": 7.6,
+                        "unit": "h",
+                        "day": "2026-09-07",
+                        "baseline_window": "365d",
+                        "baseline_n": 267,
+                        "baseline_mean": 7.2,
+                        "baseline_earliest": "2025-09-08",
+                    }
+                ],
+            }
+        },
+        user_id="selfcheck",
+    )
+    if "2026-09-07" not in fc_manifest.allowed_dates:
+        print("FAIL F-fact-card allowed_dates missing as_of")
+        failed += 1
+    elif "2025-09-08" not in fc_manifest.allowed_dates:
+        print("FAIL F-fact-card allowed_dates missing baseline_earliest")
+        failed += 1
+    else:
+        print("OK F-fact-card allowed_dates")
+
     print("\n" + ("OK all" if not failed else f"FAILED {failed} case(s)"))
     return failed
 
