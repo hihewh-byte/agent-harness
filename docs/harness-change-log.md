@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-09-08 (M1-P9.4.1：英文无年日期)
+
+- **类别**：**P1（audit）**。无年 `September 3` 对齐卡上 allowed_dates 后整段遮罩。
+- **改动**：`_extract_fact_card_dates` + `_fact_card_date_surface_needles`；`FACT_CARD_AUDIT_POLICY_REV=v1.1`。
+- **证据**：`FC-en-yearless-*` PASS。
+- **回滚**：还原日期提取分支。
+
 ## 2026-09-08 (M1-P9.4：fact_card 审计策略)
 
 - **类别**：**P1（audit）**。`manifest.profile == fact_card_interpret` 时走子句级 S/E/T1，不再套用 0.5–15 小数区间。

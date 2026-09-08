@@ -350,11 +350,19 @@ def main() -> int:
                 anchor="2026-09-08",
                 source="selfcheck",
             ),
+            ManifestEntry(
+                domain="fact_card",
+                metric="VO2max",
+                value=51.5,
+                unit="mL/kg/min",
+                anchor="2026-09-03",
+                source="selfcheck",
+            ),
         ],
         reference_date="2026-09-08",
         forbidden_dates={"2026-04-30", "2025-01-13"},
-        card_labels={"血氧", "静息心率", "HRV"},
-        card_units={"%", "bpm", "ms"},
+        card_labels={"血氧", "静息心率", "HRV", "VO2max"},
+        card_units={"%", "bpm", "ms", "mL/kg/min"},
         window_day_tokens={"365", "12", "267"},
     )
     fc_cases = [
@@ -400,6 +408,18 @@ def main() -> int:
             "近 90 天睡眠均值 7.6 小时。",
             False,
             "unauthorized_window:90",
+        ),
+        (
+            "FC-en-yearless-ok",
+            "Your VO2max, measured on September 3, is 51.5 mL/kg/min.",
+            True,
+            "",
+        ),
+        (
+            "FC-en-yearless-bad",
+            "Measured on June 10 with HRV 32.9.",
+            False,
+            "unauthorized_date:2026-06-10",
         ),
     ]
     for cid, ans, exp_pass, vsub in fc_cases:

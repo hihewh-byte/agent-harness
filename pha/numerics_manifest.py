@@ -144,7 +144,7 @@ LANG_DISCLOSURE_MAP: Tuple[_LangDisclosureSpec, ...] = (
 )
 
 # T0 claim cues — evaluated on masked text; T0 always wins over T1 (see audit priority).
-FACT_CARD_AUDIT_POLICY_REV = "v1"
+FACT_CARD_AUDIT_POLICY_REV = "v1.1"
 
 LANG_T0_CLAIM_MAP: Dict[str, Tuple[str, ...]] = {
     "owner_cues": (
@@ -809,6 +809,78 @@ def _normalize_en_date(month_token: str, day: str, year: str) -> Optional[str]:
         return None
 
 
+_EN_MONTH_NAMES: Dict[int, Tuple[str, ...]] = {
+    1: ("January", "Jan", "Jan."),
+    2: ("February", "Feb", "Feb."),
+    3: ("March", "Mar", "Mar."),
+    4: ("April", "Apr", "Apr."),
+    5: ("May",),
+    6: ("June", "Jun", "Jun."),
+    7: ("July", "Jul", "Jul."),
+    8: ("August", "Aug", "Aug."),
+    9: ("September", "Sep", "Sept", "Sep.", "Sept."),
+    10: ("October", "Oct", "Oct."),
+    11: ("November", "Nov", "Nov."),
+    12: ("December", "Dec", "Dec."),
+}
+
+
+def _resolve_month_day_iso(
+    month: int,
+    day: int,
+    allowed: Set[str],
+    *,
+    reference_date: str = "",
+) -> str:
+    """Map month/day to ISO using card-allowed dates when present (FR-6.9)."""
+    suffix = f"-{month:02d}-{day:02d}"
+    hits = sorted(iso for iso in allowed if len(iso) == 10 and iso.endswith(suffix))
+    if hits:
+        return hits[-1]
+    year = "2026"
+    ref = (reference_date or "")[:10]
+    if len(ref) == 10 and ref[4] == "-" and ref[7] == "-":
+        year = ref[:4]
+    else:
+        for iso in sorted(allowed, reverse=True):
+            if len(iso) == 10 and iso[4] == "-" and iso[7] == "-":
+                year = iso[:4]
+                break
+    return f"{year}-{month:02d}-{day:02d}"
+
+
+def _en_iso_surface_forms(iso: str) -> List[str]:
+    """All common English spellings of an ISO date (with and without year)."""
+    if len(iso) != 10 or iso[4] != "-" or iso[7] != "-":
+        return [iso]
+    try:
+        y, m, d = int(iso[:4]), int(iso[5:7]), int(iso[8:10])
+    except ValueError:
+        return [iso]
+    forms: List[str] = [iso]
+    for name in _EN_MONTH_NAMES.get(m, ()):
+        forms.append(f"{name} {d}")
+        forms.append(f"{name} {d}, {y}")
+        forms.append(f"{name} {d} {y}")
+    return forms
+
+
+def _cn_iso_surface_forms(iso: str) -> List[str]:
+    if len(iso) != 10 or iso[4] != "-" or iso[7] != "-":
+        return []
+    try:
+        y, m, d = int(iso[:4]), int(iso[5:7]), int(iso[8:10])
+    except ValueError:
+        return []
+    return [
+        f"{y}年{m}月{d}日",
+        f"{y}年{m:02d}月{d:02d}日",
+        f"{y}年 {m}月 {d}日",
+        f"{m}月{d}日",
+        f"{m}月 {d}日",
+    ]
+
+
 def _extract_normalized_dates(text: str) -> List[str]:
     """Extract ISO + 中文/英文日期并统一为 YYYY-MM-DD。无年份的月日不在这里解析。"""
     found: List[str] = []
@@ -821,6 +893,92 @@ def _extract_normalized_dates(text: str) -> List[str]:
         if iso:
             found.append(iso)
     return found
+
+
+def _extract_fact_card_dates(
+    text: str,
+    allowed: Set[str],
+    *,
+    reference_date: str = "",
+) -> List[str]:
+    """Like `_extract_normalized_dates`, plus yearless EN/CN month-day resolved to card dates."""
+    found = list(_extract_normalized_dates(text))
+    for mon, d, y in _DATE_EN_RE.findall(text or ""):
+        if y:
+            continue
+        month = _EN_MONTH_NUM.get((mon or "").strip(".").lower())
+        if month is None:
+            continue
+        try:
+            day = int(d)
+        except ValueError:
+            continue
+        found.append(
+            _resolve_month_day_iso(month, day, allowed, reference_date=reference_date)
+        )
+    for month_s, day_s in _DATE_CN_MD_RE.findall(text or ""):
+        try:
+            month, day = int(month_s), int(day_s)
+        except ValueError:
+            continue
+        found.append(
+            _resolve_month_day_iso(month, day, allowed, reference_date=reference_date)
+        )
+    return found
+
+
+def _fact_card_date_surface_needles(
+    text: str,
+    iso_dates: Set[str],
+    *,
+    allowed: Set[str],
+    reference_date: str = "",
+) -> List[str]:
+    """Blankable surface strings for ISO dates, including yearless EN/CN forms."""
+    needles: List[str] = []
+    for iso in iso_dates:
+        needles.append(iso)
+        needles.extend(_en_iso_surface_forms(iso))
+        needles.extend(_cn_iso_surface_forms(iso))
+        needles.extend(_date_surface_forms(text, iso))
+    for mon, d, y in _DATE_EN_RE.findall(text or ""):
+        if y:
+            iso = _normalize_en_date(mon, d, y)
+        else:
+            month = _EN_MONTH_NUM.get((mon or "").strip(".").lower())
+            if month is None:
+                continue
+            try:
+                iso = _resolve_month_day_iso(
+                    month, int(d), allowed, reference_date=reference_date
+                )
+            except ValueError:
+                continue
+        if not iso or iso not in iso_dates:
+            continue
+        needles.append(f"{mon} {d}")
+        if y:
+            needles.append(f"{mon} {d}, {y}")
+            needles.append(f"{mon} {d} {y}")
+    for y, m, d in _DATE_CN_RE.findall(text or ""):
+        iso = _normalize_cn_date(y, m, d)
+        if iso in iso_dates:
+            needles.append(f"{y}年{int(m)}月{int(d)}日")
+            needles.append(f"{y}年{m}月{d}日")
+    for month_s, day_s in _DATE_CN_MD_RE.findall(text or ""):
+        try:
+            iso = _resolve_month_day_iso(
+                int(month_s),
+                int(day_s),
+                allowed,
+                reference_date=reference_date,
+            )
+        except ValueError:
+            continue
+        if iso in iso_dates:
+            needles.append(f"{month_s}月{day_s}日")
+            needles.append(f"{int(month_s)}月{int(day_s)}日")
+    return needles
 
 
 def _extract_decimal_tokens(text: str) -> List[str]:
@@ -1364,7 +1522,11 @@ def _audit_response_numerics_fact_card(
 
     working = mask_disclosure_blocks(text, complete_blocks)
 
-    normalized_dates = _extract_normalized_dates(working)
+    normalized_dates = _extract_fact_card_dates(
+        working,
+        allowed_dates,
+        reference_date=manifest.reference_date or "",
+    )
     cited_dates = sorted({d for d in normalized_dates if d in allowed_dates})
     forbidden = set(manifest.forbidden_dates)
     for d in set(normalized_dates):
@@ -1394,10 +1556,13 @@ def _audit_response_numerics_fact_card(
         violations.append(f"unauthorized_date:{d}")
 
     # Blank every recognized date surface (allowed or not) so year/month/day
-    # fragments are not re-scanned as bare integers.
-    date_blank_needles: List[str] = []
-    for d in set(normalized_dates):
-        date_blank_needles.extend(_date_surface_forms(working, d))
+    # fragments — including yearless "September 3" — are not re-scanned as ints.
+    date_blank_needles = _fact_card_date_surface_needles(
+        working,
+        set(normalized_dates),
+        allowed=allowed_dates,
+        reference_date=manifest.reference_date or "",
+    )
     working = _blank_substrings(working, date_blank_needles)
     working = _blank_substrings(working, sorted(manifest.card_times))
 

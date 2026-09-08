@@ -1,3 +1,10 @@
+## 2026-09-08 22:20 (M1-P9.4.1：英文无年日期遮罩)
+
+- **类别**：P1（audit）。`September 3` 无年时未当日期，日数字 `3` 被拒。
+- **改动**：fact_card 审计用 `_extract_fact_card_dates` 把无年 EN/CN 月日对齐卡上 `allowed_dates`；遮罩生成 `September 3` / `9月3日` 等表面形。策略版本 `v1.1`。
+- **证据**：`FC-en-yearless-ok/bad` selfcheck PASS。
+- **回滚**：还原 `_extract_fact_card_dates` 调用与 `FACT_CARD_AUDIT_POLICY_REV`。
+
 ## 2026-09-08 20:40 (M1-P9.4 落地：fact_card 数字分级审计)
 
 - **类别**：P1（audit）/ 事实卡解读。
