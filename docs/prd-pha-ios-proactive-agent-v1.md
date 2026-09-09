@@ -256,7 +256,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P11** | **勾选即所见 + 捷径全集同步**（FR-1.5 v1.7 / FR-2.7 v1.7） | `DONE` | 2026-09-08：去掉 `reveal_when_selected`；卡 = 勾选；`shortcut_sync_specs` 不读 prefs；catalog 三态提示。与 P10 同一套捷径生成器。selfcheck PASS |
 | **M1-P12** | **优先级包一期**：闭合 zip 日表（血氧 / 呼吸率 / VO2max / 腕温）+ zip 为最终真值 + pack_version | `DONE*` | 2026-09-08：7 项数量 Find 真机入库；Find 总表 `shortcut_health_find_catalog.json`；腕温无权限开关，捷径跳过（`*`）。VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。pack `2026.09.08.priority-1e` |
 | **M1-P9.2** | 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band/文案方向统一 | `DONE` | 2026-09-08：prefs `locale`；HTML 中英日期；解读剥 Markdown；`numeric_band` 标签；缓存键含 locale。通知 body 日期仍 ISO（P9.3） |
-| **M1-P9.3** | 真机与边界验收 | `IN_PROGRESS` | 2026-09-08：Mac+iPhone Safari 解读已出。评估要求走 TASK 大纲（非整卡叙事、不解析指标 id）。git 默认 en-US。欠：停 Ollama、跨日真看 |
+| **M1-P9.3** | 真机与边界验收 | `DONE` | 2026-09-09：跨日 `calendar_day` 键隔离真看 PASS；Ollama 不可达 → API `model_unavailable` + SSR「本机模型未响应」/「重试」PASS（临时实例 `OLLAMA_BASE_URL=:9`；本机 Electron Ollama 会自动拉起，不宜依赖 kill）。Mac+iPhone Safari 解读此前已出 |
 | **M1-P9.4** | **卡外数字分级放宽 + 单一审计 + review 优化**（FR-6.3 / FR-6.10 v1.10） | `DONE` | 2026-09-08：`fact_card` 审计策略住 `numerics_manifest`；卡侧删字面量正则；标识符/`.0`/窗口口语归一；TASK 分条 + locale T1；Tier0 `min` 保留 values；失败存 `rejected_text` + 归并文案。selfcheck PASS |
 | **M1-P9.5** | **解读专用 soul（焦点跑偏）** | `DONE` | 2026-09-08：`PHA_FACT_CARD_SOUL_MINIMAL` + `select_soul_base`；禁三步看诊；缓存键含 soul。交接 v4。验收见 change-log |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |

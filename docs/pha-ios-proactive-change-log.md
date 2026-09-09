@@ -1,3 +1,11 @@
+## 2026-09-09 08:35 (M1-P9.3：停 Ollama + 跨日缓存真验收)
+
+- **类别**：验收 / FR-6.5 / FR-6.6。
+- **跨日**：今日键与 `calendar_day-1` 键不同；栽入昨日假 `done` 不泄漏到今日 `load_interpretation_for_user`；同键二次 POST `started=False`。
+- **模型不可用**：临时 PHA `:8799` + `OLLAMA_BASE_URL=http://127.0.0.1:9` → 解读 `failed` / `model_unavailable` / `Connection refused`；SSR `humanize` →「本机模型未响应」+ 按钮「重试」。规则层指标仍在。说明：直接 kill 本机 Ollama 会被 Electron/launchd 拉起，真测改用死端口更稳。
+- **改动**：仅文档（PRD §8 P9.3 → DONE）。无代码。
+- **回滚**：无。
+
 ## 2026-09-08 22:50 (M1-P9.5：解读专用 soul，消三步看诊焦点跑偏)
 
 - **类别**：P1（解读大纲）。英文解读强制 `Trend review / Related markers / Recommendations`，把卡上 SpO2/呼吸率当「相关指标」念出。

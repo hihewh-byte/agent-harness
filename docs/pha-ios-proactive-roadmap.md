@@ -56,7 +56,7 @@
 - **P11** 勾选即所见 + 捷径全集同步（**维护者 9/8 08:27 拍板，PRD v1.7 FR-1.5 / FR-2.7**）：去掉睡眠分期隐式展开；捷径按注册表全集出 Find、不读 prefs；改勾选后刷新即切换、不重装捷径。**与 P10 同一 agent 一次做完、一次重装**
 - **P12** 优先级包一期：血氧/呼吸率/VO2max 真机入库；Find 总表 `shortcut_health_find_catalog.json`；腕温捷径跳过。zip 为最终真值。
 - **P9.2** 本地时区 + locale 日期渲染 + 纯文本输出 + 缓存键 + band 数值方向标签（DONE 2026-09-08）
-- **P9.3** iPhone Safari 已跑通解读；停 Ollama、跨日缓存未完。git 默认 en-US。
+- **P9.3** 真机与边界验收 **DONE 2026-09-09**：跨日缓存键隔离；Ollama 不可达 → `model_unavailable`（见 change-log）
 
 ### 2. M2 薄 App（捷径同步已不可忍受时）
 
