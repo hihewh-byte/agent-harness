@@ -10,7 +10,7 @@ from typing import Any, Dict, Iterator, List, Literal, Optional
 import httpx
 from dotenv import load_dotenv
 
-from pha.ollama_payload import apply_keep_alive
+from pha.ollama_payload import apply_ollama_options
 
 FALLBACK_TO_HEURISTIC = "FALLBACK_TO_HEURISTIC"
 
@@ -456,7 +456,7 @@ class OllamaProvider:
         """
         self._assert_model_installed()
         url = f"{self._base_url}/api/chat"
-        body: Dict[str, Any] = apply_keep_alive(
+        body: Dict[str, Any] = apply_ollama_options(
             {
                 "model": self._model,
                 "messages": [
@@ -517,7 +517,7 @@ class OllamaProvider:
         """
         self._assert_model_installed()
         url = f"{self._base_url}/api/chat"
-        body: Dict[str, Any] = apply_keep_alive(
+        body: Dict[str, Any] = apply_ollama_options(
             {
                 "model": self._model,
                 "messages": messages,
@@ -534,7 +534,7 @@ class OllamaProvider:
         """Stream assistant token deltas from Ollama ``/api/chat``."""
         self._assert_model_installed()
         url = f"{self._base_url}/api/chat"
-        body = apply_keep_alive(
+        body = apply_ollama_options(
             {
                 "model": self._model,
                 "messages": messages,
@@ -582,7 +582,7 @@ class OllamaProvider:
             raise ValueError("chat_with_vision requires at least one base64 image")
         self._assert_model_installed()
         url = f"{self._base_url}/api/chat"
-        body = apply_keep_alive(
+        body = apply_ollama_options(
             {
                 "model": self._model,
                 "messages": [
