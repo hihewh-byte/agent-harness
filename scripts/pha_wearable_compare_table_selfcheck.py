@@ -733,15 +733,14 @@ def test_single_metric_focus() -> bool:
         if got != expected:
             print(f"FAIL p2 single focus {msg!r}: {got} != {expected}")
             return False
-    # 深睡时长 / 锻炼成对 → allowed metric pairs (not blocked by 2-non-sleep rule).
-    if set(infer_single_metric_focus_ids("深睡时长是多少")) != {"sleep_deep", "sleep_rem"}:
-        print("FAIL 深睡时长 pair", infer_single_metric_focus_ids("深睡时长是多少"))
+    # 深睡时长 → 仅深睡（同簇允许，但不因硬编码对把 REM 绑进来）。
+    if set(infer_single_metric_focus_ids("深睡时长是多少")) != {"sleep_deep"}:
+        print("FAIL 深睡时长", infer_single_metric_focus_ids("深睡时长是多少"))
         return False
     if set(infer_single_metric_focus_ids("请报告锻炼心率范围")) != {
         "workout_heart_rate_range_bpm",
-        "workout_count_recent",
     }:
-        print("FAIL 锻炼心率范围 workout pair", infer_single_metric_focus_ids("请报告锻炼心率范围"))
+        print("FAIL 锻炼心率范围", infer_single_metric_focus_ids("请报告锻炼心率范围"))
         return False
     # Colloquial sleep duration → primary sleep_time_asleep (not asleep/deep/rem triple).
     if infer_single_metric_focus_ids("昨晚睡多久啊") != ["sleep_time_asleep"]:

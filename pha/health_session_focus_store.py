@@ -93,6 +93,9 @@ def session_focus_to_health(focus: SessionTurnFocus | None) -> HealthSessionFocu
         last_assistant_digest=focus.last_assistant_digest or "",
         focus_goal=focus.focus_goal or "",
         focus_domains=list(focus.focus_domains or []),
+        focus_grain_start=getattr(focus, "focus_grain_start", "") or "",
+        focus_grain_end=getattr(focus, "focus_grain_end", "") or "",
+        focus_grain_aggregation=getattr(focus, "focus_grain_aggregation", "") or "",
     )
 
 
@@ -128,6 +131,9 @@ def save_health_session_focus(
         last_assistant_digest=focus.last_assistant_digest,
         focus_goal=focus.focus_goal,
         focus_domains=list(focus.focus_domains or []),
+        focus_grain_start=getattr(focus, "focus_grain_start", "") or "",
+        focus_grain_end=getattr(focus, "focus_grain_end", "") or "",
+        focus_grain_aggregation=getattr(focus, "focus_grain_aggregation", "") or "",
     )
 
 
@@ -221,7 +227,11 @@ def record_health_turn_focus(
     focus_domains: list[str] = []
     prior = load_health_session_focus(sid)
     explicit_metrics = infer_metrics_from_message(user_message)
-    if explicit_metrics and goal_session_anchor_enabled():
+    if (
+        explicit_metrics
+        and goal_session_anchor_enabled()
+        and harness_profile not in ("wearable_daily_review", "combined_review")
+    ):
         focus_goal = ""
         focus_domains = []
     elif harness_profile == "combined_review" and arbiter_reason in (
@@ -236,9 +246,27 @@ def record_health_turn_focus(
             focus_domains.append("wearable")
         if not focus_domains:
             focus_domains = ["lab", "wearable"]
+    elif harness_profile == "wearable_daily_review":
+        focus_goal = "daily_readiness"
+        focus_domains = ["wearable"]
     elif prior and goal_session_anchor_enabled():
         focus_goal = prior.focus_goal
         focus_domains = list(prior.focus_domains or [])
+    grain_start = ""
+    grain_end = ""
+    grain_agg = ""
+    if (os.environ.get("PHA_EPISODIC_GRAIN_ANCHOR") or "1").strip().lower() in ("1", "true", "yes"):
+        from pha.wearable_time_grain import resolve_wearable_time_grain
+
+        grain = resolve_wearable_time_grain(user_message)
+        if grain.source != "default":
+            grain_start = grain.start.isoformat()
+            grain_end = grain.end.isoformat()
+            grain_agg = grain.aggregation
+        elif prior is not None:
+            grain_start = getattr(prior, "focus_grain_start", "") or ""
+            grain_end = getattr(prior, "focus_grain_end", "") or ""
+            grain_agg = getattr(prior, "focus_grain_aggregation", "") or ""
     focus = HealthSessionFocus(
         session_id=sid,
         focus_profile=profile,
@@ -252,6 +280,9 @@ def record_health_turn_focus(
         last_assistant_digest=summarize_assistant_digest(assistant_reply),
         focus_goal=focus_goal,
         focus_domains=focus_domains,
+        focus_grain_start=grain_start,
+        focus_grain_end=grain_end,
+        focus_grain_aggregation=grain_agg,
     )
     save_health_session_focus(
         sid,
@@ -268,6 +299,7 @@ def episodic_report_meta(
     recall_focus_injected: bool,
     focus_goal: str = "",
     focus_domains: list[str] | None = None,
+    health_episodic_focus: Any = None,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {
         "episodic": {
@@ -280,6 +312,15 @@ def episodic_report_meta(
         out["episodic"]["focusGoal"] = focus_goal
     if focus_domains:
         out["episodic"]["focusDomains"] = list(focus_domains)
+    grain_start = str(getattr(health_episodic_focus, "focus_grain_start", "") or "").strip()
+    grain_end = str(getattr(health_episodic_focus, "focus_grain_end", "") or "").strip()
+    grain_agg = str(getattr(health_episodic_focus, "focus_grain_aggregation", "") or "").strip()
+    if grain_start and grain_end:
+        out["episodic"]["focusGrain"] = {
+            "start": grain_start,
+            "end": grain_end,
+            "aggregation": grain_agg or "point",
+        }
     if turn_scope is not None:
         out["turnScope"] = turn_scope.to_report_dict()
     return out

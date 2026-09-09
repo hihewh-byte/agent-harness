@@ -447,6 +447,41 @@ def main() -> int:
     else:
         print("OK FC audit_scope=fact_card")
 
+    from pha.wearable_metric_registry import catalog_keys_canonical, catalog_labels, primary_metric_id_for_catalog_key
+
+    frozen = {
+        "sleep": ("今日睡眠", "睡眠均值", "当日睡眠", "Today's sleep", "Mean sleep", "Sleep that day"),
+        "hrv": ("今日HRV", "HRV均值", "当日HRV", "Today's HRV", "Mean HRV", "HRV that day"),
+        "rhr": ("今日静息心率", "静息心率均值", "当日静息心率", "Today's resting HR", "Mean resting HR", "Resting HR that day"),
+        "steps": ("今日步数", "步数均值", "当日步数", "Today's steps", "Mean steps", "Steps that day"),
+        "activity_kcal": ("今日活动消耗", "活动消耗日均", "当日活动消耗", "Today's active kcal", "Mean active kcal/day", "Active kcal that day"),
+        "spo2": ("今日血氧", "血氧均值", "当日血氧", "Today's SpO2", "Mean SpO2", "SpO2 that day"),
+        "respiratory_rate": ("今日呼吸率", "呼吸率均值", "当日呼吸率", "Today's respiratory rate", "Mean respiratory rate", "Respiratory rate that day"),
+        "vo2max": ("今日VO2max", "VO2max均值", "当日VO2max", "Today's VO2max", "Mean VO2max", "VO2max that day"),
+        "wrist_temp": ("今日手腕体温", "手腕体温均值", "当日手腕体温", "Today's wrist temp", "Mean wrist temp", "wrist temp that day"),
+    }
+    for key in catalog_keys_canonical():
+        mid = primary_metric_id_for_catalog_key(key)
+        labels = catalog_labels(mid) if mid else None
+        expect = frozen.get(key)
+        if labels is None or expect is None:
+            print("FAIL freeze missing labels", key, mid, labels)
+            failed += 1
+            continue
+        got = (
+            labels.point_zh,
+            labels.span_zh,
+            labels.that_day_zh,
+            labels.point_en,
+            labels.span_en,
+            labels.that_day_en,
+        )
+        if got != expect:
+            print("FAIL freeze", key, got, "!=", expect)
+            failed += 1
+        else:
+            print("OK freeze", key)
+
     print("\n" + ("OK all" if not failed else f"FAILED {failed} case(s)"))
     return failed
 

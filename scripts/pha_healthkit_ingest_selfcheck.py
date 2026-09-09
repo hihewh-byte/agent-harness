@@ -166,7 +166,14 @@ def test_happy_path_and_idempotent(client) -> bool:
     if hd.row_count != 1 or not hd.metrics_supported:
         print("FAIL get_health_data row_count", hd)
         return False
-    hrv_avg = hd.summaries["hrv"].average if "hrv" in hd.summaries else None
+    hrv_avg = None
+    if "hrv_sdnn_ms" in hd.summaries:
+        hrv_avg = hd.summaries["hrv_sdnn_ms"].average
+    else:
+        for mid, ckey in (hd.catalog_key_of or {}).items():
+            if ckey == "hrv" and mid in hd.summaries:
+                hrv_avg = hd.summaries[mid].average
+                break
     if hrv_avg != 42.0:
         print("FAIL get_health_data hrv", hd.summaries)
         return False

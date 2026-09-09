@@ -198,6 +198,59 @@ def infer_wearable_metrics(user_message: str) -> List[str]:
     return get_catalog_manager().infer_wearable_metrics(user_message)
 
 
+def infer_wearable_metric_ids(user_message: str) -> List[str]:
+    """Registry metric_ids for this turn, with optional cluster expansion."""
+    from pha.wearable_metric_registry import (
+        cluster_expand_enabled,
+        cluster_members,
+        cluster_of,
+        cluster_primary_metric_id,
+        hint_match_metric_ids,
+        metric_entry,
+        metric_ids_for_catalog_key,
+        primary_metric_id_for_catalog_key,
+    )
+
+    msg = (user_message or "").strip()
+    if not msg:
+        return []
+    ordered: List[str] = []
+    seen: set[str] = set()
+
+    def _add(mid: str) -> None:
+        if mid and mid not in seen:
+            seen.add(mid)
+            ordered.append(mid)
+
+    for mid in hint_match_metric_ids(msg):
+        _add(mid)
+    hinted_clusters = {cluster_of(mid) for mid in ordered if cluster_of(mid)}
+    for key in infer_wearable_metrics(msg):
+        primary = primary_metric_id_for_catalog_key(key)
+        key_cluster = cluster_of(primary) if primary else None
+        if primary and key_cluster and key_cluster in hinted_clusters and primary not in seen:
+            continue
+        if primary:
+            _add(primary)
+        else:
+            for mid in metric_ids_for_catalog_key(key):
+                _add(mid)
+
+    if cluster_expand_enabled():
+        extra: List[str] = []
+        for mid in list(ordered):
+            cid = cluster_of(mid)
+            if not cid:
+                continue
+            primary = cluster_primary_metric_id(cid)
+            if primary and primary in seen:
+                extra.extend(cluster_members(cid, expand_only=True))
+        for mid in extra:
+            _add(mid)
+
+    return [mid for mid in ordered if metric_entry(mid)]
+
+
 def resolve_wearable_tool_args(
     user_message: str,
     *,

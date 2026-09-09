@@ -36,6 +36,7 @@ def evaluate_skip_llm_path(
     numerics_manifest: Optional[NumericsManifest],
     wearable_compare_table_obj: Any,
     response_locale: Optional[str] = None,
+    episodic: Any = None,
 ) -> SkipLlmEvaluation:
     """Harness veto path: deterministic answers before LLM compose."""
     out = SkipLlmEvaluation()
@@ -103,6 +104,7 @@ def evaluate_skip_llm_path(
             user_message=msg,
             manifest=numerics_manifest,
             response_locale=response_locale,
+            episodic=episodic,
         )
         if manifest_focus:
             out.skip_llm = True
@@ -261,6 +263,7 @@ def evaluate_skip_llm_path(
                 user_message=msg,
                 manifest=numerics_manifest,
                 response_locale=response_locale,
+                episodic=episodic,
             )
             if manifest_focus:
                 out.skip_llm = True

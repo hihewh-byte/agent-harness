@@ -158,8 +158,50 @@ def emit_turn_harness_report(
         goal_class=ctx.goal_class or "",
         goal_source=ctx.goal_source or "",
         arbiter_decision=dict(ctx.arbiter_decision or {}),
+        wearable_metric_resolution=_wearable_metric_resolution(ctx),
     )
     emit_harness_build_report(build_harness_report(h_in))
+
+
+def _wearable_metric_resolution(ctx: HarnessEmitContext) -> Dict[str, Any]:
+    from pha.intent_gates import infer_wearable_metric_ids, infer_wearable_metrics
+    from pha.wearable_metric_registry import cluster_of
+    from pha.wearable_time_grain import resolve_wearable_time_grain
+
+    msg = ctx.msg or ""
+    ids = list(infer_wearable_metric_ids(msg))
+    keys = list(infer_wearable_metrics(msg))
+    grain = resolve_wearable_time_grain(msg, episodic=ctx.session_focus_row)
+    clusters = sorted({c for mid in ids if (c := cluster_of(mid))})
+    missing: list[str] = []
+    manifest = ctx.numerics_manifest
+    if manifest is not None and ids:
+        from pha.wearable_metric_registry import catalog_labels
+
+        present = {e.metric for e in (manifest.entries or [])}
+        same_day_today = grain.is_point_day() and grain.end.isoformat() == str(
+            getattr(manifest, "reference_date", "") or ""
+        )
+        for mid in ids:
+            labels = catalog_labels(mid)
+            if labels is None:
+                continue
+            candidates = (
+                [labels.point_zh, labels.that_day_zh] if grain.is_point_day() else [labels.span_zh]
+            )
+            if not any(c in present for c in candidates):
+                missing.append(mid)
+    return {
+        "requestedCatalogKeys": keys,
+        "requestedMetricIds": ids,
+        "clusterExpanded": clusters,
+        "grain": {
+            "start": grain.start.isoformat(),
+            "end": grain.end.isoformat(),
+            "source": grain.source,
+        },
+        "missingForGrain": missing,
+    }
 
 
 __all__ = ["HarnessEmitContext", "build_turn_intent_route_telemetry", "emit_turn_harness_report"]

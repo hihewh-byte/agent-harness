@@ -12,7 +12,6 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypedDict
 
 from pha.date_range_parser import default_wearable_window
 from pha.health_data import HealthDataResult, effective_query_reference_date, get_health_data
-from pha.intent_gates import infer_wearable_metrics
 from pha.medical_storage import sanitize_ldl_value
 
 _MANIFEST_MAX_CHARS = int(os.environ.get("PHA_MANIFEST_MAX_CHARS", "600"))
@@ -451,34 +450,25 @@ def _wearable_entries(
     user_message: str,
     *,
     wearable_result: Optional[HealthDataResult] = None,
+    episodic: Any = None,
 ) -> List[ManifestEntry]:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
-    window = default_wearable_window(user_message, reference=ref)
+    window = default_wearable_window(user_message, reference=ref, episodic=episodic)
     anchor = f"{window.start.isoformat()}~{window.end.isoformat()}"
 
     if wearable_result is None or window.start == window.end:
-        metrics = infer_wearable_metrics(user_message)
-        if not metrics:
-            # Registry-hint focus (e.g. 「呼吸正常吗」) may not hit catalog triggers;
-            # map focus metric_ids → catalog keys so we do not fall back to hrv+kcal.
-            from pha.wearable_compare_table_v1 import infer_single_metric_focus_ids
+        from pha.intent_gates import infer_wearable_metric_ids
 
-            _focus_to_cat = {
-                "sleep_time_asleep": "sleep",
-                "hrv_rmssd_ms": "hrv",
-                "hrv_sdnn_ms": "hrv",
-                "resting_heart_rate_bpm": "rhr",
-                "spo2_percent": "spo2",
-                "respiratory_rate": "respiratory_rate",
-            }
-            metrics = [
-                _focus_to_cat[mid]
-                for mid in infer_single_metric_focus_ids(user_message)
-                if mid in _focus_to_cat
-            ]
+        metrics = infer_wearable_metric_ids(user_message)
         if not metrics:
-            metrics = ["hrv", "activity_kcal"]
+            from pha.wearable_metric_registry import catalog_keys_core, primary_metric_id_for_catalog_key
+
+            metrics = [
+                mid
+                for key in catalog_keys_core()[:2]
+                if (mid := primary_metric_id_for_catalog_key(key))
+            ]
         wearable_result = get_health_data(
             uid,
             window.start,
@@ -492,35 +482,29 @@ def _wearable_entries(
     point_prefix = "今日" if same_day and window.end == ref else "当日"
     if same_day:
         anchor = window.start.isoformat()
-        label_map = {
-            "hrv": (f"{point_prefix}HRV", "ms"),
-            "activity_kcal": (f"{point_prefix}活动消耗", "kcal"),
-            "steps": (f"{point_prefix}步数", "步"),
-            "sleep": (f"{point_prefix}睡眠", "h"),
-            "rhr": (f"{point_prefix}静息心率", "bpm"),
-            "spo2": (f"{point_prefix}血氧", "%"),
-            "respiratory_rate": (f"{point_prefix}呼吸率", "breaths/min"),
-            "vo2max": (f"{point_prefix}VO2max", "mL/kg/min"),
-            "wrist_temp": (f"{point_prefix}手腕体温", "°C"),
-        }
-    else:
-        label_map = {
-            "hrv": ("HRV均值", "ms"),
-            "activity_kcal": ("活动消耗日均", "kcal"),
-            "steps": ("步数均值", "步"),
-            "sleep": ("睡眠均值", "h"),
-            "rhr": ("静息心率均值", "bpm"),
-            "spo2": ("血氧均值", "%"),
-            "respiratory_rate": ("呼吸率均值", "breaths/min"),
-            "vo2max": ("VO2max均值", "mL/kg/min"),
-            "wrist_temp": ("手腕体温均值", "°C"),
-        }
+    from pha.wearable_metric_registry import catalog_key_for, catalog_labels, catalog_unit_for
+
     for key, summary in (wearable_result.summaries or {}).items():
         avg = summary.average
         if avg is None:
             continue
-        metric_key = str(key).strip().lower()
-        label, unit = label_map.get(metric_key, (metric_key, summary.unit or ""))
+        metric_key = str(key).strip()
+        labels = catalog_labels(metric_key)
+        if labels is None:
+            ckey = catalog_key_for(metric_key)
+            labels = catalog_labels(ckey) if ckey else None
+        unit = catalog_unit_for(metric_key) or str(summary.unit or "")
+        if unit in ("hours",):
+            unit = "h"
+        if unit == "count" and (catalog_key_for(metric_key) == "steps" or metric_key == "steps"):
+            unit = "步"
+        if same_day:
+            if labels:
+                label = labels.point_zh if point_prefix == "今日" else labels.that_day_zh
+            else:
+                label = metric_key
+        else:
+            label = labels.span_zh if labels else metric_key
         out.append(
             ManifestEntry(
                 domain="wearable",
@@ -542,6 +526,7 @@ def build_numerics_manifest(
     wearable_result: Optional[HealthDataResult] = None,
     include_lipid: bool = True,
     include_wearable: bool = True,
+    episodic: Any = None,
 ) -> NumericsManifest:
     """Build machine-verifiable numerics whitelist for the current turn."""
     ref = effective_query_reference_date()
@@ -549,7 +534,7 @@ def build_numerics_manifest(
     entries: List[ManifestEntry] = []
     from pha.wearable_time_grain import resolve_wearable_time_grain
 
-    grain = resolve_wearable_time_grain(user_message, reference=ref)
+    grain = resolve_wearable_time_grain(user_message, reference=ref, episodic=episodic)
 
     if include_lipid and profile in ("combined_review", "lab_cross_year", "lifestyle"):
         entries.extend(_lipid_entries(user_id))
@@ -560,7 +545,12 @@ def build_numerics_manifest(
         "wearable_screenshot_review",
     ):
         entries.extend(
-            _wearable_entries(user_id, user_message, wearable_result=wearable_result),
+            _wearable_entries(
+                user_id,
+                user_message,
+                wearable_result=wearable_result,
+                episodic=episodic,
+            ),
         )
 
     return NumericsManifest(

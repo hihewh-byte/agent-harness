@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from datetime import date
-from typing import Optional
+from typing import Any, Optional
 
 from pha.date_parser import safe_parse_date
 from pha.health_data import effective_query_reference_date
@@ -94,6 +94,7 @@ def default_wearable_window(
     user_message: str,
     *,
     reference: Optional[date] = None,
+    episodic: Any = None,
 ) -> ParsedDateRange:
     """Explicit calendar span wins; else 1E-a time-anchor grain; else 90-day default."""
     explicit = parse_user_date_range(user_message)
@@ -102,5 +103,5 @@ def default_wearable_window(
     from pha.wearable_time_grain import resolve_wearable_time_grain
 
     ref = reference or effective_query_reference_date()
-    grain = resolve_wearable_time_grain(user_message, reference=ref)
+    grain = resolve_wearable_time_grain(user_message, reference=ref, episodic=episodic)
     return ParsedDateRange(start=grain.start, end=grain.end)

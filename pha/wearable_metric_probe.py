@@ -8,46 +8,34 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from pha.intent_gates import infer_wearable_metrics, user_message_needs_wearable_query
 from pha.sqlite_storage import _connect, get_wearable_record_counts, init_schema
 from pha.wearable_metric_registry import (
+    hint_match_metric_ids as _registry_hint_match,
     ingest_module,
     list_metric_entries,
     metric_entry,
+    metric_ids_for_catalog_key,
     metric_labels_zh,
     metric_mention_hints,
 )
 
-_CATALOG_TO_REGISTRY: Dict[str, Tuple[str, ...]] = {
-    "sleep": ("sleep_time_asleep", "sleep_deep", "sleep_rem"),
-    "hrv": ("hrv_rmssd_ms",),
-    "rhr": ("resting_heart_rate_bpm",),
-    "spo2": ("spo2_percent",),
-    "respiratory_rate": ("respiratory_rate",),
-    "steps": (),
-    "activity_kcal": (),
-}
-
-_BROAD_COMPARE_RE = re.compile(
-    r"指标|是否正常|对比|相比|是不是都|整体|90\s*天|过去\s*90",
-    re.I,
-)
-_STAGE_HINT_RE = re.compile(r"深睡|REM|快速眼动|睡眠分期|分期", re.I)
-_WORKOUT_HINT_RE = re.compile(r"workout|work\s*out|锻炼|跑步|训练|运动", re.I)
-
 _MIN_DAILY_ROWS = 14
 
 
+def _catalog_to_registry(cat_id: str) -> Tuple[str, ...]:
+    return metric_ids_for_catalog_key(cat_id)
+
+
+def _broad_compare_hit(msg: str) -> bool:
+    from pha.catalog_dch import token_in_message
+    from pha.health_intent_catalog import load_health_intent_catalog
+
+    tokens = (load_health_intent_catalog().get("broad_compare") or {}).get("tokens") or []
+    if tokens:
+        return any(token_in_message(str(tok), msg, case_insensitive=True) for tok in tokens)
+    return False
+
+
 def _hint_match_metric_ids(user_message: str) -> Set[str]:
-    msg = user_message or ""
-    blob = msg.lower()
-    out: Set[str] = set()
-    for mid, hints in metric_mention_hints().items():
-        for h in hints:
-            if h and h.lower() in blob:
-                out.add(mid)
-    if _STAGE_HINT_RE.search(msg):
-        out.update({"sleep_deep", "sleep_rem"})
-    if _WORKOUT_HINT_RE.search(msg):
-        out.update({"workout_heart_rate_range_bpm", "workout_count_recent"})
-    return out
+    return set(_registry_hint_match(user_message))
 
 
 def infer_requested_compare_metric_ids(user_message: str) -> List[str]:
@@ -55,14 +43,14 @@ def infer_requested_compare_metric_ids(user_message: str) -> List[str]:
     msg = (user_message or "").strip()
     ids: Set[str] = set(_hint_match_metric_ids(msg))
     for cat_id in infer_wearable_metrics(msg):
-        for reg_id in _CATALOG_TO_REGISTRY.get(cat_id, ()):
+        for reg_id in _catalog_to_registry(cat_id):
             ids.add(reg_id)
-    if _BROAD_COMPARE_RE.search(msg) or user_message_needs_wearable_query(msg):
+    if _broad_compare_hit(msg) or user_message_needs_wearable_query(msg):
         for m in list_metric_entries():
             compare = m.get("compare") or {}
             if compare.get("comparable_90d") and not compare.get("conditional_row"):
                 ids.add(str(m.get("metric_id")))
-        if _WORKOUT_HINT_RE.search(msg) or any(
+        if any(
             m in ids for m in ("workout_heart_rate_range_bpm", "workout_count_recent")
         ):
             ids.update({"workout_heart_rate_range_bpm", "workout_count_recent"})

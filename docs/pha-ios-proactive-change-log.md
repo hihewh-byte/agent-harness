@@ -1,3 +1,29 @@
+## 2026-09-09 16:51 (FR-6.13 真机验收 · 关 DONE*)
+
+- **类别**：P1 / FR-6.13 运行验收。
+- **现场**：`pha_restart_accept.sh` launchd kickstart，pid 41270（16:24）；先前 14:17 进程模块混装（`episodic=` TypeError / `infer_wearable_metric_ids` ImportError）已消失。
+- **证据**（`qwen3:14b` · user=default · 真账本 2026-09-09；审计 `passed=true`）：
+
+| id | 路径 | 结果 |
+|---|---|---|
+| H9-zh 同类 | Mac `/api/chat` + 网页对话 | 两段训练建议；RHR 62 / HRV 32.8 / 睡眠 8.2h；力量训练可做但控量。先混装失败后重启通过 |
+| interpret | `POST /proactive/fact-card/interpret` + 完整卡中文页 | `status=done`，16:31；不再「本机模型未响应」。轻松日口径，未直接答力量训练 |
+| H10 / H10E | skip-LLM | 点日五分项 8.22 / 0.47 / 2.45 / 5.3 / 0.78（2026-09-09），无 90d 均值 |
+| H11 | 同 session 先 H10 再无日期追问 | 深睡 0.47 / 核心 5.3 / 清醒 0.78，锚点仍 2026-09-09 |
+| H12 | skip-LLM | 同 H10 五分项 |
+| H13 / H13E | skip-LLM fail-closed | 「库内没有 2026-09-09 的静息心率」/ `No verified resting HR … 2026-09-09`；正文无 62 |
+| H9E | `/api/chat` en | 审计过；英文；无 Trend review 三段标题；建议高强度力量训练须看睡眠恢复。未点名 32.8/62（定性引用区间） |
+
+- **已知口径差（不挡关账）**：对话会把 9 月 8 日 RHR=62 说成「今天」；事实卡标了「9月8日，最近一次」。力量训练是否可做：对话写可以控量，卡解读写轻松日。
+- **回滚**：同 15:20 条。
+
+## 2026-09-09 15:20 (FR-6.13：对话框解读与事实卡同源)
+
+- **类别**：P1 / FR-6.13。
+- **改动**：对话侧 Registry 单一真源；`wearable_daily_review` 复用事实卡 T0；点日粒度可继承；fail-closed 不换日换指标。不改 iOS 卡片 UI、不改 interpret 缓存键。
+- **证据**：离线 `pha_chat_fact_card_parity_selfcheck` H9–H13 / H9E–H13E。真机见上条 16:51。
+- **回滚**：`PHA_DAILY_READINESS_PROFILE=0`；`PHA_EPISODIC_GRAIN_ANCHOR=0`。
+
 ## 2026-09-09 14:20 (M1-P14：USER_BACKGROUND_BRIEF 进解读)
 
 - **类别**：P1 / FR-6.12。

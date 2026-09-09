@@ -32,6 +32,9 @@ _FOCUS_MIGRATIONS: dict[str, str] = {
     "last_assistant_digest": "TEXT NOT NULL DEFAULT ''",
     "focus_goal": "TEXT NOT NULL DEFAULT ''",
     "focus_domains_json": "TEXT NOT NULL DEFAULT '[]'",
+    "focus_grain_start": "TEXT NOT NULL DEFAULT ''",
+    "focus_grain_end": "TEXT NOT NULL DEFAULT ''",
+    "focus_grain_aggregation": "TEXT NOT NULL DEFAULT ''",
 }
 
 
@@ -79,6 +82,9 @@ class SessionTurnFocus:
     last_assistant_digest: str = ""
     focus_goal: str = ""
     focus_domains: list[str] = field(default_factory=list)
+    focus_grain_start: str = ""
+    focus_grain_end: str = ""
+    focus_grain_aggregation: str = ""
 
     @property
     def active(self) -> bool:
@@ -119,6 +125,9 @@ def _row_to_focus(row: sqlite3.Row) -> SessionTurnFocus:
         last_assistant_digest=(row["last_assistant_digest"] if "last_assistant_digest" in keys else "") or "",
         focus_goal=(row["focus_goal"] if "focus_goal" in keys else "") or "",
         focus_domains=[str(d) for d in domains if str(d).strip()],
+        focus_grain_start=(row["focus_grain_start"] if "focus_grain_start" in keys else "") or "",
+        focus_grain_end=(row["focus_grain_end"] if "focus_grain_end" in keys else "") or "",
+        focus_grain_aggregation=(row["focus_grain_aggregation"] if "focus_grain_aggregation" in keys else "") or "",
     )
 
 
@@ -138,6 +147,9 @@ def save_session_turn_focus(
     last_assistant_digest: str = "",
     focus_goal: str = "",
     focus_domains: Optional[List[str]] = None,
+    focus_grain_start: str = "",
+    focus_grain_end: str = "",
+    focus_grain_aggregation: str = "",
 ) -> None:
     sid = (session_id or "").strip()
     if not sid:
@@ -157,8 +169,9 @@ def save_session_turn_focus(
                 focus_profile, focus_metric, focus_lab_years_json,
                 focus_wearable_start, focus_wearable_end,
                 last_user_message, last_assistant_digest,
-                focus_goal, focus_domains_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                focus_goal, focus_domains_json,
+                focus_grain_start, focus_grain_end, focus_grain_aggregation
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(session_id) DO UPDATE SET
                 focus_summary = excluded.focus_summary,
                 document_type = excluded.document_type,
@@ -173,7 +186,10 @@ def save_session_turn_focus(
                 last_user_message = excluded.last_user_message,
                 last_assistant_digest = excluded.last_assistant_digest,
                 focus_goal = excluded.focus_goal,
-                focus_domains_json = excluded.focus_domains_json
+                focus_domains_json = excluded.focus_domains_json,
+                focus_grain_start = excluded.focus_grain_start,
+                focus_grain_end = excluded.focus_grain_end,
+                focus_grain_aggregation = excluded.focus_grain_aggregation
             """,
             (
                 sid,
@@ -191,6 +207,9 @@ def save_session_turn_focus(
                 (last_assistant_digest or "")[:2000],
                 (focus_goal or "")[:64],
                 domains_json,
+                (focus_grain_start or "")[:32],
+                (focus_grain_end or "")[:32],
+                (focus_grain_aggregation or "")[:32],
             ),
         )
         conn.commit()
@@ -212,7 +231,8 @@ def get_session_turn_focus(session_id: str) -> Optional[SessionTurnFocus]:
                    focus_profile, focus_metric, focus_lab_years_json,
                    focus_wearable_start, focus_wearable_end,
                    last_user_message, last_assistant_digest,
-                   focus_goal, focus_domains_json
+                   focus_goal, focus_domains_json,
+                   focus_grain_start, focus_grain_end, focus_grain_aggregation
             FROM chat_session_turn_focus WHERE session_id = ?
             """,
             (sid,),

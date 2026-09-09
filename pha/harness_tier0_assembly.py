@@ -141,6 +141,23 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
         "supplement_start": "full",
         "slot_floor": {"FACT_CARD_CONTEXT": "full"},
     },
+    "wearable_daily_review": {
+        "priority": [
+            "TASK",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+            "NUMERICS_MANIFEST",
+        ],
+        "protected": {
+            "TASK",
+            "NUMERICS_MANIFEST",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+        },
+        "degradation_order": [],
+        "supplement_start": "full",
+        "slot_floor": {"FACT_CARD_CONTEXT": "full"},
+    },
 }
 
 

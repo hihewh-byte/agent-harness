@@ -40,11 +40,6 @@ _WORKOUT_INTENT_RE = re.compile(
     re.I,
 )
 
-_COMPARE_ALL_METRICS_RE = re.compile(
-    r"所有指标|各项指标|全部指标|多项指标|各.{0,2}指标|是否正常|对比|相比|是不是都|整体",
-    re.I,
-)
-
 _SLEEP_HR_MIN_RE = re.compile(r"^(\d+)hr(\d+)min$", re.I)
 _SLEEP_HR_ONLY_RE = re.compile(r"^(\d+(?:\.\d+)?)hr$", re.I)
 
@@ -692,7 +687,9 @@ def _audit_incomplete_coverage(
     user_message: str,
 ) -> List[str]:
     """When user asks broad compare, every CompareTable row must appear in the answer."""
-    if not _COMPARE_ALL_METRICS_RE.search(user_message or ""):
+    from pha.wearable_metric_probe import _broad_compare_hit
+
+    if not _broad_compare_hit(user_message or ""):
         return []
     violations: List[str] = []
     for row in table.rows:
@@ -1027,87 +1024,60 @@ _EPISODIC_DELTA_RE = re.compile(
     re.I,
 )
 
-_CATALOG_PRIMARY_METRIC: Dict[str, str] = {
-    "sleep": "sleep_time_asleep",
-    "hrv": "hrv_sdnn_ms",
-    "rhr": "resting_heart_rate_bpm",
-    "spo2": "spo2_percent",
-    "respiratory_rate": "respiratory_rate",
-}
 
-_SLEEP_FOCUS_METRIC_IDS = frozenset({"sleep_time_asleep", "sleep_deep", "sleep_rem"})
-# Workout questions are resolved as a pair (HR range + recent count) by the probe layer's
-# _WORKOUT_HINT_RE coupling; treat that pair as a valid narrow focus, mirroring the sleep-stage pair.
-_WORKOUT_FOCUS_METRIC_IDS = frozenset({"workout_heart_rate_range_bpm", "workout_count_recent"})
-_SINGLE_METRIC_FOCUS_MAX = 2
+def _is_allowed_focus_group(ids: Sequence[str]) -> bool:
+    from pha.wearable_metric_registry import cluster_of
 
-
-def _is_allowed_focus_pair(ids: Sequence[str]) -> bool:
-    s = set(ids)
-    return s <= _SLEEP_FOCUS_METRIC_IDS or s <= _WORKOUT_FOCUS_METRIC_IDS
+    s = [str(x) for x in ids if str(x).strip()]
+    if not s:
+        return False
+    clusters = {cluster_of(mid) or f"solo:{mid}" for mid in s}
+    return len(clusters) == 1
 
 
 def infer_single_metric_focus_ids(user_message: str) -> List[str]:
     """
-    Narrow wearable follow-up: one metric (or sleep stage pair), not broad compare.
-
-    Uses hint/catalog mapping only — does **not** expand via ``user_message_needs_wearable_query``.
+    Narrow wearable follow-up: one metric or one cluster, not broad compare.
     """
     msg = (user_message or "").strip()
     if not msg:
         return []
     if _EXERCISE_ADVICE_ONLY_RE.search(msg):
         return []
-    if _COMPARE_ALL_METRICS_RE.search(msg) or user_requests_snapshot_correction(msg):
+    from pha.wearable_metric_probe import _broad_compare_hit
+
+    if _broad_compare_hit(msg) or user_requests_snapshot_correction(msg):
         return []
-    from pha.intent_gates import infer_wearable_metrics
-    from pha.wearable_metric_probe import _CATALOG_TO_REGISTRY, _hint_match_metric_ids
+    from pha.intent_gates import infer_wearable_metric_ids, infer_wearable_metrics
+    from pha.wearable_metric_registry import cluster_of, primary_metric_id_for_catalog_key
+    from pha.wearable_metric_probe import _hint_match_metric_ids
 
     if _EPISODIC_SHORT_METRIC_RE.match(msg):
+        ids = infer_wearable_metric_ids(msg)
+        if ids and _is_allowed_focus_group(ids):
+            return ids
         for cat in infer_wearable_metrics(msg):
-            primary = _CATALOG_PRIMARY_METRIC.get(cat)
+            primary = primary_metric_id_for_catalog_key(cat)
             if primary:
                 return [primary]
         return []
 
-    seen: Set[str] = set()
-    ordered: List[str] = []
-    for mid in _hint_match_metric_ids(msg):
-        if mid not in seen:
-            seen.add(mid)
-            ordered.append(mid)
-    # Narrow-hint precedence: an unambiguous registry-hint match (e.g. 「心率范围呢」「请分析心率指标」)
-    # must win over the broad bundle `core` fallback, which would otherwise add every comparable
-    # metric and blow past the single-focus cap. Only expand via infer_wearable_metrics when hints
-    # are empty or already over-broad.
-    if ordered and len(ordered) <= _SINGLE_METRIC_FOCUS_MAX and (
-        len(ordered) < 2 or _is_allowed_focus_pair(ordered)
-    ):
+    hinted = list(_hint_match_metric_ids(msg))
+    if hinted and _is_allowed_focus_group(hinted):
+        return hinted
+    ordered = infer_wearable_metric_ids(msg)
+    if ordered and _is_allowed_focus_group(ordered):
         return ordered
     cats = infer_wearable_metrics(msg)
+    primaries: List[str] = []
+    seen_p: Set[str] = set()
     for cat in cats:
-        for reg_id in _CATALOG_TO_REGISTRY.get(cat, ()):
-            if reg_id not in seen:
-                seen.add(reg_id)
-                ordered.append(reg_id)
-    if ordered and len(ordered) <= _SINGLE_METRIC_FOCUS_MAX and (
-        len(ordered) < 2 or _is_allowed_focus_pair(ordered)
-    ):
-        return ordered
-    # Catalog sleep expands to asleep/deep/rem — collapse to the primary duration metric
-    # so colloquial「昨晚睡多久啊」still takes the skip-LLM focus path.
-    if cats:
-        primaries: List[str] = []
-        seen_p: Set[str] = set()
-        for cat in cats:
-            primary = _CATALOG_PRIMARY_METRIC.get(cat)
-            if primary and primary not in seen_p:
-                seen_p.add(primary)
-                primaries.append(primary)
-        if len(primaries) == 1:
-            return primaries
-        if len(primaries) == 2 and _is_allowed_focus_pair(primaries):
-            return primaries
+        primary = primary_metric_id_for_catalog_key(cat)
+        if primary and primary not in seen_p:
+            seen_p.add(primary)
+            primaries.append(primary)
+    if primaries and _is_allowed_focus_group(primaries):
+        return primaries
     return []
 
 
@@ -1441,19 +1411,21 @@ def build_single_metric_focus_answer(
     has_snap = any(
         r.metric_id in focus_ids and r.snapshot_value for r in table.rows
     )
-    if not has_snap and set(focus_ids) <= _SLEEP_FOCUS_METRIC_IDS:
-        if loc == "en":
-            return (
-                "About the metrics you asked about:\n\n"
-                "- **Deep sleep / REM**: no reliable sleep-stage values were read from this screenshot "
-                "(total sleep duration was read). Please check the Health sleep Stages page."
-            )
-        return (
-            "关于您关心的指标：\n\n"
-            "- **深睡/REM**：本次截图未识别到可靠的睡眠分期数值（总睡眠时长已读取）。"
-            "请查看 Health 睡眠「Stages」页核对。"
-        )
     if not has_snap:
+        from pha.wearable_metric_registry import cluster_of
+
+        if focus_ids and all(cluster_of(mid) == "sleep" for mid in focus_ids):
+            if loc == "en":
+                return (
+                    "About the metrics you asked about:\n\n"
+                    "- **Deep sleep / REM**: no reliable sleep-stage values were read from this screenshot "
+                    "(total sleep duration was read). Please check the Health sleep Stages page."
+                )
+            return (
+                "关于您关心的指标：\n\n"
+                "- **深睡/REM**：本次截图未识别到可靠的睡眠分期数值（总睡眠时长已读取）。"
+                "请查看 Health 睡眠「Stages」页核对。"
+            )
         return ""
     return build_compare_table_metric_focus_summary(table, focus_ids, locale=loc)
 
@@ -1467,10 +1439,12 @@ def build_catalog_followup_focus_answer(
     """Screenshot session: 「睡眠呢」→ CompareTable 主指标，而非数仓均值。"""
     from pha.intent_gates import infer_wearable_metrics
 
+    from pha.wearable_metric_registry import primary_metric_id_for_catalog_key
+
     cats = infer_wearable_metrics(user_message or "")
     if len(cats) != 1:
         return ""
-    primary = _CATALOG_PRIMARY_METRIC.get(cats[0])
+    primary = primary_metric_id_for_catalog_key(cats[0])
     if not primary:
         return ""
     has_snap = any(r.metric_id == primary and r.snapshot_value for r in table.rows)

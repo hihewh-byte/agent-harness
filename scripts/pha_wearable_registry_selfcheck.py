@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -12,11 +13,16 @@ if str(ROOT) not in sys.path:
 
 from pha.wearable_compare_table_v1 import COMPARABLE_METRIC_SPECS, WORKOUT_METRICS
 from pha.wearable_metric_registry import (
+    catalog_key_for,
+    catalog_keys_canonical,
+    catalog_labels,
     comparable_wearable_daily_specs,
     fact_card_eligible_entries,
     fact_card_sync_complete,
     list_ingest_modules,
+    list_metric_entries,
     load_wearable_metric_registry,
+    metric_ids_for_catalog_key,
     registry_path,
     workout_compare_metric_ids,
 )
@@ -101,6 +107,56 @@ def main() -> int:
                 f"{mid!r} shortcut_health_type {health_type!r} != catalog "
                 f"{cat.get('shortcut_find_type')!r}"
             )
+
+    import re
+
+    _cjk = re.compile(r"[\u4e00-\u9fff]")
+    _latin = re.compile(r"[A-Za-z]")
+    cluster_primary: dict[str, list[str]] = {}
+    catalog_keys: set[str] = set()
+    for entry in list_metric_entries():
+        mid = str(entry.get("metric_id") or "").strip()
+        cat = entry.get("catalog") or {}
+        if not isinstance(cat, dict) or not cat:
+            continue
+        key = str(cat.get("key") or "").strip()
+        if key:
+            catalog_keys.add(key)
+        if cat.get("hidden"):
+            continue
+        if key and (not str(cat.get("label_zh") or "").strip() or not str(cat.get("label_en") or "").strip()):
+            errors.append(f"{mid!r} catalog.label_zh/label_en must both be set")
+        if catalog_labels(mid) is None and key:
+            errors.append(f"{mid!r} catalog_labels() missing")
+        hints = [str(h) for h in (entry.get("intent_hints") or []) if str(h).strip()]
+        if key and (
+            not any(_cjk.search(h) for h in hints) or not any(_latin.search(h) for h in hints)
+        ):
+            errors.append(f"{mid!r} intent_hints must include CJK and Latin tokens")
+        cid = str(cat.get("cluster") or "").strip()
+        if cid and cat.get("cluster_primary"):
+            cluster_primary.setdefault(cid, []).append(mid)
+
+    for cid, mids in cluster_primary.items():
+        if len(mids) != 1:
+            errors.append(f"cluster {cid!r} must have exactly one primary, got {mids}")
+
+    bundle_path = ROOT / "storage" / "schemas" / "wearable_bundle.schema.json"
+    if bundle_path.is_file():
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+        canonical = set((bundle.get("metrics") or {}).get("canonical") or [])
+        missing = canonical - catalog_keys
+        if missing:
+            errors.append(f"registry catalog.key missing bundle canonical {sorted(missing)}")
+
+    import subprocess
+
+    gen = ROOT / "scripts" / "pha_wearable_bundle_schema_generate.py"
+    check = subprocess.run([sys.executable, str(gen), "--check"], capture_output=True, text=True)
+    if check.returncode != 0:
+        errors.append(
+            "wearable_bundle.schema.json drifted; run pha_wearable_bundle_schema_generate.py --write"
+        )
 
     if errors:
         for e in errors:

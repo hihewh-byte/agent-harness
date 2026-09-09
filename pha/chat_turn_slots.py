@@ -49,7 +49,15 @@ from pha.chat_attachments import _message_needs_lab_ledger
 from pha.chat_turn_fsm import ChatTurnPhase, ChatTurnPhaseRecorder
 
 
-def select_soul_base(profile: str, qtype: QuestionType) -> Optional[str]:
+def uses_fact_card_context(plan: TurnEvidencePlan) -> bool:
+    return "FACT_CARD_CONTEXT" in (plan.slots_tier0 or [])
+
+
+def select_soul_base(
+    profile: str,
+    qtype: QuestionType,
+    plan: Optional[TurnEvidencePlan] = None,
+) -> Optional[str]:
     """Pick profile-local soul; None ⇒ full medical soul at call site."""
     from pha.attachment_asset_qa import is_attachment_qa_profile
     from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
@@ -63,7 +71,9 @@ def select_soul_base(profile: str, qtype: QuestionType) -> Optional[str]:
         from pha.wearable_harness import PHA_WEARABLE_SOUL_MINIMAL
 
         return PHA_WEARABLE_SOUL_MINIMAL
-    if (profile or "").strip() == "fact_card_interpret":
+    if plan is not None and uses_fact_card_context(plan):
+        return PHA_FACT_CARD_SOUL_MINIMAL
+    if (profile or "").strip() in ("fact_card_interpret", "wearable_daily_review"):
         return PHA_FACT_CARD_SOUL_MINIMAL
     if qtype == QuestionType.CASUAL:
         return PHA_MEDICAL_SOUL_LITE_SYSTEM_PROMPT
@@ -292,12 +302,12 @@ def iter_turn_harness_assembly_phase(
         # 物理隔离数仓历史 + 补剂背景，强制就图论事。
         ctx.data_availability_block = build_data_availability_block(uid, user_message=msg)
         ctx.background_block = ""
-    elif plan.profile == "fact_card_interpret":
+    elif uses_fact_card_context(plan):
         ctx.background_block = ""
     else:
         ctx.background_block = build_user_background_block(uid, user_message=msg)
 
-    if plan.profile == "fact_card_interpret":
+    if uses_fact_card_context(plan):
         ctx.recalled_snippets = ""
     elif not (
         is_attachment_qa_profile(plan.profile)
@@ -339,15 +349,40 @@ def iter_turn_harness_assembly_phase(
         )
 
     if "NUMERICS_MANIFEST" in plan.slots_tier0:
-        if plan.profile == "fact_card_interpret":
+        if uses_fact_card_context(plan):
             from pha.numerics_manifest import build_fact_card_numerics_manifest
 
             card = ctx.fact_card_payload
             if not isinstance(card, dict) or not card:
                 from pha.fact_card import load_fact_card
+                from pha.fact_card_prefs import load_enabled_metric_ids
+                from pha.intent_gates import infer_wearable_metric_ids
+                from pha.wearable_metric_registry import metric_entry
+                from pha.wearable_time_grain import resolve_wearable_time_grain
 
-                card = load_fact_card(uid)
+                ids, _src = load_enabled_metric_ids(uid)
+                extra: list[str] = []
+                for mid in infer_wearable_metric_ids(msg):
+                    entry = metric_entry(mid) or {}
+                    fc = entry.get("fact_card") or {}
+                    if isinstance(fc, dict) and fc.get("eligible"):
+                        extra.append(mid)
+                merged = list(dict.fromkeys(list(ids) + extra))
+                grain = resolve_wearable_time_grain(
+                    msg,
+                    episodic=ctx.health_episodic_focus,
+                )
+                ref = grain.start if grain.is_point_day() else effective_query_reference_date()
+                locale = ctx.response_locale or ctx.request_locale
+                card = load_fact_card(
+                    uid,
+                    reference=ref,
+                    enabled_metric_ids=merged,
+                    locale=locale,
+                )
                 ctx.fact_card_payload = card
+            if not (ctx.user_assessment_prompt or "").strip():
+                ctx.user_assessment_prompt = msg
             ctx.numerics_manifest = build_fact_card_numerics_manifest(
                 card,
                 user_id=uid,
@@ -365,6 +400,7 @@ def iter_turn_harness_assembly_phase(
                 profile=plan.profile,
                 user_message=msg,
                 include_wearable=not ctx.catalog_turn,
+                episodic=ctx.health_episodic_focus,
             )
             ctx.manifest_block = format_manifest_tier0_block(
                 ctx.numerics_manifest,
@@ -412,10 +448,13 @@ def iter_turn_harness_assembly_phase(
             )
 
     _task_locale = ctx.request_locale or ctx.response_locale or "en"
+    from pha.fact_card_copy import card_copy
+
+    _prompt_head = card_copy(_task_locale, "assessment_prompt_head")
     ctx.slot_contents = {
         "TASK": (
             fact_card_interpret_task_text(_task_locale)
-            if plan.profile == "fact_card_interpret"
+            if uses_fact_card_context(plan)
             else plan.task_text
         ),
         "EPISODIC_BRIDGE": ctx.episodic_bridge_block,
@@ -442,8 +481,7 @@ def iter_turn_harness_assembly_phase(
         "USER_BACKGROUND_BRIEF": "",
         "FACT_CARD_CONTEXT": ctx.fact_card_context,
         "USER_ASSESSMENT_PROMPT": (
-            "【用户评估要求 · 本轮解读大纲，不是数值来源】\n"
-            + ctx.user_assessment_prompt.strip()
+            f"{_prompt_head}\n{ctx.user_assessment_prompt.strip()}"
             if (ctx.user_assessment_prompt or "").strip()
             else ""
         ),
@@ -525,6 +563,7 @@ def iter_turn_harness_assembly_phase(
             if ctx.health_episodic_focus is not None
             else []
         ),
+        health_episodic_focus=ctx.health_episodic_focus,
     )
 
     from pha.shadow_routing import maybe_start_shadow_job
@@ -600,7 +639,7 @@ def iter_turn_harness_assembly_phase(
                 reference_date=effective_query_reference_date(),
             )
 
-    ctx.soul_base = select_soul_base(plan.profile, ctx.qtype)
+    ctx.soul_base = select_soul_base(plan.profile, ctx.qtype, plan=plan)
 
     soul = (ctx.soul_base or PHA_MEDICAL_SOUL_SYSTEM_PROMPT).strip()
     ref = effective_query_reference_date()

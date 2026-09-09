@@ -62,6 +62,9 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 | `fact_card.include_when_selected` | 用户勾了所列 metric_id 时，本行也进**睡眠捷径整包**（数据层，不影响卡上显示） |
 | `fact_card.shortcut_sleep_value` | Sleep Analysis 分期标签（`Asleep Deep` 等）。有此字段的行进「PHA 同步睡眠」，不进数量捷径 |
 | `fact_card.temporal` | 时效语义：`kind ∈ {accrual, daily_lagged, overnight, rolling_mean, latest}`；`daily_lagged` / `overnight` 可带 `freshness_days`（默认 2）；`latest` 回看最近一次（VO2max 默认 90 天）且 `coverage_denominator: false`；`rolling_mean` 可带 `window_days`。缺省 = 只取 as_of 当日行 |
+| `catalog.key` | 旧 bundle catalog 键（`sleep`/`hrv`…）；对话与 schema 派生共用 |
+| `catalog.cluster` / `cluster_primary` / `expand_on_cluster_query` | 同簇展开（如睡眠分期）；Python 不得再写 frozenset |
+| `catalog.label_zh` / `label_en` / `point_*` / `span_*` | 对话 Numerics / skip-LLM 审计标签；9 旧键冻结测试 |
 | `fact_card.display_fallback_metric_id` | 本行无数时改展示另一列，且用那一列做基线；标签跟过去，禁止把 SDNN 标成 RMSSD |
 
 ### `no_baseline_reason`（Spec 枚举 · 行级 reason_code 待 ε+）
@@ -114,8 +117,10 @@ L3  LLM 叙事（只引用 Tier0 表 · Audit 拦截）
 
 ### C. 用户对话新话术
 
-1. 扩 `intent_hints` 或 Catalog 映射（**不写 SQL**）。  
-2. 若 `metric_id` 未注册 → 统一回复「当前版本暂未纳入可对比指标」。
+1. **只改** `intent_hints`（中英一起补），或 Intent Catalog 的 `goal_markers` / `broad_compare` / `follow_ups`。  
+2. 跑 `python scripts/pha_wearable_bundle_schema_generate.py --check` 与 `scripts/pha_wearable_registry_selfcheck.py`。  
+3. 若 `metric_id` 未注册 → 统一回复「当前版本暂未纳入可对比指标」。  
+4. **禁止**在 `pha/*.py` 新增 phrase / metric / label 表。
 
 ---
 

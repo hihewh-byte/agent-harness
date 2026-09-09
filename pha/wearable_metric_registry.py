@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import re
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Tuple
@@ -111,13 +114,289 @@ _METRIC_LABEL_EN_FALLBACK: Dict[str, str] = {
 
 
 def metric_labels_en() -> Dict[str, str]:
-    labels: Dict[str, str] = dict(_METRIC_LABEL_EN_FALLBACK)
+    labels: Dict[str, str] = {}
     for m in list_metric_entries():
         mid = str(m.get("metric_id") or "").strip()
         en = str((m.get("ui") or {}).get("label_en") or "").strip()
         if mid and en:
             labels[mid] = en
+    for mid, fallback in _METRIC_LABEL_EN_FALLBACK.items():
+        labels.setdefault(mid, fallback)
     return labels
+
+
+def _catalog_block(entry: Mapping[str, Any] | None) -> Dict[str, Any]:
+    raw = (entry or {}).get("catalog") or {}
+    return dict(raw) if isinstance(raw, dict) else {}
+
+
+def catalog_key_for(metric_id: str) -> Optional[str]:
+    entry = metric_entry(metric_id)
+    key = str(_catalog_block(entry).get("key") or "").strip()
+    return key or None
+
+
+def metric_ids_for_catalog_key(key: str) -> Tuple[str, ...]:
+    want = (key or "").strip()
+    if not want:
+        return ()
+    out: List[str] = []
+    for m in list_metric_entries():
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        if str(cat.get("key") or "").strip() == want:
+            mid = str(m.get("metric_id") or "").strip()
+            if mid:
+                out.append(mid)
+    return tuple(out)
+
+
+def cluster_of(metric_id: str) -> Optional[str]:
+    cid = str(_catalog_block(metric_entry(metric_id)).get("cluster") or "").strip()
+    return cid or None
+
+
+def cluster_members(cluster_id: str, *, expand_only: bool = True) -> Tuple[str, ...]:
+    want = (cluster_id or "").strip()
+    if not want:
+        return ()
+    out: List[str] = []
+    for m in list_metric_entries():
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        if str(cat.get("cluster") or "").strip() != want:
+            continue
+        if expand_only and not cat.get("expand_on_cluster_query"):
+            continue
+        mid = str(m.get("metric_id") or "").strip()
+        if mid:
+            out.append(mid)
+    return tuple(out)
+
+
+def cluster_primary_metric_id(cluster_id: str) -> Optional[str]:
+    want = (cluster_id or "").strip()
+    if not want:
+        return None
+    for m in list_metric_entries():
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        if str(cat.get("cluster") or "").strip() != want:
+            continue
+        if cat.get("cluster_primary"):
+            mid = str(m.get("metric_id") or "").strip()
+            if mid:
+                return mid
+    return None
+
+
+def primary_metric_id_for_catalog_key(key: str) -> Optional[str]:
+    ids = metric_ids_for_catalog_key(key)
+    for mid in ids:
+        if _catalog_block(metric_entry(mid)).get("cluster_primary"):
+            return mid
+    return ids[0] if ids else None
+
+
+@dataclass(frozen=True)
+class CatalogLabels:
+    point_zh: str
+    span_zh: str
+    that_day_zh: str
+    point_en: str
+    span_en: str
+    that_day_en: str
+    stem_zh: str
+    stem_en: str
+
+
+def catalog_labels(metric_id: str) -> Optional[CatalogLabels]:
+    entry = metric_entry(metric_id)
+    cat = _catalog_block(entry)
+    stem_zh = str(cat.get("label_zh") or "").strip()
+    stem_en = str(cat.get("label_en") or "").strip()
+    if not stem_zh or not stem_en:
+        return None
+    mean_suffix = str(cat.get("mean_suffix_zh") or "均值").strip() or "均值"
+    return CatalogLabels(
+        point_zh=str(cat.get("point_zh") or f"今日{stem_zh}").strip(),
+        span_zh=str(cat.get("span_zh") or f"{stem_zh}{mean_suffix}").strip(),
+        that_day_zh=str(cat.get("that_day_zh") or f"当日{stem_zh}").strip(),
+        point_en=str(cat.get("point_en") or f"Today's {stem_en}").strip(),
+        span_en=str(cat.get("span_en") or f"Mean {stem_en}").strip(),
+        that_day_en=str(cat.get("that_day_en") or f"{stem_en} that day").strip(),
+        stem_zh=stem_zh,
+        stem_en=stem_en,
+    )
+
+
+def catalog_keys_canonical() -> Tuple[str, ...]:
+    doc = load_wearable_metric_registry()
+    declared = (doc.get("bundle_catalog") or {}).get("canonical")
+    if isinstance(declared, list) and declared:
+        return tuple(str(x).strip() for x in declared if str(x).strip())
+    seen: List[str] = []
+    for m in list_metric_entries():
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        key = str(cat.get("key") or "").strip()
+        if key and key not in seen:
+            seen.append(key)
+    return tuple(seen)
+
+
+def catalog_keys_core() -> Tuple[str, ...]:
+    doc = load_wearable_metric_registry()
+    declared = (doc.get("bundle_catalog") or {}).get("core")
+    if isinstance(declared, list) and declared:
+        return tuple(str(x).strip() for x in declared if str(x).strip())
+    seen: List[str] = []
+    for m in fact_card_eligible_entries():
+        fc = m.get("fact_card") or {}
+        if not fc.get("enabled_default"):
+            continue
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        key = str(cat.get("key") or "").strip()
+        if key and key not in seen:
+            seen.append(key)
+    return tuple(seen)
+
+
+def wearable_daily_metric_ids() -> Tuple[str, ...]:
+    out: List[str] = []
+    for m in list_metric_entries():
+        l1 = m.get("l1") or {}
+        if str(l1.get("kind") or "") != "wearable_daily":
+            continue
+        mid = str(m.get("metric_id") or "").strip()
+        if mid:
+            out.append(mid)
+    return tuple(out)
+
+
+def l1_field_for(metric_id: str) -> Optional[str]:
+    entry = metric_entry(metric_id)
+    if not entry:
+        return None
+    field = str((entry.get("l1") or {}).get("field") or "").strip()
+    return field or None
+
+
+def display_fallback_metric_id(metric_id: str) -> Optional[str]:
+    entry = metric_entry(metric_id)
+    if not entry:
+        return None
+    fc = entry.get("fact_card") or {}
+    raw = str(fc.get("display_fallback_metric_id") or "").strip() if isinstance(fc, dict) else ""
+    return raw or None
+
+
+def catalog_unit_for(metric_id: str) -> str:
+    entry = metric_entry(metric_id)
+    if not entry:
+        return ""
+    fc = entry.get("fact_card") or {}
+    if isinstance(fc, dict):
+        unit = str(fc.get("unit") or "").strip()
+        if unit:
+            return unit
+    return str((entry.get("snapshot") or {}).get("unit") or "").strip()
+
+
+_CJK_RE = re.compile(r"[\u4e00-\u9fff]")
+
+
+def hint_match_metric_ids(user_message: str) -> Tuple[str, ...]:
+    msg = user_message or ""
+    blob = msg.lower()
+    matches: List[tuple[str, str]] = []
+    for mid, hints in metric_mention_hints().items():
+        for h in hints:
+            token = (h or "").strip()
+            if not token:
+                continue
+            needle = token.lower()
+            if _CJK_RE.search(token):
+                hit = token in msg
+            else:
+                hit = needle in blob
+            if hit:
+                matches.append((mid, token))
+                break
+    kept: List[str] = []
+    found: set[str] = set()
+    for mid, token in matches:
+        absorbed = False
+        for other_mid, other in matches:
+            if other_mid == mid:
+                continue
+            if token != other and token in other:
+                absorbed = True
+                break
+        if absorbed:
+            continue
+        if mid not in found:
+            found.add(mid)
+            kept.append(mid)
+    return tuple(kept)
+
+
+def bundle_trigger_keywords() -> List[Dict[str, str]]:
+    """Derive wearable_bundle trigger_keywords from Registry hints × catalog.key."""
+    out: List[Dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for m in list_metric_entries():
+        cat = _catalog_block(m)
+        if cat.get("hidden"):
+            continue
+        key = str(cat.get("key") or "").strip()
+        zh = str(cat.get("label_zh") or "").strip()
+        if not key:
+            continue
+        hints = m.get("intent_hints") or []
+        if not isinstance(hints, list):
+            continue
+        for raw in hints:
+            token = str(raw or "").strip()
+            if not token:
+                continue
+            pair = (token, key)
+            if pair in seen:
+                continue
+            seen.add(pair)
+            out.append({"token": token, "metric_id": key, "zh": zh or key})
+    return out
+
+
+def bundle_core_hint_keywords() -> List[Dict[str, str]]:
+    out: List[Dict[str, str]] = []
+    for key in catalog_keys_core()[:3]:
+        mid = primary_metric_id_for_catalog_key(key)
+        labels = catalog_labels(mid) if mid else None
+        zh = labels.stem_zh if labels else key
+        out.append({"zh": zh, "metric_id": key})
+    return out
+
+
+def registry_catalog_enabled() -> bool:
+    raw = (os.environ.get("PHA_WEARABLE_REGISTRY_CATALOG") or "1").strip().lower()
+    if raw in ("0", "false", "no"):
+        raise RuntimeError("legacy path removed; rollback by git")
+    return True
+
+
+def cluster_expand_enabled() -> bool:
+    return (os.environ.get("PHA_WEARABLE_CLUSTER_EXPAND") or "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+    )
 
 
 def metric_mention_hints() -> Dict[str, Tuple[str, ...]]:
@@ -231,24 +510,43 @@ def clear_registry_cache() -> None:
 
 
 __all__ = [
+    "CatalogLabels",
+    "bundle_core_hint_keywords",
+    "bundle_trigger_keywords",
+    "catalog_key_for",
+    "catalog_keys_canonical",
+    "catalog_keys_core",
+    "catalog_labels",
+    "catalog_unit_for",
     "clear_registry_cache",
+    "cluster_expand_enabled",
+    "cluster_members",
+    "cluster_of",
+    "cluster_primary_metric_id",
     "comparable_wearable_daily_specs",
     "default_fact_card_metric_ids",
+    "display_fallback_metric_id",
     "fact_card_daily_ingest_keys",
     "fact_card_eligible_entries",
     "fact_card_sync_complete",
+    "hint_match_metric_ids",
     "shortcut_pack_version",
     "ingest_module",
     "is_registered_comparable_metric",
+    "l1_field_for",
     "list_ingest_modules",
     "list_metric_entries",
     "load_wearable_metric_registry",
     "metric_entry",
+    "metric_ids_for_catalog_key",
     "metric_labels_en",
     "metric_labels_zh",
     "metric_mention_hints",
     "metrics_footer_when_snapshot_only",
+    "primary_metric_id_for_catalog_key",
+    "registry_catalog_enabled",
     "registry_path",
     "snapshot_only_fallback_metric_ids",
+    "wearable_daily_metric_ids",
     "workout_compare_metric_ids",
 ]

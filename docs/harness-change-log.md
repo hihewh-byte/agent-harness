@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-09-09 (P1：对话框 ↔ 事实卡解读同源)
+
+- **类别**：**P1（FR-6.13）**。对话侧与主动事实卡共用 Registry；睡眠分项可答；「能否训练」走 `wearable_daily_review`。
+- **改动**：Registry `catalog.*` + bundle schema 生成；`infer_wearable_metric_ids` 簇展开；Numerics/skip-LLM 按 registry id 取数；`daily_readiness` → `wearable_daily_review`（与 interpret 同槽，记忆策略仍 `chat`）；会话锚点 `focus_grain_*`；follow_ups 进 catalog；SSE `label_display` / `metrics_in_scope`。Flag：`PHA_WEARABLE_REGISTRY_CATALOG`（关则 RuntimeError）、`PHA_WEARABLE_CLUSTER_EXPAND`、`PHA_DAILY_READINESS_PROFILE`、`PHA_EPISODIC_GRAIN_ANCHOR`（本轨道验收缺省开）。
+- **证据**：离线 `pha_chat_fact_card_parity_selfcheck` H9–H13；标签冻结在 `pha_numerics_manifest_selfcheck`；registry `--write`。真机 8788（pid 41270，`qwen3:14b`）H10–H13 / H10E / H13E skip-LLM 全过；H9-zh 网页+interpret 过；H9E 审计过（见 proactive change-log 16:51）。
+- **回滚**：`PHA_DAILY_READINESS_PROFILE=0` 与 `PHA_EPISODIC_GRAIN_ANCHOR=0` 关新行为；catalog 路径 git revert。
+
 ## 2026-09-09 (M1-P14：USER_BACKGROUND_BRIEF Tier1)
 
 - **类别**：**P1（FR-6.12）**。按钮解读可见聊天自述背景，但只能作为非数字源。

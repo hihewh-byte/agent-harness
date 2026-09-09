@@ -10,6 +10,7 @@ from pha.health_data import effective_query_reference_date, get_health_data
 from pha.intent_gates import (
     QuestionType,
     classify_question_type,
+    infer_wearable_metric_ids,
     infer_wearable_metrics,
     resolve_schema_intent,
     user_message_needs_lab_dossier,
@@ -170,6 +171,23 @@ def _fact_card_interpret_turn_plan() -> TurnEvidencePlan:
     )
 
 
+def _wearable_daily_review_turn_plan() -> TurnEvidencePlan:
+    return TurnEvidencePlan(
+        profile="wearable_daily_review",
+        slots_tier0=[
+            "TASK",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+            "NUMERICS_MANIFEST",
+        ],
+        slots_tier1=["USER_BACKGROUND_BRIEF"],
+        forbidden=list(_FACT_CARD_INTERPRET_FORBIDDEN),
+        tools_allowed=[],
+        task_text=fact_card_interpret_task_text("en"),
+        legacy_question_type=QuestionType.WEARABLE,
+    )
+
+
 def resolve_profile_override(name: str | None) -> str | None:
     """Accept only registry-known profiles that have an authoritative builder."""
     raw = (name or "").strip()
@@ -245,6 +263,8 @@ def _plan_for_authoritative_profile(
         return _wearable_only_turn_plan(qtype)
     if name == "fact_card_interpret":
         return _fact_card_interpret_turn_plan()
+    if name == "wearable_daily_review":
+        return _wearable_daily_review_turn_plan()
     if name == "casual":
         return TurnEvidencePlan(
             profile="casual",
@@ -603,9 +623,15 @@ def build_wearable_90d_summary_block(user_id: str, user_message: str) -> str:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
     window = default_wearable_window(user_message, reference=ref)
-    metrics = infer_wearable_metrics(user_message)
+    metrics = infer_wearable_metric_ids(user_message)
     if not metrics:
-        metrics = ["hrv", "activity_kcal"]
+        from pha.wearable_metric_registry import catalog_keys_core, primary_metric_id_for_catalog_key
+
+        metrics = [
+            mid
+            for key in catalog_keys_core()[:2]
+            if (mid := primary_metric_id_for_catalog_key(key))
+        ]
     result = get_health_data(
         uid,
         window.start,

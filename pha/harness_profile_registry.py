@@ -30,6 +30,7 @@ _KNOWN_ASSEMBLY_PROFILES: Set[str] = {
     "casual",
     "lifestyle",
     "fact_card_interpret",
+    "wearable_daily_review",
 }
 
 # Slot invariants: profile contract, not per-session hardcoding.
@@ -65,6 +66,20 @@ _PROFILE_SLOT_INVARIANTS: Dict[str, Dict[str, Set[str]]] = {
         "forbidden_tools": {"fetch_evidence_by_id"},
     },
     "fact_card_interpret": {
+        "required_tier0": {
+            "TASK",
+            "NUMERICS_MANIFEST",
+            "FACT_CARD_CONTEXT",
+            "USER_ASSESSMENT_PROMPT",
+        },
+        "required_tools": set(),
+        "forbidden_tools": {
+            "fetch_evidence_by_id",
+            "get_health_data",
+            "get_temporal_history_dossier",
+        },
+    },
+    "wearable_daily_review": {
         "required_tier0": {
             "TASK",
             "NUMERICS_MANIFEST",
@@ -181,6 +196,13 @@ def _profile_build_probes() -> List[tuple[str, TurnEvidencePlan]]:
             build_turn_evidence_plan("我每天早上吃这些补剂，帮我看看时间安排"),
         ),
         ("combined_review", build_turn_evidence_plan("根据血脂和穿戴数据综合看看")),
+        (
+            "wearable_daily_review",
+            build_turn_evidence_plan(
+                "请分析今天的HRV，静息心率和睡眠数据是否适合高强度的力量训练？",
+                authoritative_profile="wearable_daily_review",
+            ),
+        ),
         (
             "fact_card_interpret",
             build_turn_evidence_plan(

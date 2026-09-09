@@ -753,6 +753,7 @@ def orchestrate_chat_turn_events(
             numerics_manifest=numerics_manifest,
             wearable_compare_table_obj=wearable_compare_table_obj,
             response_locale=_slot_ctx.response_locale,
+            episodic=_health_episodic_focus,
         )
         for _skip_ev in _skip_eval.status_events:
             yield json.dumps(_skip_ev, ensure_ascii=False)
@@ -793,6 +794,7 @@ def orchestrate_chat_turn_events(
                     user_message=msg,
                     manifest=None,
                     response_locale=_slot_ctx.response_locale,
+                    episodic=_health_episodic_focus,
                 )
                 if _wm_skip or skip_llm:
                     _composer_manifest = build_numerics_manifest(
@@ -801,6 +803,7 @@ def orchestrate_chat_turn_events(
                         user_message=msg,
                         include_lipid=False,
                         include_wearable=True,
+                        episodic=_health_episodic_focus,
                     )
             if _composer_manifest is None and wearable_screenshot_review and skip_llm:
                 _composer_manifest = build_numerics_manifest(
@@ -810,12 +813,19 @@ def orchestrate_chat_turn_events(
                     include_lipid=False,
                     include_wearable=True,
                 )
-            _fc = build_fact_card_event(_composer_manifest)
+            _fc = build_fact_card_event(
+                _composer_manifest,
+                locale=_slot_ctx.response_locale,
+                user_id=uid,
+                user_message=msg,
+                fact_card_payload=_slot_ctx.fact_card_payload,
+            )
             if _fc:
                 yield json.dumps(_fc, ensure_ascii=False)
             _composer_follow_ups = build_follow_ups_event(
                 profile=plan.profile,
                 metric_keys=list(_health_turn_scope.metric_keys) if _health_turn_scope else [],
+                locale=_slot_ctx.response_locale,
             )
         _phase_rec.enter(ChatTurnPhase.COMPOSE)
         _phase_rec.assert_plan_before_compose()

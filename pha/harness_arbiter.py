@@ -6,7 +6,14 @@ from dataclasses import dataclass, replace
 from typing import Any
 
 from pha.catalog_existence import _probe_lipid_data, _probe_wearable_data
-from pha.goal_classifier import GoalClassification, classify_goal, goal_classifier_enabled, goal_session_anchor_enabled, clarify_intent_scope_enabled
+from pha.goal_classifier import (
+    GoalClassification,
+    classify_goal,
+    daily_readiness_profile_enabled,
+    goal_classifier_enabled,
+    goal_session_anchor_enabled,
+    clarify_intent_scope_enabled,
+)
 from pha.health_intent_catalog import (
     catalog_clarify_kind,
     catalog_holistic_proxy_metrics,
@@ -168,6 +175,44 @@ def resolve_harness_arbiter(
                 reason="episodic_goal_continue",
                 existence_probe=probe,
             )
+
+    if daily_readiness_profile_enabled() and (
+        goal.goal_class == "daily_readiness"
+        or (
+            goal_session_anchor_enabled()
+            and episodic is not None
+            and (getattr(episodic, "focus_goal", "") or "") == "daily_readiness"
+            and is_weak_episodic_followup(user_message)
+        )
+    ):
+        if probe.get("wearable"):
+            return ArbiterDecision(
+                goal_class="daily_readiness",
+                goal_source=goal.source,
+                router_profile=router,
+                authoritative_profile="wearable_daily_review",
+                reason=(
+                    "episodic_goal_continue"
+                    if goal.goal_class != "daily_readiness"
+                    else "goal_readiness_daily"
+                ),
+                existence_probe=probe,
+            )
+        scope = _build_data_gap_clarify(
+            prompt=str(
+                (catalog_clarify_kind("data_gap") or {}).get("prompt_template")
+                or "库内暂无足够化验或穿戴数据，请先导入后再做综合评估。",
+            ),
+        )
+        return ArbiterDecision(
+            goal_class="daily_readiness",
+            goal_source=goal.source,
+            router_profile=router,
+            authoritative_profile="clarify",
+            reason="goal_clarify_data_gap",
+            existence_probe=probe,
+            turn_scope=scope,
+        )
 
     if goal.goal_class == "holistic_assessment":
         if probe.get("lab") and probe.get("wearable"):

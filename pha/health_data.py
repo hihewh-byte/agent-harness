@@ -77,6 +77,64 @@ def clamp_tool_query_window(
         )
     return start_date, end_date, note
 
+def _registry_metric_sets() -> tuple[frozenset[str], frozenset[str], Dict[str, str]]:
+    from pha.wearable_metric_registry import (
+        catalog_key_for,
+        catalog_keys_canonical,
+        catalog_keys_core,
+        wearable_daily_metric_ids,
+    )
+
+    catalog_keys = frozenset(catalog_keys_canonical()) | frozenset(catalog_keys_core())
+    daily_ids = frozenset(wearable_daily_metric_ids())
+    aliases: Dict[str, str] = {}
+    for key in catalog_keys:
+        aliases[key] = key
+        aliases[key.lower()] = key
+    for mid in daily_ids:
+        aliases[mid] = mid
+        aliases[mid.lower()] = mid
+        ckey = catalog_key_for(mid)
+        if ckey:
+            aliases.setdefault(ckey, ckey)
+            aliases.setdefault(ckey.lower(), ckey)
+    # Historic aliases (catalog-key space).
+    aliases.update(
+        {
+            "sleep_hours": "sleep",
+            "hrv_rmssd": "hrv",
+            "step": "steps",
+            "resting_heart_rate": "rhr",
+            "heart_rate": "rhr",
+            "active_energy": "activity_kcal",
+            "kcal": "activity_kcal",
+            "calories": "activity_kcal",
+            "blood_oxygen": "spo2",
+            "oxygen_saturation": "spo2",
+            "血氧": "spo2",
+            "resp_rate": "respiratory_rate",
+            "呼吸率": "respiratory_rate",
+            "vo2_max": "vo2max",
+            "最大摄氧量": "vo2max",
+            "wrist_temperature": "wrist_temp",
+            "body_temperature": "wrist_temp",
+            "体温": "wrist_temp",
+            "手腕温度": "wrist_temp",
+        }
+    )
+    return catalog_keys, daily_ids, aliases
+
+
+def _core_extension_allowed() -> tuple[frozenset[str], frozenset[str], frozenset[str]]:
+    catalog_keys, daily_ids, _aliases = _registry_metric_sets()
+    from pha.wearable_metric_registry import catalog_keys_core
+
+    core = frozenset(catalog_keys_core())
+    allowed = catalog_keys | daily_ids
+    extension = allowed - core
+    return core, extension, allowed
+
+
 CORE_WEARABLE_METRICS = frozenset({"sleep", "hrv", "steps", "rhr", "activity_kcal"})
 EXTENSION_WEARABLE_METRICS = frozenset(
     {"spo2", "respiratory_rate", "vo2max", "wrist_temp"},
@@ -114,6 +172,23 @@ METRIC_ALIASES: Dict[str, str] = {
     "体温": "wrist_temp",
     "手腕温度": "wrist_temp",
 }
+
+
+def _resolve_metric_token(raw: str) -> Optional[str]:
+    """Map a request token to a registry metric_id or catalog key."""
+    label = (raw or "").strip()
+    if not label:
+        return None
+    _catalog_keys, daily_ids, aliases = _registry_metric_sets()
+    key = aliases.get(label) or aliases.get(label.lower())
+    if not key:
+        return None
+    from pha.wearable_metric_registry import primary_metric_id_for_catalog_key, wearable_daily_metric_ids
+
+    if key in daily_ids or key in wearable_daily_metric_ids():
+        return key
+    primary = primary_metric_id_for_catalog_key(key)
+    return primary or key
 
 
 class ImportIncompleteError(RuntimeError):
@@ -159,6 +234,7 @@ class HealthDataResult(BaseModel):
     message: str = ""
     metrics_supported: bool = True
     unsupported_metrics_requested: List[str] = Field(default_factory=list)
+    catalog_key_of: Dict[str, str] = Field(default_factory=dict)
 
     def as_tool_payload(self) -> dict[str, Any]:
         return {
@@ -173,6 +249,7 @@ class HealthDataResult(BaseModel):
             "message": self.message,
             "metrics_supported": self.metrics_supported,
             "unsupported_metrics_requested": self.unsupported_metrics_requested,
+            "catalog_key_of": dict(self.catalog_key_of),
         }
 
 
@@ -240,7 +317,7 @@ def verify_import_completeness(
 
 
 def _partition_requested_metrics(metrics: Sequence[str]) -> tuple[List[str], List[str]]:
-    """Split user-requested tokens into (canonical wearable ids, unknown labels)."""
+    """Split user-requested tokens into (registry metric_ids, unknown labels)."""
     unknown: List[str] = []
     out: List[str] = []
     seen_unknown: set[str] = set()
@@ -248,8 +325,7 @@ def _partition_requested_metrics(metrics: Sequence[str]) -> tuple[List[str], Lis
         label = str(raw or "").strip()
         if not label:
             continue
-        key = label.lower()
-        canon = METRIC_ALIASES.get(key)
+        canon = _resolve_metric_token(label)
         if not canon:
             lk = label.lower()
             if lk not in seen_unknown:
@@ -267,30 +343,61 @@ def _normalize_metrics(metrics: Sequence[str]) -> List[str]:
 
 
 def _metric_value(row: Any, metric: str) -> Optional[float]:
-    if metric == "sleep":
-        return float(row.sleep_hours) if row.sleep_hours is not None else None
-    if metric == "hrv":
-        # M1-P8: prefer SDNN; fall back to legacy mislabeled RMSSD column.
-        if row.hrv_sdnn_ms is not None:
-            return float(row.hrv_sdnn_ms)
-        if row.hrv_rmssd_ms is not None:
-            return float(row.hrv_rmssd_ms)
+    from pha.wearable_metric_registry import (
+        catalog_key_for,
+        display_fallback_metric_id,
+        l1_field_for,
+        primary_metric_id_for_catalog_key,
+    )
+
+    mid = metric
+    field = l1_field_for(mid)
+    if not field:
+        primary = primary_metric_id_for_catalog_key(mid)
+        if primary:
+            mid = primary
+            field = l1_field_for(mid)
+    if not field:
         return None
-    if metric == "steps":
-        return float(row.steps) if row.steps is not None else None
-    if metric == "rhr":
-        return float(row.resting_heart_rate_bpm) if row.resting_heart_rate_bpm is not None else None
-    if metric == "activity_kcal":
-        return float(row.active_energy_kcal) if row.active_energy_kcal is not None else None
-    if metric == "spo2":
-        return float(row.spo2_pct) if row.spo2_pct is not None else None
-    if metric == "respiratory_rate":
-        return float(row.respiratory_rate_bpm) if row.respiratory_rate_bpm is not None else None
-    if metric == "vo2max":
-        return float(row.vo2max_ml_kg_min) if row.vo2max_ml_kg_min is not None else None
-    if metric == "wrist_temp":
-        return float(row.wrist_temp_c) if row.wrist_temp_c is not None else None
+
+    def _read(target_id: str) -> Optional[float]:
+        col = l1_field_for(target_id)
+        if not col:
+            return None
+        raw = getattr(row, col, None)
+        return float(raw) if raw is not None else None
+
+    value = _read(mid)
+    if value is not None:
+        return value
+    fallback = display_fallback_metric_id(mid)
+    if fallback:
+        return _read(fallback)
+    # Catalog-key HRV historically preferred SDNN then RMSSD.
+    if catalog_key_for(mid) == "hrv" or mid in ("hrv", "hrv_sdnn_ms"):
+        other = _read("hrv_rmssd_ms")
+        if other is not None:
+            return other
     return None
+
+
+def _metric_unit(metric: str) -> str:
+    from pha.wearable_metric_registry import catalog_unit_for, primary_metric_id_for_catalog_key
+
+    unit = catalog_unit_for(metric)
+    if unit:
+        if unit == "h":
+            return "hours"
+        if unit == "count":
+            return "count"
+        return unit
+    primary = primary_metric_id_for_catalog_key(metric)
+    if primary:
+        unit = catalog_unit_for(primary)
+        if unit == "h":
+            return "hours"
+        return unit
+    return ""
 
 
 def _fetch_activity_kcal_series(
@@ -382,9 +489,9 @@ def get_health_data(
                 f"（以下指标未接入已忽略：{', '.join(unknown_requested)}）"
             )
     elif (user_message or "").strip():
-        from pha.intent_gates import infer_wearable_metrics
+        from pha.intent_gates import infer_wearable_metric_ids
 
-        normalized = infer_wearable_metrics(user_message)
+        normalized = infer_wearable_metric_ids(user_message)
     else:
         normalized = []
 
@@ -408,8 +515,13 @@ def get_health_data(
             message=deny,
         )
     rows = _fetch_rows_for_range(uid, start_date, end_date)
-    wearable_metrics = [m for m in normalized if m != "activity_kcal"]
-    kcal_metrics = [m for m in normalized if m == "activity_kcal"]
+    from pha.wearable_metric_registry import catalog_key_for
+
+    def _is_kcal(mid: str) -> bool:
+        return mid in ("activity_kcal", "active_energy") or catalog_key_for(mid) == "activity_kcal"
+
+    wearable_metrics = [m for m in normalized if not _is_kcal(m)]
+    kcal_metrics = [m for m in normalized if _is_kcal(m)]
 
     summaries: Dict[str, MetricSummary] = {}
     series: Dict[str, List[HealthDataPoint]] = {}
@@ -450,6 +562,14 @@ def get_health_data(
     if kcal_metrics:
         kcal_daily = _fetch_activity_kcal_series(uid, start_date, end_date)
 
+    analytics_keys: list[str] = []
+    catalog_key_of: Dict[str, str] = {}
+    for mid in normalized:
+        ckey = catalog_key_for(mid) or mid
+        catalog_key_of[mid] = ckey
+        if ckey not in analytics_keys:
+            analytics_keys.append(ckey)
+
     analytics_snapshot = build_analytics_snapshot(
         rows,
         start_date=start_date,
@@ -457,7 +577,7 @@ def get_health_data(
         reference_date=ref,
         user_id=uid,
         user_message=user_message,
-        metrics=normalized,
+        metrics=analytics_keys,
         activity_kcal_daily=kcal_daily if kcal_daily else None,
     )
 
@@ -480,7 +600,7 @@ def get_health_data(
             f"{msg} 未指定有效穿戴指标；请在问题中点名 sleep/hrv/steps/rhr/activity_kcal，"
             f"或依赖 Patient State / 卷宗中的化验数据。"
         ).strip()
-    if "activity_kcal" in normalized and not kcal_daily:
+    if kcal_metrics and not kcal_daily:
         msg = (
             f"{msg} 活动消耗：本场查询区间内 wearable_daily.active_energy_kcal 与 "
             "wearable_data 均无有效日序列，禁止口述具体千卡均值。"
@@ -498,6 +618,7 @@ def get_health_data(
         message=msg,
         metrics_supported=True,
         unsupported_metrics_requested=unknown_requested,
+        catalog_key_of=catalog_key_of,
     )
 
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.6",
+  "version": "1.7",
   "anaphora": {
     "tokens": [
       "那",
@@ -14,7 +14,13 @@
       "前年",
       "去年",
       "上个月",
-      "上月"
+      "上月",
+      "that",
+      "this",
+      "same",
+      "continue",
+      "previous",
+      "as before"
     ]
   },
   "multi_scope_lab": {
@@ -52,8 +58,30 @@
       "lipid panel",
       "lipid"
     ],
-    "sleep": ["睡眠", "waso", "深睡", "睡多久", "sleep", "slept", "deep sleep"],
-    "steps": ["步数", "走路", "步行", "走了多少步", "多少步", "steps", "step count", "walking"],
+    "sleep": [
+      "睡眠",
+      "waso",
+      "深睡",
+      "睡多久",
+      "sleep",
+      "slept",
+      "deep sleep",
+      "核心睡眠",
+      "睡眠清醒",
+      "core sleep",
+      "awake",
+      "rem"
+    ],
+    "steps": [
+      "步数",
+      "走路",
+      "步行",
+      "走了多少步",
+      "多少步",
+      "steps",
+      "step count",
+      "walking"
+    ],
     "rhr": [
       "静息心率",
       "静息",
@@ -70,7 +98,13 @@
       "resp rate",
       "breathing rate"
     ],
-    "spo2": ["血氧", "spo2", "氧饱和", "blood oxygen", "oxygen saturation"]
+    "spo2": [
+      "血氧",
+      "spo2",
+      "氧饱和",
+      "blood oxygen",
+      "oxygen saturation"
+    ]
   },
   "episodic_delta_followup": {
     "tokens": [
@@ -135,7 +169,10 @@
       "should watch"
     ]
   },
-  "supplement_families": ["supplement", "supplement_label"],
+  "supplement_families": [
+    "supplement",
+    "supplement_label"
+  ],
   "topic_markers": {
     "wearable_only": [
       "睡眠",
@@ -149,7 +186,15 @@
       "heart rate",
       "wearable"
     ],
-    "lab_cross_year": ["历年", "对比", "跨年", "各年", "year over year", "multi-year", "trend"],
+    "lab_cross_year": [
+      "历年",
+      "对比",
+      "跨年",
+      "各年",
+      "year over year",
+      "multi-year",
+      "trend"
+    ],
     "attachment_asset_qa": [
       "是什么",
       "有什么帮助",
@@ -159,11 +204,32 @@
       "what is this",
       "ingredients"
     ],
-    "attachment_episodic_bridge": ["指标", "身体", "hrv", "血脂", "改善", "metrics", "lipids"]
+    "attachment_episodic_bridge": [
+      "指标",
+      "身体",
+      "hrv",
+      "血脂",
+      "改善",
+      "metrics",
+      "lipids"
+    ]
   },
   "scope_disambiguation": {
-    "session_tokens": ["截图", "上传", "刚才", "附件", "会话"],
-    "archive_tokens": ["化验", "存档", "数据库", "档案", "历年", "记录"]
+    "session_tokens": [
+      "截图",
+      "上传",
+      "刚才",
+      "附件",
+      "会话"
+    ],
+    "archive_tokens": [
+      "化验",
+      "存档",
+      "数据库",
+      "档案",
+      "历年",
+      "记录"
+    ]
   },
   "lab_record_request": {
     "tokens": [
@@ -186,11 +252,58 @@
         "各项指标",
         "全面",
         "大健康",
-        "身体年龄"
+        "身体年龄",
+        "overall",
+        "comprehensive",
+        "assessment",
+        "all my metrics",
+        "how am i doing",
+        "body age"
       ]
+    },
+    "daily_readiness": {
+      "tokens": [
+        "训练",
+        "力量训练",
+        "高强度",
+        "运动强度",
+        "运动类型",
+        "恢复",
+        "准备度",
+        "身体状态",
+        "今天状态",
+        "适合运动",
+        "能不能练",
+        "可以锻炼",
+        "strength training",
+        "readiness",
+        "recovery",
+        "train today",
+        "workout today",
+        "can i train",
+        "high intensity"
+      ],
+      "anti_tokens": [
+        "化验",
+        "血脂",
+        "LDL",
+        "lipid"
+      ],
+      "domain": "wearable",
+      "precedence_over": [
+        "holistic_assessment"
+      ],
+      "wins_over_explicit_metric": true,
+      "notes": "当日训练/恢复准备度评估；数值来源 = 事实卡 T0"
     }
   },
-  "holistic_proxy_metrics": ["ldl", "hrv", "steps", "vo2max", "resting_hr"],
+  "holistic_proxy_metrics": [
+    "ldl",
+    "hrv",
+    "steps",
+    "vo2max",
+    "resting_hr"
+  ],
   "clarify_kinds": {
     "intent_scope": {
       "prompt_template": "您希望基于库内哪些数据做综合评估？",
@@ -200,7 +313,10 @@
           "label": "化验 + 穿戴",
           "payload": {
             "action": "intent_scope",
-            "domains": ["lab", "wearable"],
+            "domains": [
+              "lab",
+              "wearable"
+            ],
             "profile_hint": "combined_review"
           }
         },
@@ -209,7 +325,9 @@
           "label": "仅化验档案",
           "payload": {
             "action": "intent_scope",
-            "domains": ["lab"],
+            "domains": [
+              "lab"
+            ],
             "profile_hint": "lab_cross_year"
           }
         },
@@ -218,7 +336,9 @@
           "label": "仅穿戴近90天",
           "payload": {
             "action": "intent_scope",
-            "domains": ["wearable"],
+            "domains": [
+              "wearable"
+            ],
             "profile_hint": "wearable_only"
           }
         }
@@ -268,6 +388,67 @@
       "episodic_continue": true,
       "recall_forbidden": true,
       "recall_ledger_allowed": true
+    }
+  },
+  "broad_compare": {
+    "tokens": [
+      "所有指标",
+      "各项指标",
+      "全部指标",
+      "多项指标",
+      "是否正常",
+      "对比",
+      "相比",
+      "是不是都",
+      "整体",
+      "all metrics",
+      "every metric",
+      "overall",
+      "compare all",
+      "are they all"
+    ]
+  },
+  "episodic_grain_ttl_turns": 6,
+  "follow_ups": {
+    "by_profile": {
+      "wearable_only": [
+        {
+          "id": "hrv_trend",
+          "label_zh": "近90天 HRV 趋势如何？",
+          "label_en": "How has HRV trended over ~90 days?"
+        },
+        {
+          "id": "sleep",
+          "label_zh": "睡眠怎么样？",
+          "label_en": "How is sleep?"
+        },
+        {
+          "id": "steps",
+          "label_zh": "步数呢？",
+          "label_en": "What about steps?"
+        }
+      ],
+      "wearable_daily_review": [
+        {
+          "id": "metric_scope_cluster",
+          "label_zh": "加入全部睡眠分项重新解读",
+          "label_en": "Re-run with all sleep stages",
+          "payload": {
+            "action": "metric_scope",
+            "cluster": "sleep"
+          }
+        },
+        {
+          "id": "sleep",
+          "label_zh": "睡眠怎么样？",
+          "label_en": "How is sleep?"
+        },
+        {
+          "id": "hrv_trend",
+          "label_zh": "近90天 HRV 趋势如何？",
+          "label_en": "How has HRV trended over ~90 days?"
+        }
+      ]
     }
   }
 }

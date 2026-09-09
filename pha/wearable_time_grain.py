@@ -8,10 +8,11 @@ default 90-day mean — that is why 「今天」 vanished from the answer.
 
 from __future__ import annotations
 
+import os
 import re
 from dataclasses import dataclass
 from datetime import date, timedelta
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from pha.health_data import effective_query_reference_date
 from pha.loop_keyword_conflicts import TIME_ANCHOR_TOKENS
@@ -254,6 +255,7 @@ def resolve_wearable_time_grain(
     user_message: str,
     *,
     reference: Optional[date] = None,
+    episodic: Any = None,
 ) -> WearableTimeGrain:
     """Map a user message onto a wearable window + aggregation.
 
@@ -329,6 +331,28 @@ def resolve_wearable_time_grain(
         )
 
     if not ranked:
+        if (os.environ.get("PHA_EPISODIC_GRAIN_ANCHOR") or "1").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        ) and episodic is not None:
+            start_s = str(getattr(episodic, "focus_grain_start", "") or "").strip()
+            end_s = str(getattr(episodic, "focus_grain_end", "") or "").strip()
+            agg = str(getattr(episodic, "focus_grain_aggregation", "") or "point").strip() or "point"
+            if start_s and end_s:
+                from pha.intent_gates import infer_wearable_metric_ids
+
+                if infer_wearable_metric_ids(text):
+                    try:
+                        return WearableTimeGrain(
+                            start=date.fromisoformat(start_s),
+                            end=date.fromisoformat(end_s),
+                            aggregation=agg,
+                            source="episodic_anchor",
+                            token="episodic",
+                        )
+                    except ValueError:
+                        pass
         return _default_grain(ref)
     ranked.sort(key=lambda item: item[0], reverse=True)
     return ranked[0][1]

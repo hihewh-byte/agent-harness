@@ -44,6 +44,20 @@
       ],
       "required_tools": []
     },
+    "wearable_daily_review": {
+      "forbidden_tools": [
+        "fetch_evidence_by_id",
+        "get_health_data",
+        "get_temporal_history_dossier"
+      ],
+      "required_tier0": [
+        "FACT_CARD_CONTEXT",
+        "NUMERICS_MANIFEST",
+        "TASK",
+        "USER_ASSESSMENT_PROMPT"
+      ],
+      "required_tools": []
+    },
     "wearable_only": {
       "forbidden_tools": [
         "fetch_evidence_by_id"
@@ -323,6 +337,32 @@
       ],
       "tools_allowed": []
     },
+    "wearable_daily_review": {
+      "forbidden": [
+        "DOSSIER_CLINICAL_COMPACT",
+        "DOSSIER_LAB",
+        "EVIDENCE_CATALOG",
+        "GET_HEALTH_DATA",
+        "GET_TEMPORAL_HISTORY_DOSSIER",
+        "PATIENT_STATE_LAB",
+        "PATIENT_STATE_WEARABLE",
+        "SUPPLEMENT_BG",
+        "USER_SNAPSHOT",
+        "WEARABLE_90D_SUMMARY"
+      ],
+      "legacy_question_type": "WEARABLE",
+      "memory_write_policy": "chat",
+      "slots_tier0": [
+        "FACT_CARD_CONTEXT",
+        "NUMERICS_MANIFEST",
+        "TASK",
+        "USER_ASSESSMENT_PROMPT"
+      ],
+      "slots_tier1": [
+        "USER_BACKGROUND_BRIEF"
+      ],
+      "tools_allowed": []
+    },
     "wearable_only": {
       "forbidden": [
         "USER_SNAPSHOT_IN_RAW_USER"
@@ -382,6 +422,7 @@
     "lab_cross_year",
     "lifestyle",
     "supplement_manifest",
+    "wearable_daily_review",
     "wearable_only",
     "wearable_screenshot_review"
   ]

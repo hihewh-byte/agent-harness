@@ -474,9 +474,10 @@ def compose_fact_card(
     user_id: str = "default",
     enabled_metric_ids: Optional[Sequence[str]] = None,
     now: Optional[datetime] = None,
+    locale: Optional[str] = None,
 ) -> dict[str, Any]:
     """Pure bind: ``rows`` is the only number source."""
-    locale = load_fact_card_locale(user_id)
+    locale = (locale or "").strip() or load_fact_card_locale(user_id)
     specs = resolve_metric_specs(user_id, enabled_metric_ids)
     by_day = {row.day: row for row in rows}
     as_of = max(by_day) if by_day else None
@@ -894,7 +895,13 @@ def fact_card_numeric_atoms(card: dict[str, Any]) -> set[str]:
     return atoms
 
 
-def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[str, Any]:
+def load_fact_card(
+    user_id: str,
+    *,
+    reference: Optional[date] = None,
+    enabled_metric_ids: Optional[Sequence[str]] = None,
+    locale: Optional[str] = None,
+) -> dict[str, Any]:
     from pha.sqlite_storage import (
         query_last_healthkit_sample,
         query_max_wearable_daily_day,
@@ -908,7 +915,13 @@ def load_fact_card(user_id: str, *, reference: Optional[date] = None) -> dict[st
     start = date(2000, 1, 1)
     end = max(ref, max_day or ref)
     rows = query_wearable_daily_range(uid, start, end)
-    card = compose_fact_card(calendar_day=ref, rows=rows, user_id=uid)
+    card = compose_fact_card(
+        calendar_day=ref,
+        rows=rows,
+        user_id=uid,
+        enabled_metric_ids=enabled_metric_ids,
+        locale=locale,
+    )
     last = query_last_healthkit_sample(uid)
     if last is None:
         card["facts"]["healthkit"] = {"reached": False}

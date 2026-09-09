@@ -32,6 +32,9 @@ class HealthSessionFocus:
     last_assistant_digest: str = ""
     focus_goal: str = ""
     focus_domains: list[str] = field(default_factory=list)
+    focus_grain_start: str = ""
+    focus_grain_end: str = ""
+    focus_grain_aggregation: str = ""
 
     @property
     def active(self) -> bool:

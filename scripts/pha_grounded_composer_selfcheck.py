@@ -98,6 +98,16 @@ def test_he4_follow_ups_catalog() -> None:
     _assert(len(choices) == 3, choices)
     _assert(all("id" in c and "label" in c for c in choices), choices)
     print("PASS H-ε4 follow_ups (3 catalog choices)")
+    zh = build_follow_ups_event(profile="wearable_daily_review", locale="zh")
+    en = build_follow_ups_event(profile="wearable_daily_review", locale="en")
+    zc = zh.get("choices") or []
+    ec = en.get("choices") or []
+    _assert(len(zc) == len(ec) == 3, (zc, ec))
+    _assert([c["id"] for c in zc] == [c["id"] for c in ec], (zc, ec))
+    _assert(zc[0]["id"] == "metric_scope_cluster", zc)
+    _assert("payload" in zc[0] and "metric_ids" in (zc[0].get("payload") or {}), zc[0])
+    _assert(zc[0]["label"] != ec[0]["label"], (zc[0]["label"], ec[0]["label"]))
+    print("PASS H-ε4b wearable_daily_review bilingual follow_ups")
 
 
 def test_he6_locale_leak_guard() -> None:

@@ -182,6 +182,7 @@ class HarnessTurnInputs:
     goal_class: str = ""
     goal_source: str = ""
     arbiter_decision: Dict[str, Any] = field(default_factory=dict)
+    wearable_metric_resolution: Dict[str, Any] = field(default_factory=dict)
 
 
 def _slot_rows(inputs: HarnessTurnInputs) -> List[Dict[str, Any]]:
@@ -498,6 +499,8 @@ def build_harness_report(inputs: HarnessTurnInputs) -> Dict[str, Any]:
         report["goalSource"] = inputs.goal_source
     if inputs.arbiter_decision:
         report["arbiterDecision"] = dict(inputs.arbiter_decision)
+    if inputs.wearable_metric_resolution:
+        report["wearableMetricResolution"] = dict(inputs.wearable_metric_resolution)
     return report
 
 

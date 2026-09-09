@@ -73,3 +73,15 @@ PYTHONPATH=. python scripts/pha_eval_set_alias_fuzz_selfcheck.py
 
 - Loop A `--full-veto` may later consume eval_set ids via `suggested_regression`.
 - Alias fuzz locks `gate_1e_d_ocr_ui_junk` (toxic `Query→hrv` class) + 1E-a templates.
+
+## PHA chat ↔ fact-card parity (H9–H13)
+
+Offline fixture cases live in `scripts/pha_chat_fact_card_parity_selfcheck.py` (not HTTP Loop goldens). Live 8788 (`qwen3:14b`, 2026-09-09 ledger) recorded 2026-09-09 16:51 in `pha-ios-proactive-change-log.md`.
+
+| ID | Locale | Expect |
+|---|---|---|
+| H9 / H9E | zh / en | `daily_readiness` → profile `wearable_daily_review` |
+| H10 / H10E | zh / en | today sleep cluster point-day (5 rows; no 90d mean) |
+| H11 / H11E | zh / en | grain inherit on; 90d stage means off |
+| H12 | zh | sleep cluster; in-bed missing only if asked |
+| H13 / H13E | zh / en | fail-closed RHR for today (no yesterday swap) |

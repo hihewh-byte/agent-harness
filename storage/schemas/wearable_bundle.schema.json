@@ -1,15 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pha://schemas/wearable_bundle.schema.json",
-  "schema_version": "1.2.0",
+  "schema_version": "1.2.3",
   "contract": {
     "name": "pha-evidence-asset",
-    "revision": "2026-05-21",
+    "revision": "2026-09-09",
     "trust_level": "signed_directory_only",
     "notes": "P1.6 DCH：Catalog 诱饵由 trigger_keywords 运行时生成；指标由同表驱动 Reduce。 · 4-α.1: retired fuzzy triggers (睡得好/睡得怎么样)"
   },
   "asset_id": "wearable_bundle",
-  "legacy_ids": ["WEARABLE_90D"],
+  "legacy_ids": [
+    "WEARABLE_90D"
+  ],
   "status": "active",
   "category": "high_frequency_time_series",
   "strategy": "wearable_ts",
@@ -25,48 +27,451 @@
   },
   "catalog": {
     "enabled": true,
-    "profiles": ["combined_review", "wearable_only", "lifestyle"],
+    "profiles": [
+      "combined_review",
+      "wearable_only",
+      "lifestyle"
+    ],
     "include_in_default_combined": true,
     "default_combined_rank": 2,
     "max_instruction_chars": 120,
     "max_matched_keywords_in_catalog": 4,
     "llm_instruction_zh": "点单拉取近窗穿戴摘要。数值须对应 Manifest wearable 域或本块；禁止索要原始导出。",
     "core_hint_keywords": [
-      {"zh": "HRV", "metric_id": "hrv"},
-      {"zh": "活动消耗", "metric_id": "activity_kcal"},
-      {"zh": "睡眠", "metric_id": "sleep"}
+      {
+        "zh": "HRV",
+        "metric_id": "hrv"
+      },
+      {
+        "zh": "活动消耗",
+        "metric_id": "activity_kcal"
+      },
+      {
+        "zh": "睡眠",
+        "metric_id": "sleep"
+      }
     ],
     "trigger_keywords": [
-      {"token": "HRV", "metric_id": "hrv", "zh": "HRV"},
-      {"token": "心率变异性", "metric_id": "hrv", "zh": "HRV"},
-      {"token": "心率变异", "metric_id": "hrv", "zh": "HRV"},
-      {"token": "rmssd", "metric_id": "hrv", "zh": "HRV"},
-      {"token": "步数", "metric_id": "steps", "zh": "步数"},
-      {"token": "走路", "metric_id": "steps", "zh": "步数"},
-      {"token": "走得多", "metric_id": "steps", "zh": "步数"},
-      {"token": "多少步", "metric_id": "steps", "zh": "步数"},
-      {"token": "走了多少", "metric_id": "steps", "zh": "步数"},
-      {"token": "steps", "metric_id": "steps", "zh": "步数"},
-      {"token": "step count", "metric_id": "steps", "zh": "步数"},
-      {"token": "睡眠", "metric_id": "sleep", "zh": "睡眠"},
-      {"token": "睡多久", "metric_id": "sleep", "zh": "睡眠"},
-      {"token": "睡了几", "metric_id": "sleep", "zh": "睡眠"},
-      {"token": "昨晚睡", "metric_id": "sleep", "zh": "睡眠"},
-      {"token": "静息心率", "metric_id": "rhr", "zh": "静息心率"},
-      {"token": "活动消耗", "metric_id": "activity_kcal", "zh": "活动消耗"},
-      {"token": "运动消耗", "metric_id": "activity_kcal", "zh": "活动消耗"},
-      {"token": "血氧", "metric_id": "spo2", "zh": "血氧"},
-      {"token": "spo2", "metric_id": "spo2", "zh": "血氧"},
-      {"token": "SpO2", "metric_id": "spo2", "zh": "血氧"},
-      {"token": "氧饱和", "metric_id": "spo2", "zh": "血氧"},
-      {"token": "oxygen saturation", "metric_id": "spo2", "zh": "血氧"},
-      {"token": "呼吸率", "metric_id": "respiratory_rate", "zh": "呼吸率"},
-      {"token": "呼吸频率", "metric_id": "respiratory_rate", "zh": "呼吸率"},
-      {"token": "呼吸正常", "metric_id": "respiratory_rate", "zh": "呼吸率"},
-      {"token": "vo2max", "metric_id": "vo2max", "zh": "VO2max"},
-      {"token": "最大摄氧", "metric_id": "vo2max", "zh": "VO2max"},
-      {"token": "体温", "metric_id": "wrist_temp", "zh": "手腕体温"},
-      {"token": "手腕温度", "metric_id": "wrist_temp", "zh": "手腕体温"}
+      {
+        "token": "睡眠",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "sleep_time",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "asleep",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "睡眠总时长",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "睡眠时长",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "睡多久",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "昨晚睡",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "睡了几",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "sleep duration",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "hours asleep",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "how long did i sleep",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "sleep data",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "sleep metrics",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "sleep",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
+        "token": "hrv",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "心率变异性",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "HRV",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "sdnn",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "心率变异",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "heart rate variability",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "heart-rate variability",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "HRV SDNN",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "心率变异 SDNN",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "静息",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "resting",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "RHR",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "心率怎么样",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "心率指标",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "心率正常",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "心跳",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "resting heart rate",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "resting hr",
+        "metric_id": "rhr",
+        "zh": "静息心率"
+      },
+      {
+        "token": "血氧",
+        "metric_id": "spo2",
+        "zh": "血氧"
+      },
+      {
+        "token": "spo2",
+        "metric_id": "spo2",
+        "zh": "血氧"
+      },
+      {
+        "token": "SpO2",
+        "metric_id": "spo2",
+        "zh": "血氧"
+      },
+      {
+        "token": "blood oxygen",
+        "metric_id": "spo2",
+        "zh": "血氧"
+      },
+      {
+        "token": "oxygen saturation",
+        "metric_id": "spo2",
+        "zh": "血氧"
+      },
+      {
+        "token": "呼吸率",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "respiratory",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "breaths",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "呼吸",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "respiratory rate",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "breathing rate",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "resp rate",
+        "metric_id": "respiratory_rate",
+        "zh": "呼吸率"
+      },
+      {
+        "token": "深睡",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "深度睡眠",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "睡眠分期",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "deep sleep",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "sleep stage",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "sleep stages",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "staging",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "REM",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "快速眼动",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "rem sleep",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "rapid eye movement",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "核心睡眠",
+        "metric_id": "sleep",
+        "zh": "核心睡眠"
+      },
+      {
+        "token": "core sleep",
+        "metric_id": "sleep",
+        "zh": "核心睡眠"
+      },
+      {
+        "token": "core sleep hours",
+        "metric_id": "sleep",
+        "zh": "核心睡眠"
+      },
+      {
+        "token": "在床",
+        "metric_id": "sleep",
+        "zh": "在床"
+      },
+      {
+        "token": "in bed",
+        "metric_id": "sleep",
+        "zh": "在床"
+      },
+      {
+        "token": "time in bed",
+        "metric_id": "sleep",
+        "zh": "在床"
+      },
+      {
+        "token": "睡眠清醒",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "waso",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "awake",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "awake time",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "time awake",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "WASO",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "步数",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "steps",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "走了多少",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "走路",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "走路多",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "step count",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "活动消耗",
+        "metric_id": "activity_kcal",
+        "zh": "活动消耗"
+      },
+      {
+        "token": "active energy",
+        "metric_id": "activity_kcal",
+        "zh": "活动消耗"
+      },
+      {
+        "token": "卡路里",
+        "metric_id": "activity_kcal",
+        "zh": "活动消耗"
+      },
+      {
+        "token": "vo2max",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "VO2",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "最大摄氧量",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "cardio fitness",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "腕温",
+        "metric_id": "wrist_temp",
+        "zh": "手腕体温"
+      },
+      {
+        "token": "手腕温度",
+        "metric_id": "wrist_temp",
+        "zh": "手腕体温"
+      },
+      {
+        "token": "wrist temperature",
+        "metric_id": "wrist_temp",
+        "zh": "手腕体温"
+      },
+      {
+        "token": "sleeping wrist",
+        "metric_id": "wrist_temp",
+        "zh": "手腕体温"
+      }
     ]
   },
   "fetch": {
@@ -76,8 +481,13 @@
       "callable": "build_wearable_90d_summary_block",
       "empty_message_zh": "【wearable_bundle】近窗无穿戴数据。"
     },
-    "window": {"default_days": 90},
-    "forbidden": ["raw_sql", "per_sample_dump_in_tier0"]
+    "window": {
+      "default_days": 90
+    },
+    "forbidden": [
+      "raw_sql",
+      "per_sample_dump_in_tier0"
+    ]
   },
   "metrics": {
     "canonical": [
@@ -91,7 +501,13 @@
       "vo2max",
       "wrist_temp"
     ],
-    "core": ["hrv", "activity_kcal", "sleep", "steps", "rhr"]
+    "core": [
+      "hrv",
+      "activity_kcal",
+      "sleep",
+      "steps",
+      "rhr"
+    ]
   },
   "existence": {
     "probe": "sqlite_metric"
@@ -101,12 +517,26 @@
   },
   "dual_track": {
     "enabled": true,
-    "resolve_map": {"WEARABLE_90D": "wearable_bundle"}
+    "resolve_map": {
+      "WEARABLE_90D": "wearable_bundle"
+    }
   },
   "extension_registry": {
-    "spo2": {"enabled": true, "storage_column": "spo2_pct"},
-    "respiratory_rate": {"enabled": true, "storage_column": "respiratory_rate_bpm"},
-    "vo2max": {"enabled": true, "storage_column": "vo2max_ml_kg_min"},
-    "wrist_temp": {"enabled": true, "storage_column": "wrist_temp_c"}
+    "spo2": {
+      "enabled": true,
+      "storage_column": "spo2_pct"
+    },
+    "respiratory_rate": {
+      "enabled": true,
+      "storage_column": "respiratory_rate_bpm"
+    },
+    "vo2max": {
+      "enabled": true,
+      "storage_column": "vo2max_ml_kg_min"
+    },
+    "wrist_temp": {
+      "enabled": true,
+      "storage_column": "wrist_temp_c"
+    }
   }
 }
