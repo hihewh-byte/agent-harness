@@ -27,6 +27,15 @@ def _q(user_id: str, token: Optional[str]) -> str:
     return urlencode(params)
 
 
+def _background_used_html(interp: Optional[dict[str, Any]], locale: str) -> str:
+    notes = int((interp or {}).get("background_notes_used") or 0)
+    if notes <= 0:
+        return ""
+    return (
+        f'<p class="fine">{escape(card_copy(locale, "bg_brief_used", n=notes))}</p>'
+    )
+
+
 def _interpret_status_html(
     interp: Optional[dict[str, Any]],
     *,
@@ -53,7 +62,8 @@ def _interpret_status_html(
         )
         return (
             f'<div id="interp-status"><p class="interp-body">{text}</p>'
-            f'<p class="fine">{escape(card_copy(locale, "model_meta", model=model, at=at))}</p></div>'
+            f'<p class="fine">{escape(card_copy(locale, "model_meta", model=model, at=at))}</p>'
+            f"{_background_used_html(interp, locale)}</div>"
         )
     return '<p class="fine" id="interp-status"></p>'
 
@@ -404,6 +414,13 @@ def render_fact_card_html(
           .replace("{{at}}", data.generated_at_display || data.generated_at || "");
         box.appendChild(p);
         box.appendChild(meta);
+        var nBg = Number(data.background_notes_used || 0);
+        if (nBg > 0 && COPY.bg_brief_used) {{
+          var bg = document.createElement("p");
+          bg.className = "fine";
+          bg.textContent = COPY.bg_brief_used.replace("{{n}}", String(nBg));
+          box.appendChild(bg);
+        }}
         btn.textContent = COPY.generate;
       }}
     }}

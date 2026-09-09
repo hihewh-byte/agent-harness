@@ -39,6 +39,7 @@ _SLOT_MARKERS: Dict[str, str] = {
     "DATA_AVAILABILITY": "数据可用性（库内概况）",
     "EPISODIC_BRIDGE": "上轮对话摘要（单会话续焦）",
     "USER_CONTEXT_BRIEF": "慢性健康简报（CHB · 只读）",
+    "USER_BACKGROUND_BRIEF": "用户背景 · 自述 · 非数字源",
     "FACT_CARD_CONTEXT": "唯一可引用数字与日期",
     "USER_ASSESSMENT_PROMPT": "用户评估要求",
 }
@@ -130,10 +131,15 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
             "FACT_CARD_CONTEXT",
             "NUMERICS_MANIFEST",
         ],
-        "protected": {"TASK", "NUMERICS_MANIFEST", "USER_ASSESSMENT_PROMPT"},
-        "degradation_order": ["FACT_CARD_CONTEXT"],
+        "protected": {
+            "TASK",
+            "NUMERICS_MANIFEST",
+            "USER_ASSESSMENT_PROMPT",
+            "FACT_CARD_CONTEXT",
+        },
+        "degradation_order": [],
         "supplement_start": "full",
-        "slot_floor": {"FACT_CARD_CONTEXT": "summary"},
+        "slot_floor": {"FACT_CARD_CONTEXT": "full"},
     },
 }
 

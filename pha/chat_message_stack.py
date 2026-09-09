@@ -13,7 +13,7 @@ from pha.health_data import build_system_date_block, effective_query_reference_d
 
 CHAT_HISTORY_MAX_TURNS = int(os.environ.get("PHA_CHAT_HISTORY_MAX_TURNS", "8"))
 CHAT_HISTORY_MAX_CHARS = int(os.environ.get("PHA_CHAT_HISTORY_MSG_MAX_CHARS", "2800"))
-SYSTEM_CONTENT_MAX_CHARS = int(os.environ.get("PHA_SYSTEM_CONTENT_MAX_CHARS", "10000"))
+SYSTEM_CONTENT_MAX_CHARS = int(os.environ.get("PHA_SYSTEM_CONTENT_MAX_CHARS", "12000"))
 SUPPLEMENTAL_RECALL_MAX_CHARS = 1500
 PHA_SUPPLEMENTAL_EXTRA_MAX_CHARS = int(os.environ.get("PHA_SUPPLEMENTAL_EXTRA_MAX_CHARS", "3200"))
 

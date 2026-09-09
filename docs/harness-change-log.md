@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-09-09 (M1-P14：USER_BACKGROUND_BRIEF Tier1)
+
+- **类别**：**P1（FR-6.12）**。按钮解读可见聊天自述背景，但只能作为非数字源。
+- **改动**：`pha/fact_card_background_brief.py`；`fact_card_interpret` `slots_tier1=["USER_BACKGROUND_BRIEF"]`；TASK 第 5 条；`interpret_cache_key` 增 `bg_brief_digest`；`leftover_s_level_numeric_tokens` 后验（不改审计策略）。9 指标卡 soul+T0 ≈10.2k，默认系统上限 10k 会整段丢掉 T1，故 `PHA_SYSTEM_CONTENT_MAX_CHARS` 默认 12000。`pha_harness_profile_registry_generate.py --write`。
+- **证据**：`pha_fact_card_selfcheck` P14 八段 PASS；registry `--write` + selfcheck PASS。运行验收见 proactive change-log。
+- **回滚**：`PHA_FACT_CARD_BG_BRIEF=0`；槽改回 `[]`；TASK 删第 5 条；系统上限改回 10000。
+
 ## 2026-09-09 (M1-P13：memory_write_policy)
 
 - **类别**：**P0（FR-6.11）**。`fact_card_interpret` 借用 chat 管线但不得写入会话记忆。

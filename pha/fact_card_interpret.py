@@ -69,6 +69,7 @@ def interpret_cache_key(
     card_digest: str = "",
     locale: str = _DEFAULT_LOCALE,
     calendar_day: str = "",
+    bg_brief_digest: str = "",
 ) -> str:
     uid = (user_id or "default").strip() or "default"
     raw = (
@@ -76,6 +77,7 @@ def interpret_cache_key(
         f"{card_digest or ''}|"
         f"{(locale or _DEFAULT_LOCALE).strip() or _DEFAULT_LOCALE}|"
         f"{assessment_prompt or ''}|"
+        f"{bg_brief_digest or ''}|"
         f"{_interpret_prompt_rev()}"
     )
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -230,12 +232,22 @@ def run_interpretation(
             "card_digest": digest,
         }
     generated_at = datetime.now(timezone.utc).isoformat()
+    from pha.fact_card_background_brief import build_fact_card_background_brief
+
+    _brief_text, brief_meta = build_fact_card_background_brief(
+        user_id,
+        locale=locale,
+        as_of=str((card.get("facts") or {}).get("as_of") or ""),
+    )
+    notes_used = int(brief_meta.get("notes_used") or 0)
     base_meta = {
         "model": model_used,
         "generated_at": generated_at,
         "harness_profile": "fact_card_interpret",
         "numerics_audit": numerics_audit,
         "card_digest": digest,
+        "background_used": notes_used > 0,
+        "background_notes_used": notes_used,
     }
     if not (text or "").strip():
         return {
@@ -268,6 +280,13 @@ def run_interpretation(
     }
 
 
+def _bg_brief_digest_for(user_id: str, card: dict[str, Any], locale: str) -> str:
+    from pha.fact_card_background_brief import background_brief_digest
+
+    as_of = str((card.get("facts") or {}).get("as_of") or "")
+    return background_brief_digest(user_id, locale=locale, as_of=as_of)
+
+
 def current_interpret_key(
     user_id: str,
     card: Optional[dict[str, Any]] = None,
@@ -286,6 +305,7 @@ def current_interpret_key(
         card_digest=fact_card_digest(card),
         locale=locale,
         calendar_day=calendar_day,
+        bg_brief_digest=_bg_brief_digest_for(uid, card, locale),
     )
 
 
@@ -318,6 +338,12 @@ def start_interpretation(
     as_of = (card.get("facts") or {}).get("as_of")
     calendar_day = str((card.get("facts") or {}).get("calendar_day") or "")
     digest = fact_card_digest(card)
+    from pha.fact_card_background_brief import build_fact_card_background_brief
+
+    _brief_text, brief_meta = build_fact_card_background_brief(
+        uid, locale=loc, as_of=str(as_of or "")
+    )
+    bg_digest = str(brief_meta.get("digest") or "")
     key = interpret_cache_key(
         uid,
         as_of,
@@ -325,6 +351,7 @@ def start_interpretation(
         card_digest=digest,
         locale=loc,
         calendar_day=calendar_day,
+        bg_brief_digest=bg_digest,
     )
     existing = _read_cache(key)
     if existing and existing.get("status") in {"pending", "done"}:
@@ -357,6 +384,8 @@ def start_interpretation(
         "as_of": as_of,
         "harness_profile": "fact_card_interpret",
         "card_digest": digest,
+        "background_used": int(brief_meta.get("notes_used") or 0) > 0,
+        "background_notes_used": int(brief_meta.get("notes_used") or 0),
     }
     with _LOCK:
         if key in _INFLIGHT:

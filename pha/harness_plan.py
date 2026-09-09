@@ -125,7 +125,10 @@ _FACT_CARD_INTERPRET_TASK = (
     "3. Population commons and training tips: integers OK (e.g. 95%, 70–80%, 2–3 times); "
     "do not invent decimals. Optional sourced note: {T1_TEMPLATE}.\n"
     "4. Plain text only — no Markdown (* # `). No diagnosis, prescriptions, or doses. "
-    "Do not repeat the disclaimer. Language follows response_locale."
+    "Do not repeat the disclaimer. Language follows response_locale.\n"
+    "5. USER_BACKGROUND_BRIEF, if present, only shapes cautions and wording of advice. "
+    "Never cite it as data, never restate or infer doses, and skip it when unrelated "
+    "to the rows the assessment named."
 )
 
 
@@ -159,7 +162,7 @@ def _fact_card_interpret_turn_plan() -> TurnEvidencePlan:
             "FACT_CARD_CONTEXT",
             "NUMERICS_MANIFEST",
         ],
-        slots_tier1=[],
+        slots_tier1=["USER_BACKGROUND_BRIEF"],
         forbidden=list(_FACT_CARD_INTERPRET_FORBIDDEN),
         tools_allowed=[],
         task_text=fact_card_interpret_task_text("en"),

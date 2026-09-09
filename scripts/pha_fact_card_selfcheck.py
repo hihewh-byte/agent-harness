@@ -968,6 +968,10 @@ def main() -> int:
         return _fail(f"override profile {plan.profile}")
     if "WEARABLE_90D_SUMMARY" not in plan.forbidden:
         return _fail("WEARABLE_90D_SUMMARY must be forbidden")
+    if "SUPPLEMENT_BG" not in plan.forbidden:
+        return _fail("SUPPLEMENT_BG must stay forbidden on fact_card_interpret")
+    if plan.slots_tier1 != ["USER_BACKGROUND_BRIEF"]:
+        return _fail(f"fact_card_interpret tier1 must be USER_BACKGROUND_BRIEF only, got {plan.slots_tier1}")
     if "NUMERICS_MANIFEST" not in plan.slots_tier0:
         return _fail("NUMERICS_MANIFEST missing from fact_card_interpret")
     if resolve_profile_override("not_a_real_profile") is not None:
@@ -1113,6 +1117,8 @@ def main() -> int:
         return _fail("TASK must not name specific metrics")
     if "did not name" not in task:
         return _fail("TASK must forbid paragraphs for unnamed rows")
+    if "USER_BACKGROUND_BRIEF" not in task:
+        return _fail("TASK must mention USER_BACKGROUND_BRIEF")
 
     from pha.chat_turn_slots import select_soul_base
     from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
@@ -1212,6 +1218,9 @@ def main() -> int:
     mem_err = _check_p13_memory(p91_card)
     if mem_err:
         return mem_err
+    p14_err = _check_p14_background(p91_card)
+    if p14_err:
+        return p14_err
 
     print("pha_fact_card_selfcheck: PASS")
     return 0
@@ -1279,6 +1288,8 @@ def _check_p13_memory(p91_card: dict) -> int | None:
         return _fail("fact_card_interpret memory_write_policy must be none")
     snap = introspect_harness_profile_plans().get("fact_card_interpret") or {}
     t1 = set(snap.get("slots_tier1") or [])
+    if "USER_BACKGROUND_BRIEF" not in t1:
+        return _fail("fact_card_interpret tier1 must include USER_BACKGROUND_BRIEF")
     if "RECALL" in t1 or "EPISODIC_BRIDGE" in t1:
         return _fail("fact_card_interpret tier1 must not include RECALL/EPISODIC_BRIDGE")
 
@@ -1530,6 +1541,334 @@ def _check_p13_memory(p91_card: dict) -> int | None:
         verify.close()
 
     _restore_p13_db(old_db, old_slots, old_disc)
+    return None
+
+
+def _check_p14_background(p91_card: dict) -> int | None:
+    """FR-6.12: USER_BACKGROUND_BRIEF is denumerized Tier1, never a numeric source."""
+    import pha.chat_turn_orchestrator as orch
+    import pha.sqlite_connection as sc
+    import pha.sqlite_storage as st
+    from pha.chat_background import init_background_schema
+    from pha.chat_storage import init_chat_schema
+    from pha.fact_card_background_brief import (
+        background_brief_enabled,
+        build_fact_card_background_brief,
+    )
+    from pha.fact_card_copy import card_copy
+    from pha.fact_card_interpret import build_fact_card_context_block, interpret_cache_key
+    from pha.harness_plan import FACT_CARD_INTERPRET_USER_MESSAGE
+    from pha.numerics_manifest import leftover_s_level_numeric_tokens
+
+    html = render_fact_card_html(
+        {
+            **p91_card,
+            "interpretation": {
+                "status": "done",
+                "text": "ok",
+                "model": "selfcheck-model",
+                "generated_at": "2026-09-09T00:00:00+00:00",
+                "background_used": True,
+                "background_notes_used": 2,
+            },
+        },
+        prefs={**prefs_payload("selfcheck"), "locale": "zh-CN"},
+        token=None,
+    )
+    if "已参考你在对话中自述的 2 条背景" not in html:
+        return _fail("interpret HTML must show referenced background count")
+    en_html = render_fact_card_html(
+        {
+            **p91_card,
+            "interpretation": {
+                "status": "done",
+                "text": "ok",
+                "model": "selfcheck-model",
+                "generated_at": "2026-09-09T00:00:00+00:00",
+                "background_used": True,
+                "background_notes_used": 2,
+            },
+        },
+        prefs={**prefs_payload("selfcheck"), "locale": "en-US"},
+        token=None,
+    )
+    if "Referenced 2 background note" not in en_html:
+        return _fail("en interpret HTML must show referenced background count")
+
+    tmp = Path(tempfile.mkdtemp(prefix="pha-p14-"))
+    db = tmp / "pha_storage.db"
+    slots_dir = tmp / "slots"
+    slots_dir.mkdir()
+    old_db = st.DEFAULT_DB_PATH
+    old_slots = os.environ.get("PHA_USER_DYNAMIC_SLOTS_DIR")
+    old_disc = os.environ.get("PHA_DYNAMIC_SLOT_DISCOVERY")
+    old_flag = os.environ.get("PHA_FACT_CARD_BG_BRIEF")
+    old_quota = os.environ.get("PHA_FACT_CARD_BG_BRIEF_QUOTA")
+    os.environ["PHA_USER_DYNAMIC_SLOTS_DIR"] = str(slots_dir)
+    os.environ["PHA_DYNAMIC_SLOT_DISCOVERY"] = "1"
+    os.environ["PHA_FACT_CARD_BG_BRIEF"] = "1"
+    st.DEFAULT_DB_PATH = db
+    old_tls = getattr(sc._thread_local, "conn", None)
+    if old_tls is not None:
+        try:
+            old_tls.close()
+        except Exception:
+            pass
+    sc.reset_schema_state_for_tests()
+    st.init_schema()
+    init_chat_schema()
+    init_background_schema()
+
+    def _restore() -> None:
+        if old_flag is None:
+            os.environ.pop("PHA_FACT_CARD_BG_BRIEF", None)
+        else:
+            os.environ["PHA_FACT_CARD_BG_BRIEF"] = old_flag
+        if old_quota is None:
+            os.environ.pop("PHA_FACT_CARD_BG_BRIEF_QUOTA", None)
+        else:
+            os.environ["PHA_FACT_CARD_BG_BRIEF_QUOTA"] = old_quota
+        _restore_p13_db(old_db, old_slots, old_disc)
+
+    def _insert(uid: str, note_date: str, category: str, content: str) -> None:
+        conn = st._connect()
+        try:
+            conn.execute(
+                "INSERT INTO user_health_background_notes "
+                "(user_id, note_date, category, content) VALUES (?, ?, ?, ?)",
+                (uid, note_date, category, content),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    uid = "selfcheck-p14"
+    _insert(uid, "2026-09-05", "supplement", "每晚补镁 400mg")
+    _insert(uid, "2026-09-05", "sleep_lifestyle", "最近两周都 1 点后睡")
+    _insert(uid, "2026-09-05", "supplement", "在吃维生素D3 和 Omega-3")
+    _insert(uid, "2026-09-01", "supplement", "2026-09-01 开始每天两次鱼油")
+    _insert(
+        uid,
+        "2026-09-05",
+        "unstructured_vision",
+        "[vision_parse_failed] Server error 500",
+    )
+
+    brief, meta = build_fact_card_background_brief(
+        uid, locale="zh-CN", as_of="2026-09-07"
+    )
+    if not brief:
+        _restore()
+        return _fail("P14 brief must be non-empty with fixture notes")
+    for needle in ("镁", "维生素D3", "Omega-3", "鱼油"):
+        if needle not in brief:
+            _restore()
+            return _fail(f"P14 brief missing {needle!r}: {brief}")
+    for banned in ("400", "1 点", "2026", "两次"):
+        if banned in brief:
+            _restore()
+            return _fail(f"P14 brief leaked {banned!r}: {brief}")
+    if "2026-09-05" in brief or "2026-09-01" in brief:
+        _restore()
+        return _fail(f"P14 brief must not emit note_date: {brief}")
+    rel_words = (
+        card_copy("zh-CN", "bg_brief_rel_week"),
+        card_copy("zh-CN", "bg_brief_rel_month"),
+        card_copy("zh-CN", "bg_brief_rel_earlier"),
+    )
+    if not any(word in brief for word in rel_words):
+        _restore()
+        return _fail(f"P14 brief must include a relative time word: {brief}")
+    if "[vision_parse_failed]" in brief or "Server error" in brief:
+        _restore()
+        return _fail("P14 brief must drop unstructured_vision / system-tag notes")
+    leftover = leftover_s_level_numeric_tokens(brief)
+    if leftover:
+        _restore()
+        return _fail(f"P14 brief leftover S-level tokens {leftover}: {brief}")
+    if int(meta.get("notes_used") or 0) < 4:
+        _restore()
+        return _fail(f"P14 notes_used too low: {meta}")
+
+    class _CaptureProvider:
+        last_blob = ""
+
+        def __init__(self, model: str = "selfcheck-model", **_kwargs):
+            self.model = model
+
+        def stream_chat_messages(self, *, messages):
+            parts = []
+            for item in messages or []:
+                if isinstance(item, dict):
+                    parts.append(str(item.get("content") or ""))
+            _CaptureProvider.last_blob = "\n".join(parts)
+            yield "今日指标处于你的常见范围，训练可按舒适强度进行。"
+
+        def chat_with_tools(self, *, messages, tools):
+            parts = []
+            for item in messages or []:
+                if isinstance(item, dict):
+                    parts.append(str(item.get("content") or ""))
+            _CaptureProvider.last_blob = "\n".join(parts)
+            return {
+                "message": {
+                    "role": "assistant",
+                    "content": "今日指标处于你的常见范围，训练可按舒适强度进行。",
+                },
+            }
+
+    prev_provider = orch.OllamaProvider
+    orch.OllamaProvider = _CaptureProvider  # type: ignore[misc, assignment]
+    try:
+        list(
+            orch.orchestrate_chat_turn_events(
+                user_id=uid,
+                user_message=FACT_CARD_INTERPRET_USER_MESSAGE,
+                model="selfcheck-model",
+                profile_override="fact_card_interpret",
+                fact_card_payload=p91_card,
+                fact_card_context=build_fact_card_context_block(p91_card),
+                user_assessment_prompt="重点看静息心率",
+                response_locale="zh-CN",
+            ),
+        )
+    finally:
+        orch.OllamaProvider = prev_provider  # type: ignore[misc]
+    sys_blob = _CaptureProvider.last_blob
+    if "用户背景 · 自述 · 非数字源" not in sys_blob:
+        _restore()
+        return _fail("P14 system prompt must include USER_BACKGROUND_BRIEF title")
+    for banned in (
+        "聊天背景档案",
+        "上轮对话摘要",
+        "近90日穿戴",
+        "SUPPLEMENT_BG",
+        "EPISODIC_BRIDGE",
+        "WEARABLE_90D_SUMMARY",
+        "【RECALL】",
+    ):
+        if banned in sys_blob:
+            _restore()
+            return _fail(f"P14 system prompt leaked {banned!r}")
+    for t0 in (
+        "【TASK】",
+        "用户评估要求",
+        "唯一可引用数字与日期",
+        "Numerics Manifest",
+    ):
+        if t0 not in sys_blob:
+            _restore()
+            return _fail(f"P14 Tier0 missing {t0!r}")
+
+    budget_uid = "selfcheck-p14-budget"
+    os.environ["PHA_FACT_CARD_BG_BRIEF_QUOTA"] = json.dumps(
+        {"supplement": 40, "medication": 4, "sleep_lifestyle": 3, "symptom": 3, "general": 2},
+    )
+    for i in range(40):
+        _insert(budget_uid, "2026-09-05", "supplement", f"钙片 {i + 10}mg 早晚各一次编号{i}")
+    fat, fat_meta = build_fact_card_background_brief(
+        budget_uid, locale="zh-CN", as_of="2026-09-07"
+    )
+    title = card_copy("zh-CN", "bg_brief_title")
+    lead = card_copy("zh-CN", "bg_brief_lead")
+    header = f"【{title}】\n{lead}\n"
+    body = fat[len(header) :] if fat.startswith(header) else fat
+    if len(body) > 600:
+        _restore()
+        return _fail(f"P14 brief body exceeds 600 chars: {len(body)}")
+    last_line = body.strip().splitlines()[-1] if body.strip() else ""
+    if last_line.endswith("〔") or last_line.endswith("["):
+        _restore()
+        return _fail(f"P14 brief last line looks truncated: {last_line!r}")
+    if int(fat_meta.get("notes_used") or 0) < 1:
+        _restore()
+        return _fail("P14 budget brief must keep at least one note")
+
+    k_on = current_interpret_key(uid, card=p91_card, locale="zh-CN")
+    os.environ["PHA_FACT_CARD_BG_BRIEF"] = "0"
+    if background_brief_enabled():
+        _restore()
+        return _fail("flag 0 must disable background brief")
+    off_text, off_meta = build_fact_card_background_brief(
+        uid, locale="zh-CN", as_of="2026-09-07"
+    )
+    if off_text or int(off_meta.get("notes_used") or 0) != 0:
+        _restore()
+        return _fail("flag 0 must yield empty brief")
+    k_off = current_interpret_key(uid, card=p91_card, locale="zh-CN")
+    if k_on == k_off:
+        _restore()
+        return _fail("flag 0 cache key must differ from flag 1")
+    orch.OllamaProvider = _CaptureProvider  # type: ignore[misc, assignment]
+    try:
+        list(
+            orch.orchestrate_chat_turn_events(
+                user_id=uid,
+                user_message=FACT_CARD_INTERPRET_USER_MESSAGE,
+                model="selfcheck-model",
+                profile_override="fact_card_interpret",
+                fact_card_payload=p91_card,
+                fact_card_context=build_fact_card_context_block(p91_card),
+                user_assessment_prompt="重点看静息心率",
+                response_locale="zh-CN",
+            ),
+        )
+    finally:
+        orch.OllamaProvider = prev_provider  # type: ignore[misc]
+    if "用户背景 · 自述 · 非数字源" in _CaptureProvider.last_blob:
+        _restore()
+        return _fail("flag 0 system prompt must omit USER_BACKGROUND_BRIEF title")
+
+    os.environ["PHA_FACT_CARD_BG_BRIEF"] = "1"
+    k_same = current_interpret_key(uid, card=p91_card, locale="zh-CN")
+    if k_same != k_on:
+        _restore()
+        return _fail("unchanged notes must keep interpret cache key")
+    _insert(uid, "2026-09-06", "supplement", "辅酶Q10 一直在吃")
+    k_new = current_interpret_key(uid, card=p91_card, locale="zh-CN")
+    if k_new == k_on:
+        _restore()
+        return _fail("new background note must change interpret cache key")
+    digest_a = interpret_cache_key(
+        uid, "2026-09-07", "", card_digest="x", locale="zh-CN", bg_brief_digest="aaa"
+    )
+    digest_b = interpret_cache_key(
+        uid, "2026-09-07", "", card_digest="x", locale="zh-CN", bg_brief_digest="bbb"
+    )
+    if digest_a == digest_b:
+        _restore()
+        return _fail("interpret_cache_key must include bg_brief_digest")
+
+    def _done(text: str):
+        def _stream(**_kwargs):
+            yield json.dumps(
+                {
+                    "event": "done",
+                    "model": "selfcheck-model",
+                    "answer": {"answer_text": text},
+                    "numerics_audit": {"passed": True, "violations": []},
+                },
+                ensure_ascii=False,
+            )
+
+        return _stream
+
+    streamed = run_interpretation(
+        user_id=uid,
+        card=p91_card,
+        assessment_prompt="",
+        model="selfcheck-model",
+        stream_fn=_done("你的静息心率 400 bpm。"),
+        locale="zh-CN",
+    )
+    if streamed.get("status") != "failed":
+        _restore()
+        return _fail(f"brief numbers must still fail audit, got {streamed}")
+    if "unauthorized_value:400" not in (streamed.get("violations") or []):
+        _restore()
+        return _fail(f"audit must reject 400 from brief, got {streamed}")
+
+    _restore()
     return None
 
 

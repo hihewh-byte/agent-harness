@@ -263,7 +263,9 @@
         "TASK",
         "USER_ASSESSMENT_PROMPT"
       ],
-      "slots_tier1": [],
+      "slots_tier1": [
+        "USER_BACKGROUND_BRIEF"
+      ],
       "tools_allowed": []
     },
     "lab_cross_year": {

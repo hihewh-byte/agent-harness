@@ -1343,6 +1343,31 @@ def _mask_identifiers(text: str) -> str:
     return _IDENTIFIER_RE.sub(lambda m: " " * len(m.group(0)), text or "")
 
 
+def leftover_s_level_numeric_tokens(text: str) -> list[str]:
+    """Numbers that remain after identifier/date masking (brief post-check).
+
+    Does not change the ``fact_card`` audit policy. Hyphenated identifiers
+    such as Omega-3 and letter-leading identifiers (D3, SpO2) are masked.
+    Digit-leading tokens like ``400mg`` are leftover doses, not identifiers.
+    """
+    working = text or ""
+    working = re.sub(r"\b[A-Za-z][A-Za-z0-9]*-\d+\b", lambda m: " " * len(m.group(0)), working)
+    working = re.sub(
+        r"[A-Za-z_][A-Za-z0-9_]*\d[A-Za-z0-9_]*",
+        lambda m: " " * len(m.group(0)),
+        working,
+    )
+    working = _DATE_ISO_RE.sub(" ", working)
+    working = _DATE_CN_RE.sub(" ", working)
+    working = _DATE_EN_RE.sub(" ", working)
+    working = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", " ", working)
+    out: list[str] = []
+    for m in _FACT_NUM_RE.finditer(working):
+        token = f"{m.group(1)}.{m.group(2)}" if m.group(2) is not None else m.group(1)
+        out.append(token)
+    return out
+
+
 def _normalize_num_token(token: str) -> Set[str]:
     raw = (token or "").translate(_FULLWIDTH_DIGITS).replace(",", "").strip()
     if not raw:
@@ -1800,6 +1825,7 @@ __all__ = [
     "build_numerics_manifest",
     "extract_disclosure_blocks",
     "format_wearable_grain_refusal",
+    "leftover_s_level_numeric_tokens",
     "wearable_grain_fence_blocked",
     "mask_disclosure_blocks",
     "numerics_audit_mode",

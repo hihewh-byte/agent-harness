@@ -439,6 +439,7 @@ def iter_turn_harness_assembly_phase(
         "AUDIT": ctx.audit_warn,
         "RECALL": ctx.recalled_snippets,
         "USER_CONTEXT_BRIEF": user_context_brief_block,
+        "USER_BACKGROUND_BRIEF": "",
         "FACT_CARD_CONTEXT": ctx.fact_card_context,
         "USER_ASSESSMENT_PROMPT": (
             "【用户评估要求 · 本轮解读大纲，不是数值来源】\n"
@@ -447,6 +448,23 @@ def iter_turn_harness_assembly_phase(
             else ""
         ),
     }
+    if "USER_BACKGROUND_BRIEF" in plan.slots_tier1:
+        from pha.fact_card_background_brief import (
+            background_brief_enabled,
+            build_fact_card_background_brief,
+        )
+
+        if background_brief_enabled():
+            as_of = ""
+            payload = ctx.fact_card_payload or {}
+            if isinstance(payload, dict):
+                as_of = str((payload.get("facts") or {}).get("as_of") or "")
+            brief_text, _brief_meta = build_fact_card_background_brief(
+                uid,
+                locale=_task_locale,
+                as_of=as_of,
+            )
+            ctx.slot_contents["USER_BACKGROUND_BRIEF"] = brief_text
 
     from pha.health_intent_catalog import profile_allows_active_recall_ledger
 

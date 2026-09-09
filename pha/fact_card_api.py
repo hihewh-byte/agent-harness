@@ -43,6 +43,9 @@ def _decorate_interpretation(payload: Optional[dict], user_id: str) -> Optional[
         extra["generated_at_display"] = format_card_datetime(
             at, locale=loc, timezone_name=tz
         )
+    notes = int(payload.get("background_notes_used") or 0)
+    extra["background_used"] = bool(payload.get("background_used")) or notes > 0
+    extra["background_notes_used"] = notes
     return {**payload, **extra}
 
 
