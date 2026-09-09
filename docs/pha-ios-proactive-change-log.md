@@ -1,3 +1,19 @@
+## 2026-09-09 12:20 (PRD v1.12：主动 Agent 与聊天记忆共享方案 · 立 M1-P13 / P14 / P15)
+
+- **类别**：产品 / 文档。无代码。
+- **发现**（查库 `data/pha_storage.db`）：解读轮 `session_id=None` 借 chat 管线 → 每次按钮新建会话（56 个）并写 `chat_messages`；旧中文合成 prompt 被捕获为 7 条 `medication` 背景笔记；17 条 `unstructured_vision` 笔记是 `[vision_parse_failed]` 错误串；`chb_briefs` 0 行。反向：用户自述背景（supplement 124 / medication 12 / sleep 4）与 CHB 对解读不可见（FR-6.8 设计）。
+- **拍板**：记忆要共享。三层：A 结构化自述 → 非数字源 Tier1 `USER_BACKGROUND_BRIEF`；B 情景记忆不进；C CHB 统一供给。解读轮零写入聊天记忆（注册表属性 `memory_write_policy`）。
+- **文档**：PRD §1.3a 第二含义、FR-6.11 / FR-6.12、§8 三卡、§11 两条；交接 [`handoff-2026-09-09-proactive-memory-sharing.md`](handoff-2026-09-09-proactive-memory-sharing.md)。
+- **顺序**：P13 → P14 → P15，逐卡验收；卫生脚本 apply 须维护者确认。
+
+## 2026-09-09 12:00 (模型切 qwen3:14b + `OLLAMA_THINK`)
+
+- **类别**：运行时 / provider。commit `0ed4898`，未 push。
+- **改动**：`pha/ollama_payload.py` `apply_think_option` / `apply_ollama_options`；`OllamaProvider` 四处 `/api/chat` body 走新函数。`OLLAMA_THINK` 未设不发 `think`（qwen2.5 会拒显式 think）；`false` → `think=false`。env-8788.sh / `.env`：`OLLAMA_MODEL` / `OLLAMA_MEDICAL_MODEL=qwen3:14b`，`OLLAMA_THINK=false`。
+- **证据**：真卡真 prefs in-process 各 1 轮：zh 审计过 0 违规 72.5 s；en 审计过 0 违规 77.0 s；无 `<think>` 泄漏；未编造卡上没有的睡眠行。软问题：RHR 行是 `prior_day`，中文写「今天您的静息心率」（既有类别，不调审计）。
+- **待定**：`OLLAMA_KEEP_ALIVE=0` 使每次解读冷加载 9.3 GB；改 `10m` 由维护者定。
+- **回滚**：env 三行改回 `qwen2.5:7b-instruct` 并删 `OLLAMA_THINK`；代码可留。
+
 ## 2026-09-09 08:55 (M1-P9.5b：TASK 禁止未点名行另起段落)
 
 - **类别**：P1（解读大纲）。soul 去掉三步标题后，偶发仍写睡眠/呼吸率等未点名行（enT3）。

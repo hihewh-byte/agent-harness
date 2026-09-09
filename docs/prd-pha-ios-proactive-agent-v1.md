@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.11 · 2026-09-08  
+> **版本**：v1.12 · 2026-09-09  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -19,7 +19,7 @@
 1. **产品目标**：用户打开（或被通知）的是一台 **主动、本地优先的健康管理 Agent**，而不是「先导出 zip 再在浏览器里问答」的研究原型。  
 2. **演进方式**：Mac 上的 PHA（FastAPI + SQLite + harness + 可选 Ollama）在中长期仍是 **账本与审计内核**；iOS 先做 **采集 + 通知 + 展示壳**，再视算力决定是否把推理搬进手机。禁止幻想「一个 PR 把 Python 仓编译成 App」。  
 3. **主动 ≠ 诊疗**：主动推送的是 **无 LLM 事实卡（数字层）+ 规则分档与固定模板建议（评估层）+ 用户自登记提醒**。禁止诊断口吻、禁止编造数字、禁止把一次 HRV 写成处方。**主动路径不得用 LLM 写评估**；开口问答属 M3。**「主动路径」= 未经用户当次触发就生成/推送的内容**（定时通知、卡级评估、预生成）。用户在完整卡上**点按钮**要求解读，等价于「开口」，走既有 chat harness（TurnEvidencePlan + Numerics 审计），不属主动路径（v1.6，见 FR-6）。  
-3a. **主动 agent 与 Mac PHA 是同一个产品，不得割裂**：事实卡评估必须用到 Mac 账本里 **全部** 可比历史（zip 导入 + HealthKit），不能因窄窗口把多年数据判成「基线不足」。个人基线按可用量递进回看（90 日 → 365 日 → 全历史），并在卡上明写用了哪段；个人基线之外再给 **通用参考层**（Tier 1 披露制，只做「参考范围内/外」，非医疗判定），保证用户从第一天起就能读懂数字（v1.6，见 FR-2.6 / FR-2.8）。**zip 全量快照是最终真值**：导入覆盖同日 HealthKit 增量；建议每季度回灌一次 export.zip 做校正（v1.8）。  
+3a. **主动 agent 与 Mac PHA 是同一个产品，不得割裂**：事实卡评估必须用到 Mac 账本里 **全部** 可比历史（zip 导入 + HealthKit），不能因窄窗口把多年数据判成「基线不足」。个人基线按可用量递进回看（90 日 → 365 日 → 全历史），并在卡上明写用了哪段；个人基线之外再给 **通用参考层**（Tier 1 披露制，只做「参考范围内/外」，非医疗判定），保证用户从第一天起就能读懂数字（v1.6，见 FR-2.6 / FR-2.8）。**zip 全量快照是最终真值**：导入覆盖同日 HealthKit 增量；建议每季度回灌一次 export.zip 做校正（v1.8）。**不割裂的第二含义（v1.12）**：评估是「用户整个历史背景下的增量数据评估」，用户在聊天中沉淀的**非数字记忆**（补剂/用药/生活习惯自述、长期画像 CHB）对按钮式解读**可见**，但只能作为**非数字源**的 Tier1 背景（去数字、限长、不可引用为数值）；情景/会话记忆（RECALL、turn focus、上轮摘要）**不**进解读；解读轮**不得**写入任何聊天记忆表（见 FR-6.11 / FR-6.12、M1-P13–P15）。  
 3b. **账本与增量是同一套指标**：同一 `metric_id`、同一日列、同一聚合器；捷径只写新日期。M1 增量通道仍是捷径；开源 HealthKit App（轨道 B）留到 M2。  
 4. **数据物理事实**：Watch 数据只存在 **iPhone HealthKit**。实时/近实时 = iPhone 网关 → 本机（或用户自有组网）上的 PHA。Mac **不能**直连 Watch。  
 5. **第一刀冻结**：打通 **HealthKit 样本 → Mac `wearable_data` / `wearable_daily`**。未绿之前不得宣称「今日主动 Agent 已上线」。
@@ -179,6 +179,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致。**解读轮不套三步看诊法**（`PHA_FACT_CARD_SOUL_MINIMAL`，见 M1-P9.5） | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
 | FR-6.9 | **日期与语言**：机器层 ISO 8601；展示层按 `locale` 渲染，禁止纯数字斜杠日期；LLM 文本优先相对表达，绝对日期仅允许 as_of / 各行实际 day；审计把日期作为独立词类归一化后比对 | `unauthorized_date` 用例；中英 locale HTML 属 M1-P9.2 |
 | FR-6.10 | **卡外数字分级**（v1.10 放宽，取代 v1.7「只进 T1」）：按 **语境** 不按数值大小分三级。**S 级（必须 ⊆ manifest）**：日期/时刻；任何 1–2 位小数；子句含归属词（你/您/your）、时间归属词（今天/昨天/近 N/today/last N）或测量动词（测得/记录/基线/均值）的数字；子句含卡上指标标签或单位却无教育/建议词的数字（歧义 fail-closed）。**E 级（放行，记 telemetry）**：子句含人群词/建议词/参考词（一般/通常/建议/控制在/范围/usually/recommend）的整数，以及无归属、无标签、无单位的裸整数。**T1 块**：块内数字不验真伪，中英同权，块内出现归属词 → 拒。标识符里的数字（`SpO2`/`VO2max`）不计。词表放语言表，指标标签/单位来自卡；Python 不写指标名。用户评估要求不能解锁 S 级 | selfcheck：「一般成年人血氧高于 95%」→ 过；「你的 HRV 接近 35 ms」→ 拒；「静息心率 65 bpm 偏高」→ 拒；「建议睡 7.5 小时」→ 拒；「今天血氧 96.0%，SpO2 正常」→ 过。用例全表见 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2.4 |
+| FR-6.11 | **记忆写入策略**（v1.12）：解读轮借用 chat 管线但**不属于用户聊天**，对 `chat_sessions` / `chat_messages` / `user_health_background_notes` / `chat_session_turn_focus` / `chat_session_active_recall` 零写入，不触发动态槽 discover；结果只落 `data/fact_card_interpret/`。判定靠 harness profile 注册表属性 `memory_write_policy=none`，不靠 profile 名硬编码。既有污染（解读会话、合成 prompt 被捕获为用药笔记、`[vision_parse_failed]` 错误串）由卫生脚本 dry-run → 维护者确认 → apply 清理 | selfcheck：mock 解读一轮，五张表行数逐表相等；对照 `lifestyle` 轮会话 +1。见 M1-P13 |
+| FR-6.12 | **非数字背景**（v1.12）：`fact_card_interpret` 允许**唯一**一个 Tier1 槽 `USER_BACKGROUND_BRIEF`：来源为用户聊天自述（`user_health_background_notes` 的 supplement / medication / sleep_lifestyle / symptom / general），去重、按类配额、**去数字去日期**（标识符 `D3`/`Omega-3` 保留；时间只用相对词表）、整行截断限长，并经审计同一套抽取器后验「无 S 级 token」；只影响建议措辞与注意事项，不得引用为数值、不得复述剂量。`SUPPLEMENT_BG` / RECALL / `EPISODIC_BRIDGE` / `WEARABLE_90D_SUMMARY` 继续禁止。审计策略不变：brief 内数字不是 manifest 成员。缓存键增 `sha256(brief)`；响应带 `background_used`。P15 后供给源切到 CHB 投影（§Background + 解读脉络，**不含** §Facts），槽契约不变 | selfcheck：`每晚补镁 400mg` → brief 含 `镁` 不含 `400`；mock 回复引用 `400` → 审计仍拒；flag 关 → 槽不出现。运行验收中英各 3 轮见交接 §5.8 |
 
 ### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
@@ -259,6 +261,9 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P9.3** | 真机与边界验收 | `DONE` | 2026-09-09：跨日 `calendar_day` 键隔离真看 PASS；Ollama 不可达 → API `model_unavailable` + SSR「本机模型未响应」/「重试」PASS（临时实例 `OLLAMA_BASE_URL=:9`；本机 Electron Ollama 会自动拉起，不宜依赖 kill）。Mac+iPhone Safari 解读此前已出 |
 | **M1-P9.4** | **卡外数字分级放宽 + 单一审计 + review 优化**（FR-6.3 / FR-6.10 v1.10） | `DONE` | 2026-09-08：`fact_card` 审计策略住 `numerics_manifest`；卡侧删字面量正则；标识符/`.0`/窗口口语归一；TASK 分条 + locale T1；Tier0 `min` 保留 values；失败存 `rejected_text` + 归并文案。selfcheck PASS |
 | **M1-P9.5** | **解读专用 soul（焦点跑偏）** | `DONE` | 2026-09-08：`PHA_FACT_CARD_SOUL_MINIMAL` + `select_soul_base`；禁三步看诊；缓存键含 soul。交接 v4。验收见 change-log |
+| **M1-P13** | **解读轮零写入聊天记忆 + 记忆卫生**（FR-6.11） | `TODO` | 注册表 `memory_write_policy`；编排器无会话轮；背景捕获拒系统标签串；`scripts/pha_memory_hygiene.py` dry-run/apply（apply 须维护者确认）。交接 [`handoff-2026-09-09-proactive-memory-sharing.md`](handoff-2026-09-09-proactive-memory-sharing.md) §4 |
+| **M1-P14** | **`USER_BACKGROUND_BRIEF` 进解读**（FR-6.12 · A 层） | `TODO` | 前置：P13 DONE。去数字构建器 + 后验抽取器；TASK 加一条；缓存键含 brief 摘要；view 显示「已参考 N 条背景」。验收中英各 3 轮。交接 §5 |
+| **M1-P15** | **CHB 统一供给**（C 层 · 闭环） | `TODO` | 前置：P14 验收后 ≥1 天。CHB 增 §Background + 解读脉络 + 组合 hash；每日在 `GET /proactive/fact-card` 后台触发；`fact_card_interpret` 投影不含 §Facts；brief 供给源 chb → live_notes 回落。交接 §6 |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
@@ -319,6 +324,8 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-08 08:47 | P10+P11 落地：卡 = 勾选 5 行；活动消耗标进行中不分档；RHR 仍空（9/6 超 2 日窗，须新捷径带日期入库）；selfcheck 两套 PASS | 决定 7–12 按默认/拍板执行；§8 P10/P11 DONE。P9.1 未开 |
 | 2026-09-08 14:10 | 维护者拍板：zip 为最终真值、季度回灌；不启动 Pulso（M2 再议）；VO2max 进一期勾选。不单独注册呼吸率 | v1.8：FR-1.4/1.5/1.8；优先级包一期；立 M1-P12 |
 | 2026-09-08 | P12 代码落地：eligible 闭环；ingest 单位门；捷径 8 个 Find；VO2max `latest` 不计覆盖率；zip 覆盖同日 healthkit。Find 标签 `Blood Oxygen` / `Respiratory Rate` / `VO2 Max` / `Wrist Temperature` **真机未验** | §8 M1-P12 保持 TODO（真机门禁）；轨道 B 不启动 |
+| 2026-09-09 11:57 | 查库：解读轮以 `session_id=None` 借 chat 管线，每按一次按钮新建一个会话（56 个）、写 `chat_messages`；旧中文合成 prompt 含「处方/用药剂量」被捕获为 7 条 `medication` 背景笔记；另有 17 条 `unstructured_vision` 笔记内容是 `[vision_parse_failed] 500` 错误串、6 个空会话。反向：聊天自述背景（supplement 124 / medication 12 / sleep 4）与 CHB（0 次编译）对解读不可见。维护者定：**主动 agent 是 PHA 一部分，评估 = 用户整个历史背景下的增量评估，记忆要共享**；采纳三层方案：A 结构化自述共享（非数字源）、B 情景记忆不共享、C CHB 统一供给 | v1.12：§1.3a 第二含义；FR-6.11 / FR-6.12；立 M1-P13 / P14 / P15。vision 错误串入库根因、空会话来源另开卡。不改代码。交接 [`handoff-2026-09-09-proactive-memory-sharing.md`](handoff-2026-09-09-proactive-memory-sharing.md) |
+| 2026-09-09 12:00 | 模型切 `qwen3:14b`（16 GB M4 Air 可跑，9.3 GB）；Ollama 0.33 对 qwen3 默认 thinking，代码新增 `OLLAMA_THINK` env → `/api/chat` `think=false`（qwen2.5 不设则不发）；真卡中英解读审计各过、无 `<think>` 泄漏、约 72–77 s（`OLLAMA_KEEP_ALIVE=0` 每次冷加载 9.3 GB） | 代码 `0ed4898`（`ollama_payload.apply_think_option`），未 push。`KEEP_ALIVE` 是否改 `10m` 待维护者定 |
 | 2026-09-08 17:06 | 真机解读连续被拒 `2、95、2、3、95` / `70、80、2、2、95、2、3`。查明：`2` 来自 `SpO2`/`VO2max` 标签（卡侧 `\d+` 无边界）；`96.0` 因上下文块给原值、白名单只有 `96`；`95`/`70–80`/`2–3` 是科普与训练建议整数，7b 写不出 T1 模板；卡侧 T1 正则只认中文，en-US 下科普数字必败。harness 审计对同文本 `passed=True`，两道审计结论相反。review 另见 8462695 历史含被撤回的 focus 过滤、`{"7","12"}` 魔数、Tier0 `min` 清空 metrics 与 TASK 矛盾、失败记录不存原文 | 维护者授权放宽，尺度由 agent 定：v1.10 FR-6.10 改为语境三级（S/E/T1）、FR-6.3 改为单一审计；立 M1-P9.4；交接 v3。不改代码 |
 
 ---
@@ -342,3 +349,4 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-08 | v1.9 | Find 总表为捷径真源；腕温跳过捷径；数量包 7 项；§8 P12 DONE* / P9.2 DONE |
 | 2026-09-08 | v1.10 | FR-6.10 卡外数字由「只进 T1」放宽为语境三级（S 必对账 / E 放行记 telemetry / T1 中英同权）；FR-6.3 审计只有一道（harness `fact_card` 策略）；立 M1-P9.4；§11 一条。文档改动，无代码。交接：[`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) |
 | 2026-09-08 | v1.11 | FR-6.8 备注解读轮不套三步看诊；§8 M1-P9.5 DONE。交接：[`handoff-2026-09-08-fact-card-interpret-v4-soul.md`](handoff-2026-09-08-fact-card-interpret-v4-soul.md) |
+| 2026-09-09 | v1.12 | §1.3a「不割裂」第二含义（非数字记忆对解读可见但非数字源；情景记忆不进；解读轮不写聊天记忆）；FR-6.11 记忆写入策略；FR-6.12 `USER_BACKGROUND_BRIEF`；§8 立 M1-P13 / P14 / P15；§11 两条。文档改动，无代码（`OLLAMA_THINK` 开关为同日独立 commit）。交接：[`handoff-2026-09-09-proactive-memory-sharing.md`](handoff-2026-09-09-proactive-memory-sharing.md) |
