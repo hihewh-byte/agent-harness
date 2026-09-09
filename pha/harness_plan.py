@@ -116,6 +116,7 @@ _FACT_CARD_INTERPRET_TASK = (
     "1. Outline = USER_ASSESSMENT_PROMPT (length, tone, training advice). "
     "If it names metrics, discuss only those rows; otherwise cover the card. "
     "Match names by label or metric id. Non-null value ⇒ cite it; never say missing. "
+    "Do not start a new paragraph or sentence for rows the assessment did not name. "
     "summary/advice are the rule layer already on the page — not the outline.\n"
     "2. Your own data: cite only numbers and dates from the Numerics Manifest / "
     "FACT_CARD_CONTEXT; copy decimals as shown. Absolute dates only as_of, "

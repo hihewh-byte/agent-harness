@@ -4,7 +4,7 @@ Bump PHA_SERVER_BUILD on release; console static assets pick up the same token
 via asset_cache_version() (no manual index.html edits).
 """
 
-PHA_SERVER_BUILD: str = "pha-v2.3.33-fact-card-soul-p95"
+PHA_SERVER_BUILD: str = "pha-v2.3.34-fact-card-task-p95b"
 
 
 def asset_cache_version() -> str:

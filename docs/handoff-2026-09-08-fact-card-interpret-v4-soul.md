@@ -215,3 +215,4 @@ qtype == CASUAL → PHA_MEDICAL_SOUL_LITE_SYSTEM_PROMPT
 | 2 | `harness_report.py:740` 是否本轮并轨 | 仅当 fact_card 路径经过它才改；否则记 change-log 待办 |
 | 3 | §5 通过线「英文 ≤ 1/3」是否太松 | 保留；两周真机后按 telemetry 再收 |
 | 4 | §6 触发后是否允许直接做 | 允许，但单独 commit 且 change-log 单独条目 |
+| 5 | §6 后仍偶发睡眠/VO2 漏提（≤1/3） | 停手；候选：更大模型，或 UI「重点指标」结构化勾选（须改 PRD） |

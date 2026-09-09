@@ -1110,6 +1110,8 @@ def main() -> int:
         return _fail("TASK source must not hardcode Chinese T1 template")
     if "resting_heart_rate" in task or "静息心率" in task:
         return _fail("TASK must not name specific metrics")
+    if "did not name" not in task:
+        return _fail("TASK must forbid paragraphs for unnamed rows")
 
     from pha.chat_turn_slots import select_soul_base
     from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
