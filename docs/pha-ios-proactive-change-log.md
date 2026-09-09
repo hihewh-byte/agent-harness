@@ -1,3 +1,10 @@
+## 2026-09-09 13:10 (M1-P13：解读轮零写入聊天记忆)
+
+- **类别**：P0 / FR-6.11。
+- **改动**：`memory_write_policy`；`TurnMemorySink`；`maybe_capture_chat_background` 拒 `[snake_case_tag]`；`scripts/pha_memory_hygiene.py`（默认 dry-run）。
+- **证据**：`pha_fact_card_selfcheck` PASS；registry `--write` + selfcheck PASS。查库合成会话 57（交接时 56，含 14b 冒烟多 1 条）、污染笔记 medication 7 + vision 错误串 17、空会话 6。卫生 **apply 未跑**，待维护者确认 dry-run。
+- **回滚**：Sink 恒 writes=True；删卫生脚本。
+
 ## 2026-09-09 12:20 (PRD v1.12：主动 Agent 与聊天记忆共享方案 · 立 M1-P13 / P14 / P15)
 
 - **类别**：产品 / 文档。无代码。

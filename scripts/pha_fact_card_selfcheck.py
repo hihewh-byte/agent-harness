@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import sys
@@ -1208,8 +1209,328 @@ def main() -> int:
     if "本机模型未响应" not in boom_html or "重试" not in boom_html:
         return _fail("failed interpret HTML must say 本机模型未响应 and 重试")
 
+    mem_err = _check_p13_memory(p91_card)
+    if mem_err:
+        return mem_err
+
     print("pha_fact_card_selfcheck: PASS")
     return 0
+
+
+def _restore_p13_db(old_db, old_slots, old_disc) -> None:
+    import pha.sqlite_connection as sc
+    import pha.sqlite_storage as st
+
+    st.DEFAULT_DB_PATH = old_db
+    if old_slots is None:
+        os.environ.pop("PHA_USER_DYNAMIC_SLOTS_DIR", None)
+    else:
+        os.environ["PHA_USER_DYNAMIC_SLOTS_DIR"] = old_slots
+    if old_disc is None:
+        os.environ.pop("PHA_DYNAMIC_SLOT_DISCOVERY", None)
+    else:
+        os.environ["PHA_DYNAMIC_SLOT_DISCOVERY"] = old_disc
+    sc.reset_schema_state_for_tests()
+
+
+def _memory_table_counts() -> dict[str, int]:
+    from pha.sqlite_storage import _connect
+
+    names = (
+        "chat_sessions",
+        "chat_messages",
+        "user_health_background_notes",
+        "chat_session_turn_focus",
+        "chat_session_active_recall",
+    )
+    conn = _connect()
+    try:
+        out: dict[str, int] = {}
+        for name in names:
+            exists = conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+                (name,),
+            ).fetchone()
+            out[name] = (
+                int(conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0])
+                if exists
+                else 0
+            )
+        return out
+    finally:
+        conn.close()
+
+
+def _check_p13_memory(p91_card: dict) -> int | None:
+    """FR-6.11: interpret writes no chat memory; hygiene script classifies A/B/C."""
+    import pha.chat_turn_orchestrator as orch
+    import pha.sqlite_connection as sc
+    import pha.sqlite_storage as st
+    from pha.chat_background import maybe_capture_chat_background
+    from pha.chat_storage import append_message, create_session, init_chat_schema
+    from pha.chat_background import init_background_schema
+    from pha.harness_plan import FACT_CARD_INTERPRET_USER_MESSAGE
+    from pha.harness_profile_registry import (
+        introspect_harness_profile_plans,
+        memory_write_policy,
+    )
+
+    if memory_write_policy("fact_card_interpret") != "none":
+        return _fail("fact_card_interpret memory_write_policy must be none")
+    snap = introspect_harness_profile_plans().get("fact_card_interpret") or {}
+    t1 = set(snap.get("slots_tier1") or [])
+    if "RECALL" in t1 or "EPISODIC_BRIDGE" in t1:
+        return _fail("fact_card_interpret tier1 must not include RECALL/EPISODIC_BRIDGE")
+
+    tmp = Path(tempfile.mkdtemp(prefix="pha-p13-"))
+    db = tmp / "pha_storage.db"
+    slots_dir = tmp / "slots"
+    slots_dir.mkdir()
+    slots_path = slots_dir / "dynamic_slots.json"
+    slots_path.write_text("{}", encoding="utf-8")
+    mtime0 = slots_path.stat().st_mtime
+    old_db = st.DEFAULT_DB_PATH
+    old_slots = os.environ.get("PHA_USER_DYNAMIC_SLOTS_DIR")
+    old_disc = os.environ.get("PHA_DYNAMIC_SLOT_DISCOVERY")
+    os.environ["PHA_USER_DYNAMIC_SLOTS_DIR"] = str(slots_dir)
+    os.environ["PHA_DYNAMIC_SLOT_DISCOVERY"] = "1"
+    st.DEFAULT_DB_PATH = db
+    old_tls = getattr(sc._thread_local, "conn", None)
+    if old_tls is not None:
+        try:
+            old_tls.close()
+        except Exception:
+            pass
+    sc.reset_schema_state_for_tests()
+    st.init_schema()
+    init_chat_schema()
+    init_background_schema()
+
+    stored, rej = maybe_capture_chat_background(
+        "selfcheck",
+        "[vision_parse_failed] Server error 500",
+    )
+    if stored or rej != "system_tag_message":
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail(f"system tag must reject capture, got stored={stored} rej={rej}")
+    stored_ok, rej_ok = maybe_capture_chat_background("selfcheck", "每天补镁 400mg")
+    if not stored_ok or rej_ok is not None:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("real supplement note must still capture")
+
+    class _FakeProvider:
+        def __init__(self, model: str = "selfcheck-model", **_kwargs):
+            self.model = model
+
+        def stream_chat_messages(self, *, messages):
+            yield "今日指标处于你的常见范围，训练可按舒适强度进行。"
+
+        def chat_with_tools(self, *, messages, tools):
+            return {
+                "message": {
+                    "role": "assistant",
+                    "content": "今日指标处于你的常见范围，训练可按舒适强度进行。",
+                },
+            }
+
+    real_sess = create_session("selfcheck")
+    append_message(real_sess.id, "user", "我最近睡眠还行")
+    append_message(real_sess.id, "assistant", "好的")
+    maybe_capture_chat_background("selfcheck", "每天补镁 400mg")
+    maybe_capture_chat_background("selfcheck", "鱼油一直在吃")
+    before = _memory_table_counts()
+
+    prev_provider = orch.OllamaProvider
+    orch.OllamaProvider = _FakeProvider  # type: ignore[misc, assignment]
+    try:
+        events = list(
+            orch.orchestrate_chat_turn_events(
+                user_id="selfcheck",
+                user_message=FACT_CARD_INTERPRET_USER_MESSAGE,
+                model="selfcheck-model",
+                profile_override="fact_card_interpret",
+                fact_card_payload=p91_card,
+                fact_card_context="{}",
+                user_assessment_prompt="",
+                response_locale="zh-CN",
+            ),
+        )
+    finally:
+        orch.OllamaProvider = prev_provider  # type: ignore[misc]
+
+    after_interp = _memory_table_counts()
+    if after_interp != before:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail(f"interpret must not write chat memory: {before} -> {after_interp}")
+    if slots_path.stat().st_mtime != mtime0:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("interpret must not rewrite dynamic_slots.json")
+    done_ev = None
+    for raw in events:
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if payload.get("event") == "done":
+            done_ev = payload
+    if not done_ev:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("interpret orchestrate must still emit done")
+    if done_ev.get("session_id") is not None:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("interpret done.session_id must be null")
+
+    orch.OllamaProvider = _FakeProvider  # type: ignore[misc, assignment]
+    try:
+        list(
+            orch.orchestrate_chat_turn_events(
+                user_id="selfcheck",
+                user_message="最近饮食需要注意什么",
+                model="selfcheck-model",
+                profile_override="lifestyle",
+                response_locale="zh-CN",
+            ),
+        )
+    finally:
+        orch.OllamaProvider = prev_provider  # type: ignore[misc]
+
+    after_life = _memory_table_counts()
+    if after_life["chat_sessions"] != before["chat_sessions"] + 1:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail(
+            f"lifestyle must create a session: {before['chat_sessions']} -> {after_life['chat_sessions']}",
+        )
+    if after_life["chat_messages"] < before["chat_messages"] + 2:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail(
+            f"lifestyle must append user+assistant: {before['chat_messages']} -> {after_life['chat_messages']}",
+        )
+
+    import importlib.util
+
+    hy_path = Path(ROOT) / "scripts" / "pha_memory_hygiene.py"
+    spec = importlib.util.spec_from_file_location("pha_memory_hygiene", hy_path)
+    if spec is None or spec.loader is None:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("cannot load pha_memory_hygiene")
+    hygiene_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(hygiene_mod)
+    classify = hygiene_mod.classify
+    connect = hygiene_mod.connect
+    hygiene_run = hygiene_mod.run
+    _SYN = FACT_CARD_INTERPRET_USER_MESSAGE
+
+    hy_db = tmp / "hygiene.db"
+    hy_conn = connect(hy_db)
+    try:
+        hy_conn.executescript(
+            """
+            CREATE TABLE chat_sessions (
+                id TEXT PRIMARY KEY, user_id TEXT, title TEXT, created_at TEXT, updated_at TEXT
+            );
+            CREATE TABLE chat_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT, role TEXT, content TEXT, created_at TEXT
+            );
+            CREATE TABLE chat_session_turn_focus (session_id TEXT PRIMARY KEY, focus_summary TEXT);
+            CREATE TABLE chat_session_active_recall (session_id TEXT PRIMARY KEY, ledger_json TEXT);
+            CREATE TABLE user_health_background_notes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, note_date TEXT,
+                category TEXT, content TEXT, created_at TEXT
+            );
+            """,
+        )
+        keep_sid = "keep-real"
+        hy_conn.execute(
+            "INSERT INTO chat_sessions VALUES (?,?,?,?,?)",
+            (keep_sid, "selfcheck", "真实", "2026-09-01", "2026-09-01"),
+        )
+        hy_conn.execute(
+            "INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?,?,?,?)",
+            (keep_sid, "user", "每天补镁 400mg", "2026-09-01"),
+        )
+        hy_conn.execute(
+            "INSERT INTO user_health_background_notes "
+            "(user_id, note_date, category, content, created_at) VALUES (?,?,?,?,?)",
+            ("selfcheck", "2026-09-01", "supplement", "每天补镁 400mg", "2026-09-01"),
+        )
+        for i in range(2):
+            sid = f"interp-{i}"
+            hy_conn.execute(
+                "INSERT INTO chat_sessions VALUES (?,?,?,?,?)",
+                (sid, "selfcheck", "解读", "2026-09-08", "2026-09-08"),
+            )
+            hy_conn.execute(
+                "INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?,?,?,?)",
+                (sid, "user", _SYN, "2026-09-08"),
+            )
+            hy_conn.execute(
+                "INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?,?,?,?)",
+                (sid, "assistant", "解读正文", "2026-09-08"),
+            )
+            hy_conn.execute(
+                "INSERT INTO chat_session_turn_focus VALUES (?,?)",
+                (sid, "leak"),
+            )
+        hy_conn.execute(
+            "INSERT INTO user_health_background_notes "
+            "(user_id, note_date, category, content, created_at) VALUES (?,?,?,?,?)",
+            (
+                "selfcheck",
+                "2026-09-08",
+                "medication",
+                "请根据系统提供的当日事实卡数字与基线摘要，写一段简短的健康教育解读。只能引用已给出的数字。",
+                "2026-09-08",
+            ),
+        )
+        hy_conn.execute(
+            "INSERT INTO user_health_background_notes "
+            "(user_id, note_date, category, content, created_at) VALUES (?,?,?,?,?)",
+            (
+                "selfcheck",
+                "2026-09-08",
+                "unstructured_vision",
+                "[vision_parse_failed] Server error 500",
+                "2026-09-08",
+            ),
+        )
+        for i in range(2):
+            hy_conn.execute(
+                "INSERT INTO chat_sessions VALUES (?,?,?,?,?)",
+                (f"empty-{i}", "selfcheck", "空", "2026-09-08", "2026-09-08"),
+            )
+        hy_conn.commit()
+        dry = classify(hy_conn)
+        if len(dry["A"]) != 2 or len(dry["B"]) != 2 or len(dry["C"]) != 2:
+            _restore_p13_db(old_db, old_slots, old_disc)
+            return _fail(f"hygiene dry-run counts want A2 B2 C2 got { {k: len(dry[k]) for k in 'ABC'} }")
+    finally:
+        hy_conn.close()
+
+    applied = hygiene_run(db_path=hy_db, apply=True, include_empty=False)
+    after_hy = applied.get("after") or {}
+    if len(after_hy.get("A") or []) != 0 or len(after_hy.get("B") or []) != 0:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("hygiene apply must clear A and B")
+    if len(after_hy.get("C") or []) != 2:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("hygiene apply must keep empty sessions by default")
+    verify = connect(hy_db)
+    try:
+        real_sessions = verify.execute(
+            "SELECT COUNT(*) FROM chat_sessions WHERE id=?",
+            (keep_sid,),
+        ).fetchone()[0]
+        real_notes = verify.execute(
+            "SELECT COUNT(*) FROM user_health_background_notes WHERE category='supplement'",
+        ).fetchone()[0]
+        if real_sessions != 1 or real_notes != 1:
+            _restore_p13_db(old_db, old_slots, old_disc)
+            return _fail("hygiene apply must keep the real session and supplement note")
+    finally:
+        verify.close()
+
+    _restore_p13_db(old_db, old_slots, old_disc)
+    return None
 
 
 def json_blob(card: dict) -> str:

@@ -261,7 +261,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P9.3** | 真机与边界验收 | `DONE` | 2026-09-09：跨日 `calendar_day` 键隔离真看 PASS；Ollama 不可达 → API `model_unavailable` + SSR「本机模型未响应」/「重试」PASS（临时实例 `OLLAMA_BASE_URL=:9`；本机 Electron Ollama 会自动拉起，不宜依赖 kill）。Mac+iPhone Safari 解读此前已出 |
 | **M1-P9.4** | **卡外数字分级放宽 + 单一审计 + review 优化**（FR-6.3 / FR-6.10 v1.10） | `DONE` | 2026-09-08：`fact_card` 审计策略住 `numerics_manifest`；卡侧删字面量正则；标识符/`.0`/窗口口语归一；TASK 分条 + locale T1；Tier0 `min` 保留 values；失败存 `rejected_text` + 归并文案。selfcheck PASS |
 | **M1-P9.5** | **解读专用 soul（焦点跑偏）** | `DONE` | 2026-09-08：`PHA_FACT_CARD_SOUL_MINIMAL` + `select_soul_base`；禁三步看诊；缓存键含 soul。交接 v4。验收见 change-log |
-| **M1-P13** | **解读轮零写入聊天记忆 + 记忆卫生**（FR-6.11） | `TODO` | 注册表 `memory_write_policy`；编排器无会话轮；背景捕获拒系统标签串；`scripts/pha_memory_hygiene.py` dry-run/apply（apply 须维护者确认）。交接 [`handoff-2026-09-09-proactive-memory-sharing.md`](handoff-2026-09-09-proactive-memory-sharing.md) §4 |
+| **M1-P13** | **解读轮零写入聊天记忆 + 记忆卫生**（FR-6.11） | `DONE` | 2026-09-09：`memory_write_policy=none`；编排器 `TurnMemorySink`；背景捕获拒 `[snake_case]` 系统标签；`scripts/pha_memory_hygiene.py`。selfcheck PASS。查库 A=57 / B=24 / C=6；卫生脚本 apply 须维护者确认 dry-run 后再跑。交接 §4 |
 | **M1-P14** | **`USER_BACKGROUND_BRIEF` 进解读**（FR-6.12 · A 层） | `TODO` | 前置：P13 DONE。去数字构建器 + 后验抽取器；TASK 加一条；缓存键含 brief 摘要；view 显示「已参考 N 条背景」。验收中英各 3 轮。交接 §5 |
 | **M1-P15** | **CHB 统一供给**（C 层 · 闭环） | `TODO` | 前置：P14 验收后 ≥1 天。CHB 增 §Background + 解读脉络 + 组合 hash；每日在 `GET /proactive/fact-card` 后台触发；`fact_card_interpret` 投影不含 §Facts；brief 供给源 chb → live_notes 回落。交接 §6 |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |

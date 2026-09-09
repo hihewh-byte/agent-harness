@@ -80,6 +80,27 @@ _PROFILE_SLOT_INVARIANTS: Dict[str, Dict[str, Set[str]]] = {
     },
 }
 
+# FR-6.11: interpret reuses the chat orchestrator but is not a user chat turn.
+MEMORY_WRITE_CHAT = "chat"
+MEMORY_WRITE_NONE = "none"
+_DEFAULT_MEMORY_WRITE_POLICY = MEMORY_WRITE_CHAT
+_PROFILE_MEMORY_WRITE: Dict[str, str] = {
+    "fact_card_interpret": MEMORY_WRITE_NONE,
+}
+
+
+def memory_write_policy(profile: str | None) -> str:
+    name = (profile or "").strip()
+    policy = _PROFILE_MEMORY_WRITE.get(name, _DEFAULT_MEMORY_WRITE_POLICY)
+    if policy not in (MEMORY_WRITE_CHAT, MEMORY_WRITE_NONE):
+        return _DEFAULT_MEMORY_WRITE_POLICY
+    return policy
+
+
+def profile_writes_chat_memory(profile: str | None) -> bool:
+    """True when the turn may persist sessions / messages / notes / focus."""
+    return memory_write_policy(profile) == MEMORY_WRITE_CHAT
+
 # Stage 3H-γ: explicit specialized → grounded fallback contract (never lifestyle).
 _PROFILE_GROUNDED_FALLBACK: Dict[str, str] = {
     "wearable_screenshot_review": "attachment_grounded_review",
@@ -117,6 +138,7 @@ def _plan_snapshot(plan: TurnEvidencePlan) -> Dict[str, Any]:
         "forbidden": sorted(set(plan.forbidden or [])),
         "tools_allowed": sorted(set(plan.tools_allowed or [])),
         "legacy_question_type": qname,
+        "memory_write_policy": memory_write_policy(plan.profile),
     }
 
 
@@ -459,6 +481,29 @@ def validate_health_intent_catalog_registry() -> RegistryValidationResult:
     return out
 
 
+def validate_memory_write_consistency() -> RegistryValidationResult:
+    """``none`` profiles must not subscribe to chat-episodic Tier1 slots."""
+    out = RegistryValidationResult()
+    if memory_write_policy("fact_card_interpret") != MEMORY_WRITE_NONE:
+        out.add("fact_card_interpret must have memory_write_policy=none")
+    live = introspect_harness_profile_plans()
+    banned_t1 = {"RECALL", "EPISODIC_BRIDGE"}
+    for name, snap in live.items():
+        policy = str(snap.get("memory_write_policy") or _DEFAULT_MEMORY_WRITE_POLICY)
+        if policy not in (MEMORY_WRITE_CHAT, MEMORY_WRITE_NONE):
+            out.add(f"{name}: unknown memory_write_policy {policy!r}")
+            continue
+        if policy != MEMORY_WRITE_NONE:
+            continue
+        t1 = set(snap.get("slots_tier1") or [])
+        leaked = sorted(t1 & banned_t1)
+        if leaked:
+            out.add(
+                f"{name}: memory_write_policy=none but tier1 contains {leaked}",
+            )
+    return out
+
+
 def validate_slot_invariants_vs_manifest() -> RegistryValidationResult:
     """Hand-maintained slot invariants must match generated profile introspection."""
     out = RegistryValidationResult()
@@ -492,6 +537,7 @@ def validate_harness_profile_registry() -> RegistryValidationResult:
         validate_schema_trigger_conflicts(),
         validate_health_intent_catalog_registry(),
         validate_slot_invariants_vs_manifest(),
+        validate_memory_write_consistency(),
         validate_generated_manifest(),
     ):
         merged.errors.extend(part.errors)
@@ -504,7 +550,10 @@ __all__ = [
     "RegistryValidationResult",
     "generate_profile_registry_manifest",
     "introspect_harness_profile_plans",
+    "memory_write_policy",
+    "profile_writes_chat_memory",
     "validate_generated_manifest",
+    "validate_memory_write_consistency",
     "validate_harness_profile_registry",
     "validate_health_intent_catalog_registry",
     "validate_plan_invariants",

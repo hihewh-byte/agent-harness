@@ -29,7 +29,6 @@ from pha.agent_tools import (
 from pha.chat_background import (
     MAX_CHAT_BACKGROUND_CHARS,
     build_user_background_block,
-    maybe_capture_chat_background,
 )
 from pha.intent_gates import (
     QuestionType,
@@ -50,13 +49,6 @@ from pha.chat_router import (
     log_harness_payload,
     prepare_chat_evidence_bundle,
     probe_temporal_route,
-)
-from pha.chat_storage import (
-    append_message,
-    create_session,
-    get_session,
-    maybe_set_title_from_first_message,
-    update_message_parsed_json,
 )
 from pha.event_medical import metrics_preview_dicts, narratives_preview_dicts
 from pha.health_data import (
@@ -126,6 +118,8 @@ from pha.chat_skip_llm import evaluate_skip_llm_path  # noqa: E402
 from pha.chat_turn_fsm import ChatTurnPhase, ChatTurnPhaseRecorder  # noqa: E402
 from pha.chat_turn_harness_report import HarnessEmitContext, emit_turn_harness_report  # noqa: E402
 from pha.chat_turn_routing import resolve_turn_routing  # noqa: E402
+from pha.chat_turn_memory import TurnMemorySink  # noqa: E402
+from pha.harness_profile_registry import profile_writes_chat_memory  # noqa: E402
 
 
 def orchestrate_chat_turn_events(
@@ -160,6 +154,11 @@ def orchestrate_chat_turn_events(
     _resolved_override = resolve_profile_override(profile_override)
     if (profile_override or "").strip() and _resolved_override is None:
         logger.warning("profile_override_rejected name=%s", (profile_override or "").strip())
+    _memory = TurnMemorySink(
+        writes=profile_writes_chat_memory(_resolved_override),
+        user_id=uid,
+        session_id=session_id,
+    )
     _paths_in = [p.strip() for p in (attachment_paths or []) if (p or "").strip()]
     if not _paths_in and (attachment_path or "").strip():
         _paths_in = [(attachment_path or "").strip()]
@@ -210,14 +209,13 @@ def orchestrate_chat_turn_events(
             ensure_ascii=False,
         )
 
-    sid = session_id
-    if sid:
-        if not get_session(sid, uid):
-            yield json.dumps({"event": "error", "message": "会话不存在"}, ensure_ascii=False)
-            return
-    else:
-        sess = create_session(uid)
-        sid = sess.id
+    if not _memory.ensure_session():
+        yield json.dumps(
+            {"event": "error", "message": _memory.session_error or "会话不存在"},
+            ensure_ascii=False,
+        )
+        return
+    sid = _memory.sid
     _phase_rec.enter(ChatTurnPhase.SESSION)
 
     att_path = _paths_in[0] if len(_paths_in) == 1 else json.dumps(_paths_in, ensure_ascii=False)
@@ -234,8 +232,7 @@ def orchestrate_chat_turn_events(
     attachment_asset_qa = False
     attach_status_suffix = ""
     attach_client_reuse = False
-    user_row = append_message(
-        sid,
+    user_row = _memory.append(
         "user",
         msg,
         attachment_path=att_path,
@@ -250,18 +247,14 @@ def orchestrate_chat_turn_events(
         ]
         if len(_user_hist) >= 2:
             _prior_user_msg = _user_hist[1]
-    maybe_set_title_from_first_message(sid, msg)
-    from pha.dynamic_slot_registry import on_background_captured, on_request_start
-
-    slot_turn_meta = on_request_start(uid, msg)
-    stored_bg, bg_reject = maybe_capture_chat_background(
-        uid,
+    _memory.set_title_from_first_message(msg)
+    slot_turn_meta = _memory.on_request_start(msg)
+    stored_bg, bg_reject = _memory.capture_background(
         msg,
-        session_id=sid,
         source_message_id=user_row.id,
     )
     if stored_bg:
-        on_background_captured(uid, msg)
+        _memory.on_background_captured(msg)
     if bg_reject == "background_too_long":
         yield json.dumps(
             {
@@ -356,9 +349,6 @@ def orchestrate_chat_turn_events(
             episodic_report_meta,
             health_episodic_bridge_block,
             health_episodic_runtime_enabled,
-            load_health_session_focus,
-            record_health_turn_focus,
-            revive_health_session_focus,
         )
         from pha.health_turn_resolver import resolve_health_turn_scope
         from pha.clarify_turns import (
@@ -373,8 +363,8 @@ def orchestrate_chat_turn_events(
         _lab_years_available = available_lab_years_for_user(uid)
         if not _resolved_override and (health_episodic_runtime_enabled() or clarify_turns_enabled()):
             _health_episodic_focus = (
-                revive_health_session_focus(sid or "", raw_user_msg)
-                or load_health_session_focus(sid or "")
+                _memory.revive_health_session_focus(raw_user_msg)
+                or _memory.load_health_session_focus()
             )
             if clarify_turns_enabled() and (clarify_choice_id or "").strip():
                 _health_turn_scope = resolve_scope_from_clarify_choice(
@@ -453,7 +443,7 @@ def orchestrate_chat_turn_events(
                 ensure_ascii=False,
             )
             clarify_text = build_clarify_answer_text(_health_turn_scope)
-            assistant_row = append_message(sid, "assistant", clarify_text)
+            assistant_row = _memory.append("assistant", clarify_text)
             persist_pending_clarify_scope(
                 sid or "",
                 _health_turn_scope,
@@ -491,11 +481,7 @@ def orchestrate_chat_turn_events(
             focus_tokens_from_text,
         )
         from pha.session_turn_focus import (
-            consume_session_turn_focus,
             focus_summary_from_parsed,
-            get_session_turn_focus,
-            revive_session_turn_focus_for_message,
-            save_session_turn_focus,
         )
 
         _has_parse = False
@@ -503,16 +489,14 @@ def orchestrate_chat_turn_events(
 
         if parsed_payload:
             _has_parse = attachment_parse_is_actionable(parsed_payload)
-        _existing_focus = get_session_turn_focus(sid or "")
-        _route_focus = revive_session_turn_focus_for_message(sid or "", raw_user_msg) or _existing_focus
+        _existing_focus = _memory.get_session_turn_focus()
+        _route_focus = _memory.revive_session_turn_focus(raw_user_msg) or _existing_focus
         _focus_tokens = list(_route_focus.focus_tokens) if _route_focus else []
         _attach_family = family_from_parsed(parsed_payload) if parsed_payload else ""
         if user_message_needs_wearable_query(raw_user_msg) and _route_focus and _route_focus.active:
             _prev_doc = str(_route_focus.document_type or "").strip().lower()
             if _prev_doc in ("supplement", "supplement_label", ""):
-                from pha.session_turn_focus import clear_session_turn_focus
-
-                clear_session_turn_focus(sid or "")
+                _memory.clear_session_turn_focus()
                 _route_focus = None
                 _focus_tokens = []
         _routing = resolve_turn_routing(
@@ -532,7 +516,7 @@ def orchestrate_chat_turn_events(
         _health_turn_scope = _routing.health_turn_scope
         session_focus_row = None
         if _qa_mode in ("lipid_bridge", "episodic_bridge"):
-            session_focus_row = consume_session_turn_focus(sid or "")
+            session_focus_row = _memory.consume_session_turn_focus()
             if not session_focus_row and _route_focus:
                 session_focus_row = _route_focus
         elif _has_parse and parsed_payload:
@@ -551,17 +535,14 @@ def orchestrate_chat_turn_events(
                     and _doc_type != _route_focus.document_type
                     and _doc_type in ("wearable", "supplement", "lab")
                 ):
-                    from pha.session_turn_focus import clear_session_turn_focus
-
-                    clear_session_turn_focus(sid or "")
-                save_session_turn_focus(
-                    sid or "",
+                    _memory.clear_session_turn_focus()
+                _memory.save_session_turn_focus(
                     focus_summary=_fsum,
                     document_type=_doc_type,
                     focus_tokens=_ftoks,
                 )
             if attachment_asset_qa:
-                session_focus_row = get_session_turn_focus(sid or "")
+                session_focus_row = _memory.get_session_turn_focus()
 
         _phase_rec.enter(ChatTurnPhase.ROUTE_QA)
         plan = build_turn_evidence_plan(
@@ -921,7 +902,7 @@ def orchestrate_chat_turn_events(
                 attachment_qa_mode=_qa_mode,
             )
 
-        assistant_row = append_message(sid, "assistant", answer_text or raw)
+        assistant_row = _memory.append("assistant", answer_text or raw)
 
         if episodic_all_profiles_enabled() and _health_turn_scope is not None:
             _record_fsum = ""
@@ -933,8 +914,7 @@ def orchestrate_chat_turn_events(
                     or parsed_payload.get("document_type")
                     or "",
                 )
-            record_health_turn_focus(
-                sid or "",
+            _memory.record_health_turn_focus(
                 turn_scope=_health_turn_scope,
                 harness_profile=plan.profile,
                 user_message=raw_user_msg,

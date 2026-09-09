@@ -4,6 +4,13 @@
 
 ---
 
+## 2026-09-09 (M1-P13：memory_write_policy)
+
+- **类别**：**P0（FR-6.11）**。`fact_card_interpret` 借用 chat 管线但不得写入会话记忆。
+- **改动**：注册表 `memory_write_policy`（默认 `chat`，interpret=`none`）；谓词 `profile_writes_chat_memory`；编排器 `TurnMemorySink`；`EPISODIC_BRIDGE` 对 `none` 显式清空。`pha_harness_profile_registry_generate.py --write`。
+- **证据**：registry selfcheck PASS；`pha_fact_card_selfcheck` P13 段 PASS（interpret 五表行数不变、`session_id=null`；对照 lifestyle 会话 +1）。
+- **回滚**：谓词恒 True，删 Sink。
+
 ## 2026-09-09 (M1-P9.5b：TASK 未点名行禁另起句)
 
 - **类别**：**P1（解读大纲）**。TASK 第 1 条补一句禁未点名行新段落。

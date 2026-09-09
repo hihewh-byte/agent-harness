@@ -388,9 +388,12 @@ def iter_turn_harness_assembly_phase(
             profile=plan.profile,
         )
 
+    from pha.harness_profile_registry import profile_writes_chat_memory
     from pha.health_session_focus_store import episodic_all_profiles_enabled, health_episodic_bridge_block
 
-    if episodic_all_profiles_enabled():
+    if not profile_writes_chat_memory(plan.profile):
+        ctx.episodic_bridge_block = ""
+    elif episodic_all_profiles_enabled():
         from pha.attachment_asset_qa import is_attachment_qa_profile as _is_attach_profile
 
         if not _is_attach_profile(plan.profile):
@@ -526,11 +529,15 @@ def iter_turn_harness_assembly_phase(
     if ctx.attach_parse_failed:
         ctx.tier1_supp = f"{ATTACH_PARSE_FAILURE_ADDENDUM}\n\n---\n\n{ctx.tier1_supp}".strip()
 
-    ctx.history_messages = _session_history_messages(
-        sid,
-        max_turns=CHAT_HISTORY_MAX_TURNS,
-        exclude_current_user=True,
-        strip_polluted_assistant=should_strip_polluted_assistant_history(msg),
+    ctx.history_messages = (
+        []
+        if not (sid or "").strip()
+        else _session_history_messages(
+            sid,
+            max_turns=CHAT_HISTORY_MAX_TURNS,
+            exclude_current_user=True,
+            strip_polluted_assistant=should_strip_polluted_assistant_history(msg),
+        )
     )
 
     if ctx.audit_md:

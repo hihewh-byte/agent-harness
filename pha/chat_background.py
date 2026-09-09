@@ -49,6 +49,9 @@ _ALL_SUPPS_RE = re.compile(r"所有补剂|全部补剂|目前在服|正在服用
 
 MAX_CHAT_BACKGROUND_CHARS = int(os.environ.get("PHA_CHAT_BACKGROUND_MAX_CHARS", "4000"))
 
+# System / harness error strings, e.g. ``[vision_parse_failed] …`` — not user memory.
+_SYSTEM_TAG_MESSAGE_RE = re.compile(r"^\[([a-z][a-z0-9_]*)\]")
+
 
 def init_background_schema(conn: Optional[sqlite3.Connection] = None) -> None:
     init_schema()
@@ -76,6 +79,11 @@ def should_capture_background_message(message: str) -> bool:
     return get_catalog_manager().should_capture_background(message)
 
 
+def is_system_tag_message(message: str) -> bool:
+    """True when the text is a ``[snake_case_tag]`` harness/system error string."""
+    return bool(_SYSTEM_TAG_MESSAGE_RE.match((message or "").strip()))
+
+
 def maybe_capture_chat_background(
     user_id: str,
     message: str,
@@ -89,6 +97,8 @@ def maybe_capture_chat_background(
     ``\"background_too_long\"`` when content exceeds the configured cap.
     """
     text = (message or "").strip()
+    if is_system_tag_message(text):
+        return False, "system_tag_message"
     if not should_capture_background_message(text):
         return False, None
     if len(text) > MAX_CHAT_BACKGROUND_CHARS:
