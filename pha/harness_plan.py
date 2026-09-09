@@ -132,12 +132,60 @@ _FACT_CARD_INTERPRET_TASK = (
     "to the rows the assessment named."
 )
 
+_FACT_CARD_INTERPRET_TASK_SHARED_TAIL = (
+    "Match names by label or metric id. Non-null value ⇒ cite it; never say missing. "
+    "partial_day is in-progress cumulative, not missing; do not restate the page sync disclaimer. "
+    "summary/advice are the rule layer already on the page — not the outline.\n"
+    "2. Your own data: cite only numbers and dates from the Numerics Manifest / "
+    "FACT_CARD_CONTEXT; copy decimals as shown. Absolute dates only as_of, "
+    "calendar_day, or each row's day; otherwise use relative phrases. "
+    "Window wording must match the card exactly.\n"
+    "3. Population commons and training tips: integers OK (e.g. 95%, 70–80%, 2–3 times); "
+    "do not invent decimals. Optional sourced note: {T1_TEMPLATE}.\n"
+    "4. Plain text only — no Markdown (* # `). No diagnosis, prescriptions, or doses. "
+    "Do not repeat the disclaimer. Language follows response_locale.\n"
+    "5. USER_BACKGROUND_BRIEF, if present, only shapes cautions and wording of advice. "
+    "Never cite it as data, never restate or infer doses, and skip it when unrelated "
+    "to the rows the assessment named."
+)
 
-def fact_card_interpret_task_text(locale: str = "en") -> str:
+_FACT_CARD_INTERPRET_TASK_BY_OUTLINE = {
+    "exclusive": (
+        "【TASK】Write a health-education interpretation.\n"
+        "1. Outline mode = exclusive (catalog). Outline = USER_ASSESSMENT_PROMPT "
+        "(length, tone, training advice). If it names metrics, discuss only those rows. "
+        "Do not start a new paragraph or sentence for rows the assessment did not name. "
+        + _FACT_CARD_INTERPRET_TASK_SHARED_TAIL
+    ),
+    "emphasis": (
+        "【TASK】Write a health-education interpretation.\n"
+        "1. Outline mode = emphasis (catalog). Outline = USER_ASSESSMENT_PROMPT "
+        "(length, tone, training advice). Named rows get the main section; other checked "
+        "rows with values may be mentioned in the same paragraph, never as a new topical "
+        "section. "
+        + _FACT_CARD_INTERPRET_TASK_SHARED_TAIL
+    ),
+    "cover-card": (
+        "【TASK】Write a health-education interpretation.\n"
+        "1. Outline mode = cover-card (catalog). Outline = USER_ASSESSMENT_PROMPT "
+        "(length, tone, training advice). Cover checked rows that have values. "
+        + _FACT_CARD_INTERPRET_TASK_SHARED_TAIL
+    ),
+}
+
+
+def fact_card_interpret_task_text(locale: str = "en", outline_mode: str | None = None) -> str:
     """TASK with locale-specific T1 example; no Chinese/English template hardcoding in callers."""
     loc = (locale or "en").strip().lower()
     tmpl = _T1_TEMPLATE_ZH if loc.startswith("zh") else _T1_TEMPLATE_EN
-    return _FACT_CARD_INTERPRET_TASK.replace("{T1_TEMPLATE}", tmpl)
+    from pha.goal_classifier import assessment_outline_enabled
+
+    mode = (outline_mode or "").strip()
+    if assessment_outline_enabled() and mode in _FACT_CARD_INTERPRET_TASK_BY_OUTLINE:
+        body = _FACT_CARD_INTERPRET_TASK_BY_OUTLINE[mode]
+    else:
+        body = _FACT_CARD_INTERPRET_TASK
+    return body.replace("{T1_TEMPLATE}", tmpl)
 
 
 _FACT_CARD_INTERPRET_FORBIDDEN = [
@@ -265,6 +313,16 @@ def _plan_for_authoritative_profile(
         return _fact_card_interpret_turn_plan()
     if name == "wearable_daily_review":
         return _wearable_daily_review_turn_plan()
+    if name == "lifestyle":
+        return TurnEvidencePlan(
+            profile="lifestyle",
+            slots_tier0=["MASTER_ANCHOR", "TASK"],
+            slots_tier1=["SUPPLEMENT_BG", "PATIENT_STATE_LAB", "USER_CONTEXT_BRIEF"],
+            forbidden=["USER_SNAPSHOT"],
+            tools_allowed=[],
+            task_text="【本轮任务】基于用户问题与 Patient State 作答；勿臆造未列出指标。",
+            legacy_question_type=qtype,
+        )
     if name == "casual":
         return TurnEvidencePlan(
             profile="casual",

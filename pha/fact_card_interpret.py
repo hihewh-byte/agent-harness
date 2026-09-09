@@ -30,6 +30,9 @@ def _interpret_prompt_rev() -> str:
 
     blob = (
         f"{fact_card_interpret_task_text('en')}|"
+        f"{fact_card_interpret_task_text('en', outline_mode='exclusive')}|"
+        f"{fact_card_interpret_task_text('en', outline_mode='emphasis')}|"
+        f"{fact_card_interpret_task_text('en', outline_mode='cover-card')}|"
         f"{FACT_CARD_AUDIT_POLICY_REV}|"
         f"{PHA_FACT_CARD_SOUL_MINIMAL}"
     )

@@ -46,6 +46,20 @@
       {"token": "趋势", "weight": 2},
       {"token": "均值", "weight": 2}
     ],
+    "background_capture_negative_keywords": [
+      {"token": "吗"},
+      {"token": "什么"},
+      {"token": "哪些"},
+      {"token": "有没有"},
+      {"token": "请列出"},
+      {"token": "请结合库内"},
+      {"token": "？"},
+      {"token": "?"},
+      {"token": "what medications"},
+      {"token": "what supplements"},
+      {"token": "any supplements"},
+      {"token": "am i taking"}
+    ],
     "background_capture_keywords": [
       {"token": "补剂"},
       {"token": "服用"},

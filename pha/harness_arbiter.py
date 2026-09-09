@@ -9,6 +9,7 @@ from pha.catalog_existence import _probe_lipid_data, _probe_wearable_data
 from pha.goal_classifier import (
     GoalClassification,
     classify_goal,
+    context_lookup_enabled,
     daily_readiness_profile_enabled,
     goal_classifier_enabled,
     goal_session_anchor_enabled,
@@ -150,7 +151,8 @@ def resolve_harness_arbiter(
     existence_override: dict[str, bool] | None = None,
     episodic: Any = None,
 ) -> ArbiterDecision | None:
-    if not goal_classifier_enabled():
+    lookup_only = context_lookup_enabled() and not goal_classifier_enabled()
+    if not goal_classifier_enabled() and not context_lookup_enabled():
         return None
 
     msg = (user_message or "").strip()
@@ -160,6 +162,29 @@ def resolve_harness_arbiter(
     goal = goal or classify_goal(msg)
     probe = probe_domain_availability(user_id, existence_override=existence_override)
     router = (router_profile or "lifestyle").strip() or "lifestyle"
+
+    if context_lookup_enabled() and goal.goal_class == "context_lookup":
+        metrics = infer_metrics_from_message(msg)
+        if not metrics:
+            return ArbiterDecision(
+                goal_class=goal.goal_class,
+                goal_source=goal.source,
+                router_profile=router,
+                authoritative_profile="lifestyle",
+                reason="goal_context_lookup",
+                existence_probe=probe,
+            )
+        return ArbiterDecision(
+            goal_class=goal.goal_class,
+            goal_source=goal.source,
+            router_profile=router,
+            authoritative_profile=router,
+            reason="explicit_metric_with_context_lookup",
+            existence_probe=probe,
+        )
+
+    if lookup_only:
+        return None
 
     if goal_session_anchor_enabled() and _should_continue_holistic_goal(
         msg,

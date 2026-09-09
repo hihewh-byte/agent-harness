@@ -449,11 +449,17 @@ def iter_turn_harness_assembly_phase(
 
     _task_locale = ctx.request_locale or ctx.response_locale or "en"
     from pha.fact_card_copy import card_copy
+    from pha.goal_classifier import assessment_outline_enabled
+    from pha.health_intent_catalog import classify_outline_mode
 
     _prompt_head = card_copy(_task_locale, "assessment_prompt_head")
+    _outline_src = (ctx.user_assessment_prompt or msg or "").strip()
+    _outline_mode = (
+        classify_outline_mode(_outline_src) if assessment_outline_enabled() else None
+    )
     ctx.slot_contents = {
         "TASK": (
-            fact_card_interpret_task_text(_task_locale)
+            fact_card_interpret_task_text(_task_locale, outline_mode=_outline_mode)
             if uses_fact_card_context(plan)
             else plan.task_text
         ),

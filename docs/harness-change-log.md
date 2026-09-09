@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-09-09 (P1 编码：P17 大纲分档 + P18 context_lookup)
+
+- **类别**：**P1（FR-6.8 / FR-6.14 / 3F §15）**。
+- **改动**：catalog `assessment_outline` + `goal_markers.context_lookup`（v1.9）；TASK 按 exclusive/emphasis/cover-card；`advice_partial`/`hk_ok` 分域；Arbiter `goal_context_lookup` / `explicit_metric_with_context_lookup`；`is_warehouse_metric_focus_turn` 按 goal 否决；`build_fact_card_event` 空 scope 不发卡；schema capture negative；chat 注入对齐 P14 配额去重。Flag：`PHA_ASSESSMENT_OUTLINE=1`、`PHA_CONTEXT_LOOKUP=1`。**不**翻转 Data > Context；**不**提前 P15。
+- **证据**：`scripts/pha_p17_p18_selfcheck.py` O1–O3 / C1–C4；goal/arbiter / fact_card / parity / registry `--check` 绿。真机 8788 pid 65097 见 proactive change-log 20:08。
+- **回滚**：关对应 flag；copy 键 git revert。关 `PHA_CONTEXT_LOOKUP` 时发卡回退「有 entries 就发」。
+
+## 2026-09-09 (P1 文档：大纲分档 + context_lookup · 未编码)
+
+- **类别**：**P1（FR-6.8 / FR-6.14 / 3F §15）**。文档锁定，无代码。
+- **改动**：PRD v1.14；3F RFC §15；交接 `handoff-2026-09-09-outline-and-context-lookup.md`。立 M1-P17（`assessment_outline` + copy 分域）、M1-P18（`context_lookup` + 发卡 ⊆ scope + 问句不捕获）。**不**翻转 Data > Context；**不**提前 P15。
+- **证据**：2026-09-09 真机（解读 exclusive 过严、问药 skip-LLM + 默认 90d 卡）；维护者同意 18:07 审计驳回原补丁方案。
+- **回滚**：文档 git revert 本条相关文件；运行时行为不变。
+
 ## 2026-09-09 (P1：对话框 ↔ 事实卡解读同源)
 
 - **类别**：**P1（FR-6.13）**。对话侧与主动事实卡共用 Registry；睡眠分项可答；「能否训练」走 `wearable_daily_review`。

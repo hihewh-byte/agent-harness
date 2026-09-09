@@ -95,6 +95,32 @@ def _supplement_catalog_threshold(schema: Optional[Dict[str, Any]]) -> float:
     return float(intent.get("catalog_min_score") or cat.get("catalog_min_score") or 2.0)
 
 
+def _schema_intent_tokens(schema: Optional[Dict[str, Any]], key: str) -> List[str]:
+    if not schema:
+        return []
+    intent = schema.get("intent") or {}
+    out: List[str] = []
+    for rule in intent.get(key) or []:
+        if isinstance(rule, dict):
+            token = str(rule.get("token") or "").strip()
+        else:
+            token = str(rule).strip()
+        if token:
+            out.append(token)
+    return out
+
+
+def schema_hits_capture_negative(user_message: str, schema: Optional[Dict[str, Any]]) -> bool:
+    """True when the text matches schema capture-negative (question/imperative) tokens."""
+    text = (user_message or "").strip()
+    if not text:
+        return False
+    for token in _schema_intent_tokens(schema, "background_capture_negative_keywords"):
+        if token_in_message(token, text):
+            return True
+    return False
+
+
 def should_capture_background_from_schema(user_message: str, schema: Optional[Dict[str, Any]]) -> bool:
     """Long-term note capture — independent of turn lane."""
     text = (user_message or "").strip()
@@ -102,13 +128,10 @@ def should_capture_background_from_schema(user_message: str, schema: Optional[Di
         return False
     if not schema:
         return False
-    intent = schema.get("intent") or {}
-    for rule in intent.get("background_capture_keywords") or []:
-        if isinstance(rule, dict):
-            token = str(rule.get("token") or "").strip()
-        else:
-            token = str(rule).strip()
-        if token and token_in_message(token, text):
+    if schema_hits_capture_negative(text, schema):
+        return False
+    for token in _schema_intent_tokens(schema, "background_capture_keywords"):
+        if token_in_message(token, text):
             return True
     return False
 
@@ -190,6 +213,7 @@ __all__ = [
     "AssetIntentScore",
     "IntentRouteResult",
     "resolve_intent_route",
+    "schema_hits_capture_negative",
     "score_asset",
     "score_asset_positive",
     "score_all_assets",

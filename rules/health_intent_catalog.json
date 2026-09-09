@@ -1,5 +1,5 @@
 {
-  "version": "1.7",
+  "version": "1.9",
   "anaphora": {
     "tokens": [
       "那",
@@ -295,6 +295,60 @@
       ],
       "wins_over_explicit_metric": true,
       "notes": "当日训练/恢复准备度评估；数值来源 = 事实卡 T0"
+    },
+    "context_lookup": {
+      "tokens": [
+        "有服用什么",
+        "服用什么",
+        "什么药物",
+        "什么药",
+        "哪些补剂",
+        "哪些药物",
+        "用药清单",
+        "药物对于",
+        "药物对",
+        "补剂对于",
+        "补剂对",
+        "知道我有服用",
+        "what medications",
+        "what supplements",
+        "any supplements",
+        "am i taking",
+        "do i take",
+        "medications affect",
+        "supplements affect"
+      ],
+      "wins_over_warehouse_skip": true,
+      "notes": "档案列举/用药对指标的询问；非穿戴大盘。不用光秃「有没有」「我现在服用」，以免陈述自述或存在性问句被抢走。"
+    }
+  },
+  "assessment_outline": {
+    "priority": [
+      "exclusive",
+      "emphasis",
+      "cover-card"
+    ],
+    "modes": {
+      "exclusive": {
+        "tokens": [
+          "只看",
+          "仅看",
+          "only look at",
+          "only look"
+        ]
+      },
+      "emphasis": {
+        "tokens": [
+          "重点看",
+          "侧重",
+          "尤其",
+          "especially",
+          "focus on"
+        ]
+      },
+      "cover-card": {
+        "tokens": []
+      }
     }
   },
   "holistic_proxy_metrics": [

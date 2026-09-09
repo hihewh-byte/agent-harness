@@ -2,7 +2,7 @@
 
 > **文件名**：`stage3f-intent-resolution-completeness-rfc.md`  
 > **版本**：v0.1（2026-06-17）  
-> **状态**：✅ **Approved · 架构完整性锁定版**  
+> **状态**：✅ **Approved · 架构完整性锁定版** · §15 为 v1.14 增补（M1-P17 / P18 已编码）  
 > **定位**：Stage 3C（多轮连贯性）之后的 **统一产品开发波次** — 补齐「开放意图 → 证据组装」链路，**非**单条 E2E / 单指标 corner case 补丁  
 > **上游（只读）**：[`stage3c-multi-turn-episodic-focus-rfc.md`](stage3c-multi-turn-episodic-focus-rfc.md) · [`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · [`pha-pm-constitution.md`](pha-pm-constitution.md)  
 > **下游编码**：`health_turn_resolver` · `intent_gates` · `harness_plan` · `health_intent_catalog` · `clarify_turns` · `harness_report`
@@ -425,6 +425,52 @@ Flag：`PHA_SHADOW_ROUTING=1`（沿用 v2.3 Stage 2D，扩展 shadow 字段）
 4. 同句多指标 → `combined_review` 金路径  
 
 该样例证明 **组装完整性** 缺口；修复路径是 **§5 全模块**，不是为样例中的某一措辞加规则。
+
+---
+
+## 15. v1.14 增补（Approved · 文档锁定 · 未编码）
+
+> 2026-09-09 维护者同意审计：不得为「整体+重点看」扫全卡、不得药物短语翻转 Data > Context、不得按笔记长度捞历史方案。编码前必读 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md)。**不废止** §5.1 既有优先级（显式 metric → `metric_specific`）与 H7「只看 LDL」；下列为 **追加** 模块与策略行。
+
+### 15.1 `outline_mode`（解读 / `daily_readiness` 叙述契约）
+
+不选 profile。写入 `health_intent_catalog.json` 的 `assessment_outline`：
+
+| mode | 标记（catalog tokens，编码时定稿） | 叙述 |
+|------|-------------------------------------|------|
+| `exclusive` | 只看 / 仅 / only look at | P9.5b：只谈点名行 |
+| `emphasis` | 重点看 / 侧重 / especially | 点名为主；其它勾选有值行可同段带过，禁另起专题段 |
+| `cover-card` | 未命中上两档 | 覆盖勾选有值行 |
+
+优先级 **exclusive > emphasis > cover-card**。`daily_readiness` 不得默认 exclusive。Python 不解析评估要求中的指标 id。
+
+### 15.2 `goal_class=context_lookup`
+
+追加到 GoalClassifier 输出枚举。规则写入 `goal_markers.context_lookup`（禁止 Python 药名/问句表）。existence = notes probe，不是 wearable。
+
+**Arbiter 策略行（追加，不改 Data > Context）：**
+
+| goal_class | 其它 | 行为 | authoritative_profile | arbiter_reason |
+|------------|------|------|------------------------|----------------|
+| `context_lookup` 且无显式 metric | notes ✓/✗ 均不升舱 combined | 已有 lifestyle / context_only | `lifestyle` | `goal_context_lookup` |
+| `context_lookup` 且显式 metric | — | **不** warehouse skip-LLM；数字走点名指标；背景仅 brief 切片 | router_profile（通常 `wearable_only`） | `explicit_metric_with_context_lookup` |
+| 纯 metric_specific（如 90d HRV 趋势） | — | 不变 | router_profile | `schema_default` |
+
+升舱 `combined_review` 仍禁止静默全量 `SUPPLEMENT_BG`。`fact_card` ⊆ `turn_scope.metric_keys`；空则不上卡。
+
+### 15.3 捕获
+
+`supplement_bg` schema：`background_capture_keywords` 的疑问/祈使为 negative。与 lane 独立（延续 3F capture ≠ route）。
+
+### 15.4 非目标（本增补）
+
+- 为单条黄金句写 Python equals  
+- 提前开 CHB / P15  
+- 新 profile 仅服务「我有没有服药」  
+- 翻转 *Data beats Context* 打分顺序  
+
+编码映射：共识 P1（catalog + Arbiter 行 + plan 发卡过滤）；flag 见交接 §3。
+
 
 ---
 

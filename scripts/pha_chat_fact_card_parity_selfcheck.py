@@ -113,6 +113,15 @@ def test_h9_readiness_profile() -> None:
     print("PASS H9/H9E daily_readiness → wearable_daily_review")
 
 
+def test_c2_hrv_trend_not_lookup() -> None:
+    load_health_intent_catalog.cache_clear()
+    msg = "近90天HRV趋势如何"
+    goal = classify_goal(msg)
+    _assert(goal.goal_class != "context_lookup", goal)
+    _assert(goal.goal_class == "metric_specific", goal)
+    print("PASS C2 HRV trend is not context_lookup")
+
+
 def test_h10_sleep_cluster_point() -> None:
     ids = infer_wearable_metric_ids(H10_ZH)
     _assert("sleep_time_asleep" in ids, ids)
@@ -235,6 +244,7 @@ def test_h12_h13_fail_closed() -> None:
 def main() -> int:
     _seed()
     test_h9_readiness_profile()
+    test_c2_hrv_trend_not_lookup()
     test_h10_sleep_cluster_point()
     test_h11_grain_anchor()
     test_h12_h13_fail_closed()

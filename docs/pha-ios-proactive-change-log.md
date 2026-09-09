@@ -1,3 +1,35 @@
+## 2026-09-09 20:08 (M1-P17 / P18 真机 8788)
+
+- **类别**：P1 运行验收。pid 65097，`qwen3:14b`，launchd kickstart 后。
+- **现场**：`pha_restart_accept.sh` PASS。黄金句走 `/proactive/fact-card/interpret` + `/api/chat`（新 session）。
+- **证据**：
+
+| id | 路径 | 结果 |
+|---|---|---|
+| O2 | interpret，评估要求未改（整体+重点看 RHR/HRV/睡眠+训练） | `daily_readiness` + `emphasis`；审计 `passed=true`；谈了深睡 0.5h / HRV / 静息；活动消耗写「仍在进行中（截至 20:04）」 |
+| O3 | 同轮 + 卡 `active_energy` partial | 解读/卡评估句无「未进 Mac / 还在手机」 |
+| C1 | 新 session「我现在有服用什么药物吗？」 | `context_lookup`；**无** `fact_card`；列出药物项C/药物项A；未编「您正在服用」无档案品类 |
+| C2 | 「近 90 天 HRV 趋势如何？」 | 非 lookup；HRV 均值卡 35.59ms（2026-06-12~2026-09-09） |
+| C3 | 同 session 接问「药物对于 HRV 和静息心率」 | 未 skip 成 90d 消耗卡；卡 ⊆ HRV均值+静息心率均值 |
+| C4 | C1 前后 | notes 70→70 |
+
+- **已知口径差（不挡关账）**：① emphasis 允许一带而过，模型仍另起了「活动量 / 呼吸率与血氧」段，且未直接答「能否力量训练」。② C3 走 Data 车道，`wearable_only` 无 `USER_BACKGROUND_BRIEF`，正文是窗口 fail-closed（审计 false），没有把 C1 已列出的用药带上——这是 Data > Context 的既定代价，不是又弹了消耗卡。
+- **回滚**：同编码条。
+
+## 2026-09-09 18:45 (M1-P17 / P18 编码 · DONE*)
+
+- **类别**：P1 / FR-6.8 · FR-6.14 · FR-2.10 copy · FR-6.13 发卡范围。
+- **改动**：catalog v1.9；TASK 三档；copy 分域；`context_lookup` Arbiter + skip 否决 + 发卡 ⊆ scope + 问句不捕获 + chat 注入配额去重。Flag 默认开。未开 P15。
+- **证据**：离线 `pha_p17_p18_selfcheck` O1–O3 / C1–C4 PASS。真机 O2+O3 / C1–C4 待验。
+- **回滚**：`PHA_ASSESSMENT_OUTLINE=0`（回退 P9.5b 点名即 exclusive）；`PHA_CONTEXT_LOOKUP=0`（发卡回退「有 entries 就发」）。
+
+## 2026-09-09 18:21 (v1.14 文档：大纲分档 + 档案查询 · 未编码)
+
+- **类别**：P1 / FR-6.8 · FR-6.14 · FR-2.10 copy · FR-6.13 发卡范围。
+- **改动**：PRD v1.14；3F §15；交接 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md)。立 **M1-P17 / M1-P18**（TODO）。禁止扫全卡、禁止药物短语赢 Data、禁止长度启发式捞方案、禁止 LibreChat 整栈替换 `/api/chat`。
+- **证据**：同日真机解读/问药对话；审计驳回原方案后维护者同意落文档。
+- **回滚**：文档 revert；无运行时 flag。
+
 ## 2026-09-09 16:51 (FR-6.13 真机验收 · 关 DONE*)
 
 - **类别**：P1 / FR-6.13 运行验收。

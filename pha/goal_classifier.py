@@ -38,6 +38,22 @@ def daily_readiness_profile_enabled() -> bool:
     )
 
 
+def assessment_outline_enabled() -> bool:
+    return (os.environ.get("PHA_ASSESSMENT_OUTLINE") or "1").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
+def context_lookup_enabled() -> bool:
+    return (os.environ.get("PHA_CONTEXT_LOOKUP") or "1").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
+
+
 def classify_goal(user_message: str) -> GoalClassification:
     msg = (user_message or "").strip()
     if not msg:
@@ -61,6 +77,9 @@ def classify_goal(user_message: str) -> GoalClassification:
                 wins = bool(readiness.get("wins_over_explicit_metric"))
                 if wins or not metrics:
                     return GoalClassification("daily_readiness", 1.0, "catalog")
+
+    if context_lookup_enabled() and message_matches_goal_class(msg, "context_lookup"):
+        return GoalClassification("context_lookup", 1.0, "catalog")
 
     if metrics:
         return GoalClassification("metric_specific", 1.0, "explicit_metric")
@@ -94,8 +113,10 @@ def clarify_intent_scope_enabled() -> bool:
 
 __all__ = [
     "GoalClassification",
+    "assessment_outline_enabled",
     "classify_goal",
     "clarify_intent_scope_enabled",
+    "context_lookup_enabled",
     "daily_readiness_profile_enabled",
     "goal_session_anchor_enabled",
 ]

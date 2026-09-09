@@ -150,8 +150,31 @@ def build_fact_card_event(
     """T0 fact card — numbers must ⊆ numerics_manifest entries."""
     if manifest is None or not manifest.entries:
         return None
+    payload = fact_card_payload if isinstance(fact_card_payload, dict) else {}
+    scope = [str(x) for x in (payload.get("enabled_metric_ids") or []) if str(x).strip()]
+    if not scope:
+        from pha.intent_gates import infer_wearable_metric_ids
+
+        scope = list(infer_wearable_metric_ids(user_message))
+    from pha.goal_classifier import classify_goal, context_lookup_enabled
+
+    lookup_on = context_lookup_enabled()
+    is_lookup = False
+    if lookup_on and (user_message or "").strip():
+        is_lookup = classify_goal(user_message).goal_class == "context_lookup"
+    work = manifest
+    if lookup_on and is_lookup and not scope:
+        return None
+    if lookup_on and scope:
+        work = _filter_manifest_to_metric_focus(
+            manifest,
+            scope,
+            user_message=user_message,
+        )
+        if is_lookup and not work.entries:
+            return None
     items = []
-    for entry in manifest.entries[:16]:
+    for entry in work.entries[:16]:
         items.append(
             {
                 "domain": entry.domain,
@@ -166,28 +189,22 @@ def build_fact_card_event(
                 ).strip(),
             },
         )
-    payload = fact_card_payload if isinstance(fact_card_payload, dict) else {}
-    scope = [str(x) for x in (payload.get("enabled_metric_ids") or []) if str(x).strip()]
-    if not scope:
-        from pha.intent_gates import infer_wearable_metric_ids
-
-        scope = list(infer_wearable_metric_ids(user_message))
     interp = payload.get("interpretation") if isinstance(payload.get("interpretation"), dict) else {}
     notes_used = int(interp.get("background_notes_used") or payload.get("background_notes_used") or 0)
     available: list[str] = []
     if user_id:
         available = _available_not_selected_ids(
             user_id,
-            grain_start=str(manifest.wearable_window_start or ""),
-            grain_end=str(manifest.wearable_window_end or ""),
+            grain_start=str(work.wearable_window_start or ""),
+            grain_end=str(work.wearable_window_end or ""),
             metrics_in_scope=scope,
         )
     return {
         "event": "fact_card",
-        "profile": manifest.profile,
-        "reference_date": manifest.reference_date,
+        "profile": work.profile,
+        "reference_date": work.reference_date,
         "items": items,
-        "entry_count": len(manifest.entries),
+        "entry_count": len(work.entries),
         "metrics_in_scope": scope,
         "available_not_selected": available,
         "background_notes_used": notes_used,
@@ -536,8 +553,16 @@ def is_warehouse_metric_focus_turn(user_message: str) -> bool:
     msg = (user_message or "").strip()
     if not msg:
         return False
+    from pha.goal_classifier import classify_goal, context_lookup_enabled
+    from pha.health_intent_catalog import catalog_goal_markers
     from pha.intent_gates import infer_wearable_metric_ids
     from pha.wearable_metric_registry import cluster_of
+
+    if context_lookup_enabled():
+        goal = classify_goal(msg)
+        lookup = catalog_goal_markers().get("context_lookup") or {}
+        if goal.goal_class == "context_lookup" and lookup.get("wins_over_warehouse_skip"):
+            return False
 
     ids = infer_wearable_metric_ids(msg)
     if not ids:

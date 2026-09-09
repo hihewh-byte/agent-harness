@@ -373,6 +373,29 @@ def catalog_goal_markers() -> dict[str, Any]:
     return dict(load_health_intent_catalog().get("goal_markers") or {})
 
 
+def catalog_assessment_outline() -> dict[str, Any]:
+    raw = load_health_intent_catalog().get("assessment_outline") or {}
+    return dict(raw) if isinstance(raw, dict) else {}
+
+
+def classify_outline_mode(message: str) -> str:
+    """exclusive > emphasis > cover-card from catalog tokens. No metric-id parsing."""
+    msg = (message or "").strip()
+    spec = catalog_assessment_outline()
+    modes = spec.get("modes") if isinstance(spec.get("modes"), dict) else {}
+    priority = spec.get("priority") or ["exclusive", "emphasis", "cover-card"]
+    for mode in priority:
+        key = str(mode or "").strip()
+        if key == "cover-card":
+            return "cover-card"
+        entry = modes.get(key) if isinstance(modes, dict) else None
+        tokens = (entry or {}).get("tokens") if isinstance(entry, dict) else None
+        for tok in tokens or []:
+            if token_in_message(str(tok), msg, case_insensitive=True):
+                return key
+    return "cover-card"
+
+
 def catalog_holistic_proxy_metrics() -> list[str]:
     return [str(m) for m in (load_health_intent_catalog().get("holistic_proxy_metrics") or [])]
 

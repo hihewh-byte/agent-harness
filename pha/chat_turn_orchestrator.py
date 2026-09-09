@@ -407,9 +407,9 @@ def orchestrate_chat_turn_events(
                         profile_hint=inherited,
                     )
 
-        from pha.goal_classifier import goal_classifier_enabled
+        from pha.goal_classifier import context_lookup_enabled, goal_classifier_enabled
 
-        if not _resolved_override and goal_classifier_enabled():
+        if not _resolved_override and (goal_classifier_enabled() or context_lookup_enabled()):
             from pha.harness_arbiter import merge_arbiter_turn_scope, resolve_harness_arbiter
             from pha.intent_gates import resolve_schema_intent as _resolve_schema_for_arbiter
 

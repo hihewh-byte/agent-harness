@@ -1,7 +1,7 @@
 # PRD / 共识 · PHA → iOS 主动健康管理 Agent
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.12 · 2026-09-09  
+> **版本**：v1.14 · 2026-09-09  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -104,7 +104,8 @@ Watch → iPhone HealthKit → [捷径 | iOS App]
 - **LLM 解读的「每日自动预生成」**：会把 FR-6 重新变成主动路径；如需做，另立决定并登记 §11，默认不做  
 - 让 LLM 解读绕开 chat harness 直接调 Ollama（「裸奔」）；解读中出现 facts / 基线之外的精确数字  
 - 让固定窗口穿戴摘要（`WEARABLE_90D_SUMMARY`）进入事实卡解读路径  
-- APNs / 第三方推送云（v1 用 iPhone 本地通知）
+- APNs / 第三方推送云（v1 用 iPhone 本地通知）  
+- **用 LibreChat / Open WebUI / AnythingLLM 等替代 `/api/chat` harness** 作为对话内核（自带路由、RAG、工具循环会绕过 TurnEvidencePlan 与 Numerics 审计）。Mac 网页对话若换皮，必须是该端点的薄客户端（v1.14）
 
 ### 4.3 与 zip 导入的关系
 
@@ -140,7 +141,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-2.7 | 指标集由用户指定，禁止 Python 硬编码死列表 | `GET/PUT /proactive/fact-card/prefs`；完整卡底部分组勾选；允许集 = 注册表 `fact_card.eligible`。卡 = 勾选。覆盖率分母 = 勾选中 `coverage_denominator != false` 的项（VO2max 为稀疏型，不计分母） |
 | FR-2.8 | **通用参考层（Tier 1 披露制）**：个人基线之外，对 **有人群参考意义** 的指标给一行参考范围内/外，格式沿用 `manifest-tier-v1` 的 T1 披露块：`【参考标准】<描述>（来源：<指南/组织>，请自行查证，非医疗建议）`。参考范围是 **数据**，放注册表 `fact_card.reference_range`（低/高/单位/来源），Python 不写死数字。v1 适用：睡眠总时长、深睡占比、REM 占比、静息心率、步数；**不适用**：HRV 绝对值（个体差异过大，只跟自己比）、清醒、在床 | 完整卡每个适用指标多一行参考句；数字 ⊆ 注册表；`fact_card_numeric_atoms` 把参考范围也纳入原子集；非医疗措辞；HRV 无参考句 |
 | FR-2.9 | **我的评估要求**：完整卡有一个自由文本框，用户写「我想重点看什么 / 用什么口气 / 我在意的目标」，落 `data/fact_card_prefs.json` 的 `assessment_prompt`（本机、不出设备圈）。v1 只做 **保存 + 回显**，规则层不解析它（规则层不会因它变），它是 FR-6 解读的输入 | `GET/PUT /proactive/fact-card/prefs` 多一个字段；刷新回显；空字符串合法 |
-| FR-2.10 | **指标时效语义** | `temporal.kind ∈ {accrual, daily_lagged, overnight, rolling_mean, latest}`。卡按声明取值并写实际 `day`。`overnight` 与 `daily_lagged` 均在 `freshness_days` 内回看（一夜指标默认 2 天）。`latest` 回看窗口内最近一次（VO2max 默认 90 天），标「最近一次」，不计覆盖率。`accrual` 当日进行中不分档 |
+| FR-2.10 | **指标时效语义** | `temporal.kind ∈ {accrual, daily_lagged, overnight, rolling_mean, latest}`。卡按声明取值并写实际 `day`。`overnight` 与 `daily_lagged` 均在 `freshness_days` 内回看（一夜指标默认 2 天）。`latest` 回看窗口内最近一次（VO2max 默认 90 天），标「最近一次」，不计覆盖率。`accrual` 当日进行中不分档。**copy 分域（v1.14）**：`partial_day` / `advice_partial` 只表示「当日累计未封账」；`hk_ok` / `hk_none` / `sync_*` 只表示账本/同步状态。有值的 accrual 行不得渲染「未进 Mac / 还在手机」。语言表按 kind，禁止为单一 `metric_id` 写模板 |
 
 ### FR-3 主动触达
 
@@ -163,7 +164,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 
 ### FR-5 问答（沿用，不作为主动主路径）
 
-现有 harness 聊天可继续跑在 Mac。主动路径 **不得** 为了「更聪明」绕过 Numerics 审计。App 内聊天属 M3。
+现有 harness 聊天可继续跑在 Mac。主动路径 **不得** 为了「更聪明」绕过 Numerics 审计。App 内聊天属 M3。对话内核 = `POST /api/chat`（TurnEvidencePlan → Compose → Numerics）。档案列举与穿戴分析的目标分档见 FR-6.14；发卡范围见 FR-6.13。**不得**另接一套开源 Chat 产品的路由层。
 
 ### FR-6 用户触发的 LLM 解读（M1-P9 · 不是主动路径）
 
@@ -176,12 +177,13 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-6.5 | **时延**：本机 Ollama 一轮 30–170s（既有 e2e 记录）。网页必须 **异步**：点后立即返回「生成中」，结果按 `(user_id, as_of, calendar_day, card_digest, locale, sha256(assessment_prompt), sha256(USER_BACKGROUND_BRIEF))` 缓存到本机 `data/`，刷新即见；同键重复点击复用缓存，不重复调 LLM。brief 摘要在 flag 关时为空串 | 点击后 HTTP < 1s 返回；缓存命中不产生 LLM 日志；改勾选后 `card_digest` 变、旧解读不命中；跨日 `calendar_day` 变、旧解读不命中；新增一条背景自述后 `sha256(brief)` 变、旧解读不命中 |
 | FR-6.6 | **fail-closed**：Ollama 未启动 / 超时 / 审计拒绝 → 区块显示原因（含被拒 token），规则层照常；绝不回退成「模板文字冒充 AI」 | 停 Ollama 再点 → 区块写「模型不可用」，其余卡不变 |
 | FR-6.7 | **M3 关系**：M2 App 的「解读」按钮调 **同一** 端点，不另写逻辑 | M3 任务卡只含 UI 接线 |
-| FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致。**解读轮不套三步看诊法**（`PHA_FACT_CARD_SOUL_MINIMAL`，见 M1-P9.5）。**唯一 Tier1** 为非数字源 `USER_BACKGROUND_BRIEF`（FR-6.12），不得把 brief 内数字并入 manifest | selfcheck 注入「近 90 天」于 365d 卡 → 拒 |
+| FR-6.8 | **证据源**：解读的唯一一等证据源是当日事实卡 JSON（facts + 递进基线 + 参考层）；以 `fact_card_interpret` profile 进入 harness，Tier0 只含 TASK / NUMERICS_MANIFEST（由卡生成）/ FACT_CARD_CONTEXT / USER_ASSESSMENT_PROMPT；`WEARABLE_90D_SUMMARY` 等固定窗口摘要禁止进入该路径。解读中任何窗口、n、日期必须与卡上规则层逐字一致。**解读轮不套三步看诊法**（`PHA_FACT_CARD_SOUL_MINIMAL`，见 M1-P9.5）。**唯一 Tier1** 为非数字源 `USER_BACKGROUND_BRIEF`（FR-6.12），不得把 brief 内数字并入 manifest。**大纲分档（v1.14）**：整卡仍是证据源；叙述是否覆盖未点名行由 Intent Catalog `assessment_outline.outline_mode` ∈ `{exclusive, emphasis, cover-card}` 决定（exclusive > emphasis > cover-card）。`exclusive`（只看/仅/only）维持 P9.5b：只谈点名行、未点名不得另起段。`emphasis`（重点看/侧重/especially）：点名为主段，其余勾选有值行允许同一段带过、不得另起专题段。`cover-card`：无指标 token 或纯 holistic/daily_readiness 且未命中前两档 → 覆盖勾选有值行。`daily_readiness` 不得默认 exclusive。Python **不**解析评估要求里的指标 id。TASK 通则：有值不得说缺失；`partial_day` 不是缺失；不复述卡头同步免责 | selfcheck 注入「近 90 天」于 365d 卡 → 拒；O1 exclusive 不谈未点名血氧；O2 emphasis = daily_readiness。交接 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md) |
 | FR-6.9 | **日期与语言**：机器层 ISO 8601；展示层按 `locale` 渲染，禁止纯数字斜杠日期；LLM 文本优先相对表达，绝对日期仅允许 as_of / 各行实际 day；审计把日期作为独立词类归一化后比对 | `unauthorized_date` 用例；中英 locale HTML 属 M1-P9.2 |
 | FR-6.10 | **卡外数字分级**（v1.10 放宽，取代 v1.7「只进 T1」）：按 **语境** 不按数值大小分三级。**S 级（必须 ⊆ manifest）**：日期/时刻；任何 1–2 位小数；子句含归属词（你/您/your）、时间归属词（今天/昨天/近 N/today/last N）或测量动词（测得/记录/基线/均值）的数字；子句含卡上指标标签或单位却无教育/建议词的数字（歧义 fail-closed）。**E 级（放行，记 telemetry）**：子句含人群词/建议词/参考词（一般/通常/建议/控制在/范围/usually/recommend）的整数，以及无归属、无标签、无单位的裸整数。**T1 块**：块内数字不验真伪，中英同权，块内出现归属词 → 拒。标识符里的数字（`SpO2`/`VO2max`）不计。词表放语言表，指标标签/单位来自卡；Python 不写指标名。用户评估要求不能解锁 S 级 | selfcheck：「一般成年人血氧高于 95%」→ 过；「你的 HRV 接近 35 ms」→ 拒；「静息心率 65 bpm 偏高」→ 拒；「建议睡 7.5 小时」→ 拒；「今天血氧 96.0%，SpO2 正常」→ 过。用例全表见 [`handoff-2026-09-08-fact-card-interpret-v3-numerics.md`](handoff-2026-09-08-fact-card-interpret-v3-numerics.md) §2.4 |
-| FR-6.11 | **记忆写入策略**（v1.12）：解读轮借用 chat 管线但**不属于用户聊天**，对 `chat_sessions` / `chat_messages` / `user_health_background_notes` / `chat_session_turn_focus` / `chat_session_active_recall` 零写入，不触发动态槽 discover；结果只落 `data/fact_card_interpret/`。判定靠 harness profile 注册表属性 `memory_write_policy=none`，不靠 profile 名硬编码。既有污染（解读会话、合成 prompt 被捕获为用药笔记、`[vision_parse_failed]` 错误串）由卫生脚本 dry-run → 维护者确认 → apply 清理 | selfcheck：mock 解读一轮，五张表行数逐表相等；对照 `lifestyle` 轮会话 +1。见 M1-P13 |
+| FR-6.11 | **记忆写入策略**（v1.12）：解读轮借用 chat 管线但**不属于用户聊天**，对 `chat_sessions` / `chat_messages` / `user_health_background_notes` / `chat_session_turn_focus` / `chat_session_active_recall` 零写入，不触发动态槽 discover；结果只落 `data/fact_card_interpret/`。判定靠 harness profile 注册表属性 `memory_write_policy=none`，不靠 profile 名硬编码。既有污染（解读会话、合成 prompt 被捕获为用药笔记、`[vision_parse_failed]` 错误串）由卫生脚本 dry-run → 维护者确认 → apply 清理。**捕获契约（v1.14）**：`background_capture_keywords` 只收陈述自述；疑问/祈使（吗/什么/哪些/有没有/请列出）为 schema **negative**，不得写入 notes。不在 Python 列问句黑名单 | selfcheck：mock 解读一轮，五张表行数逐表相等；对照 `lifestyle` 轮会话 +1；C4 问药句不增 notes。见 M1-P13 / P18 |
 | FR-6.12 | **非数字背景**（v1.12）：`fact_card_interpret` 允许**唯一**一个 Tier1 槽 `USER_BACKGROUND_BRIEF`：来源为用户聊天自述（`user_health_background_notes` 的 supplement / medication / sleep_lifestyle / symptom / general），去重、按类配额、**去数字去日期**（标识符 `D3`/`Omega-3` 保留；时间只用相对词表）、整行截断限长，并经审计同一套抽取器后验「无 S 级 token」；只影响建议措辞与注意事项，不得引用为数值、不得复述剂量。`SUPPLEMENT_BG` / RECALL / `EPISODIC_BRIDGE` / `WEARABLE_90D_SUMMARY` 继续禁止。审计策略不变：brief 内数字不是 manifest 成员。缓存键增 `sha256(brief)`；响应带 `background_used`。P15 后供给源切到 CHB 投影（§Background + 解读脉络，**不含** §Facts），槽契约不变 | **已落地（M1-P14）**。selfcheck：`每晚补镁 400mg` → brief 含 `镁` 不含 `400`；mock 回复引用 `400` → 审计仍拒；flag 关 → 槽不出现。运行验收中英各 3 轮见交接 §5.8 |
-| FR-6.13 | **对话框解读与事实卡同源**（v1.13）：Mac 网页对话与 iOS 主动事实卡共用 Registry 指标真源。对话侧取数用 registry `metric_id` + `l1.field`；簇/标签/词表不得在 Python 再写一份。`daily_readiness`（今天状态/能否训练）升舱 `wearable_daily_review`，槽位与 `fact_card_interpret` 同构（TASK / FACT_CARD_CONTEXT / NUMERICS_MANIFEST / USER_ASSESSMENT_PROMPT），`memory_write_policy=chat`。无日期词的指标追问可继承会话点日粒度；查不到须 fail-closed，禁止换日换指标。SSE `fact_card` 披露 `metrics_in_scope` / `available_not_selected`；follow_ups 双语进 Intent Catalog | `pha_chat_fact_card_parity_selfcheck` H9–H13 / H9E–H13E；真机见 proactive change-log 16:51。交接 [`handoff-2026-09-09-chat-fact-card-parity.md`](handoff-2026-09-09-chat-fact-card-parity.md) |
+| FR-6.13 | **对话框解读与事实卡同源**（v1.13）：Mac 网页对话与 iOS 主动事实卡共用 Registry 指标真源。对话侧取数用 registry `metric_id` + `l1.field`；簇/标签/词表不得在 Python 再写一份。`daily_readiness`（今天状态/能否训练）升舱 `wearable_daily_review`，槽位与 `fact_card_interpret` 同构（TASK / FACT_CARD_CONTEXT / NUMERICS_MANIFEST / USER_ASSESSMENT_PROMPT），`memory_write_policy=chat`。无日期词的指标追问可继承会话点日粒度；查不到须 fail-closed，禁止换日换指标。SSE `fact_card` 披露 `metrics_in_scope` / `available_not_selected`；follow_ups 双语进 Intent Catalog。**发卡 ⊆ 本轮 scope（v1.14）**：`fact_card` 的 entries 必须 ⊆ `metrics_in_scope`；scope 为空则**不上卡**。fail-closed 缺行只在正文声明，禁止用默认 90d 核心（HRV 均值、活动消耗日均等）顶台 | `pha_chat_fact_card_parity_selfcheck` H9–H13 / H9E–H13E；C1 无卡、C2 可出 HRV 卡。交接 parity + [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md) |
+| FR-6.14 | **对话档案查询**（v1.14）：Intent Catalog `goal_class=context_lookup`（有没有药/哪些补剂等）。仅档案问句 → 已有 context/lifestyle 车道，不组装穿戴默认核心、不发数字卡；命中 notes 则列自述品类（去剂量），未命中一句没有。与显式指标共存（药物对 HRV）→ **不** warehouse skip-LLM；数字 ⊆ 点名指标；背景 ⊆ P14 同款 brief 切片（去重配额），禁止全量 `SUPPLEMENT_BG`、禁止翻转 Data > Context。不得把未注入档案的品类说成「您正在服用」。P15 CHB 仍是代表条编译终态，本 FR **不**授权提前开 P15，也禁止「偏爱更长历史笔记」启发式 | C1–C4；3F §15。交接同上 |
 
 ### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
@@ -232,6 +234,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | Whoop / Athlytic 恢复建议 | 用 **个人基线分位** 做分档 UX | 无证据的训练处方、订阅云分析 |
 | 本仓 harness fail-closed | 事实卡与通知走同一账本 | 主动推送用第二 LLM「润色数字」 |
 | 本地通知 / 日历提醒 | 用药时间表 | 用模型猜服药时间 |
+| tax-chat-experience-v2 / assistant-ui 等 Chat 壳 | 流式、follow-up chips、事实块先于叙述（PHA 已有 SSE `fact_card`） | 用 LibreChat 等 **整栈**替换 `/api/chat`（其 Agents/MCP/RAG 夺路由权） |
 
 ---
 
@@ -265,7 +268,9 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P13** | **解读轮零写入聊天记忆 + 记忆卫生**（FR-6.11） | `DONE` | 2026-09-09：`memory_write_policy=none`；编排器 `TurnMemorySink`；背景捕获拒 `[snake_case]` 系统标签；`scripts/pha_memory_hygiene.py`。selfcheck PASS。apply：A 57 + B 24 已删，C 6 保留；备份 `data/backups/pha_storage.20260909T051013Z.db`。交接 §4 |
 | **M1-P14** | **`USER_BACKGROUND_BRIEF` 进解读**（FR-6.12 · A 层） | `DONE` | 2026-09-09：`pha/fact_card_background_brief.py` 去数字构建器 + 后验抽取器；Tier1 唯一槽；TASK 第 5 条；缓存键含 `sha256(brief)`；view「已参考 N 条背景」。selfcheck 八段 PASS。运行验收见 change-log。交接 §5 |
 | **M1-P16** | **对话框解读与事实卡同源**（FR-6.13） | `DONE` | 2026-09-09：Registry `catalog.*` 单一真源；`wearable_daily_review`；episodic grain；H9–H13 离线 selfcheck。真机 8788：H10–H13/H10E/H13E skip-LLM；H9-zh 对话+interpret；H9E 审计过。见 proactive change-log 16:51 |
-| **M1-P15** | **CHB 统一供给**（C 层 · 闭环） | `TODO` | 前置：P14 验收后 ≥1 天。CHB 增 §Background + 解读脉络 + 组合 hash；每日在 `GET /proactive/fact-card` 后台触发；`fact_card_interpret` 投影不含 §Facts；brief 供给源 chb → live_notes 回落。交接 §6 |
+| **M1-P17** | **解读大纲分档 + accrual copy 分域**（FR-6.8 / FR-2.10 v1.14） | `DONE` | 2026-09-09：catalog `assessment_outline`；TASK 三档；copy 分域。Flag `PHA_ASSESSMENT_OUTLINE`。离线 O1–O3；真机 interpret O2+O3（活动消耗「进行中」，无「还在手机」）。模型仍可能另起未点名专题段。交接 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md) |
+| **M1-P18** | **对话档案查询 + 发卡 ⊆ scope**（FR-6.14 / FR-6.13 v1.14） | `DONE` | 2026-09-09：`context_lookup`；问句不入库；空 scope 不上卡。离线 C1–C4；真机：问药无卡并列出药物项A/药物项C；90d HRV 仍可发卡；C3 卡 ⊆ 点名行。**未开 P15** |
+| **M1-P15** | **CHB 统一供给**（C 层 · 闭环） | `TODO` | 前置：P14 验收后 ≥1 天。CHB 增 §Background + 解读脉络 + 组合 hash；每日在 `GET /proactive/fact-card` 后台触发；`fact_card_interpret` 投影不含 §Facts；brief 供给源 chb → live_notes 回落。交接 §6。**P17/P18 不得提前开本卡** |
 | **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE*` | P0–P4 已落地。`*` = 多指标入库仍缺，评估覆盖率会诚实偏低。未开 M2。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
@@ -330,6 +335,9 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-09 12:00 | 模型切 `qwen3:14b`（16 GB M4 Air 可跑，9.3 GB）；Ollama 0.33 对 qwen3 默认 thinking，代码新增 `OLLAMA_THINK` env → `/api/chat` `think=false`（qwen2.5 不设则不发）；真卡中英解读审计各过、无 `<think>` 泄漏、约 72–77 s（`OLLAMA_KEEP_ALIVE=0` 每次冷加载 9.3 GB） | 代码 `0ed4898`（`ollama_payload.apply_think_option`），未 push。`KEEP_ALIVE` 是否改 `10m` 待维护者定 |
 | 2026-09-09 14:20 | M1-P14 落地：`USER_BACKGROUND_BRIEF` 进解读。selfcheck 八段 PASS。真卡 6 轮审计全过、无剂量复述；相关背景注意事项 0/6（最新补剂笔记是问答不是自述，待 P15 CHB）。9 指标卡把系统上限默认调到 12k，否则 T1 进不了模型 | §8 P14 DONE；不改审计。P15 仍须 ≥1 天后再开 |
 | 2026-09-08 17:06 | 真机解读连续被拒 `2、95、2、3、95` / `70、80、2、2、95、2、3`。查明：`2` 来自 `SpO2`/`VO2max` 标签（卡侧 `\d+` 无边界）；`96.0` 因上下文块给原值、白名单只有 `96`；`95`/`70–80`/`2–3` 是科普与训练建议整数，7b 写不出 T1 模板；卡侧 T1 正则只认中文，en-US 下科普数字必败。harness 审计对同文本 `passed=True`，两道审计结论相反。review 另见 8462695 历史含被撤回的 focus 过滤、`{"7","12"}` 魔数、Tier0 `min` 清空 metrics 与 TASK 矛盾、失败记录不存原文 | 维护者授权放宽，尺度由 agent 定：v1.10 FR-6.10 改为语境三级（S/E/T1）、FR-6.3 改为单一审计；立 M1-P9.4；交接 v3。不改代码 |
+| 2026-09-09 18:21 | 真机：① 解读点名即排他，黄金句「整体+重点看」只谈重点指标；活动消耗有值仍被听成「在手机里」。② 库内有补剂/药物项A自述，问药被 HRV skip-LLM 抢走并弹出 90d 消耗卡；问句写入 notes。维护者同意审计：**不得**扫全卡、不得药物词打败 Data>Context、不得捞 5 月方案特例。立 v1.14 | v1.14：FR-6.8 大纲分档；FR-2.10 copy 分域；FR-6.13 发卡⊆scope；FR-6.14 `context_lookup`；FR-6.11 捕获 negative；立 M1-P17 / P18。§4.2 禁开源 Chat 整栈替换。文档改动，无代码。交接 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md) |
+| 2026-09-09 18:45 | P17+P18 编码：catalog 1.9 `assessment_outline` + `context_lookup`；TASK 三档；copy 分域；Arbiter lifestyle / 显式指标保 Data；skip-LLM 按 goal 否决；发卡 ⊆ scope；问句 capture negative；chat 注入 P14 配额去重。未开 P15，未翻转 Data>Context | §8 M1-P17 / P18 → DONE*（离线 O1–O3 / C1–C4）。Flag `PHA_ASSESSMENT_OUTLINE` / `PHA_CONTEXT_LOOKUP` 默认 1 |
+| 2026-09-09 20:08 | P17+P18 真机 8788 pid 65097：interpret O2+O3；对话 C1–C4。问药列出药物项A/药物项C且无卡；活动消耗写进行中 | §8 P17/P18 → DONE。口径差：emphasis 模型仍另起段；C3 Data 车道未带用药 brief |
 
 ---
 
@@ -356,3 +364,6 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-09 | v1.12 | M1-P14 DONE：`USER_BACKGROUND_BRIEF` 进解读（去数字、后验抽取器、缓存键 `sha256(brief)`、view 已参考 N 条）。FR-6.5 键定义补 brief 摘要；FR-6.8 备注唯一 Tier1；FR-6.12 已落地。P15 仍须 P14 验收后 ≥1 天再开 |
 | 2026-09-09 | v1.13 | FR-6.13 对话框解读与事实卡同源；§8 M1-P16 DONE*。交接 [`handoff-2026-09-09-chat-fact-card-parity.md`](handoff-2026-09-09-chat-fact-card-parity.md) |
 | 2026-09-09 | v1.13 | §8 M1-P16 → DONE：8788 真机 H10–H13 / H9-zh / H9E（审计过）。转录见 [`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md) 16:51 |
+| 2026-09-09 | v1.14 | FR-6.8 大纲 `exclusive`/`emphasis`/`cover-card`；FR-2.10 copy 分域；FR-6.13 发卡 ⊆ scope；FR-6.14 `context_lookup`；FR-6.11 问句不捕获；§4.2/§7 对话 UX：薄客户端可以、整栈开源 Chat 不行；立 M1-P17 / P18。文档改动，无代码。交接 [`handoff-2026-09-09-outline-and-context-lookup.md`](handoff-2026-09-09-outline-and-context-lookup.md) |
+| 2026-09-09 | v1.14 | §8 M1-P17 / P18 → DONE*：离线 `pha_p17_p18_selfcheck` O1–O3 / C1–C4。真机待验。未开 P15 |
+| 2026-09-09 | v1.14 | §8 M1-P17 / P18 → DONE：8788 pid 65097。interpret O2+O3；对话 C1–C4。口径差见 proactive change-log 20:08 |

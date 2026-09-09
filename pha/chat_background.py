@@ -216,31 +216,68 @@ def _inject_cap(category: str, body: str) -> str:
 
 
 def build_user_background_block(user_id: str, *, limit: int = 16, user_message: str = "") -> str:
-    rows = list_background_notes(user_id, limit=limit)
+    from pha.fact_card_background_brief import (
+        ALLOWED_CATEGORIES,
+        CATEGORY_ORDER,
+        _denumerize_line,
+        _norm_dedupe_key,
+        _quota,
+    )
+    from pha.schema_intent_router import schema_hits_capture_negative
+    from pha.universal_catalog_manager import get_catalog_manager
+
+    rows = list_background_notes(user_id, limit=max(int(limit or 16), 200))
     if not rows:
         return ""
+    schema = get_catalog_manager().get_asset("supplement_bg")
+    filtered: List[dict] = []
+    seen: set[str] = set()
+    for r in rows:
+        cat = str(r.get("category") or "general").strip() or "general"
+        if cat not in ALLOWED_CATEGORIES:
+            continue
+        content = str(r.get("content") or "").strip()
+        if not content or is_system_tag_message(content):
+            continue
+        if schema_hits_capture_negative(content, schema):
+            continue
+        key = _norm_dedupe_key(content)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        filtered.append(r)
+
+    quota = _quota()
+    per_cat: dict[str, List[dict]] = {c: [] for c in CATEGORY_ORDER}
+    for row in filtered:
+        cat = str(row.get("category") or "general").strip() or "general"
+        bucket = per_cat.get(cat)
+        if bucket is None:
+            continue
+        if len(bucket) >= quota.get(cat, 0):
+            continue
+        bucket.append(row)
+
     lines = [
         "【聊天背景档案 · user_health_background_notes（用户自述，非化验单）】",
         "以下为用户在对话中主动提供的补剂/用药/睡眠/症状等背景，请与化验数字区分引用。",
     ]
-    buckets: dict[str, List[str]] = {k: [] for k in ("supplement", "medication", "sleep_lifestyle", "symptom", "general")}
-    for r in reversed(rows):
-        cat = str(r.get("category") or "general").strip()
-        if cat not in buckets:
-            cat = "general"
-        day = str(r.get("note_date") or "")[:10]
-        body = _inject_cap(cat, str(r.get("content") or ""))
-        label = _CATEGORY_LABELS.get(cat, "其他")
-        buckets[cat].append(f"- [{day}·{label}] {body}")
-
-    order = ("supplement", "medication", "sleep_lifestyle", "symptom", "general")
-    for key in order:
-        items = buckets.get(key) or []
+    for key in CATEGORY_ORDER:
+        items = per_cat.get(key) or []
         if not items:
             continue
         sec = _CATEGORY_LABELS.get(key, key)
         lines.append(f"\n#### {sec}")
-        lines.extend(items)
+        for r in reversed(items):
+            cat = str(r.get("category") or "general").strip() or "general"
+            day = str(r.get("note_date") or "")[:10]
+            cleaned = _denumerize_line(str(r.get("content") or ""), locale="zh")
+            body = _inject_cap(cat, cleaned or str(r.get("content") or ""))
+            label = _CATEGORY_LABELS.get(cat, "其他")
+            lines.append(f"- [{day}·{label}] {body}")
+
+    if len(lines) <= 2:
+        return ""
 
     if _ALL_SUPPS_RE.search(user_message or ""):
         lines.append(

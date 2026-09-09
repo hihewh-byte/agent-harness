@@ -1120,6 +1120,30 @@ def main() -> int:
     if "USER_BACKGROUND_BRIEF" not in task:
         return _fail("TASK must mention USER_BACKGROUND_BRIEF")
 
+    from pha.goal_classifier import assessment_outline_enabled
+
+    if assessment_outline_enabled():
+        exclusive = fact_card_interpret_task_text("en", outline_mode="exclusive")
+        emphasis = fact_card_interpret_task_text("en", outline_mode="emphasis")
+        cover = fact_card_interpret_task_text("en", outline_mode="cover-card")
+        for mode_task, mode_name in (
+            (exclusive, "exclusive"),
+            (emphasis, "emphasis"),
+            (cover, "cover-card"),
+        ):
+            if "resting_heart_rate" in mode_task or "静息心率" in mode_task:
+                return _fail(f"TASK {mode_name} must not name specific metrics")
+            if "in-progress cumulative" not in mode_task:
+                return _fail(f"TASK {mode_name} must state partial_day is in-progress")
+            if "sync disclaimer" not in mode_task:
+                return _fail(f"TASK {mode_name} must forbid restating sync disclaimer")
+        if "did not name" not in exclusive:
+            return _fail("exclusive TASK must keep unnamed-row ban")
+        if "same paragraph" not in emphasis or "topical" not in emphasis:
+            return _fail("emphasis TASK must allow same-paragraph mention only")
+        if "Cover checked rows" not in cover:
+            return _fail("cover-card TASK must cover checked valued rows")
+
     from pha.chat_turn_slots import select_soul_base
     from pha.harness_plan import PHA_FACT_CARD_SOUL_MINIMAL
     from pha.attachment_asset_qa import PHA_ATTACHMENT_SOUL_MINIMAL

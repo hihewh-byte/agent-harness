@@ -262,6 +262,70 @@ def test_h9d_orchestrator_auth_profile_on_schema_default() -> None:
     print("PASS H9d schema_default authoritative_profile wired to plan")
 
 
+def test_p18_context_lookup_no_metric_lifestyle() -> None:
+    msg = "有服用什么药物吗？"
+    goal = classify_goal(msg)
+    _assert(goal.goal_class == "context_lookup", goal)
+    decision = resolve_harness_arbiter(
+        msg,
+        user_id="default",
+        router_profile="wearable_only",
+        goal=goal,
+        existence_override={"wearable": True, "lab": False},
+    )
+    _assert(decision is not None, "arbiter missing")
+    _assert(decision.authoritative_profile == "lifestyle", decision)
+    _assert(decision.reason == "goal_context_lookup", decision)
+    plan = build_turn_evidence_plan(
+        msg,
+        authoritative_profile=decision.authoritative_profile,
+    )
+    _assert(plan.profile == "lifestyle", plan.profile)
+    _assert("NUMERICS_MANIFEST" not in plan.slots_tier0, plan.slots_tier0)
+    print("PASS P18 context_lookup no metric → lifestyle")
+
+
+def test_p18_context_lookup_keeps_router_when_metrics() -> None:
+    msg = "药物对于HRV有没有影响"
+    goal = classify_goal(msg)
+    _assert(goal.goal_class == "context_lookup", goal)
+    decision = resolve_harness_arbiter(
+        msg,
+        user_id="default",
+        router_profile="wearable_only",
+        goal=goal,
+        existence_override={"wearable": True, "lab": False},
+    )
+    _assert(decision is not None, "arbiter missing")
+    _assert(decision.authoritative_profile == "wearable_only", decision)
+    _assert(decision.reason == "explicit_metric_with_context_lookup", decision)
+    print("PASS P18 context_lookup + metric keeps Data profile")
+
+
+def test_p18_lookup_without_goal_classifier() -> None:
+    prev = os.environ.get("PHA_GOAL_CLASSIFIER")
+    os.environ["PHA_GOAL_CLASSIFIER"] = "0"
+    load_health_intent_catalog.cache_clear()
+    try:
+        msg = "有服用什么药物吗？"
+        decision = resolve_harness_arbiter(
+            msg,
+            user_id="default",
+            router_profile="wearable_only",
+            existence_override={"wearable": True, "lab": False},
+        )
+        _assert(decision is not None, "lookup should run with classifier off")
+        _assert(decision.authoritative_profile == "lifestyle", decision)
+        _assert(decision.reason == "goal_context_lookup", decision)
+    finally:
+        load_health_intent_catalog.cache_clear()
+        if prev is None:
+            os.environ.pop("PHA_GOAL_CLASSIFIER", None)
+        else:
+            os.environ["PHA_GOAL_CLASSIFIER"] = prev
+    print("PASS P18 context_lookup with PHA_GOAL_CLASSIFIER=0")
+
+
 def main() -> int:
     tests = [
         test_h5_holistic_dual_domain_upgrade,
@@ -275,10 +339,13 @@ def main() -> int:
         test_h9b_attachment_qa_without_arbiter,
         test_h9c_lab_marker_blocks_holistic_continue,
         test_h9d_orchestrator_auth_profile_on_schema_default,
+        test_p18_context_lookup_no_metric_lifestyle,
+        test_p18_context_lookup_keeps_router_when_metrics,
     ]
     for test in tests:
         _with_goal_classifier(test)
-    print(f"\nAll {len(tests)} goal/arbiter checks PASS")
+    test_p18_lookup_without_goal_classifier()
+    print(f"\nAll {len(tests) + 1} goal/arbiter checks PASS")
     return 0
 
 

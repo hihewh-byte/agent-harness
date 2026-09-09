@@ -113,7 +113,12 @@ def iter_compose_response_phase(ctx: TurnComposeContext) -> Iterator[str]:
         if grounded_composer_enabled():
             from pha.grounded_answer_composer import build_fact_card_event
 
-            _fc_cat = build_fact_card_event(ctx.numerics_manifest)
+            _fc_cat = build_fact_card_event(
+                ctx.numerics_manifest,
+                locale=ctx.response_locale,
+                user_id=ctx.uid,
+                user_message=ctx.msg,
+            )
             if _fc_cat:
                 yield json.dumps(_fc_cat, ensure_ascii=False)
         stream_messages = _catalog_stream_messages(
