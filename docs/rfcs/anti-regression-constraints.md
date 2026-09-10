@@ -1,5 +1,7 @@
 # PHA 开发 Agent 刚性防翻车约束（Anti-Regression Constraints）
 
+> **Language / 语言**：[English](anti-regression-constraints.en.md) · 中文（本文）
+
 > 警告：以下为 Stage 3H 压力测试捕获的真实翻车点。任何后续 PR 修改（含 Stage 4）如果导致以下任意一条约束回归失败，Harness 拥有对该代码的物理一票否决权（Veto）。
 
 > 生成时间：2026-09-09 18:54:11 +0800 ｜ seed=20260626 ｜ L1 18/18 ｜ L2 0/0 ｜ 捕获翻车点 0

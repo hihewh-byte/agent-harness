@@ -1,5 +1,7 @@
 # Wearable Interpretation Policy v1
 
+> **Language / 语言**：[English](wearable-interpretation-policy-v1.en.md) · 中文（本文）
+
 > **状态**：**v1.0 已签字**（2026-06-01 · PM/Gemini/Cursor 架构对齐）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`stage3d-gamma-wearable-compare-contract-spec.md`](stage3d-gamma-wearable-compare-contract-spec.md)  
 > **关联**：[`stage3d-delta-wearable-fact-pipeline-spec.md`](stage3d-delta-wearable-fact-pipeline-spec.md)（数仓扩展）  

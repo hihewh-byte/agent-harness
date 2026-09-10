@@ -1,5 +1,7 @@
 # Startup Change Log
 
+> **Language / 语言**：English (this document) · [中文](startup-change-log.zh.md)
+
 > Purpose: mandatory shared context log for startup/availability related changes.  
 > Rule: when changing startup-critical files, update this log in the same PR.
 

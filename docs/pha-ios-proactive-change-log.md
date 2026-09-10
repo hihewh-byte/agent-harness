@@ -1,3 +1,90 @@
+# PHA iOS 主动 Agent 变更日志
+
+> **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
+
+## 2026-09-10 (P15 脉络丢指标字段残行)
+
+- **类别**：P1 / FR-6.12 v1.20。黄金句注入里的 §Interpretation lineage 把「今日值 / 百分位 / 近 12 个月均值」去数字残行当成注意事项，诱导 14b 填表并反推 85%。
+- **改动**：脉络只保留反复出现的注意事项句；字段残行丢弃，空则不注入。无药名表，不放水审计。
+- **证据**：`pha_chb_compiler_selfcheck` 夹具：重复「今日值/百分位」不进脉络；「偏轻松安排」仍进。build `pha-v2.3.39-p15-lineage-stub`。**不**标 P15 DONE。
+- **回滚**：去掉 `_is_lineage_field_stub`。
+
+## 2026-09-10 (P15 TASK 槽契约：零编数 + brief 在场不得 skip)
+
+- **类别**：P1 / FR-6.8 · FR-6.12 v1.19。审计熔断 21.5/85/95 证明 fail-closed 有效；不放水、不上药名表。
+- **改动**：TASK 第 2 条禁派生百分位；第 3 条人群示例去掉 `95%`；第 5 条 brief 在场不得 skip。`bg_brief_lead` 去掉「无关则忽略」。CHB 投影按 `background_rows` + 当前 copy 重渲染导语。数字真源仍是 Manifest / FACT_CARD_CONTEXT。
+- **证据**：`pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck` PASS。8788 `pha-v2.3.38-p15-task-slot`。维护者授权恢复黄金 prefs 后重跑：勾选深睡/睡眠总时长/HRV/静息心率/活动消耗/血氧，评估要求为冻结黄金句。in-process `qwen3:14b`：`brief_source=chb`，审计拒 `unauthorized_value:85`（深睡百分位 15.2 的派生补数，非剂量）。正文未落地，药物项A/镁未带出。prefs 恢复后保持原样。**不**标 P15 DONE。
+- **回滚**：TASK / lead 回到 v1.18 措辞；投影改回预渲染 markdown。
+
+## 2026-09-10 (P15 第 2 刀：background_rows + USER_CONTEXT_BRIEF 投影 §Background)
+
+- **类别**：P1 / FR-6.12 v1.18。维护者选编译层，否决「训练⇒补剂相关」TASK 补丁。
+- **改动**：CHB 把 notes 编成 `background_rows[]`（`category` + 去数字短句 + `rel_key` + `prov_type=user_statement`，无药名表、无 value/unit）。`build_user_context_brief_block`（lifestyle / combined）投影 §Background，不再物理丢弃。解读轮仍只 `USER_BACKGROUND_BRIEF`；`USER_CONTEXT_BRIEF_PROFILES` **不加** `fact_card_interpret`。TASK 不改。§Facts / Manifest 零渗透。
+- **证据**：`pha_chb_compiler_selfcheck`：工件含 rows；lifestyle 槽含 §Background 与药物项A；interpret 投影无 §Facts。工件 `reports/chb/default/brief_5d00dba7bd142656.json`（6 行自述）。build `pha-v2.3.37-p15-bg-rows`。维护者确认执行后：lifestyle mock 系统提示含 `USER_CONTEXT_BRIEF`+§Background+药物项A；interpret 槽无 `USER_CONTEXT_BRIEF`。黄金句 `brief_source=chb` notes=6，审计拒 21.5/85/95（编造百分位补数，非剂量）；正文无药物项A/镁注意事项（「用药」仅出现在请用户补充信息）。**不**标 P15 DONE，**不**改审计。
+- **回滚**：`USER_CONTEXT_BRIEF` 去掉 background 段；工件去掉 `background_rows`。
+
+## 2026-09-10 (P15：卫生 Q=9 删除 · 时段拆短条 · 黄金句注意事项仍未过)
+
+- **类别**：P1 / FR-6.12 · FR-6.11。维护者口令：① dry-run 9 条问句/祈使笔记 `--apply`；② 继续 P15。
+- **改动**：`python3 scripts/pha_memory_hygiene.py --apply` 删 Q=9（C=6 空会话保留）；备份 `data/backups/pha_storage.20260910T090958Z.db`。`fact_card_copy.bg_brief_split_marks`（上午/中午/晚上/睡前）在去数字之后拆长自述；配额仍按原笔记行。强制重编译 `reports/chb/default/brief_cc9fd56284f1aa98.json`。selfcheck：`pha_fact_card_selfcheck`、`pha_chb_compiler_selfcheck` PASS。build `pha-v2.3.36-p15-portrait-split`。
+- **证据**：黄金句 in-process `qwen3:14b`：prefs 未改；`brief_source=chb`、notes_used=7（验收当时含表头残行，随后丢掉 tab 表头后为 6）、含药物项A/镁；审计过；未复述〔数值略〕；正文仍无药物项A/镁/补剂注意事项（14b 按 TASK 第 5 条当无关跳过）。**不**标 P15 DONE，**不**改审计、**不**为黄金一句加 if。
+- **回滚**：copy 去掉 `bg_brief_split_marks`；brief 构建器去掉拆行；CHB 用前回工件；卫生从上述备份恢复。
+
+## 2026-09-10 (P15 开工：祈使问句不进 CHB · 黄金句验收未过)
+
+- **类别**：P1 / FR-6.12 · FR-6.11。维护者口令开 P15 剩余验收。
+- **改动**：`supplement_bg.schema.json` 捕获 negative 增补 `请分析` / `请核实` / `请核对` / `请再次` / `是否正常` / `是否合理`（与已有 `请列出` 同族，不在 Python 列黑名单）。读侧与 CHB §Background 丢掉分析祈使。重编译 `reports/chb/default/brief_5545b3f1c23f2933.json`（只留补剂方案自述，无 §Facts）。selfcheck：`pha_fact_card_selfcheck`、`pha_chb_compiler_selfcheck` PASS。
+- **证据**：黄金句 in-process `qwen3:14b`：`brief_source=chb`、notes_used=1、含药物项A/镁；审计拒 `unauthorized_value:80` / `92`（文内「高于80 bpm」「低于92%」，非 brief 剂量）；正文未带补剂注意事项；Markdown 分节。prefs 未改。**不**标 P15 DONE。
+- **回滚**：schema 去掉新增 token；CHB 用前回工件。
+
+## 2026-09-10 (P12 腕温推迟 · P7 占比参考关闭 · 开 P15 验收)
+
+- **类别**：P1 / FR-2.8 · FR-1.5 · FR-6.12。维护者口令。
+- **改动**：腕温权限不再挂 P12；推迟到第二批勾选。深睡/REM 占比不进注册表 `reference_range`（用户可自行计算）。P15 从 DONE* 改回 IN_PROGRESS，做编译画像进黄金句注意事项的验收。
+- **证据**：本条文档。
+- **回滚**：文档 revert。
+
+## 2026-09-10 (M1-P6 T9 通过 · 标 DONE)
+
+- **类别**：P1 / FR-1.6。维护者口头确认：9/8–9/10 健康 App vs 日表「基本都对」，可以算通过。
+- **改动**：§8 M1-P6 → `DONE`。任务卡 / review T9 收口。在床不在本次比对内。未开 M2，未改 prefs，未改 ingest 代码。
+- **证据**：维护者口头确认；日表三夜入睡/清醒/核心/深睡/REM 见任务卡 T9 表；锚点 A + T0–T8 此前已过。
+- **回滚**：文档把 P6 改回 IN_PROGRESS（无代码可回滚）。
+
+## 2026-09-10 (在床退出 T9 · 删孤儿 sleep_in_bed)
+
+- **类别**：P1 / FR-1.6。维护者口令：健康 App 已删在床，PHA 不用再管、可以删除。
+- **改动**：T9 不再验收在床。日表 `in_bed_hours` 本已全空。删除 2 条非 `healthkit\|` 孤儿日键：`default|sleep_in_bed|2026-09-06…|0.73`、`default|sleep_in_bed|2026-09-07…|8.93`。未拆 ingest 白名单（有 In Bed 样本仍可写、没有就空）；未改 prefs。
+- **证据**：删后 `metric_type=sleep_in_bed` 计数 0；日表 in_bed 非空 0。
+- **回滚**：从 `data/backups/pha_storage.20260910T082534Z.db` 还原。**不**把 P6 标 DONE。
+
+## 2026-09-10 (M1-P6 T8 文档收口 · T9 库内侧写)
+
+- **类别**：P1 / FR-1.6 · FR-1.7。不改 ingest 代码。
+- **改动**：PRD §8 P6 行去掉过时「欠 T7」；任务卡偏差表清零，遗留只留 T9；review §6.2 同步。库内 9/8–9/10：入睡+清醒=会话跨度、分期和=总并集、`in_bed` 空、无孤儿 `sleep_*` 日键；最近睡眠 ingest 200 + 回执。`pha_healthkit_ingest_selfcheck` PASS。
+- **证据**：日表三夜；`GET /ingest/healthkit/last` `ok=true` wake_day=2026-09-10；深睡 below 核对句无判定词。
+- **回滚**：文档 revert。**不**把 P6 标 DONE（缺健康 App 截图）。
+
+## 2026-09-10 (Mac 真卡：P20 exclusive + P15 brief_source=chb)
+
+- **类别**：P1 运行验收（不动 prefs）。
+- **现场**：`qwen3:14b` in-process `run_interpretation`。exclusive「只看今天的深睡」：注入仅 `sleep_deep` 1.1h；审计过；正文无 HRV/静息/血氧/消耗专题。黄金句 emphasis：审计过，`brief_source=chb`（2 条）；模型仍用 Markdown 分节且把基线均值 2h 写成「今日深睡」（数字在 Manifest 内故审计不拒）。训练/起笔仍非产品 P0。
+- **回滚**：无代码。
+
+## 2026-09-10 (M1-P20 exclusive 注入 + M1-P15 CHB + 读侧问句过滤)
+
+- **类别**：P1 / FR-6.8 · FR-6.12 v1.16。
+- **改动**：① brief 配额前丢掉 capture-negative 问句（与 P18 同一词表）。② exclusive 解读轮 LLM 注入 ⊆ catalog 点名行；HTML 可见卡仍整卡；空注入 fail-closed。③ 起笔/训练以规则层为准，评测金标退出产品 P0。④ P15：CHB §Background + 解读脉络 + 组合 hash；`GET /proactive/fact-card` 后台同日一次编译；interpret brief 优先 CHB 投影（无 §Facts）。事项 4 换模型未做。
+- **证据**：`pha_p20_selfcheck`；`pha_chb_compiler_selfcheck` P15；`pha_fact_card_selfcheck` P14 问句夹具；卫生脚本 Q 类 dry-run 列出，`--apply` 删除（C 仍默认保留）。
+- **回滚**：`PHA_EXCLUSIVE_INJECT_NAMED=0`（exclusive 回到整卡注入）；`PHA_CHB_AUTOCOMPILE=0`（不后台编译，brief 回落 live_notes）；读侧过滤随 git revert。
+
+## 2026-09-10 (M1-P19 评测审计落地 · 编码)
+
+- **类别**：P1 / FR-6.8 · FR-6.13 v1.15。
+- **改动**：emphasis 结构句；Tier0 不尾切 Manifest/卡上行；对话发卡 ⊆ FACT_CARD_CONTEXT；workout hints 与 daily_readiness 训练词解绑。交接 [`handoff-2026-09-10-eval-audit-solution.md`](handoff-2026-09-10-eval-audit-solution.md)。未开 P15。
+- **证据**：离线 `pha_p19_selfcheck` + `pha_p17_p18_selfcheck` + `pha_fact_card_selfcheck`。真机另排。
+- **回滚**：同交接 §3。
+
 ## 2026-09-09 20:08 (M1-P17 / P18 真机 8788)
 
 - **类别**：P1 运行验收。pid 65097，`qwen3:14b`，launchd kickstart 后。
@@ -341,7 +428,7 @@
 ## 2026-09-07 (T6.1 睡眠 D1 必须带日期谓词)
 
 - **类别**：捷径采集窗口。
-- **证据**：真机两遍 `pha-sync-sleep`（15:02 / 15:03，`192.168.77.9`）均为 `POST 400 sleep_stage_list_mismatch`，正文 `---VALUES---` 空；维护者确认新捷径健康权限已开。`/Users/hwh/Downloads/healthkit.json` 即该 400。结论：Health Find 只有 Type Sleep + Limit、没有日期条件时返回空集（仍会 POST）。`python3 scripts/pha_healthkit_ingest_selfcheck.py`。数量捷径未改。
+- **证据**：真机两遍 `pha-sync-sleep`（15:02 / 15:03，`<LAN-IP>`）均为 `POST 400 sleep_stage_list_mismatch`，正文 `---VALUES---` 空；维护者确认新捷径健康权限已开。本地 `Downloads/healthkit.json` 即该 400。结论：Health Find 只有 Type Sleep + Limit、没有日期条件时返回空集（仍会 POST）。`python3 scripts/pha_healthkit_ingest_selfcheck.py`。数量捷径未改。
 - **改动**：D1 Find 增加 `Start Date is in the last 2 days`（Operator 1001 / Number 2 / Unit 16384），保留 Latest First + Limit 150。last 1 day 无 Limit 曾崩 Get Details，故仍用 Limit 封顶。Source/Device 本轮不动（一次只改一处）。
 - **回滚**：去掉 last-2-days 谓词，或生成 `variant=is_today`。
 
@@ -377,7 +464,7 @@
 ## 2026-09-07 (T0 回放结案：跨分期重叠导致 10.6h)
 
 - **类别**：取证。
-- **证据**：14:00:59 `192.168.77.252` POST **200**，正文落入 `data/local_shortcuts/sleep_body_2026-09-07.txt`。日表与前两次逐位相同。回放：入睡一次总并集 7.483h（健康 App 7.717h，差约 14m 窗口缺口）；入库 10.6h = 各分期并集相加。跨分期重叠 38 对 / 2.1h；同分期交错核心多计 1.633h；完全重复 0；深睡并集=求和=1.633 与健康 App 一致。
+- **证据**：14:00:59 `<LAN-IP>` POST **200**，正文落入 `data/local_shortcuts/sleep_body_2026-09-07.txt`。日表与前两次逐位相同。回放：入睡一次总并集 7.483h（健康 App 7.717h，差约 14m 窗口缺口）；入库 10.6h = 各分期并集相加。跨分期重叠 38 对 / 2.1h；同分期交错核心多计 1.633h；完全重复 0；深睡并集=求和=1.633 与健康 App 一致。
 - **改动**：review §2 写入 T0 结论。无新代码。
 - **回滚**：不适用。
 
@@ -395,7 +482,7 @@
 ## 2026-09-07 (12:34 第二次真机 200，结果逐位相同；清醒口径定稿；只改文档)
 
 - **类别**：真机验收 + 文档（无代码）。
-- **证据**：`192.168.77.198` 12:34:35 POST **200**，日表 9/7 与 11:59:58 逐位相同（入睡 10.6 / 核心 6.033 / 深 1.633 / REM 2.933 / 清醒 2.683 / 在床空）。重复计入可复现。维护者定口径：健康 App 没有「入睡前」概念，睡眠从入睡起算，核心/REM/深睡计入入睡，清醒不计入；9/7 入睡前那块按采集特例。
+- **证据**：`<LAN-IP>` 12:34:35 POST **200**，日表 9/7 与 11:59:58 逐位相同（入睡 10.6 / 核心 6.033 / 深 1.633 / REM 2.933 / 清醒 2.683 / 在床空）。重复计入可复现。维护者定口径：健康 App 没有「入睡前」概念，睡眠从入睡起算，核心/REM/深睡计入入睡，清醒不计入；9/7 入睡前那块按采集特例。
 - **改动**：撤回「清醒三分解」产品列提案；`awake_duration_hours` = 健康 App 原值。12:37 维护者补充：9/7 会话由 20:30 一段 4 分钟 Deep 开启后 ≈2.2h 清醒，App 与 Apple 规则均无误。12:42 定稿：**PHA 不判定某夜是否采集失误、不打 `collection_anomaly` 类标签、不修正、不排除**（两版标记提案作废）；T3 改为「睡眠各项接入事实卡既有个人 90 日基线分档，偏离时加固定模板『…明显高于/低于你近 90 日的水平，请到健康 App 核对这一夜的数据』」，文案禁用判定词。review §3/§4-E/§6/§7、任务卡、PRD FR-1.6 与 §11/§12 同步。
 - **回滚**：还原文档。
 
@@ -422,7 +509,7 @@
 ## 2026-09-07 (睡眠真机 200；日表有数，尚未对上健康 App)
 
 - **类别**：真机验收。
-- **证据**：`192.168.77.198` `POST /ingest/healthkit` **200**，`received_at=2026-09-07T11:59:58`。日表 9/7：`sleep_hours=10.6`、`sleep_core=6.033`、`sleep_deep=1.633`、`sleep_rem=2.933`、`awake=2.683`、`in_bed` 空。核心+深睡+REM=入睡成立。`in_bed` 空符合 `is today` 丢掉午夜前 In Bed。10.6h 入睡偏长，可能多源分期重叠；**未**与健康 App 9/7 醒来日对账，M1-P6 不标 DONE。
+- **证据**：`<LAN-IP>` `POST /ingest/healthkit` **200**，`received_at=2026-09-07T11:59:58`。日表 9/7：`sleep_hours=10.6`、`sleep_core=6.033`、`sleep_deep=1.633`、`sleep_rem=2.933`、`awake=2.683`、`in_bed` 空。核心+深睡+REM=入睡成立。`in_bed` 空符合 `is today` 丢掉午夜前 In Bed。10.6h 入睡偏长，可能多源分期重叠；**未**与健康 App 9/7 醒来日对账，M1-P6 不标 DONE。
 - **改动**：无新代码；记录本次 200。
 - **回滚**：不适用。
 
@@ -609,7 +696,7 @@
 ## 2026-09-06 (M1-P1 真机：iPhone 收到事实卡通知)
 
 - **类别**：主动通道验收。
-- **证据**：`pha-8788.log` 出现 `192.168.77.219 GET /proactive/fact-card?user_id=default 200`（非 127.0.0.1）；维护者确认手机弹出通知。
+- **证据**：`pha-8788.log` 出现 `<LAN-IP> GET /proactive/fact-card?user_id=default 200`（非 127.0.0.1）；维护者确认手机弹出通知。
 - **当时卡**：calendar 2026-09-06，`as_of=2026-09-05`，`stale=true`，步数 14872，基线 n&lt;7 不做分档。未改代码。
 
 ---
@@ -685,7 +772,7 @@
 
 - **类别**：本机运行配置（`.env` gitignored）+ 捷径制品（`data/local_shortcuts/` gitignored）。
 - **PHA_HOST**：本机改为 `0.0.0.0`，经 `pha_restart_accept.sh` / launchd kickstart；仓库默认仍是 `127.0.0.1`。
-- **验收**：局域网 `http://192.168.77.21:8788/ingest/healthkit` fixture 200；无 token 401。
+- **验收**：局域网 `http://<LAN-IP>:8788/ingest/healthkit` fixture 200；无 token 401。
 - **捷径**：`scripts/macos/build_pha_ingest_shortcuts.py` 默认写入 `$(scutil --get LocalHostName).local`，避免 DHCP 换 IP 后旧地址 timeout。Health 捷径 **只** `Find Health Samples` 类型 `Steps`。value 在 JSON 里加引号，服务端把 `"16 count"` 收成数字。
 - **回滚**：`.env` 改回 `PHA_HOST=127.0.0.1` 再 `bash scripts/pha_restart_accept.sh`。
 

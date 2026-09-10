@@ -1,5 +1,7 @@
 # Stage 3C-ε Composer + 3C-δ 浏览器 E2E Report (2026-06-10)
 
+> **Language / 语言**：English (this document) · [中文](stage3c-composer-e2e-report-2026-06-10.zh.md)
+
 - **Build**: `pha-v2.3.32-full-import-only`
 - **Endpoint**: `http://127.0.0.1:8788`
 - **Model**: `qwen2.5:7b-instruct`

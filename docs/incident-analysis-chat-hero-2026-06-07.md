@@ -1,5 +1,7 @@
 #  incident 分析报告：对话 HTTP 0 + Hero 面板空值（v2.3.29 @ :8788）
 
+> **Language / 语言**：[English](incident-analysis-chat-hero-2026-06-07.en.md) · 中文（本文）
+
 > **日期**：2026-06-07  
 > **Build**：`pha-v2.3.29-wave4a-onboarding-ui-docker`  
 > **端口**：8788（`.env`）  

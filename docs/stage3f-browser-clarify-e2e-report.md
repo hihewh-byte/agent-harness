@@ -1,5 +1,7 @@
 # Stage 3F Browser Clarify E2E Report
 
+> **Language / 语言**：[English](stage3f-browser-clarify-e2e-report.en.md) · 中文（本文）
+
 > 时间：2026-06-24  
 > 服务：`http://127.0.0.1:8788`  
 > 路径：浏览器页内 `fetch('/api/chat')`（与 `app.js` `sendAsk` / `sendClarifyChoice` 同栈）  

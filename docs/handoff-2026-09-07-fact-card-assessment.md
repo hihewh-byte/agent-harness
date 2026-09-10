@@ -1,5 +1,7 @@
 # 交接 · 事实卡评估层重做（M1-P7 / P8 / P9）
 
+> **Language / 语言**：[English](handoff-2026-09-07-fact-card-assessment.en.md) · 中文（本文）
+
 > 写给接替的 coding agent · 2026-09-07 16:50 · 维护者已批准方案，**尚无一行代码**  
 > 首条回复必须输出：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > 碰 `hrv_rmssd_ms` / numerics / skip-LLM 时叠加：`CONSENSUS_ACK: harness-opus48-v2026-06-08 read`  

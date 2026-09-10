@@ -1,5 +1,7 @@
 # 交接 · 事实卡解读数字审计 v3：卡外数字分级放宽 + 单一审计 + review 优化清单（M1-P9.4）
 
+> **Language / 语言**：[English](handoff-2026-09-08-fact-card-interpret-v3-numerics.en.md) · 中文（本文）
+
 > 写给接替的 coding agent · 2026-09-08 20:10 起笔 · 依据 9/8 17:06 / 17:07 真机截图（解读连续被拒 `2、95、2、3、95` / `70、80、2、2、95、2、3`）与本机复现  
 > 首条回复必须同时输出两行：  
 > `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  

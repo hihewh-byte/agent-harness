@@ -1,5 +1,7 @@
 # macOS PHA 启动器
 
+> **Language / 语言**：[English](macos-pha-launcher.en.md) · 中文（本文）
+
 > 2026-06-10：官方后台路径升级为 **launchd LaunchAgent**（`KeepAlive`）；保留 keepalive 脚本作为回退。
 
 ## 官方路径（推荐）

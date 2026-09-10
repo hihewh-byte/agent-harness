@@ -1,5 +1,7 @@
 # Stage 3d · 真机 6 图 E2E 通过记录
 
+> **Language / 语言**：[English](stage3d-wearable-e2e-pass-2026-06-04.en.md) · 中文（本文）
+
 > **日期**：2026-06-04  
 > **Build**：`pha-v2.3.26-wave3d-hybrid-fallback-advisory`（通过裁定）  
 > **脚本**：`scripts/pha_e2e_6panel_realdevice.py`  

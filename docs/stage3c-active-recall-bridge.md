@@ -1,5 +1,7 @@
 # Stage 3C — Active Recall Bridge（多轮焦点记忆唤醒）
 
+> **Language / 语言**：[English](stage3c-active-recall-bridge.en.md) · 中文（本文）
+
 > **版本**：v0.2（2026-05-26）  
 > **状态**：🔒 **Spec 锁定**（Gemini 终审全票通过）· **待文辉开工码确认后编码**  
 > **评审**：文辉 · Gemini 联合评审判官 · Cursor 架构复核（反硬编码修正案已并入）  

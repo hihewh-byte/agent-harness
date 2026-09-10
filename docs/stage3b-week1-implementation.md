@@ -1,5 +1,7 @@
 # Stage 3B · Week 1 实施清单（P 层 · 无 β Worker）
 
+> **Language / 语言**：[English](stage3b-week1-implementation.en.md) · 中文（本文）
+
 > **状态**：🚧 编码中（2026-05-26）  
 > **Spec**：[`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) v0.1  
 > **测试策略**：架构完善前 **暂停** Fixture/真机 blocking 测试；代码合入后以本清单勾选回归。

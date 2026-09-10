@@ -1,5 +1,7 @@
 # Stage 3d-δ — Wearable Fact Pipeline & Metric Registry
 
+> **Language / 语言**：[English](stage3d-delta-wearable-fact-pipeline-spec.en.md) · 中文（本文）
+
 > **状态**：**v1.0 已签字**（2026-06-01 · PM/Gemini/Cursor 架构对齐）  
 > **上位法**：[`stage3d-gamma-wearable-compare-contract-spec.md`](stage3d-gamma-wearable-compare-contract-spec.md) · [`wearable-interpretation-policy-v1.md`](wearable-interpretation-policy-v1.md)  
 > **基线 build**：`pha-v2.3.18-wave3d-gamma-wearable-soul-align`（3d-γ + Soul 对齐已编码；**本文档为 3d-δ/ε 契约，不含实现**）

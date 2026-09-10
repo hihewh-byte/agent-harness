@@ -1,5 +1,7 @@
 # v2.2.7：Catalog 行为模式
 
+> **Language / 语言**：[English](harness-catalog-v2.2.7.en.md) · 中文（本文）
+
 ## 目标
 
 砍掉 `combined_review` 单轮 ~4000 字 Tier0 预注入，改为 **Catalog 目录 + fetch 点单 + 二轮推理 + C 层审计**。

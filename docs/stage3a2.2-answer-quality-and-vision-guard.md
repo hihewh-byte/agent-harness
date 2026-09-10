@@ -1,5 +1,7 @@
 # Stage 3A.2.2 — 回答质量收紧 + Vision 定账与多图合并（RFC）
 
+> **Language / 语言**：[English](stage3a2.2-answer-quality-and-vision-guard.en.md) · 中文（本文）
+
 > **基线**：`pha-v2.3.3-stage3a2.1-response-ux-causal-anchor`  
 > **目标构建**：`pha-v2.3.3-stage3a2.2-answer-quality-vision-guard`  
 > **状态**：✅ 已编码  

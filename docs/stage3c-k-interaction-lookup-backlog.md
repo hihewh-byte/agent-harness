@@ -1,5 +1,7 @@
 # Stage 3C — K 层药物交互 Lookup Backlog（AR-3 · Spec-only）
 
+> **Language / 语言**：[English](stage3c-k-interaction-lookup-backlog.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-26）  
 > **状态**：📋 **仅文档** · 编码排在 Wave 2（AR-1/2）之后  
 > **依赖**：[`stage3c-active-recall-bridge.md`](stage3c-active-recall-bridge.md) §6.2 · [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) §7.7 Medication

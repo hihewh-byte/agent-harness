@@ -1,5 +1,7 @@
 # Stage 3B — 真机脱敏标签 E2E（F 层）
 
+> **Language / 语言**：[English](stage3b-e2e-real-label-fixture.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-26）  
 > **脚本**：`scripts/pha_e2e_attachment_label_real.py`  
 > **关联**：[`tests/fixtures/supplement/README.md`](../tests/fixtures/supplement/README.md) · [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md)

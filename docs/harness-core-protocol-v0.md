@@ -1,5 +1,7 @@
 # Harness Core Protocol v0 — Interface Design (Week 2)
 
+> **Language / 语言**：English (this document) · [中文](harness-core-protocol-v0.zh.md)
+
 > **Status**: Phase A complete · Core vendored in-repo (2026-07-10) · **No PyPI yet**  
 > **Parent**: [harness-core-evolution-blueprint.md](harness-core-evolution-blueprint.md)  
 > **In-repo package**: [`packages/harness_core/`](../packages/harness_core/)  

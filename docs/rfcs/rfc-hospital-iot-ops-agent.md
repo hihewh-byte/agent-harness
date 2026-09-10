@@ -1,5 +1,7 @@
 # RFC · Hospital IoT Ops Agent（院内物联网运维 Agent）— 初步产品设计
 
+> **Language / 语言**：[English](rfc-hospital-iot-ops-agent.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-hospital-iot-ops-agent.md`  
 > **版本**：v0.2（2026-07-10）  
 > **状态**：📋 **Draft（产品/架构初设 · 思路扩写 · 零生产代码）**  

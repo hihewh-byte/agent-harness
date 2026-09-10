@@ -1,5 +1,7 @@
 # Harness Sub-Agent Protocol v1
 
+> **Language / 语言**：[English](harness-subagent-protocol-v1.en.md) · 中文（本文）
+
 > **CONSENSUS_ACK**: harness-opus48-v2026-06-08  
 > **Priority**: P2 · 子 agent 协议标准化  
 > **Status**: Draft v1（telemetry + 校验；主路径仍由 Harness 编排）

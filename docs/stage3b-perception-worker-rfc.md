@@ -1,5 +1,7 @@
 # Stage 3B — Perception Worker（平台级附件定账）RFC
 
+> **Language / 语言**：[English](stage3b-perception-worker-rfc.en.md) · 中文（本文）
+
 > **版本**：v1.0（2026-05-26 文辉批准开工）  
 > **状态**：🚧 **3B-α 实现中** — `pha-v2.3.3-stage3b-perception-worker-alpha`  
 > **β 规格**（防腐红线 · 权重 Merge · **介质分轨 + 后置 `document_family`**）：[`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) **v0.2** §1.4 · §7.0–§7.8  

@@ -1,5 +1,7 @@
 # RFC · Enterprise Multi-Tenant Gateway
 
+> **Language / 语言**：[English](rfc-enterprise-multi-tenant.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-enterprise-multi-tenant.md`  
 > **版本**：v0.1（2026-07-05）  
 > **状态**：📋 **Ratified（法理设计 · Future Work · 零生产代码）**  

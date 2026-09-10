@@ -1,5 +1,7 @@
 # Stage 3C 真机回归 E2E Report (2026-06-15)
 
+> **Language / 语言**：[English](stage3c-browser-e2e-report-2026-06-15.en.md) · 中文（本文）
+
 - **Build**: `pha-v2.3.32-full-import-only`
 - **Endpoint**: `http://127.0.0.1:8788`
 - **Model**: `qwen2.5:7b-instruct`

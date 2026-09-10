@@ -1,5 +1,7 @@
 # Stage 3A.2.1 — 响应层 UX 净化 + 论题锁 + 时空因果锚（RFC）
 
+> **Language / 语言**：[English](stage3a2.1-response-ux-and-causal-anchor.en.md) · 中文（本文）
+
 > **基线**：`pha-v2.3.3-stage3a2-episodic-focus-grounded`（3A.2 已编码）  
 > **目标构建**：`pha-v2.3.3-stage3a2.1-response-ux-causal-anchor`  
 > **状态**：✅ 已编码  

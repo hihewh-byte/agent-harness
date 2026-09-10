@@ -1,5 +1,7 @@
 # RFC · Stage 3H — 通用附件兜底车道（Universal Attachment Lane）
 
+> **Language / 语言**：[English](rfc-stage3h-universal-attachment-lane.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-stage3h-universal-attachment-lane.md`
 > **版本**：v0.3（2026-06-27）
 > **状态**：✅ **Closed（3H-α/β/γ/δ/ε 全量编码 · 148/148 压测验收）**

@@ -1,5 +1,7 @@
 # Stage 3d — 穿戴 Merge Coerce 与无数据门禁 Spec
 
+> **Language / 语言**：[English](stage3d-wearable-merge-and-gates-spec.en.md) · 中文（本文）
+
 > **状态**：v0.1 初稿（2026-05-30）  
 > **基线 build**：`pha-v2.3.9-wave3d-wearable-merge-coerce`  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md)  

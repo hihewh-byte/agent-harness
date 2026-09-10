@@ -1,5 +1,7 @@
 # Harness Loop (Alpha) — Productization Plan
 
+> **Language / 语言**：English (this document) · [中文](official-loop-suite-alpha-plan.zh.md)
+
 > **Goal:** ship an announceable **α** (installable + CLI + selfcheck + toy attach).  
 > **Branch:** `feat/official-loop-suite-alpha`  
 > **Non-goals this slice:** Trace UI, live HTTP runner, HIO third domain, full extraction of PHA scripts into the package.

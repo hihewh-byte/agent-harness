@@ -1,5 +1,7 @@
 # PHA 架构演进蓝图 v2.3
 
+> **Language / 语言**：[English](pha-architecture-evolution-v2.3.en.md) · 中文（本文）
+
 > **状态**：设计文档（Design RFC）— 仅规划，不含实现代码  
 > **基线构建**：`pha-v2.2.11-a-plus`（A+ SchemaIntentRouter 已落地）  
 > **作者立场**：Cursor 架构评审 — 综合 Gemini / Grok 辩论后的独立判断  

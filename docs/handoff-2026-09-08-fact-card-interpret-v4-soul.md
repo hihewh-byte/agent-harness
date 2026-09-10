@@ -1,5 +1,7 @@
 # 交接 · 事实卡解读焦点跑偏：profile 专用 soul（M1-P9.5）
 
+> **Language / 语言**：[English](handoff-2026-09-08-fact-card-interpret-v4-soul.en.md) · 中文（本文）
+
 > 写给接替的 coding agent · 2026-09-08 22:45 起笔 · 依据 9/8 22:26–22:29 三次英文 API 复测（`enR1–enR3`）与 zh-2/zh-3 对照  
 > 首条回复必须同时输出两行：  
 > `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  

@@ -1,5 +1,7 @@
 # Stage 3C-UX — 异步附件编排规格书
 
+> **Language / 语言**：[English](stage3c-async-attachment-orchestrator.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-26）  
 > **状态**：📋 Spec（待编码）  
 > **依赖**：3B `LabelLedgerV1`、现有 `/api/chat/attachments` · `/parse`  

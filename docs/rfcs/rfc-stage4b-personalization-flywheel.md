@@ -1,5 +1,7 @@
 # RFC · Stage 4B — 个性化价值飞轮（Personalization Flywheel）
 
+> **Language / 语言**：[English](rfc-stage4b-personalization-flywheel.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-stage4b-personalization-flywheel.md`  
 > **版本**：v0.1（2026-06-27）  
 > **状态**：📋 **Ratified（法理锁定 · 待 Wave 4b + Stage 4-β 编码）**  

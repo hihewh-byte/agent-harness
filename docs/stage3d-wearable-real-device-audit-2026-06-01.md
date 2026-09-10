@@ -1,5 +1,7 @@
 # 真机 6 图穿戴对比 · 数据链路与真实性审计（2026-06-01）
 
+> **Language / 语言**：[English](stage3d-wearable-real-device-audit-2026-06-01.en.md) · 中文（本文）
+
 > **Build**：`pha-v2.3.19-wave3d-epsilon-interpretation-audit`  
 > **DB 锚点**：user msg **330/332**（DeepSeek / Qwen）→ assistant **331/333**
 

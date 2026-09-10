@@ -1,5 +1,7 @@
 # HarnessBuildReport Schema（`pha.harness_report/v1`）
 
+> **Language / 语言**：English (this document) · [中文](harness-build-report-schema.zh.md)
+
 Phase 0 **as-is** 观测：记录 Harness **实际**做了什么，并对照 `harness-evidence-matrix.md` 输出 `warnings`。
 
 ## 顶层字段

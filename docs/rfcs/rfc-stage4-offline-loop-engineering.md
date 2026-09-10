@@ -1,5 +1,7 @@
 # RFC · Stage 4 — 离线 Loop Engineering（双环自演进）
 
+> **Language / 语言**：[English](rfc-stage4-offline-loop-engineering.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-stage4-offline-loop-engineering.md`  
 > **版本**：v0.1（2026-06-27）  
 > **状态**：📋 **Ratified（4-α.1 ✅ · 4-β-1 骨架 ✅ · 4-β-2 待编码）**  

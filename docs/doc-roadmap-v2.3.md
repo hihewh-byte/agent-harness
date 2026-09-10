@@ -1,5 +1,7 @@
 # PHA 文档路线图 v2.3
 
+> **Language / 语言**：English (this document) · [中文](doc-roadmap-v2.3.zh.md)
+
 > **状态**：Living Document · 与 [`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md) §7.9 同步  
 > **修订日期**：2026-06-27  
 > **当前 build**：`pha-v2.3.32-full-import-only`

@@ -1,5 +1,7 @@
 # 交接 · 事实卡按钮式解读 v2 + 指标时效 + 勾选即所见（M1-P9.1 / P10 / P11 / P9.2 / P9.3）
 
+> **Language / 语言**：[English](handoff-2026-09-08-fact-card-interpret-v2.en.md) · 中文（本文）
+
 > 写给接替的 coding agent · 2026-09-08 08:00 起笔，08:30 定稿 · 依据 9/7 23:20–23:30 浏览器验收 + 9/8 08:00 / 08:12 真机复测  
 > 首条回复必须同时输出两行：  
 > `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  

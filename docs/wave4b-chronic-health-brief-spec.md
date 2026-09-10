@@ -1,5 +1,7 @@
 # Wave 4b — Chronic Health Brief (CHB) Spec v0.1
 
+> **Language / 语言**：[English](wave4b-chronic-health-brief-spec.en.md) · 中文（本文）
+
 > **文件名**：`docs/wave4b-chronic-health-brief-spec.md`  
 > **版本**：v0.1（2026-07-04）  
 > **状态**：📋 **Ratified（最小可编码版 · 4-β-1 骨架）**  

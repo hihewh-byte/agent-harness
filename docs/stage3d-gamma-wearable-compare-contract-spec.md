@@ -1,5 +1,7 @@
 # Stage 3d-γ — Wearable Compare Contract Spec
 
+> **Language / 语言**：[English](stage3d-gamma-wearable-compare-contract-spec.en.md) · 中文（本文）
+
 > **状态**：**v1.0 已签字**（2026-05-31 · PM/Gemini 终审）  
 > **基线 build**：`pha-v2.3.14-wave3d-gamma-compare-table-b`（3d-γ-a/b 已编码）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`stage3c-wearable-snapshot-bridge.md`](stage3c-wearable-snapshot-bridge.md) · [`stage3d-wearable-merge-and-gates-spec.md`](stage3d-wearable-merge-and-gates-spec.md)  

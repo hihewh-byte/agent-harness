@@ -1,5 +1,7 @@
 # PHA Harness 共识基线（Opus 4.8 审计对齐）
 
+> **Language / 语言**：[English](harness-consensus-opus48-2026-06-08.en.md) · 中文（本文）
+
 > 状态：跨 agent 共识基线（强制）  
 > 来源：Opus 4.8 架构评审（用户提供全文）  
 > 适用范围：`pha/chat_service.py`、`pha/harness_*`、`pha/intent_*`、`pha/schema_*`、`pha/numerics_manifest.py`、`pha/catalog_*`、`pha/shadow_routing.py`

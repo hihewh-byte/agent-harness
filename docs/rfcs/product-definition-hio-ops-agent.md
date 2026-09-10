@@ -1,5 +1,7 @@
 # 产品定义书 · Hospital IoT Ops Agent (HIO-A)
 
+> **Language / 语言**：[English](product-definition-hio-ops-agent.en.md) · 中文（本文）
+
 > **文档类型**：Product Definition（可售卖产品说明）  
 > **版本**：v0.2（2026-07-11）  
 > **状态**：Draft · 零生产代码  

@@ -1,5 +1,7 @@
 # Stage 3C-δ Clarify E2E Report (2026-06-10)
 
+> **Language / 语言**：[English](stage3c-clarify-e2e-report-2026-06-10.en.md) · 中文（本文）
+
 - **Scenario**: Cδ-多年血脂澄清→chip
 - **Session**: `759d83a6-51d9-403a-8609-023f3874f4dd`
 - **Result**: PASS

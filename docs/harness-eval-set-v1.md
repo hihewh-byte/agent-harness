@@ -1,5 +1,7 @@
 # harness.eval_set / v1
 
+> **Language / 语言**：English (this document) · [中文](harness-eval-set-v1.zh.md)
+
 > **Thin slice (2026-07-13):** schema + golden export + offline validator + alias fuzz.  
 > **Not yet:** live HTTP runner, full bank rewrite.  
 > **Home:** Harness Loop · [`packages/harness_loop`](../packages/harness_loop/) · goldens under [`evals/goldens/`](../evals/goldens/).

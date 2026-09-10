@@ -913,7 +913,7 @@ async def get_ingest_healthkit() -> dict[str, Any]:
     return {
         "ok": False,
         "error": "use_post",
-        "hint": "此地址只接受 iPhone 捷径的 POST，不能在浏览器打开。请打开 http://WenhuideMacBook-Air.local:8788/ 看 PHA 界面。",
+        "hint": "此地址只接受 iPhone 捷径的 POST，不能在浏览器打开。请打开本机 PHA 主界面（:8788/），不要用浏览器打开本路径。",
         "last": "/ingest/healthkit/last?user_id=default",
     }
 

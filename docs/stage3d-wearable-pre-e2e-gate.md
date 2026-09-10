@@ -1,5 +1,7 @@
 # Stage 3d · 真机 E2E 前门禁（架构完整性）
 
+> **Language / 语言**：[English](stage3d-wearable-pre-e2e-gate.en.md) · 中文（本文）
+
 > **当前 build**：`pha-v2.3.27-wave3d-post-e2e-task-audit-ux`  
 > **目的**：编码闭环后再做 6 图真机；避免「UI/模型」掩盖管线缺口。  
 > **E2E**：✅ 见 [`stage3d-wearable-e2e-pass-2026-06-04.md`](stage3d-wearable-e2e-pass-2026-06-04.md)

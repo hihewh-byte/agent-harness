@@ -1,5 +1,7 @@
 # PHA 事实卡（M1）
 
+> **Language / 语言**：[English](pha-fact-card.en.md) · 中文（本文）
+
 Mac 从 `wearable_daily` **无 LLM** 生成 JSON；iPhone 捷径拉短通知后 **打开完整卡网页**。  
 不是聊天，不是诊断，不是 APNs。
 
@@ -59,17 +61,19 @@ Safari 从捷径打开时可用 query `token=`（与 header 二选一）。未�
 
 ## iPhone 怎么每天收到
 
+Clone 开通：[Mac + iPhone 同网手册](pha-fact-card-lan.zh.md)（[English](pha-fact-card-lan.md)）。公开仓只有一条**不含 token** 的模板：[shortcuts/pha-daily.shortcut](../shortcuts/pha-daily.shortcut)（导入时再填 Mac URL 与 token）。下面是维护者本机短路径（产物 gitignore）。
+
 1. 本机生成捷径（token 只进 gitignored `data/local_shortcuts/`）：
 
 ```bash
 python scripts/macos/build_pha_ingest_shortcuts.py
 ```
 
-得到新的 `pha-fact-card.shortcut`（「PHA 事实卡通知」）。**必须重新 AirDrop**，旧捷径不会打开完整卡。
+得到 `pha-daily.shortcut`（「PHA Daily」，已写入本机 URL + token）。调试仍会生成分条的同步睡眠 / 同步健康 / 事实卡通知。**必须重新 AirDrop**，旧捷径不会打开完整卡。
 
-2. 先手动跑一次：短通知之后应打开 Safari 完整卡（Mac PHA 须在听、手机能打到局域网/`.local`）。若只出通知并写「无 URL」，是旧捷径：把桌面新文件再 AirDrop 一次。
+2. 先手动跑一次 **PHA Daily**：短通知之后应打开 Safari 完整卡（Mac PHA 须在听、手机能打到局域网/`.local`）。若只出通知并写「无 URL」，是旧捷径。
 
-3. **每日主动**：快捷指令 App → 自动化 → 特定时间 → 运行「PHA 事实卡通知」→ 打开「立即运行」。
+3. **每日主动**：快捷指令 App → 自动化 → 特定时间 → 运行「PHA Daily」→ 打开「立即运行」。
 
 4. 系统锁屏通知通常 **不能**自定义点进 URL。要点通知进卡，等 M2 App。过渡期靠捷径打开的页面，或再跑一次捷径。
 

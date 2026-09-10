@@ -1,5 +1,7 @@
 # 回退说明：v2.3.29 ← v2.3.30 / v2.3.31（2026-06-07）
 
+> **Language / 语言**：[English](rollback-v2.3.29-architecture-diff.en.md) · 中文（本文）
+
 > **当前运行 build**：`pha-v2.3.29-wave4a-onboarding-ui-docker`  
 > **Git**：`3c4a8ed`（tag `v2.3.29`）  
 > **回退原因**：v2.3.30+ 未提交改动（daemon 守护、聊天 crash 修复）导致服务不稳定、网页/对话 intermittently 不可用。

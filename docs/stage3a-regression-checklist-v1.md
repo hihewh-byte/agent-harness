@@ -1,5 +1,7 @@
 # Stage 3A 回归验收清单 v1
 
+> **Language / 语言**：[English](stage3a-regression-checklist-v1.en.md) · 中文（本文）
+
 > **目的**：对**已编码**的 3A.1～3A.2.2 做金标式扫描；**不重编码** 3A.2.1。  
 > **原则**：红项记入 **3B 依赖**，禁止在 3A 堆正则 corner case。  
 > **关联**：[`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) · [`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md)

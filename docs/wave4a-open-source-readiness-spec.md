@@ -1,5 +1,7 @@
 # Wave 4a — Open Source Readiness Spec v1.0
 
+> **Language / 语言**：[English](wave4a-open-source-readiness-spec.en.md) · 中文（本文）
+
 > **文件名**：`docs/wave4a-open-source-readiness-spec.md`  
 > **版本**：v1.0（2026-07-05）  
 > **状态**：✅ **Ratified（B 档规范开源发行版 · Path-B）**  

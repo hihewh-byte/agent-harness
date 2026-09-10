@@ -1,5 +1,7 @@
 # Handoff · 2026-09-09 · 对话框与主动事实卡「解读一致性」(Chat ↔ Fact Card Parity)
 
+> **Language / 语言**：[English](handoff-2026-09-09-chat-fact-card-parity.en.md) · 中文（本文）
+
 > 状态：**已编码 · 离线 selfcheck 绿 · 真机 8788 验收过**（Wave A–F；H10–H13/H10E/H13E skip-LLM；H9-zh 对话+interpret；H9E 审计过。转录：proactive change-log 16:51）
 > 变更等级：Harness **P1**（含一个 P0 配置真源收敛）
 > 上位法：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · [`prd-pha-ios-proactive-agent-v1.md`](prd-pha-ios-proactive-agent-v1.md) · [`stage3f-intent-resolution-completeness-rfc.md`](stage3f-intent-resolution-completeness-rfc.md) · [`wearable-metric-registry-v1.md`](wearable-metric-registry-v1.md)

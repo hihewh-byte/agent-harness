@@ -1,5 +1,7 @@
 # Stage 3A.2.3 — 聊天窗附件内嵌预览（RFC）
 
+> **Language / 语言**：[English](stage3a2.3-chat-attachment-inline-preview.en.md) · 中文（本文）
+
 > **基线**：`pha-v2.3.3-stage3a2.1-response-ux-causal-anchor`  
 > **目标构建**：`pha-v2.3.3-stage3a2.3-chat-attachment-inline-preview`  
 > **状态**：📋 待 Review  

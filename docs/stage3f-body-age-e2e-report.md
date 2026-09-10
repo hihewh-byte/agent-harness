@@ -1,5 +1,7 @@
 # Stage 3F Body-Age E2E Report
 
+> **Language / 语言**：English (this document) · [中文](stage3f-body-age-e2e-report.zh.md)
+
 > session: `5c11de51-b407-471f-a017-e42d972150f0`
 > harness: `/tmp/pha-e2e-harness.jsonl`
 

@@ -1,5 +1,7 @@
 # PHA Web 服务可用性修复方案（2026-06-08）
 
+> **Language / 语言**：[English](startup-availability-remediation-plan-2026-06-08.en.md) · 中文（本文）
+
 > 状态：待实施（设计与执行清单）  
 > 范围：仅服务“启动失败 / 无法持续可用”  
 > 关联文档：`startup-stability-2026-06-07.md`、`incident-analysis-chat-hero-2026-06-07.md`、`pha-architecture-evolution-v2.3.md`

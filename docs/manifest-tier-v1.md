@@ -1,5 +1,7 @@
 # Manifest Tier v1：披露协议版（Design RFC）
 
+> **Language / 语言**：[English](manifest-tier-v1.en.md) · 中文（本文）
+
 > **状态**：**已批准（Approved）** — 待文辉确认后进入实现；默认审计行为仍为 `t0_strict`  
 > **基线构建**：`pha-v2.2.11-a-plus`  
 > **关联文档**：[`harness-numerics-manifest-v2.2.6.2-min.md`](harness-numerics-manifest-v2.2.6.2-min.md)、[`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md)  

@@ -1,5 +1,7 @@
 # Metadata Catalog v2.3 — 设计 RFC（混合注册表 · Stage 2）
 
+> **Language / 语言**：[English](metadata-catalog-v2.3.en.md) · 中文（本文）
+
 > **状态**：设计 RFC — **待 Review，禁止编码**  
 > **基线构建**：`pha-v2.2.12-manifest-tier-v1`（Stage 1 已收官）  
 > **关联**：[`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md)、[`manifest-tier-v1.md`](manifest-tier-v1.md)  

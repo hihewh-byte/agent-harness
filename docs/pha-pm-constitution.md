@@ -1,5 +1,7 @@
 # PHA 长期开发宪法修正案 (PM Constitution)
 
+> **Language / 语言**：[English](pha-pm-constitution.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-27）· 与 [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) v0.3 对齐
 
 ## 📌 核心愿景 (Core Vision)

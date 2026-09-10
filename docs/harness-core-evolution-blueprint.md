@@ -1,5 +1,7 @@
 # Harness Core Evolution Blueprint — PHA ↔ tax_agent
 
+> **Language / 语言**：English (this document) · [中文](harness-core-evolution-blueprint.zh.md)
+
 > **Status**: Phase A complete (2026-07-09) · **Week 2**: protocol isolation started  
 > **Repos**: [harness-builder-overview.md](harness-builder-overview.md) · [harness-consensus-opus48-2026-06-08.md](harness-consensus-opus48-2026-06-08.md) · [harness-core-protocol-v0.md](harness-core-protocol-v0.md)  
 > **Second domain**: `../tax_agent/` (sibling repo under `myAgents/`)  

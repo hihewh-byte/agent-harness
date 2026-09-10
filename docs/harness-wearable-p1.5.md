@@ -1,5 +1,7 @@
 # PHA P1.5 — 穿戴扩展指标
 
+> **Language / 语言**：English (this document) · [中文](harness-wearable-p1.5.zh.md)
+
 **Build**: `pha-v2.2.9-p1.5`
 
 ## 新增 canonical 指标（extension）

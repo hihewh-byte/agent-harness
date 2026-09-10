@@ -1,5 +1,7 @@
 # PHA P1.6 — DCH 动态目录诱饵
 
+> **Language / 语言**：[English](harness-dch-p1.6.en.md) · 中文（本文）
+
 **Build**: `pha-v2.2.10-p1.6`
 
 ## 机制

@@ -1,5 +1,7 @@
 # Stage 3C-Wearable — Wearable Snapshot Bridge 规格书
 
+> **Language / 语言**：[English](stage3c-wearable-snapshot-bridge.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-27）  
 > **状态**：✅ Wave 3c 已编码 · ✅ Wave 3d merge-coerce 已编码（`pha-v2.3.9-wave3d-wearable-merge-coerce`）· ⏳ 真机 E2E 待绿灯  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) §4 · [`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) v0.3  

@@ -1,5 +1,7 @@
 # PHA 全英文压测完整报告（50×≥8）
 
+> **Language / 语言**：[English](en-stress-50x-full-report-2026-07-11.en.md) · 中文（本文）
+
 - **日期**：2026-07-11 ~ 2026-07-12（UTC 起点 `20260711T121936Z`）
 - **端点**：`http://127.0.0.1:8788` · build `pha-v2.3.32-full-import-only`
 - **模型**：`qwen2.5:7b-instruct` · `response_locale=en`

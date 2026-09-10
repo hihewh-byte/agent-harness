@@ -1,5 +1,7 @@
 # Attach harness-core in 15 minutes
 
+> **Language / 语言**：English (this document) · [中文](attach-in-15-minutes.zh.md)
+
 You have an agent. It occasionally invents an ID, swaps a number, or cites a
 date that isn't in your data. harness-core is a fail-closed fence around that:
 **Plan → Compose → Post-Audit**. If the draft cites anything outside the

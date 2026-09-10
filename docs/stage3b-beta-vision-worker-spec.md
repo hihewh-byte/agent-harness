@@ -1,5 +1,7 @@
 # Stage 3B-β — Vision Perception Worker 规格书
 
+> **Language / 语言**：[English](stage3b-beta-vision-worker-spec.en.md) · 中文（本文）
+
 > **版本**：v0.3（2026-05-27）  
 > **状态**：🔒 Spec 锁定 · **Wave 3 感知泛化重构**待开工（L0.2 版面切片 + 多引擎仲裁 + G6 降级）；Wave 1/2 部分已编码  
 > **上位文档**：[`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) · [`pha-architecture-evolution-v2.3.md`](pha-architecture-evolution-v2.3.md) §2.1 · §2.2  

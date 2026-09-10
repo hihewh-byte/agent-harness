@@ -1,5 +1,7 @@
 # 审计实施方案 2026-07（Audit Implementation Plan）
 
+> **Language / 语言**：[English](audit-implementation-plan-2026-07.en.md) · 中文（本文）
+
 > **本文档是唯一执行真源（single source of truth）。**
 > 任何 coding agent（含人类协作者）在执行下列任务前，必须先完整阅读本文档与
 > [`.cursor/rules/audit-plan-execution.mdc`](../.cursor/rules/audit-plan-execution.mdc)，

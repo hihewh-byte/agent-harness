@@ -1,5 +1,7 @@
 # PHA Installation Guide
 
+> **Language / 语言**：English (this document) · [中文](INSTALL.zh.md)
+
 Aligned with release **`v0.4.0-beta.1`** (HTTP **8788**, UI default **English**, RLP via `PHA_RESPONSE_LOCALE`).
 
 ## Honest timing

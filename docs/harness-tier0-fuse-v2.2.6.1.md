@@ -1,5 +1,7 @@
 # PHA Harness Tier0 熔断策略 — v2.2.6.1 设计文档
 
+> **Language / 语言**：[English](harness-tier0-fuse-v2.2.6.1.en.md) · 中文（本文）
+
 > **状态**：v2.2.6.1 已编码 — Tier0 预算组装 + Protected SLA  
 > **范围**：Tier0 预算组装 + 工具状态文案修正 + `tier0_integrity` 观测  
 > **不在范围**：Metadata Catalog、双入口统一、`SYSTEM_CONTENT_MAX_CHARS` 单纯调大

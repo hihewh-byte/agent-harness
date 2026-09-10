@@ -1,5 +1,7 @@
 # v2.2.6.2-min：Numerics Manifest + C 层后置审计
 
+> **Language / 语言**：[English](harness-numerics-manifest-v2.2.6.2-min.en.md) · 中文（本文）
+
 ## 目标
 
 在 **不拆 Catalog 围墙** 的前提下，为 PHA 建立「机器可校验数字白名单」与答复后置门禁，使 7B 模型无法在无真值支撑时放行化验/穿戴数值。

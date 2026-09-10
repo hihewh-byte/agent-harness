@@ -1,5 +1,7 @@
 # RFC · Universal Device Ingestion Adapter
 
+> **Language / 语言**：[English](rfc-device-ingestion-adapter.en.md) · 中文（本文）
+
 > **文件名**：`docs/rfcs/rfc-device-ingestion-adapter.md`  
 > **版本**：v0.1（2026-07-05）  
 > **状态**：📋 **Ratified（法理设计 · Future Work · 零生产代码）**  

@@ -1,5 +1,7 @@
 # PHA / harness-core：Loop Engineering + Reflection 自动迭代方案
 
+> **Language / 语言**：[English](rfc-loop-reflection-auto-evolution.en.md) · 中文（本文）
+
 > 配套：Stage 4 RFC `docs/rfcs/rfc-stage4-offline-loop-engineering.md`  
 > 触发：2026-07-11 全英文 50×≥8 压测与 clone-to-run 之后
 

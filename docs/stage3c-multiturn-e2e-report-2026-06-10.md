@@ -1,5 +1,7 @@
 # Stage 3C 多轮对话真机 E2E 测试报告
 
+> **Language / 语言**：[English](stage3c-multiturn-e2e-report-2026-06-10.en.md) · 中文（本文）
+
 > 时间：2026-06-10 17:26:52
 > 服务：`http://127.0.0.1:8788` · build `pha-v2.3.32-full-import-only`
 > Flag：`PHA_EPISODIC_ALL_PROFILES=1` · `PHA_HEALTH_TURN_RESOLVER=1`

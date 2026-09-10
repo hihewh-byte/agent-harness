@@ -1,5 +1,7 @@
 # 交接 · 主动 Agent 与 PHA 记忆共享：先止漏，再分层共享（M1-P13 / P14 / P15）
 
+> **Language / 语言**：[English](handoff-2026-09-09-proactive-memory-sharing.en.md) · 中文（本文）
+
 > 写给接替的 coding agent · 2026-09-09 12:10 起笔 · 依据本机 `data/pha_storage.db` 查库证据（§1）与维护者 12:00 拍板（§2）  
 > 首条回复必须同时输出两行：  
 > `CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  

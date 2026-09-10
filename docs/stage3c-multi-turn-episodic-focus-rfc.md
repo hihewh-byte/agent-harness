@@ -1,5 +1,7 @@
 # Stage 3C — 多轮对话连贯性优化 RFC
 
+> **Language / 语言**：[English](stage3c-multi-turn-episodic-focus-rfc.en.md) · 中文（本文）
+
 > **文件名**：`stage3c-multi-turn-episodic-focus-rfc.md`  
 > **版本**：v0.1（2026-06-10）  
 > **状态**：✅ **Approved · 架构师锁定版（2026-06-10）**  

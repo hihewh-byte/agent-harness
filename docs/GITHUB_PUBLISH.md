@@ -1,5 +1,7 @@
 # 使用 GitHub Desktop 发布（单仓 · 个人开源版）
 
+> **Language / 语言**：[English](GITHUB_PUBLISH.en.md) · 中文（本文）
+
 > **公网仓库**：`hihewh-byte/agent-harness`（Harness Core+Loop；PHA = reference app）。  
 > **Git 根目录** = 本仓检出目录（内含 `pha/`、`packages/`、`README.md`、`docker-compose.yml`）。本地文件夹名可与远程不同。  
 > **不要**把上一级 `myAgents/` 加为仓库。

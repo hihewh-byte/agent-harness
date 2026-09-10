@@ -24,7 +24,10 @@
 | **Attach Harness** | Wire fail-closed numerics/ID fence into *your* agent | [Builder? 10 seconds](#builder-10-seconds--no-llm--no-health-domain) · [Attach in 15 minutes](docs/attach-in-15-minutes.md) · [harness-builder-overview](docs/harness-builder-overview.md) |
 | **Contribute Loop** | Offline harvest → promote → human PR | [Loop attach guide](examples/loop_reference_pha.md) · [CONTRIBUTING](CONTRIBUTING.md) · [Issue #1](https://github.com/hihewh-byte/agent-harness/issues/1) |
 | **Use PHA app** | Run the health reference UI locally | [Use the PHA app](#use-the-pha-app-reference-implementation) · [5-minute Quick Start](#5-minute-quick-start-pha-app) |
+| **Daily fact card** | iPhone card on the same Wi-Fi as your Mac · no LLM for daily numbers | [LAN handbook](docs/pha-fact-card-lan.md) · [PHA Daily Shortcut](shortcuts/pha-daily.shortcut) |
 | **Use Tax app** | Futu 境外所得测算 + harness 第二域 | [`apps/tax_agent/README.zh-CN.md`](apps/tax_agent/README.zh-CN.md) · `bash apps/tax_agent/scripts/bootstrap_tax.sh` |
+
+Maintainer docs are bilingual (`.en.md` / `.zh.md` twins): [convention](docs/bilingual.md).
 
 ---
 
@@ -193,6 +196,7 @@ Empty warehouse is OK — you can chat immediately; import Apple Health `export.
 
 ## PHA app features (reference)
 
+- **Daily fact card (iPhone)** — one Shortcut ([PHA Daily](shortcuts/pha-daily.shortcut)) on the same Wi-Fi; rule bands vs your baseline; LLM only if you tap interpret. [LAN handbook](docs/pha-fact-card-lan.md)
 - **Apple Health import** — `export.zip` → SQLite warehouse (steps, sleep, HRV, workouts, labs)
 - **Wearable screenshot review** — Watch OCR → 90-day CompareTable + audit / hybrid fallback
 - **Lab / supplement attachment QA** — vision parse, episodic focus, numerics compliance
@@ -207,7 +211,7 @@ Empty warehouse is OK — you can chat immediately; import Apple Health `export.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PHA_HOST` | `127.0.0.1` | Bind address (`0.0.0.0` in Docker) |
+| `PHA_HOST` | `127.0.0.1` | Bind address (`0.0.0.0` for iPhone fact card / Docker; do not expose 8788 to the WAN) |
 | `PHA_PORT` | `8788` | HTTP port |
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama API |
 | `OLLAMA_MODEL` | `qwen2.5:7b-instruct` | Default chat model |

@@ -1,5 +1,7 @@
 # Stage 3A.1 — 附件单资产问答治理（RFC）
 
+> **Language / 语言**：[English](stage3a1-attachment-qa-governance.en.md) · 中文（本文）
+
 > **基线**：`pha-v2.3.3-stage3a-vision-ocr-guard`  
 > **目标构建**：`pha-v2.3.3-stage3a1-attachment-qa-governance`  
 > **状态**：✅ 已编码

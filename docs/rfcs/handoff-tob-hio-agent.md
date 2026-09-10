@@ -1,5 +1,7 @@
 # ToB 交接文档 · Hospital IoT Ops Agent（HIO）
 
+> **Language / 语言**：[English](handoff-tob-hio-agent.en.md) · 中文（本文）
+
 > **读者**：专门负责 ToB / HIO 的新 Agent（及人类负责人）  
 > **作者视角**：PHA / harness-core 主线 Agent 的产品判断与资产交接  
 > **日期**：2026-07-11  

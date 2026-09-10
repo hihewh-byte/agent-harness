@@ -1,5 +1,7 @@
 # PHA Harness — builder overview (OSS)
 
+> **Language / 语言**：English (this document) · [中文](harness-builder-overview.zh.md)
+
 > Status: descriptive overview for external readers · not a standalone SDK yet  
 > Baseline: [harness-consensus-opus48-2026-06-08.md](harness-consensus-opus48-2026-06-08.md)
 

@@ -1,5 +1,7 @@
 # PHA Harness Evidence Matrix（v2.2.5 声明式契约）
 
+> **Language / 语言**：[English](harness-evidence-matrix.en.md) · 中文（本文）
+
 > **状态**：Phase 0 规范文档。`mode=as_is` 时运行时仅做对照报告，不强制按本表改变行为。  
 > **Phase 1** 起由 `TurnEvidencePlan` 查表执行。
 

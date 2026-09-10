@@ -1,5 +1,7 @@
 # Stage 3d — 穿戴真机 E2E 红绿验收清单（D-3d-2）
 
+> **Language / 语言**：[English](stage3d-wearable-e2e-checklist.en.md) · 中文（本文）
+
 > **状态**：✅ **Ratified（法理锁定）** — 真机签字标准  
 > **版本**：v1.0（2026-06-27）  
 > **绑定编码任务**：C-1（E1）· C-2（E2–E3）  

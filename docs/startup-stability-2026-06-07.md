@@ -1,5 +1,7 @@
 # PHA 启动与保活问题根因（2026-06-07）
 
+> **Language / 语言**：[English](startup-stability-2026-06-07.en.md) · 中文（本文）
+
 > **当前推荐启动方式**：`bash scripts/pha_restart_accept.sh` 或双击 `scripts/macos/PHA-Serve.command`（前台）  
 > **Build**：`pha-v2.3.29.1-wearable-chat-steps-fix`  
 > **刻意不恢复**：`pha_daemon.sh` / LaunchAgent（见 §3）

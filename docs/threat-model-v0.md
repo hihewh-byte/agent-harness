@@ -1,5 +1,7 @@
 # Threat Model v0 — Harness Core + Loop
 
+> **Language / 语言**：English (this document) · [中文](threat-model-v0.zh.md)
+
 > Scope: the harness control plane (online `harness_core` + offline Harness Loop) as vendored in this repo.
 > Non-scope: PHA application security (web UI, storage encryption, macOS packaging) — tracked separately.
 > Status: v0 (audit plan P1-4). One page by design; expand only when a real integration demands it.

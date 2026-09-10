@@ -1,5 +1,7 @@
 # Stage 3C — 附件焦点 × 全库证据桥接规格书
 
+> **Language / 语言**：[English](stage3c-episodic-evidence-bridge.en.md) · 中文（本文）
+
 > **版本**：v0.1（2026-05-26）  
 > **状态**：📋 Spec（待编码）  
 > **依赖**：3A 会话焦点、`session_turn_focus`、Harness Plan  

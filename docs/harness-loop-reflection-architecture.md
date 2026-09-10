@@ -7,7 +7,7 @@
 | 中文 | [harness-loop-reflection-architecture.zh.md](harness-loop-reflection-architecture.zh.md) |
 | English | [harness-loop-reflection-architecture.en.md](harness-loop-reflection-architecture.en.md) |
 
-**Convention / 约定**：新增或修订架构/RFC 级文档时，请同时更新 `.zh.md` 与 `.en.md`（本文件为索引页，不含正文）。
+**Convention / 约定**：新增或修订维护者文档时，同时更新中英孪生（见 [`bilingual.md`](bilingual.md) / [`bilingual.zh.md`](bilingual.zh.md)）。架构/RFC 级可用 `.zh.md` + `.en.md`（本文件为索引页，不含正文）。
 
 ---
 

@@ -1,8 +1,45 @@
 # Harness Change Log
 
+> **Language / 语言**：[English](harness-change-log.en.md) · 中文（本文）
+
 > Purpose: mandatory shared context log for harness architecture changes.
 
 ---
+
+## 2026-09-10 (P1：脉络丢指标字段残行)
+
+- **类别**：**P1（FR-6.12 v1.20 · 3F §20）**。
+- **改动**：CHB 解读脉络过滤去数字后的指标字段残行。空则不注入。
+- **证据**：`scripts/pha_chb_compiler_selfcheck.py`。
+- **回滚**：去掉 `_is_lineage_field_stub`。
+
+## 2026-09-10 (P1：TASK 槽契约零编数 + brief 在场不得 skip)
+
+- **类别**：**P1（FR-6.8 / FR-6.12 v1.19 · 3F §19）**。
+- **改动**：`fact_card_interpret` TASK 禁派生百分位、brief 在场不得整槽 skip；导语对齐。投影按 rows 重渲染。**不**放水 Numerics，**不加** interpret 到 `USER_CONTEXT_BRIEF_PROFILES`。
+- **证据**：`scripts/pha_fact_card_selfcheck.py` TASK 断言；`scripts/pha_chb_compiler_selfcheck.py`。
+- **回滚**：TASK / lead 回到 skip-when-unrelated。
+
+## 2026-09-10 (P1：CHB background_rows + USER_CONTEXT_BRIEF 投影 §Background)
+
+- **类别**：**P1（FR-6.12 v1.18 · 3F §18）**。
+- **改动**：CHB 自述行结构化；聊天 `USER_CONTEXT_BRIEF` 带 §Background。解读轮仍只 `USER_BACKGROUND_BRIEF`。**不加** interpret 到 `USER_CONTEXT_BRIEF_PROFILES`。TASK 不改。
+- **证据**：`scripts/pha_chb_compiler_selfcheck.py`。
+- **回滚**：投影去掉 background 段。
+
+## 2026-09-10 (P1 编码：M1-P20 exclusive 注入 + M1-P15 CHB)
+
+- **类别**：**P1（FR-6.8 / FR-6.12 v1.16 · 3F §17）**。
+- **改动**：exclusive 解读轮 Manifest/FACT_CARD_CONTEXT ⊆ `infer_wearable_metric_ids`；brief 读侧与捕获同一 negative；CHB 组合 hash + interpret 投影无 §Facts；GET 事实卡后台 `recompile_chb_if_stale`（同日一次）。**不**扫全卡、**不**翻转 Data > Context、**不**把 brief 数字进 Manifest、**不加** `fact_card_interpret` 到 `USER_CONTEXT_BRIEF_PROFILES`。
+- **证据**：`scripts/pha_p20_selfcheck.py`；`scripts/pha_chb_compiler_selfcheck.py` P15；`pha_fact_card_selfcheck` 问句夹具。
+- **回滚**：`PHA_EXCLUSIVE_INJECT_NAMED=0`；`PHA_CHB_AUTOCOMPILE=0`。
+
+## 2026-09-10 (P1 编码：M1-P19 评测审计落地)
+
+- **类别**：**P1（FR-6.8 / FR-6.13 v1.15 · 3F §16）**。
+- **改动**：emphasis TASK 第 1 句 overall（exclusive 不加）；`fact_card_interpret` / `wearable_daily_review` 提高本 profile T0 预算、FACT_CARD_CONTEXT 可压 advice、禁止 `_cap_system_content` 尾切 T0；事实卡 profile 的 `format_manifest_tier0_block` **不**按 600 字砍 KV；`build_fact_card_event` 有卡时 scope ⊆ 卡行；`workout_*` intent_hints 去掉光秃「运动/training」。**不**做 must 覆盖/缺行重试/prefs∩；**不**提前 P15。
+- **证据**：`scripts/pha_p19_selfcheck.py`；`pha_p17_p18_selfcheck` 回归；registry bundle `--check`。
+- **回滚**：见交接 `handoff-2026-09-10-eval-audit-solution.md` §3。
 
 ## 2026-09-09 (P1 编码：P17 大纲分档 + P18 context_lookup)
 

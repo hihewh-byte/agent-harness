@@ -1,5 +1,7 @@
 # Stage 3G — E2E 口语风暴修复 RFC
 
+> **Language / 语言**：[English](stage3g-e2e-remediation-rfc.en.md) · 中文（本文）
+
 > **版本**：v0.3（2026-06-26）  
 > **状态**：Implemented（P0/P1/P1b/P2 已编码并验收）  
 > **上游**：[`stage3f-intent-resolution-completeness-rfc.md`](stage3f-intent-resolution-completeness-rfc.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md)  

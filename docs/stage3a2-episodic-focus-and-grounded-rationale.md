@@ -1,5 +1,7 @@
 # Stage 3A.2 — 会话情节焦点 + 有据推论（RFC）
 
+> **Language / 语言**：[English](stage3a2-episodic-focus-and-grounded-rationale.en.md) · 中文（本文）
+
 > **基线**：`pha-v2.3.3-stage3a1-attachment-qa-governance`  
 > **目标构建**：`pha-v2.3.3-stage3a2-episodic-focus-grounded`  
 > **状态**：✅ 已编码

@@ -1,5 +1,7 @@
 # Stage 3F — 意图解析完整性 RFC
 
+> **Language / 语言**：[English](stage3f-intent-resolution-completeness-rfc.en.md) · 中文（本文）
+
 > **文件名**：`stage3f-intent-resolution-completeness-rfc.md`  
 > **版本**：v0.1（2026-06-17）  
 > **状态**：✅ **Approved · 架构完整性锁定版** · §15 为 v1.14 增补（M1-P17 / P18 已编码）  
@@ -439,10 +441,10 @@ Flag：`PHA_SHADOW_ROUTING=1`（沿用 v2.3 Stage 2D，扩展 shadow 字段）
 | mode | 标记（catalog tokens，编码时定稿） | 叙述 |
 |------|-------------------------------------|------|
 | `exclusive` | 只看 / 仅 / only look at | P9.5b：只谈点名行 |
-| `emphasis` | 重点看 / 侧重 / especially | 点名为主；其它勾选有值行可同段带过，禁另起专题段 |
+| `emphasis` | 重点看 / 侧重 / especially | 点名为主；其它勾选有值行可同段带过，禁另起专题段。**v1.15**：英文 TASK 第 1 句 = overall（无 metric label）；`exclusive` 不得要求整体起笔 |
 | `cover-card` | 未命中上两档 | 覆盖勾选有值行 |
 
-优先级 **exclusive > emphasis > cover-card**。`daily_readiness` 不得默认 exclusive。Python 不解析评估要求中的指标 id。
+优先级 **exclusive > emphasis > cover-card**。`daily_readiness` 不得默认 exclusive。Python 不解析评估要求中的指标 id。不得把 emphasis 改成 cover-card（有值必须点到）；不得缺行再跑一轮 LLM。
 
 ### 15.2 `goal_class=context_lookup`
 
@@ -456,7 +458,7 @@ Flag：`PHA_SHADOW_ROUTING=1`（沿用 v2.3 Stage 2D，扩展 shadow 字段）
 | `context_lookup` 且显式 metric | — | **不** warehouse skip-LLM；数字走点名指标；背景仅 brief 切片 | router_profile（通常 `wearable_only`） | `explicit_metric_with_context_lookup` |
 | 纯 metric_specific（如 90d HRV 趋势） | — | 不变 | router_profile | `schema_default` |
 
-升舱 `combined_review` 仍禁止静默全量 `SUPPLEMENT_BG`。`fact_card` ⊆ `turn_scope.metric_keys`；空则不上卡。
+升舱 `combined_review` 仍禁止静默全量 `SUPPLEMENT_BG`。`fact_card` ⊆ `turn_scope.metric_keys`；空则不上卡。**v1.15**：`wearable_daily_review` 在已有 FACT_CARD_CONTEXT 时，SSE ⊆ 该卡 metric 行（含合法簇展开）；训练词不把 `workout_*` 塞进 scope。
 
 ### 15.3 捕获
 
@@ -471,6 +473,69 @@ Flag：`PHA_SHADOW_ROUTING=1`（沿用 v2.3 Stage 2D，扩展 shadow 字段）
 
 编码映射：共识 P1（catalog + Arbiter 行 + plan 发卡过滤）；flag 见交接 §3。
 
+---
+
+## 16. v1.15 增补（Approved · 评测审计落地）
+
+> 2026-09-10 维护者授权：40+40 三方案按共识改写后开工。真源 [`handoff-2026-09-10-eval-audit-solution.md`](handoff-2026-09-10-eval-audit-solution.md)。**不废止** §15。
+
+| 项 | 做 | 不做 |
+|---|---|---|
+| Tier0 | 卡上已有行 KV / Manifest 不得尾截断；超限先压 FACT_CARD_CONTEXT advice | 单纯调大全局 4500 作为唯一修复；`_cap_system_content` 砍 T0 |
+| TASK | emphasis Sentence 1 = overall | exclusive 整体起笔；黄金一句 Python if |
+| 发卡 | SSE ⊆ FACT_CARD_CONTEXT metric 行 | prefs ∩ 裁簇展开；must 覆盖；缺行重试 |
+
+编码映射：共识 P1；卡 **M1-P19**。
+
+---
+
+## 17. v1.16 增补（Approved · exclusive 注入 + 规则层为准 + P15）
+
+> 2026-09-10 维护者口令：按 1–5 顺序开工，事项 4（换模型）不做。真源 PRD v1.16。**不废止** §15 / §16。
+
+| 项 | 做 | 不做 |
+|---|---|---|
+| exclusive 注入 | 仅 exclusive 解读轮 `FACT_CARD_CONTEXT` + Manifest ⊆ catalog `infer_wearable_metric_ids`；可见 HTML 卡仍整卡；空则 fail-closed | 扫全卡；Python 新写评估要求解析器；emphasis/cover 裁卡；must 覆盖 |
+| 起笔 / 训练 | 以规则层 summary/advice 为准；P19 Sentence 1 不加字；金标改 telemetry | 为黄金一句加 Python if；按 band 生成「可以力量训练」 |
+| brief 读侧 | 配额前与捕获同一 `background_capture_negative_keywords` | 偏爱长笔记；运行时 LLM 自愈 |
+| P15 CHB | §Background + lineage；组合 hash；GET 事实卡后台同日一次；interpret 投影无 §Facts | `USER_CONTEXT_BRIEF_PROFILES` 加 `fact_card_interpret`；brief 数字进 Manifest |
+
+编码映射：共识 P1；卡 **M1-P20** / **M1-P15**。Flag：`PHA_EXCLUSIVE_INJECT_NAMED`、`PHA_CHB_AUTOCOMPILE`（均默认 1）。
+
+---
+
+## 18. v1.18 增补（Approved · CHB 自述行 + USER_CONTEXT_BRIEF 投影 §Background）
+
+> 2026-09-10 维护者选第 2 刀。真源 PRD v1.18。**不废止** §15–§17。
+
+| 项 | 做 | 不做 |
+|---|---|---|
+| 编译 | notes → `background_rows[]`：`category` + 去数字短句 + 相对时间 + `prov_type=user_statement`；时段拆行沿用 copy 词表 | 药名/补剂名 Python 表；自述进 §Facts / Manifest |
+| 聊天投影 | `USER_CONTEXT_BRIEF`（lifestyle / combined）必须带 §Background | 解读轮加 `USER_CONTEXT_BRIEF`；`USER_CONTEXT_BRIEF_PROFILES` 加 `fact_card_interpret` |
+| 解读 | 同一组行经既有 `USER_BACKGROUND_BRIEF` | 改 TASK 第 5 条；「点名训练则补剂相关」 |
+
+---
+
+## 19. v1.19 增补（Approved · TASK 槽契约：零编数 + brief 在场不得 skip）
+
+> 2026-09-10 黄金句审计熔断 21.5/85/95。维护者采纳通用槽契约，**不废止** §15–§18。数字真源仍是 Manifest / FACT_CARD_CONTEXT，不是 CHB §Facts。
+
+| 项 | 做 | 不做 |
+|---|---|---|
+| 零编数 | TASK 禁止发明或派生额外数字/百分比（含 100−百分位）；无 Manifest token 只用定性词；人群示例去掉会诱出 95 的 `95%` | 放水 Numerics；brief 数字进 Manifest |
+| 背景槽 | brief 在场则 in-scope，禁止整槽 skip；导语去掉「无关则忽略」；写入建议句，不另起编号注意事项清单 | 「点名训练则补剂相关」；药名表；解读轮加 `USER_CONTEXT_BRIEF` |
+
+编码映射：共识 P1；卡 **M1-P15** 仍 IN_PROGRESS。
+
+---
+
+## 20. v1.20 增补（Approved · 脉络丢指标字段残行）
+
+> 2026-09-10。真源 PRD v1.20。**不废止** §15–§19。
+
+| 项 | 做 | 不做 |
+|---|---|---|
+| 脉络 | 只保留反复出现的注意事项句；去数字后的今日值/百分位/窗口均值残行丢弃；空则不注入 | 放水审计；药名表；从注入里拿掉卡上百分位（规则层仍用百分位分档） |
 
 ---
 

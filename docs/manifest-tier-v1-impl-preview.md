@@ -1,5 +1,7 @@
 # Manifest Tier v1 实现预览（v2.2.12）
 
+> **Language / 语言**：[English](manifest-tier-v1-impl-preview.en.md) · 中文（本文）
+
 > **状态**：Diff / 设计预览 — **待文辉 Review 通过后落盘代码**  
 > **基线**：`pha-v2.2.11-a-plus`  
 > **规范**：[`manifest-tier-v1.md`](manifest-tier-v1.md) v1.1 + 多语言沙箱追加条款  

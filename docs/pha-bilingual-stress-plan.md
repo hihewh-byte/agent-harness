@@ -1,5 +1,7 @@
 # PHA 双语压测方案（50×中文 + 50×英文多轮）
 
+> **Language / 语言**：[English](pha-bilingual-stress-plan.en.md) · 中文（本文）
+
 > 本地测试专用。使用本机数仓与附件资产；不向外部发送个人数据。
 
 ## 目标

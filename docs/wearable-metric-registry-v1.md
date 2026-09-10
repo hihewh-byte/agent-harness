@@ -1,5 +1,7 @@
 # Wearable Metric Registry v1 — 运维与扩展手册
 
+> **Language / 语言**：[English](wearable-metric-registry-v1.en.md) · 中文（本文）
+
 > **状态**：**已编码**（Wave 3d-δ-c · `pha-v2.3.23`）  
 > **配置真源**：[`storage/registry/wearable_metric_registry.json`](../storage/registry/wearable_metric_registry.json)  
 > **加载模块**：`pha/wearable_metric_registry.py`  

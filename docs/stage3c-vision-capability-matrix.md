@@ -1,5 +1,7 @@
 # PHA 图像识别能力矩阵与工具选型
 
+> **Language / 语言**：[English](stage3c-vision-capability-matrix.en.md) · 中文（本文）
+
 > **版本**：v0.3（2026-05-27）  
 > **读者**：架构决策、3B-β 选型  
 > **关联**：[`stage3b-beta-vision-worker-spec.md`](stage3b-beta-vision-worker-spec.md) §0.1 · §7.2 · §7.6

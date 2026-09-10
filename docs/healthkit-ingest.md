@@ -1,7 +1,11 @@
 # HealthKit ingest（M0）
 
+> **Language / 语言**：[English](healthkit-ingest.en.md) · 中文（本文）
+
 把 iPhone「健康」里的 Watch 样本推到本机 PHA：`POST /ingest/healthkit`。  
 **不是** zip 导入（那是 `POST /data/upload`）。Mac **不能**直连 Watch。
+
+Clone 开通：[pha-fact-card-lan.zh.md](pha-fact-card-lan.zh.md)（[English](pha-fact-card-lan.md)）。公开模板：[shortcuts/pha-daily.shortcut](../shortcuts/pha-daily.shortcut)（导入时再填 URL/token，仓内无密钥）。
 
 自检（假数据、临时库）：
 
@@ -13,18 +17,18 @@ python scripts/pha_healthkit_ingest_selfcheck.py
 
 ---
 
-## 0. 本机现状（2026-09-04）
+## 0. 本机准备（具体值不要写进 git）
 
 已在 gitignored `.env` 配好并经官方 `scripts/pha_restart_accept.sh` 重启（launchd）：
 
-| 项 | 值 |
-|----|----|
-| 监听 | `0.0.0.0:8788` |
-| 本机名 | `http://WenhuideMacBook-Air.local:8788`（DHCP 换 IP 时仍可用） |
-| 当前局域网 IP | 会变；2026-09-04 为 `192.168.77.125`（旧捷径里的 `192.168.77.21` 已失效，会 timeout） |
+| 项 | 规则 |
+|----|------|
+| 监听 | `0.0.0.0:8788`，否则手机打不到 |
+| 本机名 | `http://<LocalHostName>.local:8788`（DHCP 换 IP 时仍可用）。**真实主机名不要写进 git** |
+| 局域网 IP | 会变；旧捷径里的 IP 会 timeout |
 | Token | `.env` 的 `PHA_INGEST_TOKEN`（不要写进文档/不要 commit） |
-| 时区 | `PHA_INGEST_TZ=Asia/Shanghai` |
-| 健康权限 | 「PHA 同步健康」按优先级包请求：步数、活动消耗、静息心率、HRV、血氧、呼吸率、VO2max、腕温。睡眠另走「PHA 同步睡眠」。Find 新标签真机未验 |
+| 时区 | `PHA_INGEST_TZ`（例如 `Asia/Shanghai`） |
+| 健康权限 | 数量包：步数、活动消耗、静息心率、HRV、血氧、呼吸率、VO2max。睡眠另走睡眠捷径。腕温不在当前包 |
 
 已签名捷径（含 URL + token，勿提交 git）：
 

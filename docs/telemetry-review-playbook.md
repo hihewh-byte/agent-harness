@@ -1,5 +1,7 @@
 # PHA Route Telemetry 运营手册
 
+> **Language / 语言**：[English](telemetry-review-playbook.en.md) · 中文（本文）
+
 > **版本**：v1（Week 0）  
 > **目标**：让「观测先行」**可被每周执行**，而非仅字段存在。  
 > **关联**：HarnessBuildReport · [`stage3b-perception-worker-rfc.md`](stage3b-perception-worker-rfc.md) §8
