@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Weekly PHA Loop harvest + notify (proposal-only).
+
+  Install:
+    1. Copy to ~/Library/LaunchAgents/com.pha.loop-weekly.plist
+    2. Edit PATHS / env below (REPO, E2E jsonl, tokens, SMTP, webhook)
+    3. launchctl load ~/Library/LaunchAgents/com.pha.loop-weekly.plist
+
+  Default schedule: Monday 09:30 local.
+
+  Iron rule: does NOT merge catalog. Creates pending approval + notifies.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.pha.loop-weekly</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd "$HOME/Documents/myAgents/personal_health_agent" &amp;&amp; source .venv/bin/activate &amp;&amp; export PYTHONPATH=. PHA_LOOP_NOTIFY_APPLY=1 PHA_LOOP_BASE_URL=http://127.0.0.1:8788 &amp;&amp; python3 scripts/pha_loop_weekly_harvest.py --e2e-jsonl "${PHA_E2E_JSONL:-reports/e2e/latest_failures.jsonl}" --notify-apply &gt;&gt; "$HOME/Library/Logs/pha/loop-weekly.log" 2&gt;&amp;1</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>1</integer>
+    <key>Hour</key>
+    <integer>9</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>
