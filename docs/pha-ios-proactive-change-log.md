@@ -2,6 +2,13 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-11 (CHB 脉络 stub 正则 flags · 对话 HTTP 0)
+
+- **类别**：P0 / 对话 SSE。穿戴+补剂同轮挂 `USER_CONTEXT_BRIEF` 时 import `chb_compiler` 炸。
+- **改动**：`_LINEAGE_WINDOW_STUB_RE` 改 `re.I` 编译期 flags。build `pha-v2.3.47-lineage-stub-re-flags`。
+- **证据**：venv Python 3.12 `re.error` 复现；`pha_chb_compiler_selfcheck`。
+- **回滚**：回 v2.3.46。
+
 ## 2026-09-11 (点日集合枚举 + 穿戴轮 CHB background)
 
 - **类别**：P1 / 对话取数 · FR-6.14。

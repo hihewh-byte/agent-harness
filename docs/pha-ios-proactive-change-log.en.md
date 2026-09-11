@@ -2,6 +2,13 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-11 (CHB lineage stub regex flags · chat HTTP 0)
+
+- **Class**: P0 / chat SSE. Wearable+supplement turns mount `USER_CONTEXT_BRIEF` and import `chb_compiler`, which crashed.
+- **Change**: `_LINEAGE_WINDOW_STUB_RE` uses compile-time `re.I`. build `pha-v2.3.47-lineage-stub-re-flags`.
+- **Evidence**: venv Python 3.12 `re.error` reproduced; `pha_chb_compiler_selfcheck`.
+- **Rollback**: revert to v2.3.46.
+
 ## 2026-09-11 (named-day enumerate + wearable CHB background)
 
 - **Class**: P1 / chat evidence · FR-6.14.

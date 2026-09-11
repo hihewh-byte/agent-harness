@@ -171,6 +171,18 @@ def test_user_context_brief_empty_without_artifact() -> None:
         _assert(block == "", f"expected empty block, got: {block!r}")
 
 
+def test_lineage_window_stub_regex_compiles() -> None:
+    """Inline (?i) mid-pattern crashes CPython 3.11+ and SSE'd HTTP 0 on chat."""
+    from pha.chb_compiler import _is_lineage_field_stub
+
+    _assert(_is_lineage_field_stub("近12个月均值", locale="zh-CN"), "cn window stub")
+    _assert(_is_lineage_field_stub("rolling mean", locale="en"), "en mean stub")
+    _assert(
+        not _is_lineage_field_stub("晚间补剂与作息相关", locale="zh-CN"),
+        "caution sentence is not a field stub",
+    )
+
+
 def test_wearable_supplement_brief_mount() -> None:
     from pha.harness_plan import build_turn_evidence_plan
 
@@ -456,6 +468,8 @@ def main() -> int:
     print("PASS USER_CONTEXT_BRIEF empty without artifact")
     test_user_context_brief_forbidden_on_grounded()
     print("PASS USER_CONTEXT_BRIEF forbidden on grounded")
+    test_lineage_window_stub_regex_compiles()
+    print("PASS lineage window stub regex compiles on 3.11+")
     test_wearable_supplement_brief_mount()
     print("PASS wearable_only mounts USER_CONTEXT_BRIEF on schema positive score")
     test_write_artifact()

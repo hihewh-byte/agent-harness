@@ -499,8 +499,10 @@ def compute_live_background_hash(
 
 
 _LINEAGE_SPLIT_RE = re.compile(r"[。！？!?\n]+")
+# re.I must be a compile flag: Python 3.11+ rejects inline (?i) after the first alternative.
 _LINEAGE_WINDOW_STUB_RE = re.compile(
-    r"近.{0,16}(均值|最低|最高|夜数|天数)|(?i)\b(mean|minimum|maximum|percentile)\b"
+    r"近.{0,16}(均值|最低|最高|夜数|天数)|\b(mean|minimum|maximum|percentile)\b",
+    re.I,
 )
 
 

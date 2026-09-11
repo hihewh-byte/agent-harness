@@ -2,6 +2,13 @@
 
 > **Language / 语言**：English (this document) · [中文](harness-change-log.md)
 
+## 2026-09-11 (P0: CHB lineage stub regex flags)
+
+- **Category**: **P0 (chat SSE / HTTP 0)**. Field: compare two-day HRV + which supplements in use → `request failed HTTP 0` / `global flags not at the start of the expression at position 25`.
+- **Change**: `_LINEAGE_WINDOW_STUB_RE` moves `(?i)` to `re.compile(..., re.I)`. Python 3.11+ rejects inline flags after the first alternative; wearable turns that mount `USER_CONTEXT_BRIEF` import `chb_compiler` and crash; orchestrator SSE's the `re.error`. build `pha-v2.3.47-lineage-stub-re-flags`.
+- **Evidence**: `python3.12` reproduces `re.error`; `pha_chb_compiler_selfcheck` (incl. `test_lineage_window_stub_regex_compiles`).
+- **Rollback**: revert to v2.3.46 (chat HTTP 0 returns).
+
 ## 2026-09-11 (P1: M1-P15 → DONE)
 
 - **Category**: **P1 (§8 stamp)**. Maintainer: fixture-med unfit for training gold; `slot_named_ge2` 5/10 acceptable.

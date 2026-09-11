@@ -2,6 +2,13 @@
 
 > **Language / 语言**：[English](harness-change-log.en.md) · 中文（本文）
 
+## 2026-09-11 (P0：CHB 脉络 stub 正则 flags)
+
+- **类别**：**P0（对话 SSE / HTTP 0）**。真机：「对比这两天 HRV + 正在服用哪些补剂」→ `请求失败 HTTP 0` / `global flags not at the start of the expression at position 25`。
+- **改动**：`_LINEAGE_WINDOW_STUB_RE` 的 `(?i)` 改为 `re.compile(..., re.I)`。Python 3.11+ 禁止在第一段 alternative 之后写 inline flags；穿戴轮挂 `USER_CONTEXT_BRIEF` 时 import `chb_compiler` 即炸，orchestrator 把 `re.error` 推成 SSE `error`。build `pha-v2.3.47-lineage-stub-re-flags`。
+- **证据**：`python3.12` 复现 `re.error`；`pha_chb_compiler_selfcheck`（含 `test_lineage_window_stub_regex_compiles`）。
+- **回滚**：回 v2.3.46（对话框会再 HTTP 0）。
+
 ## 2026-09-11 (P1：M1-P15 → DONE)
 
 - **类别**：**P1（§8 盖章）**。维护者：药物项A不作训练黄金句；`slot_named_ge2` 5/10 可接受。
