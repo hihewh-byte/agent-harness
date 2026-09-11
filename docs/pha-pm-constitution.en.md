@@ -24,7 +24,7 @@ This constitution is the highest standing rule for PHA. Goal: stay inside on-dev
 
 1. **Rule**: feature evolution, harness gate upgrades, and prompt edits must be 100% driven by `Telemetry Track` (real-device logs) or automated tests that actually failed.
 2. **Anti-pattern**: god’s-eye feature invention and “pseudo-code hype” in chat.
-3. **Canonical contract**: `RECALL_FOCUS` floor slots and Active Recall exist because real multi-turn R3 showed an 11B local model forgetting turn-1 ledger facts (fixture-med start) under long-context noise. Features must “see the words, book the fact, start from the pain”.
+3. **Canonical contract**: `RECALL_FOCUS` floor slots and Active Recall exist because real multi-turn R3 showed an 11B local model forgetting turn-1 ledger facts (when aligning fixture-med) under long-context noise. Features must “see the words, book the fact, start from the pain”.
 
 ---
 
