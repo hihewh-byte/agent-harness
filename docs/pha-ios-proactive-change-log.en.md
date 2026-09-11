@@ -1,3 +1,7 @@
+# PHA iOS Proactive Change Log
+
+> **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
+
 ## 2026-09-11 (named-day enumerate + wearable CHB background)
 
 - **Class**: P1 / chat evidence · FR-6.14.

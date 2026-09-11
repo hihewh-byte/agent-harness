@@ -1,3 +1,7 @@
+# PHA iOS Proactive Change Log
+
+> **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
+
 ## 2026-09-11 (点日集合枚举 + 穿戴轮 CHB background)
 
 - **类别**：P1 / 对话取数 · FR-6.14。

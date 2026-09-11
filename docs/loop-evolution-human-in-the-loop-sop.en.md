@@ -1,5 +1,7 @@
 # Loop + Reflection Human-in-the-Loop SOP
 
+> **Language / 语言**：English (this document) · [中文](loop-evolution-human-in-the-loop-sop.zh.md)
+
 > **Reference implementation plugin** for harness-core **Harness Loop** offline loops
 > (PHA hosts the runnable scripts until `packages/harness_loop` extraction).  
 > **Operational playbook** for evolving PHA catalog aliases (Loop A / R2) and T0 facts (Loop B)

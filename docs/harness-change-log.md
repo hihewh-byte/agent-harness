@@ -1,3 +1,7 @@
+# Harness Change Log
+
+> **Language / 语言**：[English](harness-change-log.en.md) · 中文（本文）
+
 ## 2026-09-11 (P1：M1-P15 → DONE)
 
 - **类别**：**P1（§8 盖章）**。维护者：药物项A不作训练黄金句；`slot_named_ge2` 5/10 可接受。
