@@ -350,6 +350,7 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-10 | 维护者定：① 腕温权限推迟到第二批指标进入勾选名单再处理；② 深睡/REM 占比人群参考不做（用户可自行计算，无 sourced 指南不编造）；③ 开 P15 剩余验收 | FR-2.8 从 v1 适用集去掉深睡/REM 占比；§8 P12 `DONE`（去 `*`）、P7 去掉占比 TODO、P15 改回 `IN_PROGRESS` |
 | 2026-09-10 | 卫生 Q=9 `--apply`；长自述按时段词拆短条。黄金句 `brief_source=chb` 审计过，注意事项仍未带出 | §8 P15 仍 IN_PROGRESS；change-log 本条 |
 | 2026-09-10 | 维护者采纳第 2 刀：编译层结构化自述行 + 聊天 `USER_CONTEXT_BRIEF` 补 §Background。否决「训练⇒补剂相关」TASK 补丁，也否决把 `USER_CONTEXT_BRIEF` 加进解读轮 | v1.18 FR-6.12；P15 仍 IN_PROGRESS |
+| 2026-09-11 | iPhone 同网：Safari `*.local:8788` 生成 exclusive 静息心率解读；维护者接受截图（文末 HRV 软漏可接受） | §8 M1-P20 / M1 → `DONE`；PRD v1.23 |
 | 2026-09-11 | 维护者盖章 P15：药物项A不宜作训练黄金句；`slot_named_ge2` 5/10 可接受；遗留审计/频率/prefs 漂移另开 | §8 M1-P15 → `DONE`；PRD v1.22 |
 | 2026-09-10 | 黄金句审计熔断虚构百分位 21.5/85/95。维护者采纳 TASK 槽契约：零编数 + brief 在场不得 skip。不放水审计、不上药名表 | v1.19 FR-6.8 / FR-6.12；P15 仍 IN_PROGRESS |
 
@@ -387,6 +388,7 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-10 | v1.17 | FR-2.8 v1 参考层去掉深睡/REM 占比（不编造指南）；腕温推迟第二批勾选（P12 去 `*`）；P15 开剩余验收 |
 | 2026-09-10 | v1.18 | FR-6.12：CHB `background_rows`（无剂量自述行）+ `USER_CONTEXT_BRIEF` 必须投影 §Background。解读轮仍只 `USER_BACKGROUND_BRIEF`。TASK 不改。不进 §Facts / Manifest |
 | 2026-09-10 | v1.19 | FR-6.8 TASK：禁止派生百分位；brief 在场不得整槽 skip。审计不放水。P15 仍 IN_PROGRESS |
+| 2026-09-11 | v1.23 | §8 M1-P20 / M1 → DONE（iPhone 同网 exclusive 静息心率截图盖章；注入仅 RHR） |
 | 2026-09-11 | v1.22 | §8 M1-P15 → DONE（维护者：黄金句 5/10 槽内 ≥2 可接受；药物项A不宜作训练黄金句）。遗留审计/频率/prefs 漂移另开 |
 | 2026-09-11 | v1.21 | FR-6.10：Manifest `population_commons`（训练常识整数 ∧ 同句无卡标签）。P15 黄金句门槛：槽内 ≥2 具体项；药物项A∧补剂项B仅 meds-HRV |
 | 2026-09-10 | v1.20 | FR-6.12 脉络丢指标字段残行。P15 仍 IN_PROGRESS |

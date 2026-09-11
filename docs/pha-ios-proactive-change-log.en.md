@@ -48,6 +48,13 @@
 - **Acceptance**: 9/11 vs Health app Δ≤1min; `pha_wearable_daily_aggregator_selfcheck` PASS (incl. `test_mixed_segments_prefer_healthkit`).
 - **Rollback**: restore “hk only when no other” branch.
 
+## 2026-09-11 (P20 iPhone same-network → DONE)
+
+- **Category**: P1 / §8 M1-P20. Maintainer provided Safari screenshot and accepts the body.
+- **Evidence**: same-LAN `*.local:8788` Private; prefs exclusive “only today’s resting HR…” → disk inject `resting_heart_rate_bpm` only (full card still multi-select); screenshot numbers ⊆ card/Manifest; brief names concrete slot items (synthetic fixture labels only). Mac also ran deep-sleep exclusive: `reports/p20_eval/runs_p20_iphone_lan_exclusive_deep.json` status=done.
+- **Soft leak (accepted)**: closing HRV mention. PRD **v1.23** · M1 rollup drops `*`.
+- **No git in this chat**.
+
 ## 2026-09-11 (P15 → DONE · maintainer stamp)
 
 - **Category**: P1 / §8 M1-P15. Maintainer: fixture-med unfit for training gold; `slot_named_ge2` **5/10** acceptable.

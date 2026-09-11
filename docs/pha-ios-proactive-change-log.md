@@ -48,6 +48,13 @@
 - **验收**：9/11 vs 健康 App Δ≤1min（入睡/核心/深/REM/清醒）；`pha_wearable_daily_aggregator_selfcheck` PASS（含 `test_mixed_segments_prefer_healthkit`）。
 - **回滚**：恢复「仅无 other 时用 hk」分支。
 
+## 2026-09-11 (P20 iPhone 同网 → DONE)
+
+- **类别**：P1 / §8 M1-P20。维护者提供 Safari 截图并接受正文。
+- **证据**：同网 `*.local:8788` Private；prefs exclusive「只看今天的静息心率…」→ 磁盘注入仅 `resting_heart_rate_bpm`（整卡仍多选）；截图数字 ⊆ 卡/Manifest；brief 含槽内具体自述项（合成夹具标签，不写真实品名）。Mac 侧另跑「只看今天的深睡」：`reports/p20_eval/runs_p20_iphone_lan_exclusive_deep.json` status=done、注入仅深睡。
+- **软漏（接受）**：文末提到 HRV（未点名行）。PRD **v1.23** · M1 汇总去 `*`。
+- **本对话不 git**（另 agent 提交）。
+
 ## 2026-09-11 (P15 → DONE · 维护者盖章)
 
 - **类别**：P1 / §8 M1-P15。维护者：药物项A不宜作训练黄金句；`slot_named_ge2` **5/10** 可接受。
