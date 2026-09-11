@@ -1035,10 +1035,6 @@ def public_template_leak(blob: str | bytes, env: Optional[dict[str, str]] = None
     for needle in _machine_needles(env or _load_env()):
         if needle in text:
             return "machine secret or hostname would ship in the public shortcut"
-    lowered = text.lower()
-    for banned in ("wenhuidemacbook",):
-        if banned in lowered:
-            return "banned personal hostname fragment in public shortcut"
     return ""
 
 
