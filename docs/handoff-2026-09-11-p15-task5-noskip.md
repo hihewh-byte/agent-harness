@@ -62,7 +62,7 @@ CONSENSUS_ACK: stage3f-intent-resolution-completeness-rfc read
 |---|---|
 | M1-P6 / P7 / P12 | DONE（占比参考关；**个人百分位仍在卡 JSON/Manifest**） |
 | M1-P15 | **DONE**（2026-09-11） |
-| M1-P20 | DONE*（Mac exclusive 过；iPhone 同网待验） |
+| M1-P20 | **DONE**（2026-09-11 iPhone 同网 exclusive 静息心率截图） |
 | M2 | 未开 |
 
 远程：`https://github.com/hihewh-byte/agent-harness.git`。agent 只本地 commit；push 由维护者执行。用户未要求 commit 则不要 commit。
