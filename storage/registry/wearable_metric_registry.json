@@ -41,7 +41,9 @@
           "high": 9,
           "unit": "h",
           "source": "National Sleep Foundation 成人建议",
-          "note": "成人睡眠常见建议"
+          "source_en": "National Sleep Foundation adult recommendation",
+          "note": "成人睡眠常见建议",
+          "note_en": "common adult sleep recommendation"
         }
       },
       "intent_hints": [
@@ -207,7 +209,9 @@
           "high": 100,
           "unit": "bpm",
           "source": "AHA 静息心率常见成人参考范围摘要",
-          "note": "成人静息心率常见参考"
+          "source_en": "AHA resting heart rate adult reference summary",
+          "note": "成人静息心率常见参考",
+          "note_en": "common adult resting heart rate reference"
         }
       },
       "intent_hints": [
@@ -733,7 +737,9 @@
           "high": 10000,
           "unit": "count",
           "source": "Lancet Public Health 步数与死亡率观察研究摘要",
-          "note": "成人日常步数常见参考"
+          "source_en": "Lancet Public Health step-count and mortality observational summary",
+          "note": "成人日常步数常见参考",
+          "note_en": "common adult daily step-count reference"
         }
       },
       "intent_hints": [

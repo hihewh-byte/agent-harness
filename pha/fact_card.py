@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Optional, Sequence
 
 from pha.fact_card_copy import card_copy
+from pha.fact_card_locale import normalize_fact_card_locale
 from pha.fact_card_prefs import (
     FactCardMetricSpec,
     catalog_by_id,
@@ -181,6 +182,16 @@ def _reference_status(value: float, low: float, high: float) -> str:
     return "within"
 
 
+def _reference_locale_field(rr: dict[str, Any], locale: str, key: str) -> str:
+    """Prefer ``{key}_en`` when locale is en-US; else ``{key}`` (zh / shared)."""
+    loc = normalize_fact_card_locale(locale)
+    if loc == "en-US":
+        en = str(rr.get(f"{key}_en") or "").strip()
+        if en:
+            return en
+    return str(rr.get(key) or "").strip()
+
+
 def _reference_text(
     *,
     note: str,
@@ -225,13 +236,13 @@ def build_reference(
         high = float(rr["high"])
     except (KeyError, TypeError, ValueError):
         return None
-    source = str(rr.get("source") or "").strip()
+    source = _reference_locale_field(rr, locale, "source")
     if not source:
         return None
     ref_unit = str(rr.get("unit") or unit or "").strip() or unit
     status = _reference_status(value, low, high)
     shown = _fmt(value, ref_unit)
-    note = str(rr.get("note") or card_copy(locale, "ref_note")).strip()
+    note = _reference_locale_field(rr, locale, "note") or card_copy(locale, "ref_note")
     return {
         "low": _round_num(low, unit=ref_unit),
         "high": _round_num(high, unit=ref_unit),

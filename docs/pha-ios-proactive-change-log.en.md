@@ -2,6 +2,13 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-11 (English fact-card reference shell still Chinese)
+
+- **Category**: P1 / FR-2.8 localization. Screenshot: en-US card still showed `【参考标准】` / Chinese note·source.
+- **Change**: EN `ref_text` uses `[Reference Standard] … (source: …, verify by yourself, not medical advice)` (matches Numerics EN T1 regex); registry three `reference_range` add `note_en` / `source_en`; `build_reference` picks by locale. build `pha-v2.3.48-ref-en-t1`.
+- **Evidence**: `pha_fact_card_selfcheck` en-US / zh-CN reference-shell checks.
+- **Rollback**: restore copy `ref_text` + registry fields; revert to v2.3.47.
+
 ## 2026-09-11 (CHB lineage stub regex flags · chat HTTP 0)
 
 - **Class**: P0 / chat SSE. Wearable+supplement turns mount `USER_CONTEXT_BRIEF` and import `chb_compiler`, which crashed.

@@ -111,7 +111,7 @@ _EN: dict[str, str] = {
     "ref_below": "below the reference range",
     "ref_above": "above the reference range",
     "ref_note": "common suggested range",
-    "ref_text": "【参考标准】{title} {span}, today you are {shown}{unit} {status}（来源：{source}，请自行查证，非医疗建议）",
+    "ref_text": "[Reference Standard] {title} {span}, today you are {shown}{unit} {status} (source: {source}, verify by yourself, not medical advice)",
     "summary_stale": "Not today. ",
     "summary_none": "No metrics selected. ",
     "summary_sparse": "Selected metrics are not counted in daily coverage. ",

@@ -2,6 +2,13 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-11 (英文事实卡参考层中文壳)
+
+- **类别**：P1 / FR-2.8 本地化。截图：en-US 下参考句仍带 `【参考标准】` / 中文 note·source。
+- **改动**：EN `ref_text` 改用 `[Reference Standard] … (source: …, verify by yourself, not medical advice)`（与 Numerics EN T1 正则对齐）；注册表三处 `reference_range` 增 `note_en` / `source_en`；`build_reference` 按 locale 取字段。build `pha-v2.3.48-ref-en-t1`。
+- **证据**：`pha_fact_card_selfcheck` en-US / zh-CN 参考壳分测。
+- **回滚**：恢复 copy `ref_text` 与注册表字段；回 v2.3.47。
+
 ## 2026-09-11 (CHB 脉络 stub 正则 flags · 对话 HTTP 0)
 
 - **类别**：P0 / 对话 SSE。穿戴+补剂同轮挂 `USER_CONTEXT_BRIEF` 时 import `chb_compiler` 炸。

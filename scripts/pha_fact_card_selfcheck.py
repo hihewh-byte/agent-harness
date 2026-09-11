@@ -566,8 +566,43 @@ def main() -> int:
     }:
         return _fail(f"sleep must carry reference status, got {sleep_m.get('reference')}")
     ref_text = str(sleep_m["reference"].get("text") or "")
-    if not ref_text.startswith("【参考标准】") or "请自行查证" not in ref_text:
+    # Default locale for selfcheck user follows prefs / DEFAULT_LOCALE; assert T1 shell for both.
+    zh_ok = ref_text.startswith("【参考标准】") and "请自行查证" in ref_text
+    en_ok = ref_text.startswith("[Reference Standard]") and "verify by yourself" in ref_text
+    if not (zh_ok or en_ok):
         return _fail(f"reference must be T1 disclosure, got {ref_text}")
+    en_card = compose_fact_card(
+        calendar_day=as_of,
+        rows=far_hist + [as_of_sleep],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_time_asleep"],
+        locale="en-US",
+    )
+    en_ref = str(
+        next(m for m in en_card["facts"]["metrics"] if m["metric"] == "sleep_time_asleep")[
+            "reference"
+        ].get("text")
+        or ""
+    )
+    if not en_ref.startswith("[Reference Standard]") or "verify by yourself" not in en_ref:
+        return _fail(f"en-US reference must use English T1 shell, got {en_ref}")
+    if "【参考标准】" in en_ref or "请自行查证" in en_ref or "成人睡眠" in en_ref:
+        return _fail(f"en-US reference must not leak Chinese shell/note, got {en_ref}")
+    zh_card = compose_fact_card(
+        calendar_day=as_of,
+        rows=far_hist + [as_of_sleep],
+        user_id="selfcheck",
+        enabled_metric_ids=["sleep_time_asleep"],
+        locale="zh-CN",
+    )
+    zh_ref = str(
+        next(m for m in zh_card["facts"]["metrics"] if m["metric"] == "sleep_time_asleep")[
+            "reference"
+        ].get("text")
+        or ""
+    )
+    if not zh_ref.startswith("【参考标准】") or "请自行查证" not in zh_ref:
+        return _fail(f"zh-CN reference must use Chinese T1 shell, got {zh_ref}")
     atoms = fact_card_numeric_atoms(prog)
     for needle in ("7", "9"):
         if needle not in atoms:
