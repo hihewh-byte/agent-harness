@@ -21,11 +21,14 @@ reports/loop/
 examples/attach_minimal/failures.jsonl
 reports/chb/**/brief_*.json
 reports/chb/**/gap_candidates.json
+reports/chb/**/.last_compile_day
 reports/p1_golden/*
 !reports/p1_golden/README.md
 !reports/chb/README.md
 # All live e2e / stress / harvest / semantic outputs stay local (PII risk).
 reports/e2e/
+reports/p15_eval/
+reports/p20_eval/
 
 # PHA local snapshots (use git tags for releases)
 .pha-versions/
