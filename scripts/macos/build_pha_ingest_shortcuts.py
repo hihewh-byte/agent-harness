@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""Build signed Shortcuts for PHA HealthKit ingest (token from .env; output under data/)."""
+"""Build Shortcuts for PHA HealthKit ingest + the daily fact card.
+
+Two outputs, never mixed:
+
+* **Public template** (``shortcuts/pha-daily.*``) — no token, no machine host.
+  Import Questions ask for Mac URL + token. Left **unsigned** so an Apple ID
+  is not embedded in git. Clone users enable Allow Untrusted Shortcuts.
+* **Local signed copies** (``data/local_shortcuts/``, gitignored) — bake this
+  Mac's URL + ``PHA_INGEST_TOKEN``. Never copy that folder into git.
+
+``--public`` refuses to write if a leak scan finds this machine's token,
+hostname, or LAN IP in the workflow.
+"""
 
 from __future__ import annotations
 
@@ -8,16 +20,27 @@ import plistlib
 import subprocess
 import sys
 import uuid
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional, Union
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 OUT_DIR = ROOT / "data" / "local_shortcuts"
+PUBLIC_DIR = ROOT / "shortcuts"
 OBJ = "\ufffc"
+PUBLIC_NAME = "PHA Daily"
+PUBLIC_BASE_PLACEHOLDER = "http://Mac.local:8788"
+PUBLIC_TOKEN_PLACEHOLDER = ""
+BASE_VAR = "PHA Base"
+TOKEN_VAR = "PHA Token"
+_PHA_DAILY_NS = uuid.UUID("e7c0f0a0-5c11-4d2a-9b3e-0f1a2b3c4d5e")
+UrlSpec = Union[str, list, dict]
+TokenSpec = Union[str, tuple[str, str]]
+_stable_uuids: Optional[list[int]] = None
 
 
 def _load_env() -> dict[str, str]:
@@ -34,7 +57,22 @@ def _load_env() -> dict[str, str]:
     return env
 
 
+@contextmanager
+def stable_uuids() -> Iterator[None]:
+    """Deterministic UUIDs so the public template is reviewable in git."""
+    global _stable_uuids
+    prev = _stable_uuids
+    _stable_uuids = [0]
+    try:
+        yield
+    finally:
+        _stable_uuids = prev
+
+
 def _uuid() -> str:
+    if _stable_uuids is not None:
+        _stable_uuids[0] += 1
+        return str(uuid.uuid5(_PHA_DAILY_NS, f"pha-daily-{_stable_uuids[0]}")).upper()
     return str(uuid.uuid4()).upper()
 
 
@@ -77,6 +115,32 @@ def _headers(token: str) -> dict:
         },
         "WFSerializationType": "WFDictionaryFieldValue",
     }
+
+
+def _headers_from_ref(token_uuid: str, token_name: str) -> dict:
+    return {
+        "Value": {
+            "WFDictionaryFieldValueItems": [
+                _header_item("Content-Type", "application/json"),
+                _token_item("X-PHA-Ingest-Token", token_uuid, token_name),
+            ]
+        },
+        "WFSerializationType": "WFDictionaryFieldValue",
+    }
+
+
+def _coerce_url(url: UrlSpec) -> str | dict:
+    if isinstance(url, str):
+        return url
+    if isinstance(url, dict):
+        return url
+    return _text_with_refs(list(url))
+
+
+def _coerce_headers(token: TokenSpec) -> dict:
+    if isinstance(token, tuple):
+        return _headers_from_ref(token[0], token[1])
+    return _headers(token)
 
 
 def _output_ref(output_uuid: str, name: str) -> dict:
@@ -126,13 +190,18 @@ def _action(identifier: str, params: dict) -> dict:
     }
 
 
-def _workflow(name: str, actions: list[dict]) -> dict:
+def _workflow(
+    name: str,
+    actions: list[dict],
+    *,
+    import_questions: Optional[list] = None,
+) -> dict:
     return {
         "WFWorkflowActions": actions,
         "WFWorkflowClientVersion": "2700.0.4",
         "WFWorkflowHasOutputFallback": False,
         "WFWorkflowIcon": _icon(),
-        "WFWorkflowImportQuestions": [],
+        "WFWorkflowImportQuestions": list(import_questions or []),
         "WFWorkflowMinimumClientVersion": 900,
         "WFWorkflowMinimumClientVersionString": "900",
         "WFWorkflowName": name,
@@ -142,29 +211,47 @@ def _workflow(name: str, actions: list[dict]) -> dict:
     }
 
 
-def _downloadurl(url: str, token: str, body_uuid: str, body_name: str, action_uuid: str) -> dict:
+def _downloadurl(
+    url: UrlSpec,
+    token: TokenSpec,
+    body_uuid: str,
+    body_name: str,
+    action_uuid: str,
+) -> dict:
     return _action(
         "is.workflow.actions.downloadurl",
         {
             "UUID": action_uuid,
-            "WFURL": url,
+            "WFURL": _coerce_url(url),
             "WFHTTPMethod": "POST",
             "WFHTTPBodyType": "File",
-            "WFHTTPHeaders": _headers(token),
+            "WFHTTPHeaders": _coerce_headers(token),
             "WFRequestVariable": _output_ref(body_uuid, body_name),
         },
     )
 
 
-def _geturl(url: str, token: str, action_uuid: str, out_name: str) -> dict:
+def _geturl(url: UrlSpec, token: TokenSpec, action_uuid: str, out_name: str) -> dict:
     return _action(
         "is.workflow.actions.downloadurl",
         {
             "UUID": action_uuid,
             "CustomOutputName": out_name,
-            "WFURL": url,
+            "WFURL": _coerce_url(url),
             "WFHTTPMethod": "GET",
-            "WFHTTPHeaders": _headers(token),
+            "WFHTTPHeaders": _coerce_headers(token),
+        },
+    )
+
+
+def _make_url(url: UrlSpec, action_uuid: str, name: str) -> dict:
+    """Create a URL item. Open URLs cannot take a raw WFURL string (shows「无 URL」)."""
+    return _action(
+        "is.workflow.actions.url",
+        {
+            "UUID": action_uuid,
+            "CustomOutputName": name,
+            "WFURLActionURL": _coerce_url(url),
         },
     )
 
@@ -181,18 +268,6 @@ def _dict_value(src_uuid: str, src_name: str, key: str, action_uuid: str, out_na
     )
 
 
-def _make_url(url: str, action_uuid: str, name: str) -> dict:
-    """Create a URL item. Open URLs cannot take a raw WFURL string (shows「无 URL」)."""
-    return _action(
-        "is.workflow.actions.url",
-        {
-            "UUID": action_uuid,
-            "CustomOutputName": name,
-            "WFURLActionURL": url,
-        },
-    )
-
-
 def _openurl(src_uuid: str, src_name: str) -> dict:
     return _action(
         "is.workflow.actions.openurl",
@@ -200,7 +275,7 @@ def _openurl(src_uuid: str, src_name: str) -> dict:
     )
 
 
-def build_fact_card(url: str, view_url: str, token: str) -> dict:
+def build_fact_card(url: UrlSpec, view_url: UrlSpec, token: TokenSpec) -> dict:
     """GET teaser JSON → short lock-screen note → open full HTML card."""
     get_id = _uuid()
     note_id = _uuid()
@@ -404,7 +479,9 @@ def _statistics(
     )
 
 
-def _sync_one_metric(url: str, token: str, spec, *, pack_version: str = "") -> tuple[list[dict], str, str, str, str]:
+def _sync_one_metric(
+    url: UrlSpec, token: TokenSpec, spec, *, pack_version: str = ""
+) -> tuple[list[dict], str, str, str, str]:
     """Find → if empty skip POST. Accrual = today Sum; lagged/latest = last N + date; overnight = last N Average.
 
     Unit is the registry literal. Get Details Unit on a Find list concatenates
@@ -656,12 +733,14 @@ def _find_all_sleep(action_uuid: str, out_name: str) -> dict:
 
 
 def build_sleep(
-    url: str,
-    token: str,
+    url: UrlSpec,
+    token: TokenSpec,
     specs: list,
     *,
     variant: str = "d1",
     limit: int = 150,
+    show_result: bool = True,
+    skip_if_empty: bool = False,
 ) -> dict:
     """Find Sleep → Value/Start/End (+ Source/Device) text → File POST → show JSON."""
     name = "PHA 同步睡眠" if variant != "is_today" else "PHA 同步睡眠（is today 备选）"
@@ -691,8 +770,8 @@ def build_sleep(
     resp_id = _uuid()
     post = _downloadurl(url, token, text_id, "Sleep Bundle", resp_id)
     post["WFWorkflowActionParameters"]["CustomOutputName"] = "Sleep Response"
-    actions = [
-        _find_sleep(find_id, "Sleep Samples", variant=variant, limit=limit),
+    find_action = _find_sleep(find_id, "Sleep Samples", variant=variant, limit=limit)
+    inner: list[dict] = [
         _get_detail(find_id, "Sleep Samples", "Value", value_id, "Sleep Values"),
         _get_detail(find_id, "Sleep Samples", "Start Date", start_id, "Sleep Starts"),
         _get_detail(find_id, "Sleep Samples", "End Date", end_id, "Sleep Ends"),
@@ -720,24 +799,44 @@ def build_sleep(
             },
         ),
         post,
-        _action(
-            "is.workflow.actions.showresult",
-            {
-                "Text": _text_with_refs(
-                    [
-                        "PHA睡眠上传\n",
-                        (text_id, "Sleep Bundle"),
-                        "\n服务器：",
-                        (resp_id, "Sleep Response"),
-                    ]
-                )
-            },
-        ),
     ]
+    if show_result:
+        inner.append(
+            _action(
+                "is.workflow.actions.showresult",
+                {
+                    "Text": _text_with_refs(
+                        [
+                            "PHA睡眠上传\n",
+                            (text_id, "Sleep Bundle"),
+                            "\n服务器：",
+                            (resp_id, "Sleep Response"),
+                        ]
+                    )
+                },
+            )
+        )
+    if skip_if_empty:
+        group = _uuid()
+        actions = [
+            find_action,
+            _if_has_any(find_id, "Sleep Samples", group),
+            *inner,
+            _endif(group),
+        ]
+    else:
+        actions = [find_action, *inner]
     return _workflow(name, actions)
 
 
-def build_health(url: str, token: str, specs: list, *, pack_version: str = "") -> dict:
+def build_health(
+    url: UrlSpec,
+    token: TokenSpec,
+    specs: list,
+    *,
+    pack_version: str = "",
+    show_result: bool = True,
+) -> dict:
     """iPhone-only: one POST per registry quantity type (do not POST Health items)."""
     if not specs:
         return _workflow(
@@ -775,13 +874,172 @@ def build_health(url: str, token: str, specs: list, *, pack_version: str = "") -
                 (resp_id, resp_name),
             ]
         )
-    actions.append(
-        _action(
-            "is.workflow.actions.showresult",
-            {"Text": _text_with_refs(result_parts)},
+    if show_result:
+        actions.append(
+            _action(
+                "is.workflow.actions.showresult",
+                {"Text": _text_with_refs(result_parts)},
+            )
         )
-    )
     return _workflow("PHA 同步健康", actions)
+
+
+def _import_questions() -> list[dict]:
+    return [
+        {
+            "ActionIndex": 0,
+            "Category": "Parameter",
+            "ParameterKey": "WFTextActionText",
+            "Text": "PHA Mac URL on this Wi-Fi (not localhost). Example: http://Mac.local:8788",
+            "DefaultValue": PUBLIC_BASE_PLACEHOLDER,
+        },
+        {
+            "ActionIndex": 1,
+            "Category": "Parameter",
+            "ParameterKey": "WFTextActionText",
+            "Text": "PHA_INGEST_TOKEN from your Mac .env — private, never from GitHub",
+            "DefaultValue": "",
+        },
+    ]
+
+
+def build_daily(
+    *,
+    base_text: str,
+    token_text: str,
+    specs: list,
+    sleep_specs: list,
+    pack_version: str,
+    import_questions: bool,
+) -> dict:
+    """One run: sleep + quantity pack + lock-screen teaser + open the full card.
+
+    No Show Result (would block morning automation). Sleep Find empty → skip POST.
+    """
+    base_id = _uuid()
+    token_id = _uuid()
+    actions: list[dict] = [
+        _action(
+            "is.workflow.actions.gettext",
+            {
+                "UUID": base_id,
+                "CustomOutputName": BASE_VAR,
+                "WFTextActionText": base_text,
+            },
+        ),
+        _action(
+            "is.workflow.actions.gettext",
+            {
+                "UUID": token_id,
+                "CustomOutputName": TOKEN_VAR,
+                "WFTextActionText": token_text,
+            },
+        ),
+    ]
+    ingest: list = [(base_id, BASE_VAR), "/ingest/healthkit"]
+    fact_get: list = [(base_id, BASE_VAR), "/proactive/fact-card?user_id=default"]
+    fact_view: list = [
+        (base_id, BASE_VAR),
+        "/proactive/fact-card/view?user_id=default&token=",
+        (token_id, TOKEN_VAR),
+    ]
+    token_ref = (token_id, TOKEN_VAR)
+    if sleep_specs:
+        sleep_wf = build_sleep(
+            ingest,
+            token_ref,
+            sleep_specs,
+            variant="d1",
+            show_result=False,
+            skip_if_empty=True,
+        )
+        actions.extend(sleep_wf["WFWorkflowActions"])
+    if specs:
+        health_wf = build_health(
+            ingest,
+            token_ref,
+            specs,
+            pack_version=pack_version,
+            show_result=False,
+        )
+        actions.extend(health_wf["WFWorkflowActions"])
+    actions.extend(
+        build_fact_card(fact_get, fact_view, token_ref)["WFWorkflowActions"]
+    )
+    questions = _import_questions() if import_questions else []
+    return _workflow(PUBLIC_NAME, actions, import_questions=questions)
+
+
+def build_daily_public() -> dict:
+    from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs
+    from pha.wearable_metric_registry import shortcut_pack_version
+
+    with stable_uuids():
+        return build_daily(
+            base_text=PUBLIC_BASE_PLACEHOLDER,
+            token_text=PUBLIC_TOKEN_PLACEHOLDER,
+            specs=shortcut_sync_specs("default"),
+            sleep_specs=shortcut_sleep_specs("default"),
+            pack_version=shortcut_pack_version(),
+            import_questions=True,
+        )
+
+
+def _machine_needles(env: dict[str, str]) -> list[str]:
+    """Values that must never appear in the GitHub template."""
+    needles: list[str] = []
+
+    def add(raw: object) -> None:
+        v = str(raw or "").strip().strip("'").strip('"')
+        if len(v) < 8:
+            return
+        if v == PUBLIC_BASE_PLACEHOLDER or v == PUBLIC_TOKEN_PLACEHOLDER:
+            return
+        if v in PUBLIC_BASE_PLACEHOLDER:
+            return
+        if v not in needles:
+            needles.append(v)
+
+    for key in ("PHA_INGEST_TOKEN", "PHA_INGEST_URL_HOST"):
+        add(env.get(key, ""))
+        add(os.environ.get(key, ""))
+    try:
+        name = subprocess.check_output(
+            ["scutil", "--get", "LocalHostName"], text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        name = ""
+    if name:
+        add(name)
+        add(f"{name}.local")
+    try:
+        computer = subprocess.check_output(
+            ["scutil", "--get", "ComputerName"], text=True
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        computer = ""
+    add(computer)
+    for iface in ("en0", "en1", "en2"):
+        try:
+            ip = subprocess.check_output(
+                ["ipconfig", "getifaddr", iface], text=True
+            ).strip()
+        except (OSError, subprocess.CalledProcessError):
+            ip = ""
+        add(ip)
+    return needles
+
+
+def public_template_leak(blob: str | bytes, env: Optional[dict[str, str]] = None) -> str:
+    text = blob.decode("latin-1") if isinstance(blob, bytes) else blob
+    for needle in _machine_needles(env or _load_env()):
+        if needle in text:
+            return "machine secret or hostname would ship in the public shortcut"
+    lowered = text.lower()
+    for banned in ("wenhuidemacbook",):
+        if banned in lowered:
+            return "banned personal hostname fragment in public shortcut"
+    return ""
 
 
 def _sign(src: Path, dest: Path, *, mode: str = "anyone") -> None:
@@ -798,6 +1056,119 @@ def _sign(src: Path, dest: Path, *, mode: str = "anyone") -> None:
         ],
         check=True,
     )
+
+
+def _write_signed(dir_path: Path, stem: str, wf: dict, *, mode: str) -> Path:
+    dir_path.mkdir(parents=True, exist_ok=True)
+    xml_path = dir_path / f"{stem}.plist"
+    unsigned_path = dir_path / f"{stem}.unsigned.shortcut"
+    signed_path = dir_path / f"{stem}.shortcut"
+    xml_path.write_bytes(plistlib.dumps(wf, fmt=plistlib.FMT_XML))
+    unsigned_path.write_bytes(plistlib.dumps(wf, fmt=plistlib.FMT_BINARY))
+    dest = Path("/tmp") / f"{stem}.shortcut"
+    if dest.exists():
+        dest.unlink()
+    if signed_path.exists():
+        signed_path.unlink()
+    _sign(unsigned_path, dest, mode=mode)
+    signed_path.write_bytes(dest.read_bytes())
+    print(f"OK {signed_path} mode={mode}")
+    return signed_path
+
+
+def _validate_sync_plan(sync_specs: list) -> Optional[str]:
+    from pha.shortcut_find_catalog import never_use_find_labels
+
+    banned = set(never_use_find_labels())
+    bad = [s.health_type for s in sync_specs if s.health_type in banned]
+    if bad:
+        return f"forbidden Find labels in sync plan: {bad}"
+    if any(s.metric_id == "wrist_temp" for s in sync_specs):
+        return "wrist_temp is not device_verified; do not emit Find"
+    return None
+
+
+def emit_public() -> int:
+    """Write the GitHub template. Unsigned on purpose — signing embeds an Apple ID."""
+    env = _load_env()
+    wf = build_daily_public()
+    reason = public_template_leak(str(wf), env)
+    if reason:
+        print(f"FAIL {reason}", file=sys.stderr)
+        return 1
+    PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
+    plist_path = PUBLIC_DIR / "pha-daily.plist"
+    shortcut_path = PUBLIC_DIR / "pha-daily.shortcut"
+    xml = plistlib.dumps(wf, fmt=plistlib.FMT_XML)
+    binary = plistlib.dumps(wf, fmt=plistlib.FMT_BINARY)
+    for label, payload in (("plist", xml), ("shortcut", binary)):
+        reason = public_template_leak(payload, env)
+        if reason:
+            print(f"FAIL {label}: {reason}", file=sys.stderr)
+            return 1
+    plist_path.write_bytes(xml)
+    shortcut_path.write_bytes(binary)
+    print(f"OK {plist_path} (unsigned template, no token, no host)")
+    print(f"OK {shortcut_path} (unsigned; enable Allow Untrusted Shortcuts to import)")
+    return 0
+
+
+def emit_local() -> int:
+    env = _load_env()
+    token = env.get("PHA_INGEST_TOKEN", "").strip()
+    if not token:
+        print("FAIL: PHA_INGEST_TOKEN missing in .env", file=sys.stderr)
+        return 1
+    host_ip = _default_ingest_host()
+    port = env.get("PHA_PORT", "8788").strip() or "8788"
+    url = f"http://{host_ip}:{port}/ingest/healthkit"
+    from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs
+    from pha.wearable_metric_registry import shortcut_pack_version
+
+    pack = shortcut_pack_version()
+    sync_specs = shortcut_sync_specs("default")
+    sleep_specs = shortcut_sleep_specs("default")
+    plan_err = _validate_sync_plan(sync_specs)
+    if plan_err:
+        print(f"FAIL {plan_err}", file=sys.stderr)
+        return 1
+    print("sync_plan", [(s.metric_id, s.health_type, s.stat) for s in sync_specs])
+    print("sleep_plan", [(s.metric_id, s.unit_health) for s in sleep_specs])
+    fact_url = f"http://{host_ip}:{port}/proactive/fact-card?user_id=default"
+    fact_view = (
+        f"http://{host_ip}:{port}/proactive/fact-card/view"
+        f"?user_id=default&token={token}"
+    )
+    base = f"http://{host_ip}:{port}"
+    daily = build_daily(
+        base_text=base,
+        token_text=token,
+        specs=sync_specs,
+        sleep_specs=sleep_specs,
+        pack_version=pack,
+        import_questions=False,
+    )
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    (OUT_DIR / "endpoint.txt").write_text(
+        url + "\n" + fact_url + "\n" + fact_view.split("&token=")[0] + "\n",
+        encoding="utf-8",
+    )
+    jobs = [
+        ("pha-ingest-probe", build_probe(url, token), "anyone"),
+        ("pha-sync-health", build_health(url, token, sync_specs, pack_version=pack), "people-who-know-me"),
+        ("pha-sync-sleep", build_sleep(url, token, sleep_specs, variant="d1"), "people-who-know-me"),
+        (
+            "pha-sync-sleep-is-today",
+            build_sleep(url, token, sleep_specs, variant="is_today"),
+            "people-who-know-me",
+        ),
+        ("pha-fact-card", build_fact_card(fact_url, fact_view, token), "people-who-know-me"),
+        ("pha-daily", daily, "people-who-know-me"),
+    ]
+    for stem, wf, mode in jobs:
+        _write_signed(OUT_DIR, stem, wf, mode=mode)
+    print(f"endpoint {url}")
+    return 0
 
 
 def _default_ingest_host() -> str:
@@ -817,76 +1188,30 @@ def _default_ingest_host() -> str:
 
 
 def main() -> int:
-    env = _load_env()
-    token = env.get("PHA_INGEST_TOKEN", "").strip()
-    if not token:
-        print("FAIL: PHA_INGEST_TOKEN missing in .env", file=sys.stderr)
-        return 1
-    host_ip = _default_ingest_host()
-    port = env.get("PHA_PORT", "8788").strip() or "8788"
-    url = f"http://{host_ip}:{port}/ingest/healthkit"
-    from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs
-    from pha.shortcut_find_catalog import never_use_find_labels
-    from pha.wearable_metric_registry import shortcut_pack_version
-
-    pack = shortcut_pack_version()
-    sync_specs = shortcut_sync_specs("default")
-    sleep_specs = shortcut_sleep_specs("default")
-    banned = set(never_use_find_labels())
-    bad = [s.health_type for s in sync_specs if s.health_type in banned]
-    if bad:
-        print(f"FAIL forbidden Find labels in sync plan: {bad}", file=sys.stderr)
-        return 1
-    if any(s.metric_id == "wrist_temp" for s in sync_specs):
-        print("FAIL wrist_temp is not device_verified; do not emit Find", file=sys.stderr)
-        return 1
-    print(
-        "sync_plan",
-        [(s.metric_id, s.health_type, s.stat) for s in sync_specs],
-    )
-    print(
-        "sleep_plan",
-        [(s.metric_id, s.unit_health) for s in sleep_specs],
-    )
-    fact_url = f"http://{host_ip}:{port}/proactive/fact-card?user_id=default"
-    fact_view = (
-        f"http://{host_ip}:{port}/proactive/fact-card/view"
-        f"?user_id=default&token={token}"
-    )
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "endpoint.txt").write_text(
-        url + "\n" + fact_url + "\n" + fact_view.split("&token=")[0] + "\n",
-        encoding="utf-8",
-    )
-
-    jobs = [
-        ("pha-ingest-probe", build_probe(url, token), "anyone"),
-        ("pha-sync-health", build_health(url, token, sync_specs, pack_version=pack), "people-who-know-me"),
-        ("pha-sync-sleep", build_sleep(url, token, sleep_specs, variant="d1"), "people-who-know-me"),
-        (
-            "pha-sync-sleep-is-today",
-            build_sleep(url, token, sleep_specs, variant="is_today"),
-            "people-who-know-me",
-        ),
-        ("pha-fact-card", build_fact_card(fact_url, fact_view, token), "people-who-know-me"),
-    ]
-    for stem, wf, mode in jobs:
-        xml_path = OUT_DIR / f"{stem}.plist"
-        unsigned_path = OUT_DIR / f"{stem}.unsigned.shortcut"
-        signed_path = OUT_DIR / f"{stem}.shortcut"
-        xml_path.write_bytes(plistlib.dumps(wf, fmt=plistlib.FMT_XML))
-        unsigned_path.write_bytes(plistlib.dumps(wf, fmt=plistlib.FMT_BINARY))
-        dest = Path("/tmp") / f"{stem}.shortcut"
-        if dest.exists():
-            dest.unlink()
-        if signed_path.exists():
-            signed_path.unlink()
-        _sign(unsigned_path, dest, mode=mode)
-        signed_path.write_bytes(dest.read_bytes())
-        print(f"OK {signed_path} mode={mode}")
-        print(f"OK {signed_path}")
-    print(f"endpoint {url}")
-    return 0
+    flags = set(sys.argv[1:])
+    if "-h" in flags or "--help" in flags:
+        print(
+            "Build PHA Shortcuts.\n"
+            "  (default)     local signed copies → data/local_shortcuts/ (gitignored)\n"
+            "  --public      GitHub template → shortcuts/pha-daily.shortcut (no secrets)\n"
+            "  --all         local + public\n",
+            end="",
+        )
+        return 0
+    unknown = flags - {"--public", "--local", "--all", "-h", "--help"}
+    if unknown:
+        print(f"Unknown option: {sorted(unknown)}", file=sys.stderr)
+        return 2
+    want_public = "--public" in flags or "--all" in flags
+    want_local = "--local" in flags or "--all" in flags or not want_public
+    rc = 0
+    if want_local:
+        rc = emit_local()
+        if rc:
+            return rc
+    if want_public:
+        rc = emit_public()
+    return rc
 
 
 if __name__ == "__main__":

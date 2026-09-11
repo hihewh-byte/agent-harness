@@ -744,7 +744,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{127, 1}</key>
+							<key>{125, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>active_energy Text</string>
@@ -755,7 +755,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"active_energy","timestamp":"","value":"￼","unit":"kcal","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"active_energy","timestamp":"","value":"￼","unit":"kcal","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -1158,7 +1158,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{119, 1}</key>
+							<key>{117, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>steps Text</string>
@@ -1169,7 +1169,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"steps","timestamp":"","value":"￼","unit":"count","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"steps","timestamp":"","value":"￼","unit":"count","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -1350,7 +1350,7 @@ user_id=default
 								<key>Bounded</key>
 								<true/>
 								<key>Operator</key>
-								<integer>1001</integer>
+								<integer>1002</integer>
 								<key>Property</key>
 								<string>Start Date</string>
 								<key>Removable</key>
@@ -1358,9 +1358,9 @@ user_id=default
 								<key>Values</key>
 								<dict>
 									<key>Number</key>
-									<integer>2</integer>
+									<string>7</string>
 									<key>Unit</key>
-									<integer>16384</integer>
+									<integer>16</integer>
 								</dict>
 							</dict>
 						</array>
@@ -1371,13 +1371,7 @@ user_id=default
 					<string>WFContentPredicateTableTemplate</string>
 				</dict>
 				<key>WFContentItemLimitEnabled</key>
-				<true/>
-				<key>WFContentItemLimitNumber</key>
-				<integer>150</integer>
-				<key>WFContentItemSortOrder</key>
-				<string>Latest First</string>
-				<key>WFContentItemSortProperty</key>
-				<string>Start Date</string>
+				<false/>
 			</dict>
 		</dict>
 		<dict>
@@ -1409,60 +1403,6 @@ user_id=default
 						<key>WFSerializationType</key>
 						<string>WFTextTokenAttachment</string>
 					</dict>
-				</dict>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.getitemfromlist</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>CustomOutputName</key>
-				<string>hrv_sdnn_ms First</string>
-				<key>UUID</key>
-				<string>395E7A80-37F1-5056-92A4-C3502153DF6D</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>OutputName</key>
-						<string>hrv_sdnn_ms Samples</string>
-						<key>OutputUUID</key>
-						<string>DFF7D088-CED7-53DA-97EC-DC838EECE004</string>
-						<key>Type</key>
-						<string>ActionOutput</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
-				</dict>
-				<key>WFItemSpecifier</key>
-				<string>First Item</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>WFWorkflowActionIdentifier</key>
-			<string>is.workflow.actions.properties.health.quantity</string>
-			<key>WFWorkflowActionParameters</key>
-			<dict>
-				<key>CustomOutputName</key>
-				<string>hrv_sdnn_ms Start</string>
-				<key>UUID</key>
-				<string>704CA4E4-6D11-5749-B731-1D8E2D1EE223</string>
-				<key>WFContentItemPropertyName</key>
-				<string>Start Date</string>
-				<key>WFInput</key>
-				<dict>
-					<key>Value</key>
-					<dict>
-						<key>OutputName</key>
-						<string>hrv_sdnn_ms First</string>
-						<key>OutputUUID</key>
-						<string>395E7A80-37F1-5056-92A4-C3502153DF6D</string>
-						<key>Type</key>
-						<string>ActionOutput</string>
-					</dict>
-					<key>WFSerializationType</key>
-					<string>WFTextTokenAttachment</string>
 				</dict>
 			</dict>
 		</dict>
@@ -1632,16 +1572,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{111, 1}</key>
-							<dict>
-								<key>OutputName</key>
-								<string>hrv_sdnn_ms Start</string>
-								<key>OutputUUID</key>
-								<string>704CA4E4-6D11-5749-B731-1D8E2D1EE223</string>
-								<key>Type</key>
-								<string>ActionOutput</string>
-							</dict>
-							<key>{123, 1}</key>
+							<key>{120, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>hrv_sdnn_ms Text</string>
@@ -1652,7 +1583,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"hrv_sdnn","timestamp":"￼","value":"￼","unit":"ms","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"hrv_sdnn","timestamp":"","value":"￼","unit":"ms","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -2117,7 +2048,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{119, 1}</key>
+							<key>{117, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>respiratory_rate Start</string>
@@ -2126,7 +2057,7 @@ user_id=default
 								<key>Type</key>
 								<string>ActionOutput</string>
 							</dict>
-							<key>{131, 1}</key>
+							<key>{129, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>respiratory_rate Text</string>
@@ -2137,7 +2068,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"respiratory_rate","timestamp":"￼","value":"￼","unit":"count/min","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"respiratory_rate","timestamp":"￼","value":"￼","unit":"count/min","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -2534,7 +2465,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{106, 1}</key>
+							<key>{104, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>resting_heart_rate_bpm Start</string>
@@ -2543,7 +2474,7 @@ user_id=default
 								<key>Type</key>
 								<string>ActionOutput</string>
 							</dict>
-							<key>{118, 1}</key>
+							<key>{116, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>resting_heart_rate_bpm Text</string>
@@ -2554,7 +2485,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"rhr","timestamp":"￼","value":"￼","unit":"count/min","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"rhr","timestamp":"￼","value":"￼","unit":"count/min","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -3017,7 +2948,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{107, 1}</key>
+							<key>{105, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>spo2_percent Start</string>
@@ -3026,7 +2957,7 @@ user_id=default
 								<key>Type</key>
 								<string>ActionOutput</string>
 							</dict>
-							<key>{119, 1}</key>
+							<key>{117, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>spo2_percent Text</string>
@@ -3037,7 +2968,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"spo2","timestamp":"￼","value":"￼","unit":"%","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"spo2","timestamp":"￼","value":"￼","unit":"%","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>
@@ -3432,7 +3363,7 @@ user_id=default
 					<dict>
 						<key>attachmentsByRange</key>
 						<dict>
-							<key>{109, 1}</key>
+							<key>{107, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>vo2max Start</string>
@@ -3441,7 +3372,7 @@ user_id=default
 								<key>Type</key>
 								<string>ActionOutput</string>
 							</dict>
-							<key>{121, 1}</key>
+							<key>{119, 1}</key>
 							<dict>
 								<key>OutputName</key>
 								<string>vo2max Text</string>
@@ -3452,7 +3383,7 @@ user_id=default
 							</dict>
 						</dict>
 						<key>string</key>
-						<string>{"user_id":"default","pack_version":"2026.09.08.priority-1e","samples":[{"metric_type":"vo2max","timestamp":"￼","value":"￼","unit":"mL/kg·min","source":"healthkit"}]}</string>
+						<string>{"user_id":"default","pack_version":"2026.09.11.hrv-today","samples":[{"metric_type":"vo2max","timestamp":"￼","value":"￼","unit":"mL/kg·min","source":"healthkit"}]}</string>
 					</dict>
 					<key>WFSerializationType</key>
 					<string>WFTextTokenString</string>

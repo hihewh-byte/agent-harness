@@ -6,15 +6,16 @@ import os
 import re
 import sqlite3
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, TypedDict
 
-from pha.date_range_parser import default_wearable_window
+from pha.date_range_parser import default_wearable_window, parse_user_date_range
 from pha.health_data import HealthDataResult, effective_query_reference_date, get_health_data
 from pha.medical_storage import sanitize_ldl_value
 
 _MANIFEST_MAX_CHARS = int(os.environ.get("PHA_MANIFEST_MAX_CHARS", "600"))
+_FACT_CARD_MANIFEST_PROFILES = frozenset({"fact_card_interpret", "wearable_daily_review"})
 
 # Known E2E hallucination anchors — always forbidden in model output.
 _GLOBAL_FORBIDDEN_DATES: frozenset[str] = frozenset({"2026-04-30", "2025-01-13"})
@@ -143,7 +144,7 @@ LANG_DISCLOSURE_MAP: Tuple[_LangDisclosureSpec, ...] = (
 )
 
 # T0 claim cues — evaluated on masked text; T0 always wins over T1 (see audit priority).
-FACT_CARD_AUDIT_POLICY_REV = "v1.1"
+FACT_CARD_AUDIT_POLICY_REV = "v1.2"
 
 LANG_T0_CLAIM_MAP: Dict[str, Tuple[str, ...]] = {
     "owner_cues": (
@@ -304,13 +305,17 @@ def _value_variants(v: float) -> Set[str]:
 class ManifestEntry:
     domain: str
     metric: str
-    value: float
+    value: Optional[float]
     unit: str
     anchor: str
     source: str
 
     def kv_line(self) -> str:
-        return f"{self.domain}|{self.anchor}|{self.metric}|{_fmt_value(self.value)}|{self.unit or '-'}"
+        if self.value is None:
+            shown = "-"
+        else:
+            shown = _fmt_value(self.value)
+        return f"{self.domain}|{self.anchor}|{self.metric}|{shown}|{self.unit or '-'}"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -333,28 +338,46 @@ class NumericsManifest:
     wearable_grain_source: str = "default"
     wearable_window_start: str = ""
     wearable_window_end: str = ""
+    wearable_named_days: Tuple[str, ...] = ()
     card_labels: Set[str] = field(default_factory=set)
     card_units: Set[str] = field(default_factory=set)
     window_day_tokens: Set[str] = field(default_factory=set)
     card_times: Set[str] = field(default_factory=set)
 
     @property
+    def population_commons_values(self) -> Set[str]:
+        """Training / population commons integers (domain=population_commons)."""
+        vals: Set[str] = set()
+        for e in self.entries:
+            if e.domain == "population_commons" and e.value is not None:
+                vals.update(_value_variants(e.value))
+        return vals
+
+    @property
     def allowed_dates(self) -> Set[str]:
         dates: Set[str] = set()
         for e in self.entries:
-            if e.domain == "lipid" and len(e.anchor) == 10:
+            if e.domain in ("lipid", "wearable") and len(e.anchor) == 10:
                 dates.add(e.anchor)
             elif e.domain == "fact_card":
                 for iso in _DATE_ISO_RE.findall(e.anchor or ""):
                     dates.add(iso)
         if self.profile == "fact_card_interpret" and len(self.reference_date or "") == 10:
             dates.add(self.reference_date)
+        for raw in self.wearable_named_days:
+            day = str(raw or "")[:10]
+            if len(day) == 10:
+                dates.add(day)
         return dates
 
     @property
     def allowed_values(self) -> Set[str]:
         vals: Set[str] = set()
         for e in self.entries:
+            if e.domain == "population_commons":
+                continue
+            if e.value is None:
+                continue
             vals.update(_value_variants(e.value))
         return vals
 
@@ -362,7 +385,7 @@ class NumericsManifest:
     def lipid_values(self) -> Set[str]:
         vals: Set[str] = set()
         for e in self.entries:
-            if e.domain == "lipid":
+            if e.domain == "lipid" and e.value is not None:
                 vals.update(_value_variants(e.value))
         return vals
 
@@ -378,6 +401,7 @@ class NumericsManifest:
             "wearable_grain_source": self.wearable_grain_source,
             "wearable_window_start": self.wearable_window_start,
             "wearable_window_end": self.wearable_window_end,
+            "wearable_named_days": list(self.wearable_named_days),
             "card_labels": sorted(self.card_labels),
             "card_units": sorted(self.card_units),
             "window_day_tokens": sorted(self.window_day_tokens),
@@ -445,19 +469,65 @@ def _lipid_entries(user_id: str) -> List[ManifestEntry]:
     return out
 
 
+def _metric_display(
+    metric_key: str,
+    *,
+    point: bool,
+    today: bool,
+) -> tuple[str, str]:
+    from pha.wearable_metric_registry import catalog_key_for, catalog_labels, catalog_unit_for
+
+    labels = catalog_labels(metric_key)
+    if labels is None:
+        ckey = catalog_key_for(metric_key)
+        labels = catalog_labels(ckey) if ckey else None
+    unit = catalog_unit_for(metric_key) or ""
+    if unit in ("hours",):
+        unit = "h"
+    if unit == "count" and (catalog_key_for(metric_key) == "steps" or metric_key == "steps"):
+        unit = "步"
+    if point:
+        if labels:
+            label = labels.point_zh if today else labels.that_day_zh
+        else:
+            label = metric_key
+    else:
+        label = labels.span_zh if labels else metric_key
+    return label, unit
+
+
 def _wearable_entries(
     user_id: str,
     user_message: str,
     *,
     wearable_result: Optional[HealthDataResult] = None,
     episodic: Any = None,
-) -> List[ManifestEntry]:
+) -> tuple[List[ManifestEntry], Tuple[str, ...], date, date]:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
-    window = default_wearable_window(user_message, reference=ref, episodic=episodic)
-    anchor = f"{window.start.isoformat()}~{window.end.isoformat()}"
+    from pha.wearable_time_grain import resolve_wearable_time_grain
 
-    if wearable_result is None or window.start == window.end:
+    grain = resolve_wearable_time_grain(user_message, reference=ref, episodic=episodic)
+    explicit = parse_user_date_range(user_message)
+    named: tuple[date, ...] = ()
+    enumerate_days = False
+    if explicit is not None:
+        win_start, win_end = explicit.start, explicit.end
+        span = (win_end - win_start).days
+        if span <= 1:
+            enumerate_days = True
+            named = tuple(win_start + timedelta(days=i) for i in range(span + 1))
+    elif grain.is_enumerate():
+        enumerate_days = True
+        named = grain.named_days
+        win_start, win_end = grain.start, grain.end
+    else:
+        window = default_wearable_window(user_message, reference=ref, episodic=episodic)
+        win_start, win_end = window.start, window.end
+        if grain.is_point_day():
+            named = grain.named_days or (grain.start,)
+
+    if wearable_result is None or win_start == win_end or enumerate_days:
         from pha.intent_gates import infer_wearable_metric_ids
 
         metrics = infer_wearable_metric_ids(user_message)
@@ -471,40 +541,51 @@ def _wearable_entries(
             ]
         wearable_result = get_health_data(
             uid,
-            window.start,
-            window.end,
+            win_start,
+            win_end,
             metrics,
             user_message=user_message,
         )
 
     out: List[ManifestEntry] = []
-    same_day = window.start == window.end
-    point_prefix = "今日" if same_day and window.end == ref else "当日"
-    if same_day:
-        anchor = window.start.isoformat()
-    from pha.wearable_metric_registry import catalog_key_for, catalog_labels, catalog_unit_for
+    named_iso = tuple(d.isoformat() for d in named)
 
+    if enumerate_days and named:
+        from pha.wearable_metric_registry import catalog_unit_for
+
+        for key, series in (wearable_result.series or {}).items():
+            by_day = {str(pt.date)[:10]: pt.value for pt in series or []}
+            metric_key = str(key).strip()
+            unit = catalog_unit_for(metric_key) or ""
+            for day in named:
+                iso = day.isoformat()
+                label, unit_l = _metric_display(metric_key, point=True, today=(day == ref))
+                raw = by_day.get(iso)
+                value: Optional[float]
+                if raw is None:
+                    value = None
+                else:
+                    value = round(float(raw), 2)
+                out.append(
+                    ManifestEntry(
+                        domain="wearable",
+                        metric=label,
+                        value=value,
+                        unit=unit_l or unit,
+                        anchor=iso,
+                        source="wearable.daily",
+                    ),
+                )
+        return out, named_iso, win_start, win_end
+
+    same_day = win_start == win_end
+    anchor = win_start.isoformat() if same_day else f"{win_start.isoformat()}~{win_end.isoformat()}"
     for key, summary in (wearable_result.summaries or {}).items():
         avg = summary.average
         if avg is None:
             continue
         metric_key = str(key).strip()
-        labels = catalog_labels(metric_key)
-        if labels is None:
-            ckey = catalog_key_for(metric_key)
-            labels = catalog_labels(ckey) if ckey else None
-        unit = catalog_unit_for(metric_key) or str(summary.unit or "")
-        if unit in ("hours",):
-            unit = "h"
-        if unit == "count" and (catalog_key_for(metric_key) == "steps" or metric_key == "steps"):
-            unit = "步"
-        if same_day:
-            if labels:
-                label = labels.point_zh if point_prefix == "今日" else labels.that_day_zh
-            else:
-                label = metric_key
-        else:
-            label = labels.span_zh if labels else metric_key
+        label, unit = _metric_display(metric_key, point=same_day, today=(same_day and win_end == ref))
         out.append(
             ManifestEntry(
                 domain="wearable",
@@ -515,7 +596,7 @@ def _wearable_entries(
                 source="wearable.summary" if not same_day else "wearable.daily",
             ),
         )
-    return out
+    return out, named_iso, win_start, win_end
 
 
 def build_numerics_manifest(
@@ -535,6 +616,8 @@ def build_numerics_manifest(
     from pha.wearable_time_grain import resolve_wearable_time_grain
 
     grain = resolve_wearable_time_grain(user_message, reference=ref, episodic=episodic)
+    named_iso: Tuple[str, ...] = tuple(d.isoformat() for d in grain.named_days)
+    win_start, win_end = grain.start, grain.end
 
     if include_lipid and profile in ("combined_review", "lab_cross_year", "lifestyle"):
         entries.extend(_lipid_entries(user_id))
@@ -544,14 +627,13 @@ def build_numerics_manifest(
         "wearable_only",
         "wearable_screenshot_review",
     ):
-        entries.extend(
-            _wearable_entries(
-                user_id,
-                user_message,
-                wearable_result=wearable_result,
-                episodic=episodic,
-            ),
+        wear_entries, named_iso, win_start, win_end = _wearable_entries(
+            user_id,
+            user_message,
+            wearable_result=wearable_result,
+            episodic=episodic,
         )
+        entries.extend(wear_entries)
 
     return NumericsManifest(
         profile=profile,
@@ -560,8 +642,9 @@ def build_numerics_manifest(
         reference_date=ref.isoformat(),
         forbidden_dates=forbidden,
         wearable_grain_source=grain.source,
-        wearable_window_start=grain.start.isoformat(),
-        wearable_window_end=grain.end.isoformat(),
+        wearable_window_start=win_start.isoformat(),
+        wearable_window_end=win_end.isoformat(),
+        wearable_named_days=named_iso,
     )
 
 
@@ -580,6 +663,48 @@ def _is_night_metric_id(metric_id: str) -> bool:
 
 
 _BASELINE_WINDOW_DAYS_RE = re.compile(r"^(\d+)d$")
+_POPULATION_COMMONS_SCHEMA = (
+    Path(__file__).resolve().parent.parent
+    / "storage"
+    / "schemas"
+    / "fact_card_population_commons.schema.json"
+)
+
+
+def _load_population_commons_ints() -> list[int]:
+    """Ints live in schema JSON — not a Python hardcode table of metric names."""
+    import json
+
+    try:
+        doc = json.loads(_POPULATION_COMMONS_SCHEMA.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    raw = doc.get("training_ints") if isinstance(doc, dict) else None
+    if not isinstance(raw, list):
+        return []
+    out: list[int] = []
+    for item in raw:
+        try:
+            n = int(item)
+        except (TypeError, ValueError):
+            continue
+        if 0 < n <= 100:
+            out.append(n)
+    return out
+
+
+def _append_population_commons_entries(entries: List[ManifestEntry]) -> None:
+    for n in _load_population_commons_ints():
+        entries.append(
+            ManifestEntry(
+                domain="population_commons",
+                metric="training_commons",
+                value=float(n),
+                unit="-",
+                anchor="-",
+                source="schema:fact_card_population_commons",
+            )
+        )
 
 
 def build_fact_card_numerics_manifest(
@@ -722,6 +847,8 @@ def build_fact_card_numerics_manifest(
         except (TypeError, ValueError):
             pass
 
+    _append_population_commons_entries(entries)
+
     return NumericsManifest(
         profile="fact_card_interpret",
         user_id=(user_id or "default").strip() or "default",
@@ -744,7 +871,13 @@ def format_manifest_tier0_block(
     max_chars: Optional[int] = None,
     profile: str = "",
 ) -> str:
-    cap = max_chars if max_chars is not None else _MANIFEST_MAX_CHARS
+    prof = (profile or manifest.profile or "").strip()
+    if max_chars is not None:
+        cap: Optional[int] = max_chars
+    elif prof in _FACT_CARD_MANIFEST_PROFILES:
+        cap = None
+    else:
+        cap = _MANIFEST_MAX_CHARS
     if not manifest.entries:
         empty = (
             "【Numerics Manifest · T0 · 机器白名单】\n"
@@ -752,7 +885,7 @@ def format_manifest_tier0_block(
             "（本轮库内无血脂/穿戴可校验数值；禁止编造化验或 HRV/千卡数字。）\n"
             "T1 guide values: use 【参考标准】 or [Reference Standard] disclosure; not whitelisted here."
         )
-        if (profile or manifest.profile or "").strip() == "wearable_screenshot_review":
+        if prof == "wearable_screenshot_review":
             empty = f"{empty}\n{_WEARABLE_MANIFEST_FORBIDDEN_FOOTER}"
         return empty
     header = (
@@ -767,8 +900,8 @@ def format_manifest_tier0_block(
     for e in manifest.entries:
         lines.append(e.kv_line())
     body = "\n".join(lines)
-    if len(body) <= cap:
-        if (profile or manifest.profile or "").strip() == "wearable_screenshot_review":
+    if cap is None or len(body) <= cap:
+        if prof == "wearable_screenshot_review":
             body = f"{body}\n{_WEARABLE_MANIFEST_FORBIDDEN_FOOTER}"
         return body
     trimmed = [header.strip()]
@@ -780,7 +913,7 @@ def format_manifest_tier0_block(
         trimmed.append(line)
     trimmed.append("…（Manifest 已按 Tier0 上限截断，仍以已列 KV 为唯一合法数字源）")
     body = "\n".join(trimmed)[:cap]
-    if (profile or manifest.profile or "").strip() == "wearable_screenshot_review":
+    if prof == "wearable_screenshot_review":
         body = f"{body}\n{_WEARABLE_MANIFEST_FORBIDDEN_FOOTER}"
     return body
 
@@ -1433,6 +1566,22 @@ def _metric_clause(clause: str, labels: Set[str], units: Set[str]) -> bool:
     return False
 
 
+def _label_clause(clause: str, labels: Set[str]) -> bool:
+    """Card metric labels only — units like % must not veto training-zone ints."""
+    cl = clause or ""
+    for lab in labels:
+        if len(lab) >= 2 and lab in cl:
+            return True
+    return False
+
+
+def _is_plain_integer_token(token: str) -> bool:
+    raw = (token or "").replace(",", "")
+    if not raw or "." in raw:
+        return False
+    return raw.isdigit()
+
+
 def _complete_disclosure_blocks(
     text: str,
 ) -> List[Tuple[int, int, str, str]]:
@@ -1525,6 +1674,7 @@ def _audit_response_numerics_fact_card(
     units = set(manifest.card_units)
     window_ok = set(manifest.window_day_tokens) | set(allowed_values)
     value_ok = set(allowed_values) | set(manifest.window_day_tokens)
+    commons_ok = set(manifest.population_commons_values)
     m4_mode = numerics_t1_m4_mode()
 
     complete_blocks = _complete_disclosure_blocks(text)
@@ -1607,6 +1757,15 @@ def _audit_response_numerics_fact_card(
             continue
         if _is_nonzero_fraction_decimal(token):
             violations.append(f"unauthorized_value:{token}")
+            continue
+        # Population commons (Manifest domain): plain int ∧ no card metric label
+        # in the same clause. Units alone (e.g. %) do not veto.
+        if (
+            _is_plain_integer_token(token)
+            and _token_in_allowed(token, commons_ok)
+            and not _label_clause(clause, labels)
+        ):
+            educational_ints.update(_normalize_num_token(token) or {token})
             continue
         if _personal_clause(clause):
             violations.append(f"unauthorized_value:{token}")

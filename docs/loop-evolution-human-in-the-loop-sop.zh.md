@@ -143,4 +143,68 @@ python3 scripts/pha_chb_daily_recompile.py
 
 | 日期 | 说明 |
 |------|------|
+| 2026-09-11 | v1.2 — 路径 B：同意 → 本机 `data/loop_local_aliases.json`（不落仓库 catalog） |
+| 2026-09-11 | v1.1 — 周更 harvest + 多渠道通知 + 人审批准页（不落 catalog） |
 | 2026-07-13 | v1.0 — 首条人审 alias 已合入（`steps←多少步`，PR #2） |
+
+---
+
+## 路径 W — 每周自动 harvest + 通知 + 审批（不落库）
+
+> **铁律**：自动部分只到「提案 + 通知」；**永不**自动改仓库 `health_intent_catalog.json`。
+>
+> **路径 B（本机生效）**：事实卡 / 审批页点「同意」→ 写入 gitignored 的 `data/loop_local_aliases.json`，本机 `catalog_metric_aliases` / 意图匹配立刻可用。可选 `PHA_LOOP_APPROVE_FULL_VETO=1` 或 `--full-veto` 另跑 full-veto；合入仓库 catalog 仍需人工 Ready PR。
+
+### W1. 本机一键（先 dry-run）
+
+```bash
+cd personal_health_agent
+source .venv/bin/activate
+export PYTHONPATH=.
+export PHA_LOOP_APPROVE_TOKEN="与 .env 中 PHA_INGEST_TOKEN 相同或单独密钥"
+export PHA_LOOP_BASE_URL="http://127.0.0.1:8788"   # 手机同网可用 Mac.local:8788
+
+# 通知 dry-run（不发邮件/webhook；仍写 PHA inbox + pending）
+python3 scripts/pha_loop_weekly_harvest.py \
+  --e2e-jsonl reports/e2e/某次失败.jsonl
+
+# 真正推送：Mac 通知 / 邮件 / webhook（飞书·Slack·Pushover 等）
+export PHA_LOOP_NOTIFY_APPLY=1
+export PHA_LOOP_WEEKLY_CHANNELS=pha_inbox,mac,email,webhook
+export LOOP_NOTIFY_WEBHOOK_URL="https://…"          # 手机可达的 webhook
+export LOOP_NOTIFY_WEBHOOK_FORMAT=feishu            # 或 slack / generic
+export PHA_LOOP_SMTP_HOST=smtp.example.com
+export PHA_LOOP_NOTIFY_EMAIL_TO=you@example.com
+export PHA_LOOP_SMTP_USER=…
+export PHA_LOOP_SMTP_PASSWORD=…
+python3 scripts/pha_loop_weekly_harvest.py --e2e-jsonl … --notify-apply
+```
+
+产物：`reports/loop/approvals/pending/loopapr_*.json` · `data/loop_inbox/` · 通知里的 **Approve URL**。
+
+### W2. 审批（任选其一）
+
+| 渠道 | 做法 |
+|------|------|
+| **PHA 事实卡（推荐）** | 打开完整卡 → **Loop 审批** 区块 → 同意 / 拒绝（锁屏通知会短提示「Loop 待审」） |
+| 手机 / Mac Safari | 打开通知里的 `/ops/loop/approvals/<id>/view?token=…` → **Approve** |
+| CLI | `python3 scripts/pha_loop_weekly_approve.py --id loopapr_… --approve --confirm YES` |
+| PHA 收件箱 API | `GET /ops/loop/inbox?token=…` 列出 pending |
+
+**Approve 实际执行（路径 B）**：合并提案别名到 `data/loop_local_aliases.json`（本机 only）。**不**改仓库 catalog。可选 `--full-veto` / `PHA_LOOP_APPROVE_FULL_VETO=1`；可选 `--draft-pr`（需 `PHA_LOOP_WEEKLY_DRAFT_PR=1`）。仓库合入仍需人工 Ready PR。
+
+拒绝：页面 **Reject** 或 `--reject`。
+
+### W3. launchd 每周一 09:30
+
+示例：`scripts/macos/com.pha.loop-weekly.plist.example` → 拷到 `~/Library/LaunchAgents/` 后改路径与环境变量，再 `launchctl load …`。
+
+PHA 服务需在听（审批页 / inbox）；Mac 通知不依赖 PHA；邮件与 webhook 不依赖 PHA。
+
+### W4. 手机通知建议
+
+- **飞书 / Slack / Discord webhook**：设 `LOOP_NOTIFY_WEBHOOK_URL`
+- **Pushover / Bark / ntfy**：用 generic JSON webhook 或中间 Shortcuts
+- **iOS 捷径**：收到 webhook 后「打开 URL」→ 审批页（同网 `http://Mac.local:8788/...`）
+
+Selfcheck：`python3 scripts/pha_loop_weekly_selfcheck.py`

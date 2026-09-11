@@ -136,9 +136,13 @@ class WearableTimeGrain:
     aggregation: str
     source: str
     token: str = ""
+    named_days: tuple[date, ...] = ()
 
     def is_point_day(self) -> bool:
         return self.aggregation == "point" and self.start == self.end
+
+    def is_enumerate(self) -> bool:
+        return self.aggregation == "enumerate" and len(self.named_days) >= 2
 
     def is_default_90d(self) -> bool:
         return self.source == "default"
@@ -330,32 +334,72 @@ def resolve_wearable_time_grain(
             )
         )
 
-    if not ranked:
-        if (os.environ.get("PHA_EPISODIC_GRAIN_ANCHOR") or "1").strip().lower() in (
-            "1",
-            "true",
-            "yes",
-        ) and episodic is not None:
-            start_s = str(getattr(episodic, "focus_grain_start", "") or "").strip()
-            end_s = str(getattr(episodic, "focus_grain_end", "") or "").strip()
-            agg = str(getattr(episodic, "focus_grain_aggregation", "") or "point").strip() or "point"
-            if start_s and end_s:
-                from pha.intent_gates import infer_wearable_metric_ids
+    from pha.date_range_parser import extract_named_calendar_days
 
-                if infer_wearable_metric_ids(text):
-                    try:
-                        return WearableTimeGrain(
-                            start=date.fromisoformat(start_s),
-                            end=date.fromisoformat(end_s),
-                            aggregation=agg,
-                            source="episodic_anchor",
-                            token="episodic",
-                        )
-                    except ValueError:
-                        pass
-        return _default_grain(ref)
-    ranked.sort(key=lambda item: item[0], reverse=True)
-    return ranked[0][1]
+    duration: list[tuple[int, WearableTimeGrain]] = []
+    point_days: set[date] = set()
+    point_rank = 0
+    for rank, grain in ranked:
+        if grain.aggregation == "point":
+            point_days.add(grain.start)
+            if rank > point_rank:
+                point_rank = rank
+        else:
+            duration.append((rank, grain))
+    for named in extract_named_calendar_days(text, reference=ref):
+        point_days.add(named)
+        if point_rank < 12:
+            point_rank = 12
+
+    duration.sort(key=lambda item: item[0], reverse=True)
+    best_duration = duration[0] if duration else None
+    if best_duration is not None and best_duration[0] > point_rank:
+        return best_duration[1]
+
+    ordered = tuple(sorted(point_days))
+    if len(ordered) >= 2:
+        return WearableTimeGrain(
+            start=ordered[0],
+            end=ordered[-1],
+            aggregation="enumerate",
+            source="named_days",
+            named_days=ordered,
+        )
+    if len(ordered) == 1:
+        day = ordered[0]
+        return WearableTimeGrain(
+            start=day,
+            end=day,
+            aggregation="point",
+            source="time_slot",
+            named_days=ordered,
+        )
+    if best_duration is not None:
+        return best_duration[1]
+
+    if (os.environ.get("PHA_EPISODIC_GRAIN_ANCHOR") or "1").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    ) and episodic is not None:
+        start_s = str(getattr(episodic, "focus_grain_start", "") or "").strip()
+        end_s = str(getattr(episodic, "focus_grain_end", "") or "").strip()
+        agg = str(getattr(episodic, "focus_grain_aggregation", "") or "point").strip() or "point"
+        if start_s and end_s:
+            from pha.intent_gates import infer_wearable_metric_ids
+
+            if infer_wearable_metric_ids(text):
+                try:
+                    return WearableTimeGrain(
+                        start=date.fromisoformat(start_s),
+                        end=date.fromisoformat(end_s),
+                        aggregation=agg,
+                        source="episodic_anchor",
+                        token="episodic",
+                    )
+                except ValueError:
+                    pass
+    return _default_grain(ref)
 
 
 __all__ = [

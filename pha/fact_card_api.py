@@ -65,12 +65,19 @@ def get_fact_card(
     _auth(x_pha_ingest_token, token)
     uid = (user_id or "default").strip() or "default"
     try:
-        return load_fact_card(uid)
+        card = load_fact_card(uid)
     except Exception as exc:
         raise HTTPException(
             status_code=500,
             detail={"error": "fact_card_failed", "reason": type(exc).__name__},
         ) from exc
+    try:
+        from pha.chb_compiler import schedule_chb_autocompile
+
+        schedule_chb_autocompile(uid)
+    except Exception:
+        pass
+    return card
 
 
 @router.get("/proactive/fact-card/view", response_class=HTMLResponse)

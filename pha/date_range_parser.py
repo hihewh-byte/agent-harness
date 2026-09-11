@@ -22,6 +22,16 @@ _CN_RANGE_RE = re.compile(
     re.I,
 )
 
+_ISO_DAY_RE = re.compile(
+    r"(?<!\d)(20\d{2}|19\d{2})[-/.](\d{1,2})[-/.](\d{1,2})(?!\d)",
+)
+_CN_YMD_RE = re.compile(
+    r"(20\d{2}|19\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]",
+)
+_CN_MD_RE = re.compile(
+    r"(?<![\d年])(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]",
+)
+
 _META_RANGE_QUESTION_RE = re.compile(
     r"日期范围|时间范围|精确日期|哪段时间|什么时候到|从哪天|到哪一天|数据区间",
     re.I,
@@ -70,6 +80,56 @@ def parse_user_date_range(text: str) -> Optional[ParsedDateRange]:
             end = ref
         return ParsedDateRange(start=start, end=end)
     return None
+
+
+def closest_past_month_day(month: int, day: int, reference: date) -> Optional[date]:
+    """Nearest calendar month-day on or before ``reference`` (this year or last)."""
+    found: list[date] = []
+    for year in (reference.year, reference.year - 1):
+        try:
+            candidate = date(year, month, day)
+        except ValueError:
+            continue
+        if candidate <= reference:
+            found.append(candidate)
+    if not found:
+        return None
+    return max(found)
+
+
+def extract_named_calendar_days(
+    text: str,
+    *,
+    reference: Optional[date] = None,
+) -> tuple[date, ...]:
+    """Calendar dates named in the utterance (grammar only; no spoken-word table)."""
+    raw = text or ""
+    if not raw.strip():
+        return ()
+    ref = reference or effective_query_reference_date()
+    found: list[date] = []
+    seen: set[date] = set()
+
+    def _add(item: Optional[date]) -> None:
+        if item is None or item in seen or item > ref:
+            return
+        seen.add(item)
+        found.append(item)
+
+    for pat in (_ISO_DAY_RE, _CN_YMD_RE):
+        for match in pat.finditer(raw):
+            _add(_triplet_to_date(match.group(1), match.group(2), match.group(3)))
+    ymd_spans = [m.span() for m in _CN_YMD_RE.finditer(raw)]
+    for match in _CN_MD_RE.finditer(raw):
+        start, _end = match.span()
+        if any(s <= start < e for s, e in ymd_spans):
+            continue
+        try:
+            month, day = int(match.group(1)), int(match.group(2))
+        except ValueError:
+            continue
+        _add(closest_past_month_day(month, day, ref))
+    return tuple(sorted(found))
 
 
 def is_meta_date_range_question(text: str) -> bool:

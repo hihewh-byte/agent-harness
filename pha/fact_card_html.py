@@ -68,6 +68,80 @@ def _interpret_status_html(
     return '<p class="fine" id="interp-status"></p>'
 
 
+def _loop_approvals_html(
+    card: dict[str, Any],
+    *,
+    locale: str,
+    token: Optional[str],
+    return_to: str,
+) -> str:
+    """Ops section: pending Loop approvals with approve/reject on the full card."""
+    block = card.get("loop_approvals") or {}
+    pending = list(block.get("pending") or [])
+    local = block.get("local_aliases") or {}
+    local_n = int(local.get("alias_n") or 0)
+    local_lines = list(local.get("lines") or [])
+    local_html = ""
+    if local_n:
+        lis = "".join(f"<li>{escape(str(x))}</li>" for x in local_lines[:8])
+        local_html = (
+            f'<p class="fine">{escape(card_copy(locale, "loop_local_active", n=local_n))}</p>'
+            f"<ul>{lis}</ul>"
+        )
+    if not pending:
+        return (
+            '<section class="card" id="loop-approvals">'
+            f"<h2>{escape(card_copy(locale, 'loop_h2'))}</h2>"
+            f'<p class="fine">{escape(card_copy(locale, "loop_none"))}</p>'
+            f"{local_html}"
+            "</section>"
+        )
+    items: list[str] = []
+    for row in pending:
+        aid = escape(str(row.get("approval_id") or ""))
+        n = int(row.get("accepted_catalog_n") or 0)
+        aliases = row.get("aliases") or []
+        alias_lis = "".join(f"<li>{escape(str(a))}</li>" for a in aliases) or (
+            f"<li>{escape(card_copy(locale, 'loop_empty_aliases'))}</li>"
+        )
+        approve_q = urlencode(
+            {
+                **({"token": token} if token else {}),
+                "confirm": "YES",
+                "next": return_to,
+            }
+        )
+        reject_q = urlencode(
+            {
+                **({"token": token} if token else {}),
+                "reason": "rejected_from_fact_card",
+                "next": return_to,
+            }
+        )
+        approve_action = f"/ops/loop/approvals/{aid}/approve?{approve_q}"
+        reject_action = f"/ops/loop/approvals/{aid}/reject?{reject_q}"
+        items.append(
+            "<div class=\"loop-item\">"
+            f"<p><code>{aid}</code> · {escape(card_copy(locale, 'loop_item', n=n))}</p>"
+            f"<ul>{alias_lis}</ul>"
+            f'<form method="post" action="{approve_action}" style="display:inline">'
+            f'<button type="submit">{escape(card_copy(locale, "loop_approve"))}</button>'
+            "</form> "
+            f'<form method="post" action="{reject_action}" style="display:inline">'
+            f'<button type="submit" class="secondary">{escape(card_copy(locale, "loop_reject"))}</button>'
+            "</form>"
+            "</div>"
+        )
+    return (
+        '<section class="card" id="loop-approvals">'
+        f"<h2>{escape(card_copy(locale, 'loop_h2'))}</h2>"
+        f'<p class="fine">{escape(card_copy(locale, "loop_lead"))}</p>'
+        f"{local_html}"
+        + "".join(items)
+        + "</section>"
+    )
+
+
 def render_fact_card_html(
     card: dict[str, Any],
     *,
@@ -179,9 +253,19 @@ def render_fact_card_html(
     eval_text = escape(str(summary.get("text") or ""))
     advice_text = escape(str(summary.get("advice") or ""))
     composite = escape(str(summary.get("composite") or ""))
+    composite_kind = str(summary.get("composite_kind") or "")
     composite_line = (
         f'<p class="fine">{escape(card_copy(locale, "composite", label=composite))}</p>' if composite else ""
     )
+    hero_html = ""
+    if composite_kind in {"easy", "typical", "good"} and composite:
+        hero_html = (
+            f'<section class="hero" aria-label="{escape(card_copy(locale, "hero_kicker"))}">'
+            f'<p class="hero-kicker">{escape(card_copy(locale, "hero_kicker"))}</p>'
+            f'<p class="hero-band {escape(composite_kind)}">{composite}</p>'
+            f'<p class="hero-advice">{advice_text}</p>'
+            "</section>"
+        )
     prompt_raw = str(prefs.get("assessment_prompt") or "")
     prompt_escaped = escape(prompt_raw)
     prompt_max = int(prefs.get("assessment_prompt_max") or ASSESSMENT_PROMPT_MAX)
@@ -198,6 +282,7 @@ def render_fact_card_html(
         else card_copy(locale, "generate")
     )
     hk = facts.get("healthkit") or {}
+    needs_setup = not bool(hk.get("reached"))
     if hk.get("reached"):
         hk_ts = format_card_datetime(
             hk.get("last_timestamp"),
@@ -212,6 +297,19 @@ def render_fact_card_html(
         )
     else:
         hk_line = card_copy(locale, "hk_none")
+    setup_html = ""
+    if needs_setup:
+        setup_html = (
+            '<section class="setup" id="lan-setup">'
+            f"<h2>{escape(card_copy(locale, 'setup_h2'))}</h2>"
+            f'<p class="fine">{escape(card_copy(locale, "setup_lead"))}</p>'
+            "<ol>"
+            f"<li>{escape(card_copy(locale, 'setup_1'))}</li>"
+            f"<li>{escape(card_copy(locale, 'setup_2'))}</li>"
+            f"<li>{escape(card_copy(locale, 'setup_3'))}</li>"
+            f"<li>{escape(card_copy(locale, 'setup_4'))}</li>"
+            "</ol></section>"
+        )
     ingest_last = facts.get("ingest_last") or {}
     if ingest_last.get("at"):
         kind = escape(str(ingest_last.get("kind") or ""))
@@ -264,6 +362,13 @@ def render_fact_card_html(
         "<span>English</span></label>"
     )
     copy_js = json.dumps(js_copy(locale), ensure_ascii=False)
+    return_to = f"/proactive/fact-card/view?{qs}"
+    loop_html = _loop_approvals_html(
+        card,
+        locale=locale,
+        token=token,
+        return_to=return_to,
+    )
     return f"""<!doctype html>
 <html lang="{escape(locale or DEFAULT_LOCALE)}">
 <head>
@@ -315,6 +420,27 @@ def render_fact_card_html(
     button:disabled {{ opacity: .55; }}
     .warn {{ color: #f0c36d; font-weight: 600; }}
     .interp-body {{ white-space: pre-wrap; }}
+    .setup {{
+      background: #243044; border: 1px solid #e8d5a3;
+      border-radius: 16px; padding: 16px 16px 8px; margin: 14px 0;
+    }}
+    .setup ol {{ margin: 8px 0 12px; padding-left: 1.25rem; }}
+    .setup li {{ margin: 8px 0; }}
+    .hero {{
+      background: #1b222b; border-radius: 16px;
+      padding: 20px 16px 16px; margin: 14px 0; text-align: center;
+    }}
+    .hero-kicker {{ margin: 0; color: #b9b3a7; font-size: .92rem; }}
+    .hero-band {{
+      font-size: 2rem; font-weight: 700; margin: 8px 0 10px;
+      letter-spacing: .02em;
+    }}
+    .hero-band.easy {{ color: #9fd4a3; }}
+    .hero-band.typical {{ color: #e8d5a3; }}
+    .hero-band.good {{ color: #8ec8f0; }}
+    .hero-advice {{ margin: 0; color: #f4f1ea; }}
+    .loop-item {{ border-top: 1px solid #444; padding-top: 12px; margin-top: 12px; }}
+    .loop-item:first-of-type {{ border-top: none; padding-top: 0; margin-top: 0; }}
   </style>
 </head>
 <body>
@@ -324,6 +450,8 @@ def render_fact_card_html(
     · {escape(card_copy(locale, "coverage", present=present, total=total))}</p>
   <p class="fine">{sync_line}</p>
   <p class="fine">{hk_line}</p>
+  {setup_html}
+  {hero_html}
   <section class="card">
     <h2>{escape(card_copy(locale, "facts"))}</h2>
     <ul>{''.join(metrics_html)}</ul>
@@ -342,6 +470,7 @@ def render_fact_card_html(
     {interpret_block}
     <button type="button" class="secondary" id="interpret-btn">{interpret_btn}</button>
   </section>
+  {loop_html}
   <section class="card">
     <h2>{escape(card_copy(locale, "metrics_h2"))}</h2>
     <p class="fine">{escape(card_copy(locale, "metrics_help"))}</p>

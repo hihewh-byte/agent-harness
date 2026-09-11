@@ -1,6 +1,117 @@
-# PHA iOS 主动 Agent 变更日志
+## 2026-09-11 (点日集合枚举 + 穿戴轮 CHB background)
 
-> **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
+- **类别**：P1 / 对话取数 · FR-6.14。
+- **改动**：点日集合枚举；90 日槽与点日解耦；schema 正分挂 `USER_CONTEXT_BRIEF`（仅 §Background）。build `pha-v2.3.46-named-days-chb-brief`。
+- **证据**：`pha_healthkit_ingest_selfcheck`；`pha_chb_compiler_selfcheck`。
+- **回滚**：回 v2.3.45。
+
+## 2026-09-11 (Loop 路径 B：同意 → 本机别名生效)
+
+- **类别**：P1 / Loop × 产品。维护者选 B：同意后本机实际可用，仍不写仓库 catalog。
+- **改动**：`pha/loop_local_aliases.py`；`catalog_metric_aliases` 合并本地 override；`approve_and_execute` 写 `data/loop_local_aliases.json`；事实卡文案「同意 · 本机生效」；full-veto / Draft PR 改为可选。
+- **证据**：`pha_loop_weekly_selfcheck` PASS（含 infer_metrics_from_message）。
+- **回滚**：去掉 local 合并与 approve 写入。
+
+## 2026-09-11 (活动消耗/步数跨源双计修复)
+
+- **类别**：P1 / 日聚合。新 zip 导入后捷径再次写入同日 `healthkit|` 日总量；活动消耗对所有源**求和** → 事实卡约 699 vs 健康 App ~372；步数捷径多设备列表误求和 ≈ Watch+iPhone，再经 max 抢赢。
+- **改动**：`active_energy` 改为按源汇总后 max（与步数同族）；`healthkit` 日总量若 ≈ 多设备之和则丢弃（未去重合并）；捷径 `_combine_step_numbers` 无覆盖 Sum 时改 max 不 sum。已回填 `default` 近窗日表。
+- **证据**：`pha_wearable_daily_aggregator_selfcheck` PASS。今日卡：活动消耗 355.6 kcal、步数 6963（修复前 699.3 / 12812）。
+- **回滚**：恢复 `active_energy_sum` 与 combine 的 sum 分支。
+
+
+- **类别**：P1 / Loop × Fact Card。维护者：通知与审批做到事实卡上。
+- **改动**：`load_fact_card` 附 `loop_approvals`；锁屏通知短提示；完整卡 `#loop-approvals` 同意/拒绝（`next` 回事实卡）。同意仍 = full-veto，不合入 catalog。
+- **证据**：`pha_loop_weekly_selfcheck`（含事实卡段）PASS。
+- **回滚**：去掉 attach 与 HTML 区块。
+
+## 2026-09-11 (周更 Loop：harvest + 多渠道通知 + 人审批准)
+
+- **类别**：P1 / Loop 运维。维护者要：每周自动 harvest、多渠道通知、可审批执行；**不落 catalog**。
+- **改动**：`pha/loop_weekly.py` · `pha/loop_approval_api.py` · `scripts/pha_loop_weekly_harvest.py` · `pha_loop_weekly_approve.py` · launchd 示例 · SOP 路径 W。通知：PHA inbox / Mac / 邮件 / webhook。Approve = full-veto（+ 可选 Draft PR），**禁止**自动改 catalog。
+- **证据**：`pha_loop_weekly_selfcheck` PASS。
+- **回滚**：去掉 router 挂载与脚本即可。
+
+## 2026-09-11 (zip 睡眠日键 = HealthKit 醒来日)
+
+- **类别**：P0 / FR-1.6 · FR-2.6。维护者：zip 与 HealthKit 本应同源一致。
+- **根因**：zip 按分段 **start 日历日** 写 `wearable_sleep_segments.day`；午夜前 Core/Deep 落到前一日。同夜 zip vs HealthKit 入睡差约 59min。
+- **改动**：① `pha/sleep_wake_day.py` 正午窗醒来日；② 导入写分段用醒来日；③ `rebucket_zip_sleep_segments_to_wake_days` 纠正历史；④ 日表 zip-only 也走 T2 `healthkit_sleep_fields`（含 Core）。本机已 rebucket `updated=1423` / 590 夜并 rebuild。
+- **验收**：9/11 |zip−hk| ≤1min；9/10 zip vs 健康 App 截图 Δ≤约 5min 且 Core 有值；`pha_wearable_daily_aggregator_selfcheck` PASS。
+- **回滚**：去掉 wake_day 写入与 rebucket 调用；日表 zip 分支回 sum deep/REM。
+
+## 2026-09-11 (睡眠日表：双源夜优先 healthkit|)
+
+- **类别**：P0 / FR-1.6。维护者截图 Sep 10–11：健康 App 深睡 55min / 核心 5h5m / REM 1h22m / 清醒 1h5m；日表此前入睡少约 58min、深睡少约 37min、Core 空。
+- **根因**：同日并存 `healthkit|` 捷径分段与残缺 zip/`HKCategory` 段时，`build_wearable_daily_summary` 走 zip 分支（条件曾为 `hk_rows and not other_rows`）。
+- **改动**：有 `healthkit|` 即用 `healthkit_sleep_fields_from_segments`；仅无捷径时才用 zip。zip 路径清空 stale `sleep_core` / `in_bed` / `sleep_period`。已重算 9/8–9/11。
+- **验收**：9/11 vs 健康 App Δ≤1min（入睡/核心/深/REM/清醒）；`pha_wearable_daily_aggregator_selfcheck` PASS（含 `test_mixed_segments_prefer_healthkit`）。
+- **回滚**：恢复「仅无 other 时用 hk」分支。
+
+## 2026-09-11 (P15 → DONE · 维护者盖章)
+
+- **类别**：P1 / §8 M1-P15。维护者：药物项A不宜作训练黄金句；`slot_named_ge2` **5/10** 可接受。
+- **改动**：PRD **v1.22** · §8 **M1-P15 → DONE**。M1 汇总 `*` 仅余 P20 iPhone 同网。
+- **遗留（非阻塞，另开）**：审计小数/个别整数、`slot_named_ge2` 频率、prefs 勾选漂移、think 性能、药物项A点名语义错配。
+- **本对话不 git**（另 agent / 任务列表提交）。
+
+## 2026-09-11 (P15 population_commons + 黄金句门槛改口)
+
+- **类别**：P1 / FR-6.10 · FR-6.12。维护者：① 黄金句不再用药物项A∧补剂项B；② 训练常识整数进 Manifest 白名单；③ think 可选；④ 跑 ×10。
+- **改动**：schema `fact_card_population_commons.training_ints` → Manifest `domain=population_commons`；审计「白名单整数 ∧ 同句无卡标签」放行（% 单位不否决）；不并入个人 `allowed_values`。DONE 门槛：黄金句 `slot_named_ge2`；药物项A∧补剂项B仅 meds-HRV。PRD v1.21。build `pha-v2.3.45-p15-commons-gate`。
+- **验收**：`runs_v244_commons_gold10.jsonl`（think=true 试用）：`slot_named_ge2` **5/10**；硬 Markdown 1；无训练建议缺口 0；审计拒 5。prefs 勾选有漂移，批处理内存裁到黄金六项、**未写盘**。后经维护者盖章见上条 DONE。
+- **回滚**：去掉 commons 域与门槛改口；policy_rev 回 v1.1。
+
+## 2026-09-11 (P15 ctx-min + TASK 去 % 诱饵 + think 对照)
+
+- **类别**：P1 / FR-6.12。维护者口令：执行 review 建议。
+- **改动**：① `env-8788.sh` `LLM_TIMEOUT_SECONDS=300`（此前 120 导致假 `model_unavailable`）。② `fact_card_interpret` `slot_start.FACT_CARD_CONTEXT=min`（去双份全字段 JSON）。③ schema 捕获负例「进行建议/给出建议」；`item_seps` 加 `) `/`） `；编译后按 text 去重。④ TASK 第 3 条去掉 70–80% 人群百分诱饵。build `pha-v2.3.43-p15-ctxmin-think`。
+- **对照**：`OLLAMA_THINK=true` 黄金句 ×5（`runs_v243_ctxmin_think_gold5.jsonl`）：硬 Markdown **0/5**；`no_training_advice` **0/5**；补剂项B点名 3/5；双点名仍 **0/5**；审计拒 3。timeout=300 生效。**不**标 P15 DONE。
+- **回滚**：slot_start / TASK / schema 回 v2.3.42；timeout 回 120。
+
+## 2026-09-11 (P15 CHB 一项一行 · 黄金句 ×10)
+
+- **类别**：P1 / FR-6.12 验收。`qwen3:14b`；`brief_source=chb`；prefs 未改；build `pha-v2.3.42-p15-chb-itemrows`。
+- **结果**（n=1..10）：双点名 **0/10**；文本含药物项A/补剂项B均为 0；硬 Markdown（剥后）多数；审计拒常见。**不**标 P15 DONE；**不满 20**（维护者口令开满 10）。
+- **证据**：`reports/p15_eval/runs_v242_chb_itemrows_gold10.jsonl`。
+
+## 2026-09-11 (P15 CHB 一项一行 + 槽位邻接 + 验收走 CHB)
+
+- **类别**：P1 / FR-6.12。维护者拍板：DONE 门槛不动；行数上限与分隔符进 copy/schema，不进 Python 硬编码。
+- **改动**：① 批处理先 `recompile_chb_if_stale`，断言 `brief_source=chb`。② `background_rows` 按 schema/copy 的 `item_seps` 拆成一项一行；有时段词时丢无标记表头；制表符笔记按表头列取「具体内容」；`row_caps`/`note_caps` 读 schema+copy；时段桶首尾交错以免截断丢末项。③ `USER_BACKGROUND_BRIEF` 装配到 `USER_ASSESSMENT_PROMPT` 之后（仍登记为唯一 Tier1）。④ 格式门在剥 Markdown 后测。build `pha-v2.3.42-p15-chb-itemrows`。
+- **烟雾 ×5（qwen3:14b · CHB）**：`brief_source=chb`×5；brief 含药物项A+补剂项B；双点名 **0/5**；硬 Markdown（剥后）4/5；审计拒若干。**有路径、无点名信号 → 暂不满 20**。**不**标 P15 DONE。
+- **证据**：`pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck`；`reports/p15_eval/runs_v242_chb_itemrows_gold5.jsonl`。
+- **回滚**：回 v2.3.41 拆行/装配；批处理去掉 CHB 断言。
+
+## 2026-09-11 (named-prose 黄金句 20：仍未过 P15)
+
+- **类别**：P1 / FR-6.12 验收。`qwen3:14b`；prefs 未改；build `pha-v2.3.41-p15-named-prose`。
+- **条件**：brief `live_notes`×6 含药物项A+补剂项B；TASK 第 4/5 条已落地。
+- **结果**：双点名 **0/20**；药物项A 0、补剂项B 8；审计未过 6（`unauthorized_value`）；硬 Markdown/列表 **19/20**。prefs 未变。
+- **失败家族**：仍用「一、」「-」「###」分层；药物项A零点名；补剂项B偶发；编数熔断仍有效。**不**标 P15 DONE；**不**加药名表 / 注意事项专段 / 黄金一句 if。
+- **证据**：`reports/p15_eval/runs_v241_named_prose_gold20.jsonl` · `summary_v241_named_prose_gold20.json`。
+
+## 2026-09-11 (P15 named-prose：槽内字面入建议句 + 连续散文)
+
+- **类别**：P1 / FR-6.8 · FR-6.12。维护者拍板：采纳干净契约（无 medications/supplements 反向 priming；不穷尽点名）。
+- **改动**：TASK 第 4 条 continuous narrative + 禁 bullet/hyphen/1. 2./一、二、；第 5 条按槽内已有字面写入建议句，禁止仅用笼统类别词代替；导语中英同步。build `pha-v2.3.41-p15-named-prose`。**不**放水审计、**不加**药名表/注意事项专段/黄金一句 if。P15 仍 IN_PROGRESS（待黄金句 20 轮）。
+- **证据**：`pha_fact_card_selfcheck`；随后 `reports/p15_eval/runs_v241_named_prose_gold20.jsonl`。
+- **回滚**：TASK / lead 回 v2.3.40 noskip 文案。
+
+## 2026-09-11 (黄金句 20 轮：去 skip 后仍未过 P15)
+
+- **类别**：P1 / FR-6.12 验收。只用 `qwen3:14b`；不改 prefs；路径 `run_interpretation`。
+- **条件**：brief `live_notes` notes_used=6，含药物项A+补剂项B；TASK/导语已去 skip。
+- **结果**（按 n=1..20 末次唯一）：双点名 **2/20**（门槛 ≥16）；药物项A 2、补剂项B 9；审计未过 1（`unauthorized_value`）；硬 Markdown **17/20**。prefs 测后未变。
+- **失败家族**：整槽仍偏「泛称补剂/药物」；药物项A极少落入建议句；清单体/Markdown 抬头（「一、二、」）仍常见。**不**标 P15 DONE；**不**加药名表 / 注意事项专段 / 黄金一句 if。
+- **证据**：`reports/p15_eval/runs_v119_gold20.jsonl` · `summary_v119_gold20.json`。
+
+## 2026-09-11 (磁盘兑现 v1.19：去 skip + 写入建议句 + 弱因果；HRV 当日均值)
+
+- **类别**：P1 / FR-6.8 · FR-6.12 v1.19 · FR-1.5。维护者口令：兑现已批准的 v1.19；拒绝 Gemini「强制注意事项专段」；HRV 以健康 App 今日均值准。
+- **改动**：TASK 第 5 条 + `bg_brief_lead`：brief 在场不得 skip，写入建议句，不另起编号注意事项清单；禁 causes / leads to。HRV `temporal.kind=accrual`，捷径 Find `is today` + Average。pack `2026.09.11.hrv-today`。**不**标 P15 DONE（待黄金句 20 轮）。
+- **证据**：`pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck`。build `pha-v2.3.40-p15-noskip`。
+- **回滚**：TASK / lead 回 skip；HRV 回 overnight last-2-days。
 
 ## 2026-09-10 (P15 脉络丢指标字段残行)
 
@@ -13,28 +124,28 @@
 
 - **类别**：P1 / FR-6.8 · FR-6.12 v1.19。审计熔断 21.5/85/95 证明 fail-closed 有效；不放水、不上药名表。
 - **改动**：TASK 第 2 条禁派生百分位；第 3 条人群示例去掉 `95%`；第 5 条 brief 在场不得 skip。`bg_brief_lead` 去掉「无关则忽略」。CHB 投影按 `background_rows` + 当前 copy 重渲染导语。数字真源仍是 Manifest / FACT_CARD_CONTEXT。
-- **证据**：`pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck` PASS。8788 `pha-v2.3.38-p15-task-slot`。维护者授权恢复黄金 prefs 后重跑：勾选深睡/睡眠总时长/HRV/静息心率/活动消耗/血氧，评估要求为冻结黄金句。in-process `qwen3:14b`：`brief_source=chb`，审计拒 `unauthorized_value:85`（深睡百分位 15.2 的派生补数，非剂量）。正文未落地，药物项A/镁未带出。prefs 恢复后保持原样。**不**标 P15 DONE。
+- **证据**：`pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck` PASS。8788 `pha-v2.3.38-p15-task-slot`。维护者授权恢复黄金 prefs 后重跑：勾选深睡/睡眠总时长/HRV/静息心率/活动消耗/血氧，评估要求为冻结黄金句。in-process `qwen3:14b`：`brief_source=chb`，审计拒 `unauthorized_value:85`（深睡百分位 15.2 的派生补数，非剂量）。正文未落地，药物项A/补剂项B未带出。prefs 恢复后保持原样。**不**标 P15 DONE。
 - **回滚**：TASK / lead 回到 v1.18 措辞；投影改回预渲染 markdown。
 
 ## 2026-09-10 (P15 第 2 刀：background_rows + USER_CONTEXT_BRIEF 投影 §Background)
 
 - **类别**：P1 / FR-6.12 v1.18。维护者选编译层，否决「训练⇒补剂相关」TASK 补丁。
 - **改动**：CHB 把 notes 编成 `background_rows[]`（`category` + 去数字短句 + `rel_key` + `prov_type=user_statement`，无药名表、无 value/unit）。`build_user_context_brief_block`（lifestyle / combined）投影 §Background，不再物理丢弃。解读轮仍只 `USER_BACKGROUND_BRIEF`；`USER_CONTEXT_BRIEF_PROFILES` **不加** `fact_card_interpret`。TASK 不改。§Facts / Manifest 零渗透。
-- **证据**：`pha_chb_compiler_selfcheck`：工件含 rows；lifestyle 槽含 §Background 与药物项A；interpret 投影无 §Facts。工件 `reports/chb/default/brief_5d00dba7bd142656.json`（6 行自述）。build `pha-v2.3.37-p15-bg-rows`。维护者确认执行后：lifestyle mock 系统提示含 `USER_CONTEXT_BRIEF`+§Background+药物项A；interpret 槽无 `USER_CONTEXT_BRIEF`。黄金句 `brief_source=chb` notes=6，审计拒 21.5/85/95（编造百分位补数，非剂量）；正文无药物项A/镁注意事项（「用药」仅出现在请用户补充信息）。**不**标 P15 DONE，**不**改审计。
+- **证据**：`pha_chb_compiler_selfcheck`：工件含 rows；lifestyle 槽含 §Background 与药物项A；interpret 投影无 §Facts。工件 `reports/chb/default/brief_5d00dba7bd142656.json`（6 行自述）。build `pha-v2.3.37-p15-bg-rows`。维护者确认执行后：lifestyle mock 系统提示含 `USER_CONTEXT_BRIEF`+§Background+药物项A；interpret 槽无 `USER_CONTEXT_BRIEF`。黄金句 `brief_source=chb` notes=6，审计拒 21.5/85/95（编造百分位补数，非剂量）；正文无药物项A/补剂项B注意事项（「用药」仅出现在请用户补充信息）。**不**标 P15 DONE，**不**改审计。
 - **回滚**：`USER_CONTEXT_BRIEF` 去掉 background 段；工件去掉 `background_rows`。
 
 ## 2026-09-10 (P15：卫生 Q=9 删除 · 时段拆短条 · 黄金句注意事项仍未过)
 
 - **类别**：P1 / FR-6.12 · FR-6.11。维护者口令：① dry-run 9 条问句/祈使笔记 `--apply`；② 继续 P15。
 - **改动**：`python3 scripts/pha_memory_hygiene.py --apply` 删 Q=9（C=6 空会话保留）；备份 `data/backups/pha_storage.20260910T090958Z.db`。`fact_card_copy.bg_brief_split_marks`（上午/中午/晚上/睡前）在去数字之后拆长自述；配额仍按原笔记行。强制重编译 `reports/chb/default/brief_cc9fd56284f1aa98.json`。selfcheck：`pha_fact_card_selfcheck`、`pha_chb_compiler_selfcheck` PASS。build `pha-v2.3.36-p15-portrait-split`。
-- **证据**：黄金句 in-process `qwen3:14b`：prefs 未改；`brief_source=chb`、notes_used=7（验收当时含表头残行，随后丢掉 tab 表头后为 6）、含药物项A/镁；审计过；未复述〔数值略〕；正文仍无药物项A/镁/补剂注意事项（14b 按 TASK 第 5 条当无关跳过）。**不**标 P15 DONE，**不**改审计、**不**为黄金一句加 if。
+- **证据**：黄金句 in-process `qwen3:14b`：prefs 未改；`brief_source=chb`、notes_used=7（验收当时含表头残行，随后丢掉 tab 表头后为 6）、含药物项A/补剂项B；审计过；未复述〔数值略〕；正文仍无药物项A/补剂项B/补剂注意事项（14b 按 TASK 第 5 条当无关跳过）。**不**标 P15 DONE，**不**改审计、**不**为黄金一句加 if。
 - **回滚**：copy 去掉 `bg_brief_split_marks`；brief 构建器去掉拆行；CHB 用前回工件；卫生从上述备份恢复。
 
 ## 2026-09-10 (P15 开工：祈使问句不进 CHB · 黄金句验收未过)
 
 - **类别**：P1 / FR-6.12 · FR-6.11。维护者口令开 P15 剩余验收。
 - **改动**：`supplement_bg.schema.json` 捕获 negative 增补 `请分析` / `请核实` / `请核对` / `请再次` / `是否正常` / `是否合理`（与已有 `请列出` 同族，不在 Python 列黑名单）。读侧与 CHB §Background 丢掉分析祈使。重编译 `reports/chb/default/brief_5545b3f1c23f2933.json`（只留补剂方案自述，无 §Facts）。selfcheck：`pha_fact_card_selfcheck`、`pha_chb_compiler_selfcheck` PASS。
-- **证据**：黄金句 in-process `qwen3:14b`：`brief_source=chb`、notes_used=1、含药物项A/镁；审计拒 `unauthorized_value:80` / `92`（文内「高于80 bpm」「低于92%」，非 brief 剂量）；正文未带补剂注意事项；Markdown 分节。prefs 未改。**不**标 P15 DONE。
+- **证据**：黄金句 in-process `qwen3:14b`：`brief_source=chb`、notes_used=1、含药物项A/补剂项B；审计拒 `unauthorized_value:80` / `92`（文内「高于80 bpm」「低于92%」，非 brief 剂量）；正文未带补剂注意事项；Markdown 分节。prefs 未改。**不**标 P15 DONE。
 - **回滚**：schema 去掉新增 token；CHB 用前回工件。
 
 ## 2026-09-10 (P12 腕温推迟 · P7 占比参考关闭 · 开 P15 验收)

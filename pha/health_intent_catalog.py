@@ -57,11 +57,35 @@ def catalog_topic_markers(profile: str) -> list[str]:
 
 def catalog_metric_aliases(metric_key: str) -> list[str]:
     aliases = (load_health_intent_catalog().get("metric_aliases") or {}).get(metric_key) or []
-    return [str(a) for a in aliases]
+    out: list[str] = [str(a) for a in aliases]
+    seen = {a.lower() for a in out}
+    try:
+        from pha.loop_local_aliases import local_aliases_for_metric
+
+        for a in local_aliases_for_metric(metric_key):
+            low = a.lower()
+            if low in seen:
+                continue
+            seen.add(low)
+            out.append(a)
+    except Exception:
+        pass
+    return out
 
 
 def catalog_all_metric_keys() -> list[str]:
-    return list((load_health_intent_catalog().get("metric_aliases") or {}).keys())
+    keys = list((load_health_intent_catalog().get("metric_aliases") or {}).keys())
+    seen = {str(k) for k in keys}
+    try:
+        from pha.loop_local_aliases import local_alias_metric_keys
+
+        for k in local_alias_metric_keys():
+            if k not in seen:
+                seen.add(k)
+                keys.append(k)
+    except Exception:
+        pass
+    return keys
 
 
 def profile_episodic_continue(profile: str) -> bool:

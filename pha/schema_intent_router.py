@@ -209,6 +209,16 @@ def resolve_intent_route(
     )
 
 
+def supplement_context_brief_should_mount(user_message: str) -> bool:
+    """Mount USER_CONTEXT_BRIEF using schema positive score, ignoring Data negatives."""
+    from pha.universal_catalog_manager import get_catalog_manager
+
+    schema = get_catalog_manager().get_asset("supplement_bg")
+    if not schema:
+        return False
+    return score_asset_positive(user_message, schema) >= _supplement_catalog_threshold(schema)
+
+
 __all__ = [
     "AssetIntentScore",
     "IntentRouteResult",
@@ -218,4 +228,5 @@ __all__ = [
     "score_asset_positive",
     "score_all_assets",
     "should_capture_background_from_schema",
+    "supplement_context_brief_should_mount",
 ]

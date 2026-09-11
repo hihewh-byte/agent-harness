@@ -523,9 +523,9 @@ Flag：`PHA_SHADOW_ROUTING=1`（沿用 v2.3 Stage 2D，扩展 shadow 字段）
 | 项 | 做 | 不做 |
 |---|---|---|
 | 零编数 | TASK 禁止发明或派生额外数字/百分比（含 100−百分位）；无 Manifest token 只用定性词；人群示例去掉会诱出 95 的 `95%` | 放水 Numerics；brief 数字进 Manifest |
-| 背景槽 | brief 在场则 in-scope，禁止整槽 skip；导语去掉「无关则忽略」；写入建议句，不另起编号注意事项清单 | 「点名训练则补剂相关」；药名表；解读轮加 `USER_CONTEXT_BRIEF` |
+| 背景槽 | brief 在场则 in-scope，禁止整槽 skip；导语去掉「无关则忽略」；写入建议句，不另起编号注意事项清单；弱因果：禁止 causes / leads to / 导致·引起 | 「点名训练则补剂相关」；药名表；解读轮加 `USER_CONTEXT_BRIEF`；强制注意事项专段 |
 
-编码映射：共识 P1；卡 **M1-P15** 仍 IN_PROGRESS。
+编码映射：共识 P1；卡 **M1-P15** → DONE（PRD v1.22；遗留另开）。
 
 ---
 

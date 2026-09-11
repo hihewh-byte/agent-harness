@@ -516,4 +516,27 @@ Coding map: consensus P1; cards **M1-P20** / **M1-P15**. Flags: `PHA_EXCLUSIVE_I
 
 ---
 
+## 19. v1.19 addendum (Approved · TASK slot contract: no invented numbers + present brief must not skip)
+
+> 2026-09-10 gold-sentence audit fused 21.5/85/95. Maintainer adopted a generic slot contract. **Does not repeal** §15–§18. Numeric truth remains Manifest / FACT_CARD_CONTEXT, not CHB §Facts.
+
+| Item | Do | Don’t |
+|---|---|---|
+| No invented numbers | TASK forbids inventing or deriving extra numbers/percents (including 100 minus a percentile); without a Manifest token use qualitative wording only; drop population examples that bait `95%` | Weaken Numerics; brief digits into Manifest |
+| Background slot | Present brief is in-scope; do not skip the slot; drop “ignore if unrelated”; fold into advice sentences; no numbered precautions list; weak causal: forbid causes / leads to | “Named training ⇒ supplement-related”; drug-name table; add interpret to `USER_CONTEXT_BRIEF`; mandatory 注意事项 section |
+
+Coding map: consensus P1; card **M1-P15** → DONE (PRD v1.22; deferred items open later).
+
+---
+
+## 20. v1.20 addendum (Approved · lineage drops metric-field stubs)
+
+> 2026-09-10. Source of truth PRD v1.20. **Does not repeal** §15–§19.
+
+| Item | Do | Don’t |
+|---|---|---|
+| Lineage | Keep only recurring caution sentences; drop de-numbered today-value / percentile / window-mean stub rows; if empty do not inject | Weaken audit; drug-name table; strip card percentiles from injection (rule layer still bands on percentiles) |
+
+---
+
 **Stage 3F · v0.1 Approved (2026-06-17)** — **status: Implemented (2026-06-24)** — **3F-α ✅ · 3F-β ✅ · 3F-γ ✅ · 3F-δ ✅** coded; P2 combined_review SSE hard assert wired into E2E.

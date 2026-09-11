@@ -743,6 +743,7 @@ def dry_run_harness_report(
         soul_with_anchor=build_system_date_block(ref) + PHA_MEDICAL_SOUL_SYSTEM_PROMPT.strip(),
         tier0_supplemental=tier0_supp,
         tier1_supplemental=tier1_supp,
+        protect_tier0="FACT_CARD_CONTEXT" in (plan.slots_tier0 or []),
     )
     messages = build_pha_chat_message_stack(
         supplemental_system="",

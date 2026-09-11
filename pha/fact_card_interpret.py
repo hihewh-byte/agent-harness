@@ -46,6 +46,76 @@ def interpret_dir() -> Path:
     return Path(__file__).resolve().parent.parent / "data" / "fact_card_interpret"
 
 
+def exclusive_named_inject_enabled() -> bool:
+    """P20: exclusive LLM inject ⊆ catalog named metric ids. Default on."""
+    return (os.environ.get("PHA_EXCLUSIVE_INJECT_NAMED") or "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+        "off",
+    )
+
+
+def slice_fact_card_for_outline_inject(
+    card: dict[str, Any],
+    *,
+    outline_mode: str | None,
+    assessment_prompt: str,
+) -> dict[str, Any]:
+    """LLM inject view. HTML / load_fact_card stay on the full selected card.
+
+    exclusive: FACT_CARD_CONTEXT + Manifest ⊆ catalog ``infer_wearable_metric_ids``.
+    emphasis / cover-card: unchanged (full card). Empty exclusive is the caller's fail-closed.
+    """
+    import copy
+
+    if (outline_mode or "").strip() != "exclusive" or not exclusive_named_inject_enabled():
+        return card
+    from pha.intent_gates import infer_wearable_metric_ids
+
+    named = set(infer_wearable_metric_ids(assessment_prompt or ""))
+    slim = copy.deepcopy(card) if isinstance(card, dict) else {}
+    facts = slim.setdefault("facts", {}) if isinstance(slim, dict) else {}
+    metrics = [
+        row
+        for row in (facts.get("metrics") or [])
+        if isinstance(row, dict) and str(row.get("metric") or "") in named
+    ]
+    facts["metrics"] = metrics
+    assessment = slim.setdefault("assessment", {}) if isinstance(slim, dict) else {}
+    if not isinstance(assessment, dict):
+        assessment = {}
+        slim["assessment"] = assessment
+    assessment["summary"] = {}
+    advice = assessment.get("advice")
+    if isinstance(advice, list):
+        assessment["advice"] = [
+            row
+            for row in advice
+            if isinstance(row, dict) and str(row.get("metric") or "") in named
+        ]
+    else:
+        assessment["advice"] = []
+    return slim
+
+
+def exclusive_inject_is_empty(
+    card: dict[str, Any],
+    *,
+    outline_mode: str | None,
+    assessment_prompt: str,
+) -> bool:
+    if (outline_mode or "").strip() != "exclusive" or not exclusive_named_inject_enabled():
+        return False
+    sliced = slice_fact_card_for_outline_inject(
+        card,
+        outline_mode=outline_mode,
+        assessment_prompt=assessment_prompt,
+    )
+    metrics = ((sliced.get("facts") or {}).get("metrics") or []) if isinstance(sliced, dict) else []
+    return not any(isinstance(row, dict) for row in metrics)
+
+
 def fact_card_digest(card: dict[str, Any]) -> str:
     facts = card.get("facts") or {}
     rows = []
@@ -161,6 +231,8 @@ def humanize_interpret_failure(payload: dict[str, Any], *, locale: str = _DEFAUL
     err = str(payload.get("error") or "failed")
     if err == "model_unavailable":
         return card_copy(locale, "model_unavailable")
+    if err == "exclusive_scope_empty":
+        return card_copy(locale, "exclusive_scope_empty")
     if err != "audit_rejected":
         return err
     summary = format_audit_violations(payload.get("violations") or [], locale=locale)
@@ -183,9 +255,35 @@ def run_interpretation(
 ) -> dict[str, Any]:
     """Synchronously generate one interpretation; used by worker and selfcheck."""
     from pha.chat_service import stream_pha_chat_events
+    from pha.goal_classifier import assessment_outline_enabled
+    from pha.health_intent_catalog import classify_outline_mode
 
     stream = stream_fn or stream_pha_chat_events
     digest = fact_card_digest(card)
+    outline_src = (assessment_prompt or "").strip()
+    outline_mode = (
+        classify_outline_mode(outline_src) if assessment_outline_enabled() else None
+    )
+    inject_card = slice_fact_card_for_outline_inject(
+        card,
+        outline_mode=outline_mode,
+        assessment_prompt=outline_src,
+    )
+    if exclusive_inject_is_empty(
+        card,
+        outline_mode=outline_mode,
+        assessment_prompt=outline_src,
+    ):
+        return {
+            "status": "failed",
+            "error": "exclusive_scope_empty",
+            "message": "exclusive_scope_empty",
+            "text": None,
+            "model": model,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "harness_profile": "fact_card_interpret",
+            "card_digest": digest,
+        }
     text = ""
     model_used = model
     numerics_audit: Optional[dict[str, Any]] = None
@@ -196,8 +294,8 @@ def run_interpretation(
             model=model,
             session_id=None,
             profile_override="fact_card_interpret",
-            fact_card_payload=card,
-            fact_card_context=build_fact_card_context_block(card),
+            fact_card_payload=inject_card,
+            fact_card_context=build_fact_card_context_block(inject_card),
             user_assessment_prompt=assessment_prompt or "",
             response_locale=locale,
         ):
@@ -251,6 +349,7 @@ def run_interpretation(
         "card_digest": digest,
         "background_used": notes_used > 0,
         "background_notes_used": notes_used,
+        "brief_source": str(brief_meta.get("brief_source") or "live_notes"),
     }
     if not (text or "").strip():
         return {
@@ -260,9 +359,9 @@ def run_interpretation(
             "text": None,
             **base_meta,
         }
-    # Single source of truth: always re-audit with the card manifest (fact_card policy).
-    # Stream/harness audit may be mocked in selfcheck; card audit must still run.
-    audit = _audit_interpretation_text(text, card, user_id=user_id)
+    # Single source of truth: always re-audit with the *injected* card manifest.
+    # Exclusive named-only inject must fail-closed on unnamed-row numbers.
+    audit = _audit_interpretation_text(text, inject_card, user_id=user_id)
     base_meta["numerics_audit"] = audit
     if _numerics_rejected(audit):
         violations = [str(v) for v in (audit or {}).get("violations") or []]
@@ -389,6 +488,7 @@ def start_interpretation(
         "card_digest": digest,
         "background_used": int(brief_meta.get("notes_used") or 0) > 0,
         "background_notes_used": int(brief_meta.get("notes_used") or 0),
+        "brief_source": str(brief_meta.get("brief_source") or "live_notes"),
     }
     with _LOCK:
         if key in _INFLIGHT:
@@ -421,11 +521,14 @@ def start_interpretation(
 __all__ = [
     "build_fact_card_context_block",
     "current_interpret_key",
+    "exclusive_inject_is_empty",
+    "exclusive_named_inject_enabled",
     "fact_card_digest",
     "humanize_interpret_failure",
     "interpret_cache_key",
     "interpret_dir",
     "load_interpretation_for_user",
     "run_interpretation",
+    "slice_fact_card_for_outline_inject",
     "start_interpretation",
 ]

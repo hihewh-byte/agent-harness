@@ -351,6 +351,9 @@ def iter_turn_harness_assembly_phase(
     if "NUMERICS_MANIFEST" in plan.slots_tier0:
         if uses_fact_card_context(plan):
             from pha.numerics_manifest import build_fact_card_numerics_manifest
+            from pha.fact_card_interpret import slice_fact_card_for_outline_inject
+            from pha.goal_classifier import assessment_outline_enabled
+            from pha.health_intent_catalog import classify_outline_mode
 
             card = ctx.fact_card_payload
             if not isinstance(card, dict) or not card:
@@ -383,8 +386,19 @@ def iter_turn_harness_assembly_phase(
                 ctx.fact_card_payload = card
             if not (ctx.user_assessment_prompt or "").strip():
                 ctx.user_assessment_prompt = msg
-            ctx.numerics_manifest = build_fact_card_numerics_manifest(
+            outline_src = (ctx.user_assessment_prompt or msg or "").strip()
+            outline_mode = (
+                classify_outline_mode(outline_src) if assessment_outline_enabled() else None
+            )
+            inject_card = slice_fact_card_for_outline_inject(
                 card,
+                outline_mode=outline_mode,
+                assessment_prompt=outline_src,
+            )
+            if outline_mode == "exclusive":
+                ctx.fact_card_payload = inject_card
+            ctx.numerics_manifest = build_fact_card_numerics_manifest(
+                inject_card,
                 user_id=uid,
             )
             ctx.manifest_block = format_manifest_tier0_block(
@@ -393,7 +407,7 @@ def iter_turn_harness_assembly_phase(
             )
             from pha.fact_card_interpret import build_fact_card_context_block
 
-            ctx.fact_card_context = build_fact_card_context_block(card)
+            ctx.fact_card_context = build_fact_card_context_block(inject_card)
         else:
             ctx.numerics_manifest = build_numerics_manifest(
                 uid,
@@ -653,6 +667,7 @@ def iter_turn_harness_assembly_phase(
         soul_with_anchor=build_system_date_block(ref) + soul,
         tier0_supplemental=ctx.tier0_supp,
         tier1_supplemental=ctx.tier1_supp,
+        protect_tier0=uses_fact_card_context(plan),
     )
     soul_t0_len = len(build_system_date_block(ref) + soul) + len(ctx.tier0_supp or "")
     if soul_t0_len > SYSTEM_CONTENT_MAX_CHARS - 200:

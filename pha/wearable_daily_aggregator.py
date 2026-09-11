@@ -43,7 +43,7 @@ class WearableDayMetricAgg:
     hrv_n: int = 0
     hrv_sdnn_sum: float = 0.0
     hrv_sdnn_n: int = 0
-    active_energy_sum: float = 0.0
+    active_energy_by_source: Dict[str, float] = field(default_factory=dict)
     spo2_sum: float = 0.0
     spo2_n: int = 0
     respiratory_sum: float = 0.0
@@ -62,6 +62,46 @@ class WearableDayMetricAgg:
     awake_hours: Optional[float] = None
 
 
+_HEALTHKIT_SOURCE_KEY = "healthkit"
+
+
+def _source_key_from_sample_id(sample_id: str) -> str:
+    sid = str(sample_id or "")
+    if "|" not in sid:
+        return "unknown"
+    return sid.rsplit("|", 1)[-1].strip() or "unknown"
+
+
+def resolve_additive_by_source(by_source: Mapping[str, float]) -> Optional[float]:
+    """Daily total for steps / active energy: max across sources (not sum).
+
+    Apple Health does not add Watch + iPhone totals. A Shortcut ``healthkit``
+    daily rollup that roughly equals the sum of device/zip sources is treated as
+    an undeduped merge and dropped; otherwise healthkit may still win via max
+    (fresher same-day accrual after zip).
+    """
+    if not by_source:
+        return None
+    items = {str(key): float(val) for key, val in by_source.items()}
+    hk = items.get(_HEALTHKIT_SOURCE_KEY)
+    non_hk = {key: val for key, val in items.items() if key != _HEALTHKIT_SOURCE_KEY}
+    if hk is not None and non_hk:
+        others_sum = float(sum(non_hk.values()))
+        others_max = float(max(non_hk.values()))
+        if (
+            len(non_hk) >= 2
+            and others_sum > 0
+            and abs(hk - others_sum) / others_sum <= 0.08
+            and hk + 1e-6 >= others_max
+        ):
+            return others_max
+        return max(others_max, hk)
+    pool = non_hk if non_hk else items
+    if not pool:
+        return None
+    return float(max(pool.values()))
+
+
 def accumulate_wearable_sample(
     metric_type: str,
     value: float,
@@ -71,7 +111,7 @@ def accumulate_wearable_sample(
     """Ingest one ``wearable_data`` row into daily metric accumulators."""
     mt = str(metric_type or "")
     if mt == _METRIC_STEPS:
-        src = sample_id.rsplit("|", 1)[-1].strip() if "|" in sample_id else "unknown"
+        src = _source_key_from_sample_id(sample_id)
         agg.steps_by_source[src] = agg.steps_by_source.get(src, 0) + int(round(value))
     elif mt == _METRIC_HEART_RATE:
         agg.hr_sum += value
@@ -87,7 +127,10 @@ def accumulate_wearable_sample(
         agg.hrv_sdnn_sum += value
         agg.hrv_sdnn_n += 1
     elif mt == _METRIC_ACTIVE_ENERGY:
-        agg.active_energy_sum += value
+        src = _source_key_from_sample_id(sample_id)
+        agg.active_energy_by_source[src] = agg.active_energy_by_source.get(src, 0.0) + float(
+            value
+        )
     elif mt == _METRIC_SPO2:
         agg.spo2_sum += value
         agg.spo2_n += 1
@@ -119,7 +162,10 @@ def accumulate_wearable_sample(
 
 def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
     """Resolve optional daily metric fields from accumulators."""
-    steps = max(agg.steps_by_source.values()) if agg.steps_by_source else None
+    steps_raw = resolve_additive_by_source(
+        {key: float(val) for key, val in agg.steps_by_source.items()}
+    )
+    steps = int(round(steps_raw)) if steps_raw is not None else None
     if agg.rhr_n > 0:
         rhr = agg.rhr_sum / agg.rhr_n
     elif agg.hr_n > 0:
@@ -128,7 +174,7 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
         rhr = None
     hrv = (agg.hrv_sum / agg.hrv_n) if agg.hrv_n > 0 else None
     hrv_sdnn = (agg.hrv_sdnn_sum / agg.hrv_sdnn_n) if agg.hrv_sdnn_n > 0 else None
-    kcal = agg.active_energy_sum if agg.active_energy_sum > 0 else None
+    kcal = resolve_additive_by_source(agg.active_energy_by_source)
     spo2 = (agg.spo2_sum / agg.spo2_n) if agg.spo2_n > 0 else None
     resp = (agg.respiratory_sum / agg.respiratory_n) if agg.respiratory_n > 0 else None
     vo2 = (agg.vo2max_sum / agg.vo2max_n) if agg.vo2max_n > 0 else None
@@ -363,27 +409,20 @@ def build_wearable_daily_summary(
     if segment_rows:
         hk_rows = [raw for raw in segment_rows if _is_healthkit_sleep_segment(raw)]
         other_rows = [raw for raw in segment_rows if not _is_healthkit_sleep_segment(raw)]
-        if hk_rows and not other_rows:
-            fields = healthkit_sleep_fields_from_segments(hk_rows)
-            row.sleep_hours = fields["sleep_hours"]
-            row.awake_duration_hours = fields["awake"]
-            row.in_bed_hours = fields["in_bed"]
-            row.sleep_core_hours = fields["core"]
-            row.sleep_deep_hours = fields["deep"]
-            row.sleep_rem_hours = fields["rem"]
-            row.sleep_start_time = fields["first_start"]
-            row.sleep_period_hours = _positive_hours(float(fields.get("sleep_period_h") or 0.0))
-        else:
-            sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_segment_rows(
-                other_rows or segment_rows,
-            )
-            row.sleep_hours = sleep_h
-            row.awake_duration_hours = awake_h
-            row.sleep_deep_hours = deep_h
-            row.sleep_rem_hours = rem_h
-            row.sleep_start_time = first_start
-            if row.sleep_hours is None and metrics is not None and metrics.sleep_hours_max is not None:
-                row.sleep_hours = metrics.sleep_hours_max
+        # Prefer HealthKit Shortcut when present; otherwise zip/HKCategory.
+        # Both use the same T2 union/core/deep/REM mapping (sample_id stage parse).
+        chosen = hk_rows or other_rows or list(segment_rows)
+        fields = healthkit_sleep_fields_from_segments(chosen)
+        row.sleep_hours = fields["sleep_hours"]
+        row.awake_duration_hours = fields["awake"]
+        row.in_bed_hours = fields["in_bed"]
+        row.sleep_core_hours = fields["core"]
+        row.sleep_deep_hours = fields["deep"]
+        row.sleep_rem_hours = fields["rem"]
+        row.sleep_start_time = fields["first_start"]
+        row.sleep_period_hours = _positive_hours(float(fields.get("sleep_period_h") or 0.0))
+        if row.sleep_hours is None and metrics is not None and metrics.sleep_hours_max is not None:
+            row.sleep_hours = metrics.sleep_hours_max
     elif import_sleep is not None:
         segs, deep_s, rem_s, awake_s, first_start = import_sleep
         sleep_h, awake_h, deep_h, rem_h, first_start = sleep_metrics_from_import_accumulators(

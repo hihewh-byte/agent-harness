@@ -1,6 +1,117 @@
-# PHA iOS proactive agent change log
+## 2026-09-11 (named-day enumerate + wearable CHB background)
 
-> **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
+- **Class**: P1 / chat evidence · FR-6.14.
+- **Change**: Enumerate named point days; keep 90d summary on a true 90-day window; mount `USER_CONTEXT_BRIEF` from schema positive score (§Background only). build `pha-v2.3.46-named-days-chb-brief`.
+- **Evidence**: `pha_healthkit_ingest_selfcheck`; `pha_chb_compiler_selfcheck`.
+- **Rollback**: revert to v2.3.45.
+
+## 2026-09-11 (Loop Path B: approve → local aliases)
+
+- **Class**: P1 / Loop × product. Path B: approve applies aliases on this Mac; still no repo catalog edit.
+- **Change**: `pha/loop_local_aliases.py`; `catalog_metric_aliases` merges local override; `approve_and_execute` writes `data/loop_local_aliases.json`; fact-card copy “Approve · apply on this Mac”; full-veto / Draft PR optional.
+- **Evidence**: `pha_loop_weekly_selfcheck` PASS (incl. `infer_metrics_from_message`).
+- **Rollback**: drop local merge + approve write.
+
+## 2026-09-11 (active energy / steps cross-source double-count fix)
+
+- **Class**: P1 / daily rollup. After zip import, Shortcut rewrote same-day `healthkit|` daily totals; active energy **summed** all sources → fact card ~699 vs Health ~372; steps Shortcut multi-device list was summed ≈ Watch+iPhone, then won via max.
+- **Change**: `active_energy` is per-source then max (same family as steps); drop `healthkit` daily when it ≈ sum of device sources; Shortcut `_combine_step_numbers` uses max (not sum) when no covering Sum. Rebuilt `default` recent days.
+- **Evidence**: `pha_wearable_daily_aggregator_selfcheck` PASS. Today card: active energy 355.6 kcal, steps 6963 (was 699.3 / 12812).
+- **Rollback**: restore `active_energy_sum` and combine sum branch.
+
+
+- **Class**: P1 / Loop × Fact Card. Maintainer: put notify + approve on the fact card.
+- **Change**: `load_fact_card` attaches `loop_approvals`; lock-screen teaser; full-card `#loop-approvals` approve/reject (`next` back to card). Approve still = full-veto, no catalog merge.
+- **Evidence**: `pha_loop_weekly_selfcheck` (fact-card segment) PASS.
+- **Rollback**: drop attach + HTML block.
+
+## 2026-09-11 (weekly Loop: harvest + multi-channel notify + human approve)
+
+- **Class**: P1 / Loop ops. Maintainer: weekly auto harvest, multi-channel notify, approvable execute; **no catalog write**.
+- **Change**: `pha/loop_weekly.py` · `pha/loop_approval_api.py` · weekly harvest/approve scripts · launchd example · SOP path W. Channels: PHA inbox / Mac / email / webhook. Approve = full-veto (+ optional Draft PR); **never** auto-edits catalog.
+- **Evidence**: `pha_loop_weekly_selfcheck` PASS.
+- **Rollback**: drop router mount + scripts.
+
+## 2026-09-11 (zip sleep day key = HealthKit wake day)
+
+- **Class**: P0 / FR-1.6 · FR-2.6. Maintainer: zip and HealthKit should match (same source).
+- **Root cause**: zip keyed `wearable_sleep_segments.day` by segment **start calendar date**; pre-midnight Core/Deep landed on the prior day (~59min asleep gap vs HealthKit).
+- **Change**: (1) `pha/sleep_wake_day.py` noon-window wake day; (2) importer writes wake day; (3) `rebucket_zip_sleep_segments_to_wake_days` for legacy rows; (4) zip-only daily uses T2 `healthkit_sleep_fields` (incl. Core). Live rebucket `updated=1423` / 590 nights + rebuild.
+- **Acceptance**: 9/11 |zip−hk| ≤1min; 9/10 zip vs Health screenshot Δ≲5min with Core present; aggregator selfcheck PASS.
+- **Rollback**: drop wake-day write + rebucket; restore zip sum deep/REM daily path.
+
+## 2026-09-11 (sleep daily: prefer healthkit| on dual-source nights)
+
+- **Class**: P0 / FR-1.6. Maintainer screenshot Sep 10–11: Health app deep 55m / core 5h5m / REM 1h22m / awake 1h5m; daily previously undercounted asleep ~58m, deep ~37m, Core null.
+- **Root cause**: when `healthkit|` Shortcut segments and incomplete zip/`HKCategory` rows coexisted, `build_wearable_daily_summary` took the zip branch (`hk_rows and not other_rows`).
+- **Change**: if any `healthkit|` rows exist, use `healthkit_sleep_fields_from_segments`; zip only when Shortcut absent. Zip path clears stale `sleep_core` / `in_bed` / `sleep_period`. Rebuilt 9/8–9/11.
+- **Acceptance**: 9/11 vs Health app Δ≤1min; `pha_wearable_daily_aggregator_selfcheck` PASS (incl. `test_mixed_segments_prefer_healthkit`).
+- **Rollback**: restore “hk only when no other” branch.
+
+## 2026-09-11 (P15 → DONE · maintainer stamp)
+
+- **Category**: P1 / §8 M1-P15. Maintainer: fixture-med unfit for training gold; `slot_named_ge2` **5/10** acceptable.
+- **Change**: PRD **v1.22** · §8 **M1-P15 → DONE**. M1 rollup `*` only P20 iPhone same-network left.
+- **Deferred (non-blocking)**: audit decimals/some ints, `slot_named_ge2` rate, prefs checkbox drift, think perf, fixture-med naming semantic mismatch.
+- **No git in this chat** (other agent / task list commits).
+
+## 2026-09-11 (P15 population_commons + gold-gate retarget)
+
+- **Category**: P1 / FR-6.10 · FR-6.12. Maintainer: (1) gold no longer requires fixture-med∧fixture-supp; (2) training commons ints on Manifest whitelist; (3) think optional; (4) run ×10.
+- **Change**: schema `fact_card_population_commons.training_ints` → Manifest `domain=population_commons`; audit passes whitelist ints when clause has no card label (% unit alone does not veto); not merged into personal `allowed_values`. DONE gate: gold `slot_named_ge2`; fixture-med∧fixture-supp only for meds-HRV. PRD v1.21. build `pha-v2.3.45-p15-commons-gate`.
+- **Acceptance**: `runs_v244_commons_gold10.jsonl` (think=true trial): `slot_named_ge2` **5/10**; hard Markdown 1; no-training-advice 0; audit reject 5. Prefs checkboxes drifted; batch sliced to gold six in-memory, **no prefs write**. Later stamped DONE — see row above.
+- **Rollback**: remove commons domain and gate retarget; policy_rev back to v1.1.
+
+## 2026-09-11 (P15 ctx-min + TASK drop % bait + think control)
+
+- **Category**: P1 / FR-6.12. Maintainer: execute review recommendations.
+- **Change**: (1) `env-8788.sh` `LLM_TIMEOUT_SECONDS=300` (was 120 → false `model_unavailable`). (2) `fact_card_interpret` `slot_start.FACT_CARD_CONTEXT=min` (drop duplicate full JSON). (3) schema capture negatives 「进行建议/给出建议」; `item_seps` add `) `/`） `; post-compile text dedupe. (4) TASK item 3 drops 70–80% population-percent bait. build `pha-v2.3.43-p15-ctxmin-think`.
+- **Control**: `OLLAMA_THINK=true` gold ×5 (`runs_v243_ctxmin_think_gold5.jsonl`): hard Markdown **0/5**; `no_training_advice` **0/5**; fixture-supp named 3/5; dual-named still **0/5**; audit reject 3. timeout=300 confirmed. **Do not** mark P15 DONE.
+- **Rollback**: restore slot_start / TASK / schema to v2.3.42; timeout 120.
+
+## 2026-09-11 (P15 CHB one-item rows · gold × 10)
+
+- **Category**: P1 / FR-6.12 acceptance. `qwen3:14b`; `brief_source=chb`; prefs untouched; build `pha-v2.3.42-p15-chb-itemrows`.
+- **Result** (n=1..10): dual-named **0/10**; fixture-med/fixture-supp in text both 0; hard Markdown (post-strip) common; audit rejects frequent. **Do not** mark P15 DONE; **no full 20** (maintainer: stop at 10).
+- **Evidence**: `reports/p15_eval/runs_v242_chb_itemrows_gold10.jsonl`.
+
+## 2026-09-11 (P15 CHB one-item rows + slot adjacency + accept via CHB)
+
+- **Category**: P1 / FR-6.12. Maintainer: leave DONE gates; row caps + separators live in copy/schema, not Python hardcoding.
+- **Change**: (1) Batch runs `recompile_chb_if_stale` and asserts `brief_source=chb`. (2) `background_rows` split one-item-per-row via schema/copy `item_seps`; drop unmarked preamble when schedule marks present; tab notes keep the details column only; `row_caps`/`note_caps` from schema+copy; interleave ends inside schedule buckets so truncation does not drop late items. (3) Assemble `USER_BACKGROUND_BRIEF` right after `USER_ASSESSMENT_PROMPT` (still the sole Tier1 slot). (4) Format gate measured after Markdown strip. build `pha-v2.3.42-p15-chb-itemrows`.
+- **Smoke ×5 (`qwen3:14b` · CHB)**: `brief_source=chb`×5; brief contains fixture-med+fixture-supp; dual-named **0/5**; hard Markdown (post-strip) 4/5; several audit rejects. **Path fixed, no naming signal → do not run full 20 yet**. **Do not** mark P15 DONE.
+- **Evidence**: `pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck`; `reports/p15_eval/runs_v242_chb_itemrows_gold5.jsonl`.
+- **Rollback**: restore v2.3.41 split/assembly; drop CHB assert in batch.
+
+## 2026-09-11 (named-prose gold × 20: P15 still not DONE)
+
+- **Category**: P1 / FR-6.12 acceptance. `qwen3:14b`; prefs untouched; build `pha-v2.3.41-p15-named-prose`.
+- **Setup**: brief `live_notes`×6 with fixture-med+fixture-supp; TASK items 4/5 landed.
+- **Result**: dual-named **0/20**; fixture-med 0, fixture-supp 8; audit fail 6 (`unauthorized_value`); hard Markdown/lists **19/20**. Prefs unchanged.
+- **Failure families**: still uses 「一、」/`-`/`###`; zero fixture-med naming; fixture-supp occasional; invent-number fuse still works. **Do not** mark P15 DONE; **no** drug-name table / 注意事项 section / gold-sentence if.
+- **Evidence**: `reports/p15_eval/runs_v241_named_prose_gold20.jsonl` · `summary_v241_named_prose_gold20.json`.
+
+## 2026-09-11 (P15 named-prose: slot wording into advice + continuous prose)
+
+- **Category**: P1 / FR-6.8 · FR-6.12. Maintainer: land clean contract (no medications/supplements reverse priming; no exhaustive naming).
+- **Change**: TASK item 4 continuous narrative + ban bullet/hyphen/1. 2./一、二、; item 5 fold slot wording into advice, forbid vague category labels alone; EN/ZH lead aligned. build `pha-v2.3.41-p15-named-prose`. **No** audit relax / drug-name table / 注意事项 section / gold-sentence if. P15 stays IN_PROGRESS pending gold × 20.
+- **Evidence**: `pha_fact_card_selfcheck`; then `reports/p15_eval/runs_v241_named_prose_gold20.jsonl`.
+- **Rollback**: TASK / lead back to v2.3.40 noskip wording.
+
+## 2026-09-11 (gold × 20 after no-skip: P15 still not DONE)
+
+- **Category**: P1 / FR-6.12 acceptance. `qwen3:14b` only; prefs untouched; path `run_interpretation`.
+- **Setup**: brief `live_notes` notes_used=6 with fixture-med+fixture-supp; TASK/lead already no-skip.
+- **Result** (last unique n=1..20): dual-named **2/20** (gate ≥16); fixture-med 2, fixture-supp 9; audit fail 1 (`unauthorized_value`); hard Markdown **17/20**. Prefs unchanged after the run.
+- **Failure families**: generic “supplements/meds” instead of named self-reports; fixture-med rarely enters advice sentences; list/Markdown headings still common. **Do not** mark P15 DONE; **no** drug-name table / 注意事项 section / gold-sentence Python if.
+- **Evidence**: `reports/p15_eval/runs_v119_gold20.jsonl` · `summary_v119_gold20.json`.
+
+## 2026-09-11 (disk-land v1.19: no skip + fold into advice + weak causal; HRV today mean)
+
+- **Category**: P1 / FR-6.8 · FR-6.12 v1.19 · FR-1.5. Maintainer: land approved v1.19; reject Gemini “MUST 注意事项 section”; HRV follows the Health app today mean.
+- **Change**: TASK item 5 + `bg_brief_lead`: present brief stays in-scope, fold into advice sentences, no numbered precautions list; forbid causes / leads to. HRV `temporal.kind=accrual`, Shortcut Find `is today` + Average. pack `2026.09.11.hrv-today`. **Do not** mark P15 DONE pending gold × 20.
+- **Evidence**: `pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck`. build `pha-v2.3.40-p15-noskip`.
+- **Rollback**: TASK / lead back to skip; HRV back to overnight last-2-days.
 
 ## 2026-09-10 (P15 lineage drops metric-field leftovers)
 
@@ -13,7 +124,7 @@
 
 - **Category**: P1 / FR-6.8 · FR-6.12 v1.19. Audit fused 21.5/85/95, proving fail-closed works; do not relax audit; no drug-name table.
 - **Change**: TASK item 2 forbids derived percents; item 3 drops the `95%` population example; item 5 keeps a present brief in-scope. `bg_brief_lead` no longer says “ignore if unrelated”. CHB projection re-renders the lead from `background_rows` + current copy. Numeric truth remains Manifest / FACT_CARD_CONTEXT.
-- **Evidence**: `pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck` PASS. 8788 `pha-v2.3.38-p15-task-slot`. After maintainer-authorized restore of gold prefs (deep sleep / sleep duration / HRV / RHR / active energy / SpO2 + frozen gold sentence), in-process `qwen3:14b`: `brief_source=chb`, audit rejected `unauthorized_value:85` (derived complement of deep-sleep percentile 15.2, not a dose). Body not landed; fixture-med/magnesium not produced. Prefs left as restored. **Do not** mark P15 DONE.
+- **Evidence**: `pha_fact_card_selfcheck` / `pha_chb_compiler_selfcheck` PASS. 8788 `pha-v2.3.38-p15-task-slot`. After maintainer-authorized restore of gold prefs (deep sleep / sleep duration / HRV / RHR / active energy / SpO2 + frozen gold sentence), in-process `qwen3:14b`: `brief_source=chb`, audit rejected `unauthorized_value:85` (derived complement of deep-sleep percentile 15.2, not a dose). Body not landed; fixture-med/fixture-supp not produced. Prefs left as restored. **Do not** mark P15 DONE.
 - **Rollback**: TASK / lead back to v1.18 wording; projection back to pre-rendered markdown.
 
 ## 2026-09-10 (P15 cut 2: background_rows + USER_CONTEXT_BRIEF projects §Background)
@@ -27,14 +138,14 @@
 
 - **Category**: P1 / FR-6.12 · FR-6.11. Maintainer order: ① dry-run 9 question/imperative notes `--apply`; ② continue P15.
 - **Change**: `python3 scripts/pha_memory_hygiene.py --apply` deleted Q=9 (C=6 empty sessions kept); backup `data/backups/pha_storage.20260910T090958Z.db`. `fact_card_copy.bg_brief_split_marks` (morning / noon / evening / before sleep) splits long self-statements after de-numerizing; quota still counts original note rows. Forced recompile `reports/chb/default/brief_cc9fd56284f1aa98.json`. selfcheck: `pha_fact_card_selfcheck`, `pha_chb_compiler_selfcheck` PASS. build `pha-v2.3.36-p15-portrait-split`.
-- **Evidence**: gold sentence in-process `qwen3:14b`: prefs unchanged; `brief_source=chb`, notes_used=7 (acceptance run still had a leftover table-header row; after dropping the tab header it is 6), contains fixture-med/magnesium; audit passed; did not restate 〔数值略〕; body still has no fixture-med/magnesium/supplement caveats (14b skipped them as unrelated per TASK item 5). **Do not** mark P15 DONE, **do not** change audit, **do not** add an if for one gold sentence.
+- **Evidence**: gold sentence in-process `qwen3:14b`: prefs unchanged; `brief_source=chb`, notes_used=7 (acceptance run still had a leftover table-header row; after dropping the tab header it is 6), contains fixture-med/fixture-supp; audit passed; did not restate 〔数值略〕; body still has no fixture-med/fixture-supp/supplement caveats (14b skipped them as unrelated per TASK item 5). **Do not** mark P15 DONE, **do not** change audit, **do not** add an if for one gold sentence.
 - **Rollback**: remove `bg_brief_split_marks` from copy; remove split-line from the brief builder; CHB uses the previous artifact; restore hygiene from the backup above.
 
 ## 2026-09-10 (P15 start: imperative questions stay out of CHB · gold sentence not passed)
 
 - **Category**: P1 / FR-6.12 · FR-6.11. Maintainer order to open remaining P15 acceptance.
 - **Change**: `supplement_bg.schema.json` capture-negative added `请分析` / `请核实` / `请核对` / `请再次` / `是否正常` / `是否合理` (same family as existing `请列出`; not a Python blacklist). Read side and CHB §Background drop analysis imperatives. Recompiled `reports/chb/default/brief_5545b3f1c23f2933.json` (only supplement-plan self-statements, no §Facts). selfcheck: `pha_fact_card_selfcheck`, `pha_chb_compiler_selfcheck` PASS.
-- **Evidence**: gold sentence in-process `qwen3:14b`: `brief_source=chb`, notes_used=1, contains fixture-med/magnesium; audit rejected `unauthorized_value:80` / `92` (in-text “above 80 bpm” / “below 92%”, not brief doses); body had no supplement caveats; Markdown sections. prefs unchanged. **Do not** mark P15 DONE.
+- **Evidence**: gold sentence in-process `qwen3:14b`: `brief_source=chb`, notes_used=1, contains fixture-med/fixture-supp; audit rejected `unauthorized_value:80` / `92` (in-text “above 80 bpm” / “below 92%”, not brief doses); body had no supplement caveats; Markdown sections. prefs unchanged. **Do not** mark P15 DONE.
 - **Rollback**: remove the new tokens from schema; CHB uses the previous artifact.
 
 ## 2026-09-10 (P12 wrist temp deferred · P7 share-reference off · open P15 acceptance)

@@ -106,8 +106,8 @@ def main() -> int:
     if steps_m["value"] is not None:
         return _fail("accrual must not fill calendar_day from MAX(day)")
     hrv_stale = next(m for m in stale["facts"]["metrics"] if m["metric"] == "hrv_sdnn_ms")
-    if hrv_stale["value"] != 33.0 or hrv_stale.get("freshness") != "prior_day":
-        return _fail(f"overnight HRV should keep as_of row as prior_day, got {hrv_stale}")
+    if hrv_stale["value"] is not None:
+        return _fail(f"accrual HRV must not fill calendar_day from MAX(day), got {hrv_stale}")
     if "今日" in stale["notification"]["body"] and "非今日" not in stale["notification"]["body"]:
         return _fail("stale notification must not claim 今日")
     if DISCLAIMER not in stale["notification"]["body"]:
@@ -117,19 +117,17 @@ def main() -> int:
         if not any(label in item for item in labels):
             return _fail(f"JSON metrics must include {label}")
     missing = [m for m in stale["facts"]["metrics"] if m["value"] is None]
-    if len(missing) != 4:
-        return _fail(f"expected 4 missing metrics (accrual empty on calendar day), got {missing}")
-    if "评估：" in stale["notification"]["body"] and "1/5有数" not in stale["notification"]["body"]:
+    if len(missing) != 5:
+        return _fail(f"expected 5 missing metrics (accrual empty on calendar day), got {missing}")
+    if "评估：" in stale["notification"]["body"] and "0/5有数" not in stale["notification"]["body"]:
         return _fail("teaser should stay short and show coverage")
     if "睡眠无" in stale["notification"]["body"]:
         return _fail("lock-screen body must not dump the five-metric list")
-    if "1/5有数" not in stale["notification"]["body"]:
-        return _fail("teaser must show coverage 1/5")
-    if "前一日" not in stale["notification"]["body"]:
-        return _fail("teaser must count prior_day rows")
+    if "0/5有数" not in stale["notification"]["body"]:
+        return _fail("teaser must show coverage 0/5")
     summary = stale["assessment"].get("summary") or {}
-    if summary.get("coverage_present") != 1 or summary.get("coverage_total") != 5:
-        return _fail(f"coverage must be 1/5 on this fixture, got {summary}")
+    if summary.get("coverage_present") != 0 or summary.get("coverage_total") != 5:
+        return _fail(f"coverage must be 0/5 on this fixture, got {summary}")
 
     fresh = _compose(yesterday, hist + [y_row])
     if fresh["facts"]["stale"] is not False:
@@ -166,6 +164,40 @@ def main() -> int:
         return _fail("HTML must not ask to regenerate shortcuts after a prefs change")
     if "诊断" in html or "处方" in html:
         return _fail("HTML used diagnostic/prescriptive copy")
+    if "在这台 iPhone 上完成开通" not in html or 'id="lan-setup"' not in html:
+        return _fail("card without HealthKit must show LAN setup checklist")
+    empty_html = render_fact_card_html(empty, prefs=prefs_payload("selfcheck"), token=None)
+    if "这不是对话框" not in empty_html:
+        return _fail("empty card must say it is not the chat box")
+    reached = {
+        **stale,
+        "facts": {
+            **(stale.get("facts") or {}),
+            "healthkit": {
+                "reached": True,
+                "last_metric": "steps",
+                "last_timestamp": "2026-09-05T08:00:00",
+            },
+        },
+    }
+    reached_html = render_fact_card_html(reached, prefs=prefs_payload("selfcheck"), token=None)
+    if "在这台 iPhone 上完成开通" in reached_html:
+        return _fail("HealthKit-reached card must hide LAN setup")
+    hero_card = {
+        **stale,
+        "assessment": {
+            **(stale.get("assessment") or {}),
+            "summary": {
+                **((stale.get("assessment") or {}).get("summary") or {}),
+                "composite": "偏轻松",
+                "composite_kind": "easy",
+                "advice": "可考虑偏轻松安排。",
+            },
+        },
+    }
+    hero_html = render_fact_card_html(hero_card, prefs=prefs_payload("selfcheck"), token=None)
+    if "今日相对你自己" not in hero_html or "hero-band easy" not in hero_html:
+        return _fail("banded composite must show glance hero")
     fresh_html = render_fact_card_html(
         _compose(yesterday, hist + [y_row], enabled=["steps"]),
         prefs=prefs_payload("selfcheck"),
@@ -217,6 +249,10 @@ def main() -> int:
     hrv_plan = [s for s in plan if s.health_type == "Heart Rate Variability"]
     if len(hrv_plan) != 1 or hrv_plan[0].ingest_key != "hrv_sdnn":
         return _fail("HRV shortcut must POST ingest_key=hrv_sdnn")
+    if hrv_plan[0].temporal_kind != "accrual" or hrv_plan[0].stat != "Average":
+        return _fail(
+            f"HRV Find must be today Average (accrual), got kind={hrv_plan[0].temporal_kind} stat={hrv_plan[0].stat}"
+        )
     if any(s.ingest_key == "hrv" for s in plan):
         return _fail("HRV must not POST as warehouse legacy hrv/RMSSD key")
     if any(s.metric_id == "wrist_temp" for s in plan):
@@ -912,6 +948,30 @@ def main() -> int:
     if edu_zone.get("status") != "done":
         return _fail(f"educational HR zone integers must done, got {edu_zone}")
 
+    commons_ok = run_interpretation(
+        user_id="selfcheck",
+        card=p91_card,
+        assessment_prompt="给运动强度建议",
+        model="selfcheck-model",
+        stream_fn=_done("建议做 3 组力量，每组 10 分钟，强度约 75% 最大心率。"),
+    )
+    if commons_ok.get("status") != "done":
+        return _fail(f"population commons ints without card labels must done, got {commons_ok}")
+
+    commons_label = run_interpretation(
+        user_id="selfcheck",
+        card=p91_card,
+        assessment_prompt="给运动强度建议",
+        model="selfcheck-model",
+        stream_fn=_done("你的静息心率对应 75 的训练区间。"),
+    )
+    if commons_label.get("status") != "failed" or "unauthorized_value:75" not in (
+        commons_label.get("violations") or []
+    ):
+        return _fail(
+            f"commons int next to card label must reject, got {commons_label}"
+        )
+
     t1_zone = run_interpretation(
         user_id="selfcheck",
         card=p91_card,
@@ -995,11 +1055,19 @@ def main() -> int:
             if ref.get("high") is not None:
                 reference += 1
     want = valued + baseline + reference
-    if len(manifest.entries) != want:
+    personal = [e for e in manifest.entries if e.domain != "population_commons"]
+    commons = [e for e in manifest.entries if e.domain == "population_commons"]
+    if len(personal) != want:
         return _fail(
-            f"manifest entries {len(manifest.entries)} != {want} "
+            f"manifest personal entries {len(personal)} != {want} "
             f"(valued={valued} baseline={baseline} reference={reference})"
         )
+    if not commons:
+        return _fail("manifest must include population_commons training ints from schema")
+    if "75" not in manifest.population_commons_values:
+        return _fail("population_commons must whitelist training-zone ints like 75")
+    if "75" in manifest.allowed_values:
+        return _fail("population_commons must not merge into personal allowed_values")
     if "2026-09-07" not in manifest.allowed_dates:
         return _fail(f"allowed_dates missing as_of: {sorted(manifest.allowed_dates)}")
     if any(e.domain == "wearable" for e in manifest.entries):
@@ -1034,6 +1102,10 @@ def main() -> int:
         return _fail("en HTML chrome must be English")
     if "<h1>PHA 事实卡</h1>" in en_html:
         return _fail("en HTML must not keep Chinese h1")
+    if "Finish setup on this iPhone" not in en_html:
+        return _fail("en HTML without HealthKit must show setup checklist")
+    if "在这台 iPhone 上完成开通" in en_html:
+        return _fail("en setup copy must not stay Chinese")
     from pha.metric_catalog_ui import GOLDEN_WEARABLE, apply_catalog_ui_locale, build_metrics_catalog_payload
     if GOLDEN_WEARABLE[0].get("label") != "Daily steps":
         return _fail("golden wearable git default must be English")
@@ -1119,6 +1191,42 @@ def main() -> int:
         return _fail("TASK must forbid paragraphs for unnamed rows")
     if "USER_BACKGROUND_BRIEF" not in task:
         return _fail("TASK must mention USER_BACKGROUND_BRIEF")
+    if "skip it when unrelated" in task:
+        return _fail("TASK must not invite skipping a present background slot")
+    if "Do not skip the slot" not in task:
+        return _fail("TASK must keep a present USER_BACKGROUND_BRIEF in-scope")
+    if "numbered precautions list" not in task:
+        return _fail("TASK must forbid a separate numbered precautions list")
+    if "Continuous narrative paragraphs only" not in task:
+        return _fail("TASK must require continuous narrative paragraphs")
+    if "一、二、" not in task:
+        return _fail("TASK must forbid Chinese numbered list markers")
+    if "words that appear in the slot" not in task:
+        return _fail("TASK must require folding slot wording into advice")
+    if "vague category labels alone" not in task:
+        return _fail("TASK must forbid vague category labels alone")
+    if "definitive causal claims" not in task:
+        return _fail("TASK must forbid definitive causal claims")
+    if "invent or derive extra" not in task:
+        return _fail("TASK must forbid derived extra percents")
+    if "95%, 70–80%" in _hp._FACT_CARD_INTERPRET_TASK:
+        return _fail("TASK must not exemplify 95% next to card-like percents")
+    if "70–80%" in _hp._FACT_CARD_INTERPRET_TASK or "70-80%" in _hp._FACT_CARD_INTERPRET_TASK:
+        return _fail("TASK must not bait population percent examples")
+    if "do not invent decimals or percents" not in task:
+        return _fail("TASK item 3 must forbid inventing percents")
+    from pha.fact_card_copy import card_copy as _card_copy
+
+    zh_lead = _card_copy("zh-CN", "bg_brief_lead")
+    en_lead = _card_copy("en", "bg_brief_lead")
+    if "无关则忽略" in zh_lead or "ignore anything unrelated" in en_lead:
+        return _fail("bg_brief_lead must not invite skipping a present background slot")
+    if "本槽在场" not in zh_lead:
+        return _fail("zh bg_brief_lead must keep a present slot in-scope")
+    if "words that appear in this slot" not in en_lead:
+        return _fail("en bg_brief_lead must require slot wording in advice")
+    if "笼统类别" not in zh_lead:
+        return _fail("zh bg_brief_lead must forbid vague category substitution")
 
     from pha.goal_classifier import assessment_outline_enabled
 
@@ -1136,11 +1244,27 @@ def main() -> int:
             if "in-progress cumulative" not in mode_task:
                 return _fail(f"TASK {mode_name} must state partial_day is in-progress")
             if "sync disclaimer" not in mode_task:
-                return _fail(f"TASK {mode_name} must forbid restating sync disclaimer")
+                return _fail(f"TASK {mode_name} must forbid refixture-medg sync disclaimer")
+            if "skip it when unrelated" in mode_task:
+                return _fail(f"TASK {mode_name} must not invite skipping a present background slot")
+            if "Do not skip the slot" not in mode_task:
+                return _fail(f"TASK {mode_name} must keep a present USER_BACKGROUND_BRIEF in-scope")
+            if "Continuous narrative paragraphs only" not in mode_task:
+                return _fail(f"TASK {mode_name} must require continuous narrative paragraphs")
+            if "words that appear in the slot" not in mode_task:
+                return _fail(f"TASK {mode_name} must require folding slot wording into advice")
+            if "definitive causal claims" not in mode_task:
+                return _fail(f"TASK {mode_name} must forbid definitive causal claims")
+            if "invent or derive extra" not in mode_task:
+                return _fail(f"TASK {mode_name} must forbid derived extra percents")
         if "did not name" not in exclusive:
             return _fail("exclusive TASK must keep unnamed-row ban")
         if "same paragraph" not in emphasis or "topical" not in emphasis:
             return _fail("emphasis TASK must allow same-paragraph mention only")
+        if "Sentence 1 = overall" not in emphasis:
+            return _fail("emphasis TASK must lead with overall sentence")
+        if "Sentence 1 = overall" in exclusive:
+            return _fail("exclusive TASK must not require overall lead")
         if "Cover checked rows" not in cover:
             return _fail("cover-card TASK must cover checked valued rows")
 
@@ -1348,7 +1472,7 @@ def _check_p13_memory(p91_card: dict) -> int | None:
     if stored or rej != "system_tag_message":
         _restore_p13_db(old_db, old_slots, old_disc)
         return _fail(f"system tag must reject capture, got stored={stored} rej={rej}")
-    stored_ok, rej_ok = maybe_capture_chat_background("selfcheck", "每天补镁 400mg")
+    stored_ok, rej_ok = maybe_capture_chat_background("selfcheck", "每天补剂项B 400mg")
     if not stored_ok or rej_ok is not None:
         _restore_p13_db(old_db, old_slots, old_disc)
         return _fail("real supplement note must still capture")
@@ -1371,7 +1495,7 @@ def _check_p13_memory(p91_card: dict) -> int | None:
     real_sess = create_session("selfcheck")
     append_message(real_sess.id, "user", "我最近睡眠还行")
     append_message(real_sess.id, "assistant", "好的")
-    maybe_capture_chat_background("selfcheck", "每天补镁 400mg")
+    maybe_capture_chat_background("selfcheck", "每天补剂项B 400mg")
     maybe_capture_chat_background("selfcheck", "鱼油一直在吃")
     before = _memory_table_counts()
 
@@ -1481,12 +1605,23 @@ def _check_p13_memory(p91_card: dict) -> int | None:
         )
         hy_conn.execute(
             "INSERT INTO chat_messages (session_id, role, content, created_at) VALUES (?,?,?,?)",
-            (keep_sid, "user", "每天补镁 400mg", "2026-09-01"),
+            (keep_sid, "user", "每天补剂项B 400mg", "2026-09-01"),
         )
         hy_conn.execute(
             "INSERT INTO user_health_background_notes "
             "(user_id, note_date, category, content, created_at) VALUES (?,?,?,?,?)",
-            ("selfcheck", "2026-09-01", "supplement", "每天补镁 400mg", "2026-09-01"),
+            ("selfcheck", "2026-09-01", "supplement", "每天补剂项B 400mg", "2026-09-01"),
+        )
+        hy_conn.execute(
+            "INSERT INTO user_health_background_notes "
+            "(user_id, note_date, category, content, created_at) VALUES (?,?,?,?,?)",
+            (
+                "selfcheck",
+                "2026-09-08",
+                "medication",
+                "我现在有服用什么药物吗？",
+                "2026-09-08",
+            ),
         )
         for i in range(2):
             sid = f"interp-{i}"
@@ -1535,9 +1670,15 @@ def _check_p13_memory(p91_card: dict) -> int | None:
             )
         hy_conn.commit()
         dry = classify(hy_conn)
-        if len(dry["A"]) != 2 or len(dry["B"]) != 2 or len(dry["C"]) != 2:
+        if (
+            len(dry["A"]) != 2
+            or len(dry["B"]) != 2
+            or len(dry["C"]) != 2
+            or len(dry.get("Q") or []) != 1
+        ):
             _restore_p13_db(old_db, old_slots, old_disc)
-            return _fail(f"hygiene dry-run counts want A2 B2 C2 got { {k: len(dry[k]) for k in 'ABC'} }")
+            counts = {k: len(dry.get(k) or []) for k in ("A", "B", "C", "Q")}
+            return _fail(f"hygiene dry-run counts want A2 B2 C2 Q1 got {counts}")
     finally:
         hy_conn.close()
 
@@ -1549,6 +1690,9 @@ def _check_p13_memory(p91_card: dict) -> int | None:
     if len(after_hy.get("C") or []) != 2:
         _restore_p13_db(old_db, old_slots, old_disc)
         return _fail("hygiene apply must keep empty sessions by default")
+    if len(after_hy.get("Q") or []) != 0:
+        _restore_p13_db(old_db, old_slots, old_disc)
+        return _fail("hygiene apply must clear Q question notes")
     verify = connect(hy_db)
     try:
         real_sessions = verify.execute(
@@ -1667,10 +1811,15 @@ def _check_p14_background(p91_card: dict) -> int | None:
             conn.close()
 
     uid = "selfcheck-p14"
-    _insert(uid, "2026-09-05", "supplement", "每晚补镁 400mg")
+    _insert(uid, "2026-09-05", "supplement", "每晚补剂项B 400mg")
     _insert(uid, "2026-09-05", "sleep_lifestyle", "最近两周都 1 点后睡")
     _insert(uid, "2026-09-05", "supplement", "在吃维生素D3 和 Omega-3")
     _insert(uid, "2026-09-01", "supplement", "2026-09-01 开始每天两次鱼油")
+    _insert(uid, "2026-09-06", "medication", "我现在有服用什么药物吗？")
+    _insert(uid, "2026-06-11", "medication", "请核实今天的睡眠数据，睡眠时长明显是错误的")
+    _insert(uid, "2026-05-23", "sleep_lifestyle", "请分析最近90天我的睡眠时间的血氧数据是否正常")
+    _insert(uid, "2026-05-01", "supplement", "对比历年血脂与补剂是否合理")
+    _insert(uid, "2026-05-01", "supplement", "我在吃药物项A类，医生让长期服用")
     _insert(
         uid,
         "2026-09-05",
@@ -1684,10 +1833,50 @@ def _check_p14_background(p91_card: dict) -> int | None:
     if not brief:
         _restore()
         return _fail("P14 brief must be non-empty with fixture notes")
-    for needle in ("镁", "维生素D3", "Omega-3", "鱼油"):
+    for needle in ("补剂项B", "维生素D3", "Omega-3", "鱼油", "药物项A"):
         if needle not in brief:
             _restore()
             return _fail(f"P14 brief missing {needle!r}: {brief}")
+    from pha.fact_card_background_brief import split_background_portrait_chunks
+
+    portrait = split_background_portrait_chunks(
+        "以下是我的补剂方案：时间 项目 具体内容 核心逻辑 "
+        "上午 鱼油 + Demo辅剂 中午 药物项A（随餐） 睡前 补剂项B（柠檬酸钙）",
+        locale="zh-CN",
+    )
+    if any("时间 项目" in p or "核心逻辑" in p for p in portrait):
+        _restore()
+        return _fail(f"portrait split must drop unmarked preamble: {portrait}")
+    if not any("药物项A" in p for p in portrait) or not any("补剂项B" in p for p in portrait):
+        _restore()
+        return _fail(f"portrait split must keep named items on own rows: {portrait}")
+    if not any(p.startswith("中午") and "药物项A" in p for p in portrait):
+        _restore()
+        return _fail(f"portrait split must keep schedule+item rows: {portrait}")
+    if any("鱼油 + Demo辅剂" in p for p in portrait):
+        _restore()
+        return _fail(f"portrait split must separate item seps: {portrait}")
+    from pha.fact_card_background_brief import expand_background_note_units
+
+    tab_note = (
+        "时间\t项目\t具体内容\t核心逻辑\n"
+        "中午 12:30（午餐时）\t脂溶性营养 + 药物\t鱼油 + 药物项A\t随油脂吸收最好\n"
+        "睡前 30分钟\t睡眠支持\t补剂项B 300mg（柠檬酸钙）\t放松神经\n"
+    )
+    units = expand_background_note_units(tab_note, locale="zh-CN")
+    joined = " | ".join(units)
+    if "核心逻辑" in joined or "脂溶性营养" in joined:
+        _restore()
+        return _fail(f"tab expand must drop header/logic columns: {units}")
+    if not any("药物项A" in u for u in units) or not any("补剂项B" in u for u in units):
+        _restore()
+        return _fail(f"tab expand must keep item column: {units}")
+    if "有服用什么药物吗" in brief or "我现在有服用什么药物" in brief:
+        _restore()
+        return _fail(f"P14 brief must drop capture-negative questions: {brief}")
+    if "请核实" in brief or "请分析" in brief or "是否合理" in brief or "是否正常" in brief:
+        _restore()
+        return _fail(f"P14 brief must drop analysis-imperative notes: {brief}")
     for banned in ("400", "1 点", "2026", "两次"):
         if banned in brief:
             _restore()
@@ -1706,6 +1895,9 @@ def _check_p14_background(p91_card: dict) -> int | None:
     if "[vision_parse_failed]" in brief or "Server error" in brief:
         _restore()
         return _fail("P14 brief must drop unstructured_vision / system-tag notes")
+    if str(meta.get("brief_source") or "") != "live_notes":
+        _restore()
+        return _fail(f"P14 without CHB artifact must be live_notes, got {meta}")
     leftover = leftover_s_level_numeric_tokens(brief)
     if leftover:
         _restore()
@@ -1713,6 +1905,28 @@ def _check_p14_background(p91_card: dict) -> int | None:
     if int(meta.get("notes_used") or 0) < 4:
         _restore()
         return _fail(f"P14 notes_used too low: {meta}")
+
+    split_uid = "selfcheck-p15-split"
+    _insert(
+        split_uid,
+        "2026-09-05",
+        "supplement",
+        "以下是我的方案 上午 训练后蛋白粉 中午 午餐鱼油与药物项A 晚上 晚餐 Demo香料 睡前 补剂项B",
+    )
+    split_brief, split_meta = build_fact_card_background_brief(
+        split_uid, locale="zh-CN", as_of="2026-09-07"
+    )
+    split_dashes = [ln for ln in split_brief.splitlines() if ln.startswith("- ")]
+    if len(split_dashes) < 4:
+        _restore()
+        return _fail(f"P15 schedule split must emit ≥4 bullets: {split_brief}")
+    for needle in ("药物项A", "补剂项B", "上午", "中午", "晚上", "睡前"):
+        if needle not in split_brief:
+            _restore()
+            return _fail(f"P15 split brief missing {needle!r}: {split_brief}")
+    if int(split_meta.get("notes_used") or 0) < 4:
+        _restore()
+        return _fail(f"P15 split notes_used too low: {split_meta}")
 
     class _CaptureProvider:
         last_blob = ""
@@ -1762,6 +1976,27 @@ def _check_p14_background(p91_card: dict) -> int | None:
     if "用户背景 · 自述 · 非数字源" not in sys_blob:
         _restore()
         return _fail("P14 system prompt must include USER_BACKGROUND_BRIEF title")
+    assess_i = sys_blob.find("【用户评估要求")
+    if assess_i < 0:
+        assess_i = sys_blob.find("User assessment request")
+    brief_i = sys_blob.find("【用户背景 · 自述 · 非数字源】")
+    if brief_i < 0:
+        brief_i = sys_blob.find("用户背景 · 自述 · 非数字源")
+    context_i = sys_blob.find("唯一可引用数字与日期")
+    if context_i < 0:
+        context_i = sys_blob.find("FACT_CARD_CONTEXT")
+    if assess_i < 0 or brief_i < 0 or context_i < 0:
+        _restore()
+        return _fail(
+            f"P14 system prompt missing adjacency markers "
+            f"assess={assess_i} brief={brief_i} context={context_i}"
+        )
+    if not (assess_i < brief_i < context_i):
+        _restore()
+        return _fail(
+            "USER_BACKGROUND_BRIEF must sit between USER_ASSESSMENT_PROMPT and "
+            f"FACT_CARD_CONTEXT (assess={assess_i}, brief={brief_i}, context={context_i})"
+        )
     for banned in (
         "聊天背景档案",
         "上轮对话摘要",

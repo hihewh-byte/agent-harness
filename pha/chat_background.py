@@ -221,7 +221,7 @@ def build_user_background_block(user_id: str, *, limit: int = 16, user_message: 
         CATEGORY_ORDER,
         _denumerize_line,
         _norm_dedupe_key,
-        _quota,
+        _note_caps,
     )
     from pha.schema_intent_router import schema_hits_capture_negative
     from pha.universal_catalog_manager import get_catalog_manager
@@ -247,7 +247,7 @@ def build_user_background_block(user_id: str, *, limit: int = 16, user_message: 
         seen.add(key)
         filtered.append(r)
 
-    quota = _quota()
+    quota = _note_caps(locale="zh")
     per_cat: dict[str, List[dict]] = {c: [] for c in CATEGORY_ORDER}
     for row in filtered:
         cat = str(row.get("category") or "general").strip() or "general"
@@ -311,7 +311,7 @@ def summarize_supplement_bg_for_tier0(raw: str, *, max_chars: int = 800) -> str:
         if stripped.startswith("- ["):
             out.append(stripped)
             continue
-        if any(k in stripped for k in ("上午", "中午", "晚上", "睡前", "药物项A", "药物项C")):
+        if any(k in stripped for k in ("上午", "中午", "晚上", "睡前")):
             out.append(stripped)
     if not out:
         out = lines[:12]

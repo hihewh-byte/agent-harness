@@ -120,6 +120,17 @@ def _as_utc_date(dt: datetime) -> date:
     return dt.date()
 
 
+def _rebucket_and_rebuild_sleep(user_id: str) -> None:
+    """Align zip sleep segment day keys to HealthKit wake days, then rebuild daily sleep."""
+    from pha.sqlite_storage import (
+        rebuild_daily_sleep_from_segments,
+        rebucket_zip_sleep_segments_to_wake_days,
+    )
+
+    rebucket_zip_sleep_segments_to_wake_days(user_id)
+    rebuild_daily_sleep_from_segments(user_id)
+
+
 def _safe_float(value: str) -> Optional[float]:
     try:
         return float(value)
@@ -155,7 +166,7 @@ class _DayAgg:
     rhr_n: int = 0
     hrv_sum: float = 0.0
     hrv_n: int = 0
-    active_energy_sum: float = 0.0
+    active_energy_by_source: Dict[str, float] = field(default_factory=dict)
     spo2_sum: float = 0.0
     spo2_n: int = 0
     respiratory_sum: float = 0.0
@@ -328,9 +339,7 @@ class AppleHealthParser:
         if incoming_rows:
             upsert_wearable_daily_batch(incoming_rows)
             store.replace_wearable_rows_in_memory(self._user_id, incoming_rows)
-            from pha.sqlite_storage import rebuild_daily_sleep_from_segments
-
-            rebuild_daily_sleep_from_segments(self._user_id)
+            _rebucket_and_rebuild_sleep(self._user_id)
             from pha.workout_storage import rebuild_workout_daily_rollup
 
             rebuild_workout_daily_rollup(self._user_id)
@@ -422,7 +431,6 @@ class AppleHealthParser:
         calendar days touched by newly ingested samples.
         """
         from pha.sqlite_storage import (
-            rebuild_daily_sleep_from_segments,
             rebuild_wearable_daily_for_days,
             resolve_import_watermark,
         )
@@ -500,7 +508,7 @@ class AppleHealthParser:
             _ = workout_writer.close()
 
         days_rebuilt = rebuild_wearable_daily_for_days(self._user_id, sorted(self._affected_days))
-        rebuild_daily_sleep_from_segments(self._user_id)
+        _rebucket_and_rebuild_sleep(self._user_id)
         rebuild_workout_daily_rollup(self._user_id)
 
         from pha.sqlite_storage import load_wearable_rows
@@ -602,11 +610,10 @@ class AppleHealthParser:
         finally:
             sessions_written = workout_writer.close()
 
-        from pha.sqlite_storage import rebuild_daily_sleep_from_segments
         from pha.workout_storage import rebuild_workout_daily_rollup
 
         days_rollup = rebuild_workout_daily_rollup(self._user_id)
-        rebuild_daily_sleep_from_segments(self._user_id)
+        _rebucket_and_rebuild_sleep(self._user_id)
 
         merged = store.list_wearable_rows(self._user_id)
         if merged:
@@ -766,7 +773,10 @@ class AppleHealthParser:
             v = _safe_float(value)
             if v is None or v <= 0:
                 return
-            per_day[day].active_energy_sum += v
+            src = (source_name or "unknown").strip() or "unknown"
+            per_day[day].active_energy_by_source[src] = (
+                per_day[day].active_energy_by_source.get(src, 0.0) + v
+            )
             writer.add_sample(METRIC_ACTIVE_ENERGY, start_dt, v, sample_id=sample_id)
             return
 
@@ -820,11 +830,15 @@ class AppleHealthParser:
             dur = (end_dt - start_dt).total_seconds()
             if dur <= 0 or dur > 24 * 3600:
                 return
+            from pha.sleep_wake_day import as_naive_local, wake_day_for_segment
+
+            wake_day = wake_day_for_segment(as_naive_local(start_dt), as_naive_local(end_dt))
+            self._affected_days.add(wake_day)
             v_lower = (value or "").lower()
             if "awake" in v_lower:
-                per_day[day].awake_seconds += dur
+                per_day[wake_day].awake_seconds += dur
                 sleep_writer.add_segment(
-                    day,
+                    wake_day,
                     start_dt,
                     end_dt,
                     source_name=source_name,
@@ -837,26 +851,26 @@ class AppleHealthParser:
                 return
             stage = sleep_stage_kind_from_hk_value(value)
             if stage == "deep":
-                per_day[day].sleep_deep_seconds += dur
+                per_day[wake_day].sleep_deep_seconds += dur
             elif stage == "rem":
-                per_day[day].sleep_rem_seconds += dur
+                per_day[wake_day].sleep_rem_seconds += dur
             seg = SleepSegment(
                 start=start_dt,
                 end=end_dt,
                 source_name=source_name,
                 sample_id=sample_id,
             )
-            per_day[day].sleep_segments.append(seg)
+            per_day[wake_day].sleep_segments.append(seg)
             sleep_writer.add_segment(
-                day,
+                wake_day,
                 start_dt,
                 end_dt,
                 source_name=source_name,
                 sample_id=sample_id,
                 is_awake=False,
             )
-            if per_day[day].first_sleep_start is None or start_dt < per_day[day].first_sleep_start:
-                per_day[day].first_sleep_start = start_dt
+            if per_day[wake_day].first_sleep_start is None or start_dt < per_day[wake_day].first_sleep_start:
+                per_day[wake_day].first_sleep_start = start_dt
             return
 
     def _apply_workout_statistic(self, pending: _PendingWorkout, elem: Element) -> None:
@@ -976,7 +990,7 @@ class AppleHealthParser:
                 rhr_n=agg.rhr_n,
                 hrv_sum=agg.hrv_sum,
                 hrv_n=agg.hrv_n,
-                active_energy_sum=agg.active_energy_sum,
+                active_energy_by_source=dict(agg.active_energy_by_source),
                 spo2_sum=agg.spo2_sum,
                 spo2_n=agg.spo2_n,
                 respiratory_sum=agg.respiratory_sum,

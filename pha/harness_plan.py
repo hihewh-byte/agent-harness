@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
-from pha.health_data import effective_query_reference_date, get_health_data
+from pha.health_data import effective_query_reference_date, get_health_data, default_last_n_days_range
 from pha.intent_gates import (
     QuestionType,
     classify_question_type,
@@ -15,7 +15,6 @@ from pha.intent_gates import (
     resolve_schema_intent,
     user_message_needs_lab_dossier,
 )
-from pha.date_range_parser import default_wearable_window
 from pha.evidence_catalog import (
     catalog_mode_enabled,
     combined_catalog_task_text,
@@ -77,11 +76,16 @@ def _lab_cross_year_turn_plan(qtype: QuestionType) -> TurnEvidencePlan:
     )
 
 
-def _wearable_only_turn_plan(qtype: QuestionType) -> TurnEvidencePlan:
+def _wearable_only_turn_plan(qtype: QuestionType, msg: str = "") -> TurnEvidencePlan:
+    t1 = ["PATIENT_STATE_WEARABLE"]
+    from pha.schema_intent_router import supplement_context_brief_should_mount
+
+    if supplement_context_brief_should_mount(msg):
+        t1.append("USER_CONTEXT_BRIEF")
     return TurnEvidencePlan(
         profile="wearable_only",
         slots_tier0=["MASTER_ANCHOR", "NUMERICS_MANIFEST", "WEARABLE_90D_SUMMARY", "TASK"],
-        slots_tier1=["PATIENT_STATE_WEARABLE"],
+        slots_tier1=t1,
         forbidden=["USER_SNAPSHOT_IN_RAW_USER"],
         tools_allowed=["get_health_data"],
         task_text=(
@@ -122,14 +126,22 @@ _FACT_CARD_INTERPRET_TASK = (
     "2. Your own data: cite only numbers and dates from the Numerics Manifest / "
     "FACT_CARD_CONTEXT; copy decimals as shown. Absolute dates only as_of, "
     "calendar_day, or each row's day; otherwise use relative phrases. "
-    "Window wording must match the card exactly.\n"
-    "3. Population commons and training tips: integers OK (e.g. 95%, 70–80%, 2–3 times); "
-    "do not invent decimals. Optional sourced note: {T1_TEMPLATE}.\n"
-    "4. Plain text only — no Markdown (* # `). No diagnosis, prescriptions, or doses. "
+    "Window wording must match the card exactly. Do not invent or derive extra "
+    "numbers or percents (including 100 minus a percentile). Without a matching "
+    "Manifest token, use qualitative wording only.\n"
+    "3. Population commons and training tips: small integers for counts or frequencies "
+    "only (e.g. 2–3 times); do not invent decimals or percents; do not attach a "
+    "population integer to a card metric label outside a T1 block. Optional sourced "
+    "note: {T1_TEMPLATE}.\n"
+    "4. Continuous narrative paragraphs only. No Markdown (* # `). No bullet / hyphen / "
+    "numbered lists (including 1. 2. and 一、二、). No diagnosis, prescriptions, or doses. "
     "Do not repeat the disclaimer. Language follows response_locale.\n"
-    "5. USER_BACKGROUND_BRIEF, if present, only shapes cautions and wording of advice. "
-    "Never cite it as data, never restate or infer doses, and skip it when unrelated "
-    "to the rows the assessment named."
+    "5. When USER_BACKGROUND_BRIEF is present and non-empty, fold specific "
+    "self-reported items from that slot into the advice wording by the words "
+    "that appear in the slot. Do not skip the slot. Do not replace those items "
+    "with vague category labels alone. Never cite as data; never restate or "
+    "infer doses. Do not open a separate numbered precautions list. Cautious "
+    "correlational language only; forbid definitive causal claims."
 )
 
 _FACT_CARD_INTERPRET_TASK_SHARED_TAIL = (
@@ -139,14 +151,22 @@ _FACT_CARD_INTERPRET_TASK_SHARED_TAIL = (
     "2. Your own data: cite only numbers and dates from the Numerics Manifest / "
     "FACT_CARD_CONTEXT; copy decimals as shown. Absolute dates only as_of, "
     "calendar_day, or each row's day; otherwise use relative phrases. "
-    "Window wording must match the card exactly.\n"
-    "3. Population commons and training tips: integers OK (e.g. 95%, 70–80%, 2–3 times); "
-    "do not invent decimals. Optional sourced note: {T1_TEMPLATE}.\n"
-    "4. Plain text only — no Markdown (* # `). No diagnosis, prescriptions, or doses. "
+    "Window wording must match the card exactly. Do not invent or derive extra "
+    "numbers or percents (including 100 minus a percentile). Without a matching "
+    "Manifest token, use qualitative wording only.\n"
+    "3. Population commons and training tips: small integers for counts or frequencies "
+    "only (e.g. 2–3 times); do not invent decimals or percents; do not attach a "
+    "population integer to a card metric label outside a T1 block. Optional sourced "
+    "note: {T1_TEMPLATE}.\n"
+    "4. Continuous narrative paragraphs only. No Markdown (* # `). No bullet / hyphen / "
+    "numbered lists (including 1. 2. and 一、二、). No diagnosis, prescriptions, or doses. "
     "Do not repeat the disclaimer. Language follows response_locale.\n"
-    "5. USER_BACKGROUND_BRIEF, if present, only shapes cautions and wording of advice. "
-    "Never cite it as data, never restate or infer doses, and skip it when unrelated "
-    "to the rows the assessment named."
+    "5. When USER_BACKGROUND_BRIEF is present and non-empty, fold specific "
+    "self-reported items from that slot into the advice wording by the words "
+    "that appear in the slot. Do not skip the slot. Do not replace those items "
+    "with vague category labels alone. Never cite as data; never restate or "
+    "infer doses. Do not open a separate numbered precautions list. Cautious "
+    "correlational language only; forbid definitive causal claims."
 )
 
 _FACT_CARD_INTERPRET_TASK_BY_OUTLINE = {
@@ -159,7 +179,8 @@ _FACT_CARD_INTERPRET_TASK_BY_OUTLINE = {
     ),
     "emphasis": (
         "【TASK】Write a health-education interpretation.\n"
-        "1. Outline mode = emphasis (catalog). Outline = USER_ASSESSMENT_PROMPT "
+        "1. Outline mode = emphasis (catalog). Sentence 1 = overall readiness "
+        "for the day (no metric labels). Then USER_ASSESSMENT_PROMPT is the outline "
         "(length, tone, training advice). Named rows get the main section; other checked "
         "rows with values may be mentioned in the same paragraph, never as a new topical "
         "section. "
@@ -308,7 +329,7 @@ def _plan_for_authoritative_profile(
     if name == "lab_cross_year":
         return _lab_cross_year_turn_plan(qtype)
     if name == "wearable_only":
-        return _wearable_only_turn_plan(qtype)
+        return _wearable_only_turn_plan(qtype, msg)
     if name == "fact_card_interpret":
         return _fact_card_interpret_turn_plan()
     if name == "wearable_daily_review":
@@ -359,7 +380,7 @@ def _plan_from_turn_scope(
     ):
         return _lab_cross_year_turn_plan(qtype)
     if hint == "wearable_only":
-        return _wearable_only_turn_plan(qtype)
+        return _wearable_only_turn_plan(qtype, msg)
     if hint == "combined_review":
         return _combined_review_turn_plan(qtype, msg)
     if hint == "wearable_screenshot_review":
@@ -628,7 +649,7 @@ def build_turn_evidence_plan(
             tools_allowed=[],
             task_text=(
                 "【本轮任务】仅针对用户本条消息中的补剂/用药时间表进行结构化点评"
-                "（时机、剂量、与药物项A/药物项C等的潜在交互）。"
+                "（时机、剂量、与常用药物等的潜在交互）。"
                 "可结合 Patient State 化验数字；禁止输出无关的穿戴 Pearson/步数大盘；"
                 "禁止向用户索要已给出的补剂清单。"
             ),
@@ -642,7 +663,7 @@ def build_turn_evidence_plan(
         return _lab_cross_year_turn_plan(qtype)
 
     if route.profile == "wearable_only" or qtype == QuestionType.WEARABLE:
-        return _wearable_only_turn_plan(qtype)
+        return _wearable_only_turn_plan(qtype, msg)
 
     return TurnEvidencePlan(
         profile="lifestyle",
@@ -680,7 +701,7 @@ def build_wearable_90d_summary_block(user_id: str, user_message: str) -> str:
     """Precomputed wearable summary for Evidence Lane (never appended to raw user)."""
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
-    window = default_wearable_window(user_message, reference=ref)
+    start, end = default_last_n_days_range(reference_date=ref, days=90)
     metrics = infer_wearable_metric_ids(user_message)
     if not metrics:
         from pha.wearable_metric_registry import catalog_keys_core, primary_metric_id_for_catalog_key
@@ -692,8 +713,8 @@ def build_wearable_90d_summary_block(user_id: str, user_message: str) -> str:
         ]
     result = get_health_data(
         uid,
-        window.start,
-        window.end,
+        start,
+        end,
         metrics,
         user_message=user_message,
     )
@@ -701,11 +722,11 @@ def build_wearable_90d_summary_block(user_id: str, user_message: str) -> str:
     if not snap:
         return (
             f"【Evidence · 近90日穿戴摘要】\n"
-            f"区间 {window.start.isoformat()}～{window.end.isoformat()}："
+            f"区间 {start.isoformat()}～{end.isoformat()}："
             f"{result.message or '无数据'}"
         )
     return (
-        f"【Evidence · 近90日穿戴摘要 · {window.start.isoformat()}～{window.end.isoformat()}】\n"
+        f"【Evidence · 近90日穿戴摘要 · {start.isoformat()}～{end.isoformat()}】\n"
         f"{snap}\n"
         f"（宏观趋势参考；90 天对比数字见 WEARABLE_COMPARE_TABLE。）"
     )
@@ -719,29 +740,29 @@ def build_wearable_90d_macro_summary_block(user_id: str, user_message: str) -> s
 
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
-    window = default_wearable_window(user_message, reference=ref)
+    start, end = default_last_n_days_range(reference_date=ref, days=90)
     metrics = infer_wearable_metrics(user_message)
     if not metrics:
         metrics = ["hrv", "activity_kcal"]
-    rows = list(query_wearable_daily_range(uid, window.start, window.end) or [])
+    rows = list(query_wearable_daily_range(uid, start, end) or [])
     if not rows:
-        rows = [r for r in store.list_wearable_rows(uid) if window.start <= r.day <= window.end]
+        rows = [r for r in store.list_wearable_rows(uid) if start <= r.day <= end]
     snap = build_wearable_macro_analytics_snapshot(
         rows,
-        start_date=window.start,
-        end_date=window.end,
+        start_date=start,
+        end_date=end,
         reference_date=ref,
         user_message=user_message,
         metrics=metrics,
     )
     if not snap:
         return (
-            f"【Evidence · 近90日穿戴宏观趋势 · {window.start.isoformat()}～{window.end.isoformat()}】\n"
+            f"【Evidence · 近90日穿戴宏观趋势 · {start.isoformat()}～{end.isoformat()}】\n"
             f"无本地日聚合数据。\n"
             f"（不含 90 天均值/区间；截图对比数字见 WEARABLE_COMPARE_TABLE。）"
         )
     return (
-        f"【Evidence · 近90日穿戴宏观趋势 · {window.start.isoformat()}～{window.end.isoformat()}】\n"
+        f"【Evidence · 近90日穿戴宏观趋势 · {start.isoformat()}～{end.isoformat()}】\n"
         f"{snap}\n"
         f"（不含 90 天均值/区间；截图对比数字见 WEARABLE_COMPARE_TABLE。）"
     )

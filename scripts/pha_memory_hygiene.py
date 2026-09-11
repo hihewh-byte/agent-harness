@@ -3,6 +3,7 @@
 
 Default is dry-run. ``--apply`` copies the DB to ``data/backups/`` first.
 Empty sessions (class C) are listed but not deleted unless ``--include-empty``.
+Capture-negative question notes (class Q) are deleted on ``--apply``.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from pha.chat_background import is_system_tag_message  # noqa: E402
+from pha.fact_card_background_brief import note_hits_capture_negative  # noqa: E402
 from pha.harness_plan import FACT_CARD_INTERPRET_USER_MESSAGE  # noqa: E402
 from pha.sqlite_storage import get_db_path  # noqa: E402
 
@@ -81,6 +83,7 @@ def classify(conn: sqlite3.Connection) -> dict[str, Any]:
     class_a: list[dict[str, Any]] = []
     class_b: list[dict[str, Any]] = []
     class_c: list[dict[str, Any]] = []
+    class_q: list[dict[str, Any]] = []
 
     if _table_exists(conn, "chat_sessions"):
         sessions = conn.execute(
@@ -130,17 +133,24 @@ def classify(conn: sqlite3.Connection) -> dict[str, Any]:
             """,
         ).fetchall()
         for note in notes:
+            sample = {
+                "id": note["id"],
+                "created_at": note["created_at"],
+                "title": note["category"],
+                "sample": (note["content"] or "")[:60],
+            }
             if is_polluted_note_content(note["content"], prefixes):
-                class_b.append(
-                    {
-                        "id": note["id"],
-                        "created_at": note["created_at"],
-                        "title": note["category"],
-                        "sample": (note["content"] or "")[:60],
-                    },
-                )
+                class_b.append(sample)
+            elif note_hits_capture_negative(note["content"] or ""):
+                class_q.append(sample)
 
-    return {"A": class_a, "B": class_b, "C": class_c, "prefixes": prefixes}
+    return {
+        "A": class_a,
+        "B": class_b,
+        "C": class_c,
+        "Q": class_q,
+        "prefixes": prefixes,
+    }
 
 
 def _print_class(label: str, rows: list[dict[str, Any]], *, limit: int = 5) -> None:
@@ -170,9 +180,10 @@ def apply_deletes(
     *,
     include_empty: bool,
 ) -> dict[str, int]:
-    deleted = {"A": 0, "B": 0, "C": 0}
+    deleted = {"A": 0, "B": 0, "C": 0, "Q": 0}
     a_ids = [r["id"] for r in classified["A"]]
     b_ids = [r["id"] for r in classified["B"]]
+    q_ids = [r["id"] for r in classified.get("Q") or []]
     c_ids = [r["id"] for r in classified["C"]] if include_empty else []
     if a_ids:
         placeholders = ",".join("?" * len(a_ids))
@@ -199,6 +210,13 @@ def apply_deletes(
             b_ids,
         )
         deleted["B"] = len(b_ids)
+    if q_ids and _table_exists(conn, "user_health_background_notes"):
+        placeholders = ",".join("?" * len(q_ids))
+        conn.execute(
+            f"DELETE FROM user_health_background_notes WHERE id IN ({placeholders})",
+            q_ids,
+        )
+        deleted["Q"] = len(q_ids)
     if c_ids and _table_exists(conn, "chat_sessions"):
         placeholders = ",".join("?" * len(c_ids))
         conn.execute(
@@ -226,6 +244,10 @@ def run(
         _print_class("A interpret-only sessions", classified["A"])
         _print_class("B polluted background notes", classified["B"])
         _print_class("C empty sessions (kept unless --include-empty)", classified["C"])
+        _print_class(
+            "Q capture-negative question notes (deleted on --apply)",
+            classified.get("Q") or [],
+        )
         if not apply:
             print("dry-run: no deletes")
             return {"db": str(path), "classified": classified, "applied": False}
@@ -241,7 +263,7 @@ def run(
         after = classify(conn)
         print(
             f"after A={len(after['A'])} B={len(after['B'])} C={len(after['C'])} "
-            f"deleted={deleted}",
+            f"Q={len(after.get('Q') or [])} deleted={deleted}",
         )
         return {
             "db": str(path),

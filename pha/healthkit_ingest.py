@@ -585,7 +585,11 @@ def make_sample_id(
 
 
 def _combine_step_numbers(nums: list[float]) -> float:
-    """Daily total if Shortcuts prepended Sum before per-sample increments; else sum."""
+    """Daily total if Shortcuts prepended Sum before per-source totals; else max.
+
+    Apple Health does not add Watch + iPhone step totals. When Shortcuts sends
+    multiple device numbers without a covering Sum, take max — not sum.
+    """
     if not nums:
         raise ValueError("unreadable_value")
     if len(nums) == 1:
@@ -593,7 +597,7 @@ def _combine_step_numbers(nums: list[float]) -> float:
     rest = float(sum(nums[1:]))
     if nums[0] + 1e-6 >= rest:
         return float(nums[0])
-    return float(sum(nums))
+    return float(max(nums))
 
 
 def _finite_number(value: Any, *, sum_all: bool = False) -> float:

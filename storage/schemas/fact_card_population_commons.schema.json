@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pha://schemas/fact_card_population_commons.schema.json",
+  "schema_version": "1.0.0",
+  "asset_id": "fact_card_population_commons",
+  "status": "active",
+  "category": "numerics_policy",
+  "notes": "Training / population commons integers for fact_card audit. Not personal card values. Pass only when the integer appears in a clause with no card metric label (labels only; units like % do not veto).",
+  "training_ints": [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 40, 45, 50, 55, 60,
+    64, 65, 70, 75, 76, 80
+  ]
+}

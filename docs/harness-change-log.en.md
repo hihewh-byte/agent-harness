@@ -2,9 +2,71 @@
 
 > **Language / 语言**：English (this document) · [中文](harness-change-log.md)
 
-> Purpose: mandatory shared context log for harness architecture changes.
+## 2026-09-11 (P1: M1-P15 → DONE)
 
----
+- **Category**: **P1 (§8 stamp)**. Maintainer: fixture-med unfit for training gold; `slot_named_ge2` 5/10 acceptable.
+- **Change**: docs closeout PRD v1.22; **no** harness code change. Deferred audit/rate/prefs open later. No git in this chat.
+
+## 2026-09-11 (P1: named-day enumerate + wearable CHB background)
+
+- **Category**: **P1 (chat evidence / FR-6.14)**.
+- **Change**: Time grain unions relative + calendar grammar point days (no single-winner); |D|≥2 enumerates into Manifest; `WEARABLE_90D_SUMMARY` stays last 90 days. Wearable turns mount `USER_CONTEXT_BRIEF` when supplement schema positive score meets threshold; projection is §Background only. build `pha-v2.3.46-named-days-chb-brief`.
+- **Evidence**: `pha_healthkit_ingest_selfcheck` grain cases; `pha_chb_compiler_selfcheck` projection + slot mount.
+- **Rollback**: revert to v2.3.45.
+
+## 2026-09-11 (P1: active energy / steps cross-source double-count)
+
+- **Category**: **P1 (daily rollup)**.
+- **Change**: `active_energy` per-source then max; drop `healthkit` daily when ≈ multi-device sum; Shortcut step multi-value without covering Sum → max. build `pha-v2.3.44-additive-max-source`.
+- **Evidence**: `pha_wearable_daily_aggregator_selfcheck` PASS; today card 355.6 kcal / 6963 steps.
+
+## 2026-09-11 (P1: population_commons + gold gate)
+
+- **Category**: **P1 (FR-6.10 / FR-6.12)**.
+- **Change**: Manifest commons domain; gold gate ≥2 brief items. build `pha-v2.3.45-p15-commons-gate`.
+- **Evidence**: `scripts/pha_fact_card_selfcheck.py`; `reports/p15_eval/runs_v244_commons_gold10.jsonl`.
+
+## 2026-09-11 (P1: ctx-min + drop % bait + think control)
+
+- **Category**: **P1 (FR-6.12)**.
+- **Change**: `slot_start` min; TASK item 3 drops 70–80%; brief schema hygiene; timeout 300. build `pha-v2.3.43-p15-ctxmin-think`.
+- **Evidence**: `scripts/pha_fact_card_selfcheck.py`; `reports/p15_eval/runs_v243_ctxmin_think_gold5.jsonl`.
+
+## 2026-09-11 (P1: CHB-path gold × 10 — still not DONE)
+
+- **Category**: **P1 (FR-6.12 acceptance)**.
+- **Evidence**: `brief_source=chb`×10; dual-named 0/10; hard Markdown 9/10; audit reject 7. **Do not** mark DONE.
+
+## 2026-09-11 (P1: CHB one-item rows + slot adjacency)
+
+- **Category**: **P1 (FR-6.12)**.
+- **Change**: copy/schema carry `item_seps`/`row_caps`; assemble brief next to assessment prompt; acceptance asserts `brief_source=chb`. build `pha-v2.3.42-p15-chb-itemrows`. P15 still IN_PROGRESS.
+- **Evidence**: `scripts/pha_fact_card_selfcheck.py`; `reports/p15_eval/run_p15_batch.py`.
+- **Rollback**: restore v2.3.41.
+
+## 2026-09-11 (P1: named-prose gold × 20 — still not DONE)
+
+- **Category**: **P1 (FR-6.12 acceptance)**.
+- **Evidence**: dual-named 0/20; Markdown 19/20; audit reject 6; prefs unchanged. **Do not** mark DONE.
+
+## 2026-09-11 (P1: named-prose slot wording + continuous prose)
+
+- **Category**: **P1 (FR-6.8 / FR-6.12)**.
+- **Change**: TASK items 4/5; lead aligned. build `pha-v2.3.41-p15-named-prose`. P15 still IN_PROGRESS.
+- **Evidence**: `scripts/pha_fact_card_selfcheck.py`.
+- **Rollback**: restore v2.3.40 TASK / lead.
+
+## 2026-09-11 (P1: gold × 20 — P15 still not DONE)
+
+- **Category**: **P1 (FR-6.12 acceptance)**.
+- **Evidence**: `qwen3:14b` × gold 20; dual-named 2/20; Markdown 17/20; prefs unchanged. **Do not** mark DONE.
+
+## 2026-09-11 (P1: disk-land v1.19 no-skip + weak causal)
+
+- **Class**: **P1 (FR-6.8 / FR-6.12 v1.19 · 3F §19)**.
+- **Change**: Runtime TASK / lead drop skip; fold into advice sentences; forbid definitive causal. **Do not** require a 注意事项 section. **Do not** add interpret to `USER_CONTEXT_BRIEF_PROFILES`.
+- **Evidence**: `scripts/pha_fact_card_selfcheck.py`.
+- **Rollback**: TASK / lead back to skip-when-unrelated.
 
 ## 2026-09-10 (P1: TASK slot contract — no invented numbers + brief present must not skip)
 
@@ -462,7 +524,7 @@
 ## 2026-06-24 (20× E2E battery fixes: weak episodic skip + warehouse focus lazy path)
 
 - **S13 weak follow-up skip-LLM** (catalog `advisory_followup` + `build_weak_episodic_followup_answer`):
-  - Screenshot-session `weak_followup` / `advisory_followup` turns: close polite wrap or Top-3 caution brief; forbid restating the whole table.
+  - Screenshot-session `weak_followup` / `advisory_followup` turns: close polite wrap or Top-3 caution brief; forbid refixture-medg the whole table.
   - `user_message_needs_wearable_session_reuse` includes `is_weak_episodic_followup` → reload session parse when not re-uploaded.
   - `chat_skip_llm` uses `wearable_compare_table_obj` as the main table; Arbiter weak close/advisory does not upgrade `combined_review`.
 - **S07 warehouse single-metric lazy path**:

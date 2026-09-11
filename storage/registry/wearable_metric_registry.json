@@ -1,7 +1,7 @@
 {
   "schema_version": "wearable_metric_registry_v1",
   "version": "2026.09.09",
-  "shortcut_pack_version": "2026.09.08.priority-1e",
+  "shortcut_pack_version": "2026.09.11.hrv-today",
   "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。捷径包版本见 shortcut_pack_version；zip 为最终真值。",
   "ingest_modules": [],
   "metrics": [
@@ -140,7 +140,7 @@
         "shortcut_stat": "Average",
         "shortcut_unit": "ms",
         "temporal": {
-          "kind": "overnight",
+          "kind": "accrual",
           "min_samples": 2
         },
         "display_fallback_metric_id": "hrv_rmssd_ms"
@@ -649,15 +649,13 @@
         "label_en": "Workout HR range"
       },
       "intent_hints": [
-        "锻炼",
-        "workout",
-        "运动",
-        "心率范围",
         "锻炼心率",
         "运动心率",
-        "work out",
-        "exercise",
-        "training"
+        "锻炼心率范围",
+        "心率范围",
+        "workout heart rate",
+        "workout hr range",
+        "exercise heart rate"
       ],
       "catalog": {
         "cluster": "workout",

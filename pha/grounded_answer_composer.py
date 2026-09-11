@@ -139,6 +139,31 @@ def _available_not_selected_ids(
     return out
 
 
+def _scope_from_fact_card_payload(
+    payload: dict[str, Any],
+    user_message: str,
+) -> list[str]:
+    """SSE scope = this turn's fact-card rows when a card exists; else infer."""
+    if isinstance(payload, dict) and payload:
+        ids = [str(x).strip() for x in (payload.get("enabled_metric_ids") or []) if str(x).strip()]
+        facts = payload.get("facts") if isinstance(payload.get("facts"), dict) else {}
+        if not ids:
+            sel = facts.get("selection") if isinstance(facts.get("selection"), dict) else {}
+            ids = [str(x).strip() for x in (sel.get("enabled_metric_ids") or []) if str(x).strip()]
+        if not ids:
+            metrics = facts.get("metrics") if isinstance(facts.get("metrics"), list) else []
+            ids = [
+                str(row.get("metric") or "").strip()
+                for row in metrics
+                if isinstance(row, dict) and str(row.get("metric") or "").strip()
+            ]
+        if ids:
+            return list(dict.fromkeys(ids))
+    from pha.intent_gates import infer_wearable_metric_ids
+
+    return list(infer_wearable_metric_ids(user_message))
+
+
 def build_fact_card_event(
     manifest: NumericsManifest | None,
     *,
@@ -151,11 +176,7 @@ def build_fact_card_event(
     if manifest is None or not manifest.entries:
         return None
     payload = fact_card_payload if isinstance(fact_card_payload, dict) else {}
-    scope = [str(x) for x in (payload.get("enabled_metric_ids") or []) if str(x).strip()]
-    if not scope:
-        from pha.intent_gates import infer_wearable_metric_ids
-
-        scope = list(infer_wearable_metric_ids(user_message))
+    scope = _scope_from_fact_card_payload(payload, user_message)
     from pha.goal_classifier import classify_goal, context_lookup_enabled
 
     lookup_on = context_lookup_enabled()
@@ -292,7 +313,11 @@ def fact_card_values_subset_of_manifest(
     fact_card: dict[str, Any],
     manifest: NumericsManifest,
 ) -> bool:
-    allowed = {(e.metric, e.anchor, float(e.value)) for e in manifest.entries}
+    allowed = {
+        (e.metric, e.anchor, float(e.value))
+        for e in manifest.entries
+        if e.value is not None
+    }
     for item in fact_card.get("items") or []:
         key = (
             str(item.get("metric") or ""),

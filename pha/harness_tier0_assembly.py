@@ -128,6 +128,7 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
         "priority": [
             "TASK",
             "USER_ASSESSMENT_PROMPT",
+            "USER_BACKGROUND_BRIEF",
             "FACT_CARD_CONTEXT",
             "NUMERICS_MANIFEST",
         ],
@@ -137,14 +138,17 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
             "USER_ASSESSMENT_PROMPT",
             "FACT_CARD_CONTEXT",
         },
-        "degradation_order": [],
+        "degradation_order": ["FACT_CARD_CONTEXT"],
         "supplement_start": "full",
-        "slot_floor": {"FACT_CARD_CONTEXT": "full"},
+        "slot_start": {"FACT_CARD_CONTEXT": "min"},
+        "slot_floor": {"FACT_CARD_CONTEXT": "min"},
+        "budget": 10000,
     },
     "wearable_daily_review": {
         "priority": [
             "TASK",
             "USER_ASSESSMENT_PROMPT",
+            "USER_BACKGROUND_BRIEF",
             "FACT_CARD_CONTEXT",
             "NUMERICS_MANIFEST",
         ],
@@ -154,9 +158,11 @@ _PROFILE_CONFIG: Dict[str, Dict[str, Any]] = {
             "USER_ASSESSMENT_PROMPT",
             "FACT_CARD_CONTEXT",
         },
-        "degradation_order": [],
+        "degradation_order": ["FACT_CARD_CONTEXT"],
         "supplement_start": "full",
-        "slot_floor": {"FACT_CARD_CONTEXT": "full"},
+        "slot_start": {"FACT_CARD_CONTEXT": "min"},
+        "slot_floor": {"FACT_CARD_CONTEXT": "min"},
+        "budget": 10000,
     },
 }
 
@@ -341,6 +347,7 @@ def _build_slot_assemblies(
     priority: List[str] = list(cfg["priority"])
     protected: Set[str] = set(cfg["protected"])
     supplement_start: TierLevel = cfg.get("supplement_start", "full")
+    slot_start: Dict[str, TierLevel] = dict(cfg.get("slot_start") or {})
 
     assemblies: List[_SlotAssembly] = []
     for slot_id in priority:
@@ -351,6 +358,8 @@ def _build_slot_assemblies(
             start = "full"
         elif slot_id == "SUPPLEMENT_BG":
             start: TierLevel = supplement_start if raw else "full"
+        elif slot_id in slot_start:
+            start = slot_start[slot_id]
         elif slot_id in protected:
             start = "full"
         else:
@@ -467,8 +476,8 @@ def assemble_tiered_supplemental_v2(
     budget: Optional[int] = None,
 ) -> Tuple[str, str, List[str], Dict[str, Any]]:
     """Budget-based Tier0 assembly with Protected SLA."""
-    cap = budget if budget is not None else PHA_HARNESS_TIER0_MAX_CHARS
     cfg = _PROFILE_CONFIG.get(_assembly_profile_key(plan), _PROFILE_CONFIG["lifestyle"])
+    cap = budget if budget is not None else int(cfg.get("budget") or PHA_HARNESS_TIER0_MAX_CHARS)
     degradation_order: List[str] = list(cfg.get("degradation_order") or [])
     slot_floor: Dict[str, TierLevel] = dict(cfg.get("slot_floor") or {})
 
@@ -521,9 +530,14 @@ def assemble_tiered_supplemental_v2(
     if len(tier0) > cap:
         errors.append("tier0_budget_exceeded")
 
-    # Tier1 unchanged + optional supplement overflow
+    # Tier1 unchanged + optional supplement overflow.
+    # Slots already joined via profile priority (e.g. USER_BACKGROUND_BRIEF
+    # next to USER_ASSESSMENT_PROMPT) must not be duplicated here.
+    priority_ids = {a.slot_id for a in assemblies}
     t1_parts: List[str] = []
     for slot in plan.slots_tier1:
+        if slot in priority_ids:
+            continue
         body = (slot_contents.get(slot) or "").strip()
         if body:
             t1_parts.append(body)

@@ -951,6 +951,13 @@ def load_fact_card(
         card["interpretation"] = load_interpretation_for_user(uid, card=card)
     except Exception:
         card["interpretation"] = None
+    try:
+        from pha.loop_weekly import attach_loop_approvals_to_fact_card
+
+        loc = locale or load_fact_card_locale(uid)
+        attach_loop_approvals_to_fact_card(card, locale=loc)
+    except Exception:
+        card["loop_approvals"] = {"pending_n": 0, "pending": []}
     return card
 
 

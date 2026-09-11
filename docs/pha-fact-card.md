@@ -22,7 +22,7 @@ python scripts/pha_fact_card.py          # 打印当前用户 default 的卡
 | 层 | 字段 | 含义 |
 |----|------|------|
 | 数字 | `facts.as_of` / `facts.stale` / `facts.metrics` | `as_of = MAX(day)`；每行按注册表 `temporal` 取值并写实际 `day` / `freshness` / `partial_day`，**不把非当日值标成当日** |
-| 时效 | `metrics[].freshness` / `partial_day` / `as_of_time` | `accrual` 当日进行中不分档；`daily_lagged` / `overnight` 在 `freshness_days` 内回看（一夜指标默认 2 天，务实近似，未改 zip 归醒来日）；`latest` 回看最近一次（VO2max 90 天）不计覆盖率。**M1-P10 / P12 已落地** |
+| 时效 | `metrics[].freshness` / `partial_day` / `as_of_time` | `accrual` 当日进行中不分档（**HRV 已改为 accrual**：与健康 App 今日均值对齐，不回看昨夜）；`daily_lagged` / `overnight` 在 `freshness_days` 内回看（一夜指标默认 2 天，务实近似，未改 zip 归醒来日）；`latest` 回看最近一次（VO2max 90 天）不计覆盖率。**M1-P10 / P12 已落地** |
 | 选择 | `facts.selection.enabled_metric_ids` | 用户已选；允许集来自注册表，不是 Python 列表 |
 | 评估 | `assessment.advice` | 相对 **递进个人基线**（90 日 → 365 日 → 全历史，取第一个 n ≥ 7 的窗口；JSON 写 `baseline_window` / `baseline_n`）的规则分档 + **固定模板**；三级窗口皆 n&lt;7 才写「历史不足 n/7」。**M1-P7 已落地** |
 | 参考 | `assessment` 内每项 `metrics[].reference` | 注册表 `fact_card.reference_range` 有值的已选指标，各一句 `【参考标准】…（来源：…，请自行查证，非医疗建议）` + 范围内/外。HRV 绝对值不给人群范围。**M1-P7 已落地**（睡眠总时长 / RHR / 步数；深睡/REM 占比 TODO） |

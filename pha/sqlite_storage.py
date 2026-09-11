@@ -930,6 +930,59 @@ def replace_healthkit_sleep_segments_for_day(
         _release_connection(conn)
 
 
+def rebucket_zip_sleep_segments_to_wake_days(user_id: str) -> dict[str, int]:
+    """Re-key non-HealthKit sleep segments from start-date to noon-window wake day.
+
+    Returns ``{scanned, updated, wake_days}``. Call after zip import (and once for
+    legacy rows) before ``rebuild_daily_sleep_from_segments``.
+    """
+    from pha.sleep_wake_day import as_naive_local, wake_day_for_segment
+
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = open_connection(bulk_import=True)
+    try:
+        cur = conn.execute(
+            """
+            SELECT id, day, start_time, end_time
+            FROM wearable_sleep_segments
+            WHERE user_id = ? AND sample_id NOT LIKE 'healthkit|%'
+            """,
+            (uid,),
+        )
+        updates: list[tuple[str, int]] = []
+        wake_days: set[str] = set()
+        scanned = 0
+        for row in cur.fetchall():
+            scanned += 1
+            start = safe_parse_datetime(str(row["start_time"] or ""))
+            end = safe_parse_datetime(str(row["end_time"] or ""))
+            if start is None or end is None:
+                continue
+            start_n = as_naive_local(start)
+            end_n = as_naive_local(end)
+            if end_n <= start_n:
+                continue
+            wake = wake_day_for_segment(start_n, end_n)
+            wake_s = wake.isoformat()
+            wake_days.add(wake_s)
+            if str(row["day"] or "") != wake_s:
+                updates.append((wake_s, int(row["id"])))
+        if updates:
+            conn.executemany(
+                "UPDATE wearable_sleep_segments SET day = ? WHERE id = ?",
+                updates,
+            )
+            conn.commit()
+        return {
+            "scanned": scanned,
+            "updated": len(updates),
+            "wake_days": len(wake_days),
+        }
+    finally:
+        _release_connection(conn)
+
+
 def query_sleep_segments_for_day(user_id: str, day: date) -> List[dict]:
     init_schema()
     uid = user_id.strip() or "default"

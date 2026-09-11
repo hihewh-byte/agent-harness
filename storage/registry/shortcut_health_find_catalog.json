@@ -49,7 +49,7 @@
       "hk_identifier": "HKQuantityTypeIdentifierHeartRateVariabilitySDNN",
       "status": "device_verified",
       "verified_on": "2026-09-07",
-      "notes": "POST ingest_key=hrv_sdnn，禁止 warehouse 遗留 hrv/RMSSD。"
+      "notes": "POST ingest_key=hrv_sdnn。Find = Start Date is today + Average（对齐健康 App 今日均值）。禁止 warehouse 遗留 hrv/RMSSD。"
     },
     {
       "metric_id": "resting_heart_rate_bpm",

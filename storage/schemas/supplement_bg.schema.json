@@ -53,6 +53,14 @@
       {"token": "有没有"},
       {"token": "请列出"},
       {"token": "请结合库内"},
+      {"token": "请分析"},
+      {"token": "请核实"},
+      {"token": "请核对"},
+      {"token": "请再次"},
+      {"token": "是否正常"},
+      {"token": "是否合理"},
+      {"token": "进行建议"},
+      {"token": "给出建议"},
       {"token": "？"},
       {"token": "?"},
       {"token": "what medications"},
@@ -117,5 +125,23 @@
   },
   "manifest": {
     "domain": null
+  },
+  "background_brief": {
+    "item_seps": [" + ", "、", "/", ") ", "） "],
+    "note_caps": {
+      "supplement": 6,
+      "medication": 4,
+      "sleep_lifestyle": 3,
+      "symptom": 3,
+      "general": 2
+    },
+    "row_caps": {
+      "supplement": 20,
+      "medication": 6,
+      "sleep_lifestyle": 4,
+      "symptom": 4,
+      "general": 2
+    },
+    "table_headers": ["时间", "项目", "具体内容", "核心逻辑"]
   }
 }

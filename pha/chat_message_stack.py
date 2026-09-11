@@ -130,13 +130,29 @@ def _cap_system_tiered(
     soul_with_anchor: str,
     tier0_supplemental: str,
     tier1_supplemental: str,
+    protect_tier0: bool = False,
 ) -> str:
-    """Tier0 (LDL/补剂/Task) kept; Tier1 (卷宗/召回) truncated first."""
+    """Tier0 (LDL/补剂/Task) kept; Tier1 (卷宗/召回) truncated first.
+
+    When ``protect_tier0`` (fact-card profiles), never tail-cut soul+Tier0.
+    Drop or trim Tier1 only. Overflow is reported by the caller.
+    """
     core = soul_with_anchor.strip()
     t0 = (tier0_supplemental or "").strip()
     t1 = (tier1_supplemental or "").strip()
     if t0:
         core = f"{core}\n\n---\n\n{t0}"
+    if protect_tier0:
+        if not t1:
+            return core
+        combined = f"{core}\n\n---\n\n{t1}"
+        if len(combined) <= SYSTEM_CONTENT_MAX_CHARS:
+            return combined
+        budget = SYSTEM_CONTENT_MAX_CHARS - len(core) - 40
+        if budget > 400:
+            t1_trim = t1[:budget] + "\n…（Tier1 卷宗/召回已截断）"
+            return f"{core}\n\n---\n\n{t1_trim}"
+        return core
     if not t1:
         return _cap_system_content(core)
     combined = f"{core}\n\n---\n\n{t1}"

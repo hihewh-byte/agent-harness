@@ -98,7 +98,10 @@ def test_o2_emphasis_readiness() -> None:
     _assert(classify_outline_mode(prompt) == "emphasis", classify_outline_mode(prompt))
     task = fact_card_interpret_task_text("en", outline_mode="emphasis")
     _assert("same paragraph" in task and "topical" in task, task)
+    _assert("Sentence 1 = overall" in task, task)
     _assert("did not name" not in task, task)
+    exclusive = fact_card_interpret_task_text("en", outline_mode="exclusive")
+    _assert("Sentence 1 = overall" not in exclusive, exclusive)
     print("PASS O2 daily_readiness + emphasis")
 
 

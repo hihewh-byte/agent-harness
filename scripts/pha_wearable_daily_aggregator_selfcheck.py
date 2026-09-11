@@ -107,7 +107,9 @@ def test_build_summary_sleep_only_preserves_metrics() -> bool:
 
 
 def test_build_matches_legacy_metric_resolution() -> bool:
-    """Offline parity: extracted aggregator vs inlined pre-P1-2 resolution."""
+    """Offline parity: steps/energy are max-by-source (not cross-source sum)."""
+    from pha.wearable_daily_aggregator import resolve_additive_by_source
+
     agg = WearableDayMetricAgg()
     samples = [
         ("steps", 500.0, "x|watch"),
@@ -115,8 +117,9 @@ def test_build_matches_legacy_metric_resolution() -> bool:
         ("steps", 600.0, "y|phone"),
         ("rhr", 58.0, "a"),
         ("hrv", 33.0, "b"),
-        ("active_energy", 12.5, "c"),
-        ("active_energy", 7.5, "d"),
+        ("active_energy", 12.5, "z|watch"),
+        ("active_energy", 7.5, "z|phone"),
+        ("active_energy", 30.0, "z|healthkit"),
         ("spo2", 98.0, "e"),
         ("respiratory_rate", 14.0, "f"),
         ("vo2max", 42.0, "g"),
@@ -126,13 +129,16 @@ def test_build_matches_legacy_metric_resolution() -> bool:
         accumulate_wearable_sample(mt, val, sid, agg)
 
     resolved = resolve_daily_metrics(agg)
-    steps = max(agg.steps_by_source.values()) if agg.steps_by_source else None
+    expected_steps = resolve_additive_by_source(
+        {key: float(val) for key, val in agg.steps_by_source.items()}
+    )
+    expected_kcal = resolve_additive_by_source(agg.active_energy_by_source)
     legacy = {
-        "steps": steps,
+        "steps": int(round(expected_steps)) if expected_steps is not None else None,
         "resting_heart_rate_bpm": agg.rhr_sum / agg.rhr_n,
         "hrv_rmssd_ms": None,
         "hrv_sdnn_ms": agg.hrv_sdnn_sum / agg.hrv_sdnn_n,
-        "active_energy_kcal": agg.active_energy_sum,
+        "active_energy_kcal": expected_kcal,
         "spo2_pct": agg.spo2_sum / agg.spo2_n,
         "respiratory_rate_bpm": agg.respiratory_sum / agg.respiratory_n,
         "vo2max_ml_kg_min": agg.vo2max_sum / agg.vo2max_n,
@@ -141,11 +147,175 @@ def test_build_matches_legacy_metric_resolution() -> bool:
     if resolved != legacy:
         print("FAIL legacy metric resolution", resolved, legacy)
         return False
+    # watch steps 1200 > phone 600; energy max(watch 12.5, phone 7.5, hk 30) = 30
     row = build_wearable_daily_summary("default", date(2026, 6, 9), metrics=agg)
-    if row.steps != 1200 or row.active_energy_kcal != 20.0:
+    if row.steps != 1200 or abs(float(row.active_energy_kcal or 0) - 30.0) > 1e-6:
         print("FAIL build_wearable_daily_summary metrics", row.steps, row.active_energy_kcal)
         return False
+    # Undeduped healthkit ≈ watch+phone steps → drop hk, keep max device
+    agg2 = WearableDayMetricAgg()
+    for mt, val, sid in (
+        ("steps", 6862.0, "x|Watch"),
+        ("steps", 5792.0, "y|iPhone"),
+        ("steps", 12812.0, "z|healthkit"),
+        ("active_energy", 343.7, "x|Watch"),
+        ("active_energy", 355.6, "z|healthkit"),
+    ):
+        accumulate_wearable_sample(mt, val, sid, agg2)
+    got = resolve_daily_metrics(agg2)
+    if got["steps"] != 6862:
+        print("FAIL drop undeduped healthkit steps", got["steps"])
+        return False
+    if abs(float(got["active_energy_kcal"] or 0) - 355.6) > 1e-6:
+        print("FAIL energy max(watch, hk)", got["active_energy_kcal"])
+        return False
     print("OK legacy metric resolution parity")
+    return True
+
+
+def test_wake_day_for_overnight_segment() -> bool:
+    from pha.sleep_wake_day import wake_day_for_segment
+
+    # Pre-midnight Core on Sep 10 belongs to wake day Sep 11
+    d = wake_day_for_segment(
+        datetime(2026, 9, 10, 23, 26, 0),
+        datetime(2026, 9, 10, 23, 49, 0),
+    )
+    if d != date(2026, 9, 11):
+        print("FAIL overnight pre-midnight wake day", d)
+        return False
+    d2 = wake_day_for_segment(
+        datetime(2026, 9, 11, 0, 26, 0),
+        datetime(2026, 9, 11, 0, 37, 0),
+    )
+    if d2 != date(2026, 9, 11):
+        print("FAIL post-midnight wake day", d2)
+        return False
+    d3 = wake_day_for_segment(
+        datetime(2026, 9, 10, 7, 50, 0),
+        datetime(2026, 9, 10, 7, 51, 0),
+    )
+    if d3 != date(2026, 9, 10):
+        print("FAIL morning wake day", d3)
+        return False
+    print("OK wake_day_for_segment overnight")
+    return True
+
+
+def test_zip_only_emits_core_via_t2_fields() -> bool:
+    """Zip HKCategory rows alone must populate core (same T2 path as HealthKit)."""
+    day = date(2026, 9, 10)
+    zip_rows = [
+        {
+            "start_time": "2026-09-10T00:34:20+08:00",
+            "end_time": "2026-09-10T05:00:00+08:00",
+            "source_name": "Watch",
+            "sample_id": (
+                "HKCategoryTypeIdentifierSleepAnalysis|a|b|"
+                "HKCategoryValueSleepAnalysisAsleepCore|Watch"
+            ),
+            "is_awake": 0,
+        },
+        {
+            "start_time": "2026-09-10T05:00:00+08:00",
+            "end_time": "2026-09-10T06:00:00+08:00",
+            "source_name": "Watch",
+            "sample_id": (
+                "HKCategoryTypeIdentifierSleepAnalysis|c|d|"
+                "HKCategoryValueSleepAnalysisAsleepDeep|Watch"
+            ),
+            "is_awake": 0,
+        },
+    ]
+    row = build_wearable_daily_summary(
+        "default",
+        day,
+        segment_rows=zip_rows,
+        sleep_only=True,
+    )
+    expected_core = (5 * 3600 - (34 * 60 + 20)) / 3600.0
+    if row.sleep_core_hours is None or abs(float(row.sleep_core_hours) - expected_core) > 0.02:
+        print("FAIL zip-only core", row.sleep_core_hours, "expected", expected_core)
+        return False
+    if row.sleep_deep_hours is None or abs(float(row.sleep_deep_hours) - 1.0) > 0.01:
+        print("FAIL zip-only deep", row.sleep_deep_hours)
+        return False
+    print("OK zip-only emits core via T2 fields")
+    return True
+
+
+def test_mixed_segments_prefer_healthkit() -> bool:
+    """When zip and HealthKit coexist, daily sleep must follow healthkit| (Health app)."""
+    day = date(2026, 9, 11)
+    # Incomplete zip: missing pre-midnight deep (~37m) — mirrors real 2026-09-11 dual-source night.
+    zip_rows = [
+        {
+            "start_time": "2026-09-11T00:26:08+08:00",
+            "end_time": "2026-09-11T00:37:10+08:00",
+            "source_name": "Wind’s Apple Watch",
+            "sample_id": (
+                "HKCategoryTypeIdentifierSleepAnalysis|a|b|"
+                "HKCategoryValueSleepAnalysisAsleepCore|Wind’s Apple Watch"
+            ),
+            "is_awake": 0,
+        },
+        {
+            "start_time": "2026-09-11T06:05:00+08:00",
+            "end_time": "2026-09-11T06:23:00+08:00",
+            "source_name": "Wind’s Apple Watch",
+            "sample_id": (
+                "HKCategoryTypeIdentifierSleepAnalysis|c|d|"
+                "HKCategoryValueSleepAnalysisAsleepDeep|Wind’s Apple Watch"
+            ),
+            "is_awake": 0,
+        },
+    ]
+    hk_rows = [
+        {
+            "start_time": "2026-09-10T23:26:00",
+            "end_time": "2026-09-10T23:49:00",
+            "source_name": "healthkit",
+            "sample_id": "healthkit|default|sleep_core|2026-09-10T23:26:00|2026-09-10T23:49:00|healthkit",
+            "is_awake": 0,
+        },
+        {
+            "start_time": "2026-09-10T23:49:00",
+            "end_time": "2026-09-11T00:26:00",
+            "source_name": "healthkit",
+            "sample_id": "healthkit|default|sleep_deep|2026-09-10T23:49:00|2026-09-11T00:26:00|healthkit",
+            "is_awake": 0,
+        },
+        {
+            "start_time": "2026-09-11T00:26:00",
+            "end_time": "2026-09-11T00:37:00",
+            "source_name": "healthkit",
+            "sample_id": "healthkit|default|sleep_core|2026-09-11T00:26:00|2026-09-11T00:37:00|healthkit",
+            "is_awake": 0,
+        },
+        {
+            "start_time": "2026-09-11T06:05:00",
+            "end_time": "2026-09-11T06:23:00",
+            "source_name": "healthkit",
+            "sample_id": "healthkit|default|sleep_deep|2026-09-11T06:05:00|2026-09-11T06:23:00|healthkit",
+            "is_awake": 0,
+        },
+    ]
+    row = build_wearable_daily_summary(
+        "default",
+        day,
+        segment_rows=zip_rows + hk_rows,
+        sleep_only=True,
+    )
+    deep = float(row.sleep_deep_hours or 0.0)
+    core = float(row.sleep_core_hours or 0.0)
+    # healthkit deep = 37m + 18m = 0.917h; zip-only deep would be 0.3h
+    if abs(deep - (37 + 18) / 60.0) > 0.02:
+        print("FAIL mixed prefer healthkit deep", row.sleep_deep_hours)
+        return False
+    if abs(core - (23 + 11) / 60.0) > 0.02:
+        print("FAIL mixed prefer healthkit core", row.sleep_core_hours)
+        return False
+    print("OK mixed segments prefer healthkit|")
     return True
 
 
@@ -174,6 +344,9 @@ def main() -> int:
             test_sleep_segment_roundtrip(),
             test_build_summary_sleep_only_preserves_metrics(),
             test_build_matches_legacy_metric_resolution(),
+            test_wake_day_for_overnight_segment(),
+            test_zip_only_emits_core_via_t2_fields(),
+            test_mixed_segments_prefer_healthkit(),
             test_sleep_hours_scalar_fallback(),
         ],
     )

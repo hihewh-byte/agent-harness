@@ -1,10 +1,68 @@
-# Harness Change Log
+## 2026-09-11 (P1：M1-P15 → DONE)
 
-> **Language / 语言**：[English](harness-change-log.en.md) · 中文（本文）
+- **类别**：**P1（§8 盖章）**。维护者：药物项A不作训练黄金句；`slot_named_ge2` 5/10 可接受。
+- **改动**：文档收口 PRD v1.22；**不**改 harness 代码。遗留审计/频率/prefs 另开。本对话不 git。
 
-> Purpose: mandatory shared context log for harness architecture changes.
+## 2026-09-11 (P1：点日集合枚举 + wearable CHB background)
 
----
+- **类别**：**P1（对话取数 / FR-6.14）**。
+- **改动**：时间粒度收齐相对锚与日历文法点日，不再单赢家；≥2 日按日枚举进 Manifest；`WEARABLE_90D_SUMMARY` 固定近 90 日。穿戴轮在 supplement schema 正分达标时挂 `USER_CONTEXT_BRIEF`，投影仅 §Background。build `pha-v2.3.46-named-days-chb-brief`。
+- **证据**：`pha_healthkit_ingest_selfcheck` 时间粒度；`pha_chb_compiler_selfcheck` 投影与挂槽。
+- **回滚**：回 v2.3.45。
+
+## 2026-09-11 (P1：活动消耗/步数跨源双计)
+
+- **类别**：**P1（日聚合）**。
+- **改动**：`active_energy` 按源 max；丢弃 ≈多设备之和的 `healthkit` 日总量；捷径步数多值无覆盖 Sum 时改 max。build `pha-v2.3.44-additive-max-source`。
+- **证据**：`pha_wearable_daily_aggregator_selfcheck` PASS；今日卡 355.6 kcal / 6963 步。
+
+## 2026-09-11 (P1：population_commons + 黄金句门槛)
+
+- **类别**：**P1（FR-6.10 / FR-6.12）**。
+- **改动**：Manifest commons 域；黄金句 ≥2 槽内项。build `pha-v2.3.45-p15-commons-gate`。
+- **证据**：`scripts/pha_fact_card_selfcheck.py`；`reports/p15_eval/runs_v244_commons_gold10.jsonl`。
+
+## 2026-09-11 (P1：ctx-min + 去 % 诱饵 + think 对照)
+
+- **类别**：**P1（FR-6.12）**。
+- **改动**：`slot_start` min；TASK 第 3 条去 70–80%；brief schema 卫生；timeout 300。build `pha-v2.3.43-p15-ctxmin-think`。
+- **证据**：`scripts/pha_fact_card_selfcheck.py`；`reports/p15_eval/runs_v243_ctxmin_think_gold5.jsonl`。
+
+## 2026-09-11 (P1：CHB 路径黄金句 ×10 未过)
+
+- **类别**：**P1（FR-6.12 验收）**。
+- **证据**：`brief_source=chb`×10；双点名 0/10；硬 Markdown 9/10；审计拒 7。**不**标 DONE。
+
+## 2026-09-11 (P1：CHB 一项一行 + 槽位邻接)
+
+- **类别**：**P1（FR-6.12）**。
+- **改动**：copy/schema 承载 `item_seps`/`row_caps`；装配顺序 brief 邻接评估要求；验收断言 `brief_source=chb`。build `pha-v2.3.42-p15-chb-itemrows`。P15 仍 IN_PROGRESS。
+- **证据**：`scripts/pha_fact_card_selfcheck.py`；`reports/p15_eval/run_p15_batch.py`。
+- **回滚**：回 v2.3.41。
+
+## 2026-09-11 (P1：named-prose 黄金句 20 未过)
+
+- **类别**：**P1（FR-6.12 验收）**。
+- **证据**：双点名 0/20；Markdown 19/20；审计拒 6；prefs 未变。**不**标 DONE。
+
+## 2026-09-11 (P1：named-prose 槽内字面 + 连续散文)
+
+- **类别**：**P1（FR-6.8 / FR-6.12）**。
+- **改动**：TASK 第 4/5 条；导语同步。build `pha-v2.3.41-p15-named-prose`。P15 仍 IN_PROGRESS。
+- **证据**：`scripts/pha_fact_card_selfcheck.py`。
+- **回滚**：回 v2.3.40 TASK / lead。
+
+## 2026-09-11 (P1：黄金句 20 轮未过 P15)
+
+- **类别**：**P1（FR-6.12 验收）**。
+- **证据**：`qwen3:14b` × 黄金句 20；双点名 2/20；Markdown 17/20；prefs 未变。**不**标 DONE。
+
+## 2026-09-11 (P1：磁盘兑现 v1.19 去 skip + 弱因果)
+
+- **类别**：**P1（FR-6.8 / FR-6.12 v1.19 · 3F §19）**。
+- **改动**：运行时 TASK / 导语去掉 skip；写入建议句；禁强因果。**不**强制注意事项专段。**不加** interpret 到 `USER_CONTEXT_BRIEF_PROFILES`。
+- **证据**：`scripts/pha_fact_card_selfcheck.py`。
+- **回滚**：TASK / lead 回 skip-when-unrelated。
 
 ## 2026-09-10 (P1：脉络丢指标字段残行)
 

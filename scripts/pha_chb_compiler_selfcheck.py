@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -143,7 +144,13 @@ def test_interpretation_mock_llm_advisory_only() -> None:
 def test_user_context_brief_profiles() -> None:
     _assert("lifestyle" in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
     _assert("combined_review" in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
+    _assert("wearable_only" in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
     _assert("attachment_grounded_review" not in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
+    _assert("fact_card_interpret" not in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
+    from pha.chb_compiler import user_context_brief_sections
+
+    _assert(user_context_brief_sections("wearable_only") == ("background",), user_context_brief_sections("wearable_only"))
+    _assert("facts" in user_context_brief_sections("lifestyle"), user_context_brief_sections("lifestyle"))
 
 
 def test_user_context_brief_block_from_artifact() -> None:
@@ -162,6 +169,21 @@ def test_user_context_brief_empty_without_artifact() -> None:
     with tempfile.TemporaryDirectory() as td:
         block = build_user_context_brief_block("no_such_user", profile="lifestyle", report_root=Path(td))
         _assert(block == "", f"expected empty block, got: {block!r}")
+
+
+def test_wearable_supplement_brief_mount() -> None:
+    from pha.harness_plan import build_turn_evidence_plan
+
+    plain = build_turn_evidence_plan("我最近的 HRV 怎么样？")
+    _assert(plain.profile == "wearable_only", plain.profile)
+    _assert("USER_CONTEXT_BRIEF" not in plain.slots_tier1, plain.slots_tier1)
+    mixed = build_turn_evidence_plan(
+        "今天是9月11号，昨天是9月10号，请对比我的这两天的HRV，"
+        "同时请说出我正在服用的哪些补剂是对HRV有改善作用的。"
+    )
+    _assert(mixed.profile == "wearable_only", mixed.profile)
+    _assert("USER_CONTEXT_BRIEF" in mixed.slots_tier1, mixed.slots_tier1)
+    _assert("SUPPLEMENT_BG" not in mixed.slots_tier0 + mixed.slots_tier1, mixed)
 
 
 def test_user_context_brief_forbidden_on_grounded() -> None:
@@ -238,6 +260,179 @@ def test_recompile_if_stale_dry_run_and_write() -> None:
         _assert(status2["artifact_count"] >= 1, status2)
 
 
+def test_p15_background_lineage_projection_autocompile() -> None:
+    """M1-P15: §Background, combo stale, interpret projection, lineage freq, same-day once."""
+    import pha.sqlite_connection as sc
+    import pha.sqlite_storage as st
+    from datetime import datetime, timezone
+
+    from pha.chat_background import init_background_schema
+    from pha.chat_storage import init_chat_schema
+    from pha.chb_compiler import (
+        assemble_lineage_section,
+        maybe_autocompile_chb,
+        project_chb_for_fact_card_interpret,
+    )
+    from pha.fact_card_background_brief import build_fact_card_background_brief
+    from pha.numerics_manifest import leftover_s_level_numeric_tokens
+
+    tmp = Path(tempfile.mkdtemp(prefix="pha-p15-"))
+    db = tmp / "pha_storage.db"
+    report_root = tmp / "chb"
+    interpret_root = tmp / "interpret"
+    interpret_root.mkdir()
+    old_db = st.DEFAULT_DB_PATH
+    old_interp = os.environ.get("PHA_FACT_CARD_INTERPRET_DIR")
+    old_chb = os.environ.get("PHA_CHB_REPORT_ROOT")
+    old_auto = os.environ.get("PHA_CHB_AUTOCOMPILE")
+    os.environ["PHA_FACT_CARD_INTERPRET_DIR"] = str(interpret_root)
+    os.environ["PHA_CHB_REPORT_ROOT"] = str(report_root)
+    os.environ["PHA_CHB_AUTOCOMPILE"] = "1"
+    st.DEFAULT_DB_PATH = db
+    old_tls = getattr(sc._thread_local, "conn", None)
+    if old_tls is not None:
+        try:
+            old_tls.close()
+        except Exception:
+            pass
+    sc.reset_schema_state_for_tests()
+    st.init_schema()
+    init_chat_schema()
+    init_background_schema()
+    uid = "selfcheck-p15"
+
+    def _restore() -> None:
+        st.DEFAULT_DB_PATH = old_db
+        if old_interp is None:
+            os.environ.pop("PHA_FACT_CARD_INTERPRET_DIR", None)
+        else:
+            os.environ["PHA_FACT_CARD_INTERPRET_DIR"] = old_interp
+        if old_chb is None:
+            os.environ.pop("PHA_CHB_REPORT_ROOT", None)
+        else:
+            os.environ["PHA_CHB_REPORT_ROOT"] = old_chb
+        if old_auto is None:
+            os.environ.pop("PHA_CHB_AUTOCOMPILE", None)
+        else:
+            os.environ["PHA_CHB_AUTOCOMPILE"] = old_auto
+        sc.reset_schema_state_for_tests()
+
+    def _insert(content: str, category: str = "supplement") -> None:
+        conn = st._connect()
+        try:
+            conn.execute(
+                "INSERT INTO user_health_background_notes "
+                "(user_id, note_date, category, content) VALUES (?, ?, ?, ?)",
+                (uid, "2026-09-05", category, content),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    try:
+        _insert("每晚补剂项B 400mg，我在吃药物项A类")
+        live_text, live_meta = build_fact_card_background_brief(
+            uid, locale="zh-CN", prefer_chb=True
+        )
+        _assert(live_meta.get("brief_source") == "live_notes", live_meta)
+        _assert("药物项A" in live_text, live_text)
+        _assert("400" not in live_text, live_text)
+
+        brief = compile_chronic_health_brief(uid)
+        _assert("§Background" in brief.background_markdown, brief.background_markdown)
+        leftover = leftover_s_level_numeric_tokens(brief.background_markdown)
+        _assert(not leftover, leftover)
+        _assert("§Facts" not in (brief.background_markdown or ""), brief.background_markdown)
+        proj = project_chb_for_fact_card_interpret(brief)
+        _assert("§Facts" not in proj, proj)
+        _assert("药物项A" in proj, proj)
+        _assert("无关则忽略" not in proj, proj)
+        _assert("本槽在场" in proj, proj)
+        _assert(brief.background_rows, brief)
+        for stmt in brief.background_rows:
+            _assert(stmt.get("prov_type") == "user_statement", stmt)
+            _assert("value" not in stmt and "unit" not in stmt and "metric_id" not in stmt, stmt)
+            leftover_row = leftover_s_level_numeric_tokens(str(stmt.get("text") or ""))
+            _assert(not leftover_row, leftover_row)
+        _assert("400" not in json.dumps(brief.background_rows, ensure_ascii=False), brief.background_rows)
+        lifestyle = build_user_context_brief_block(uid, profile="lifestyle")
+        write_chb_artifact(brief, report_root=report_root)
+        lifestyle = build_user_context_brief_block(
+            uid, profile="lifestyle", report_root=report_root
+        )
+        _assert("§Facts" in lifestyle, lifestyle)
+        _assert("§Background" in lifestyle, lifestyle)
+        _assert("药物项A" in lifestyle, lifestyle)
+        wearable_brief = build_user_context_brief_block(
+            uid, profile="wearable_only", report_root=report_root
+        )
+        _assert("§Facts" not in wearable_brief, wearable_brief)
+        _assert("§Background" in wearable_brief, wearable_brief)
+        _assert("药物项A" in wearable_brief, wearable_brief)
+        _assert("无关则忽略" not in lifestyle, lifestyle)
+        _assert("fact_card_interpret" not in USER_CONTEXT_BRIEF_PROFILES, USER_CONTEXT_BRIEF_PROFILES)
+        interp_proj = project_chb_for_fact_card_interpret(
+            load_latest_chb_artifact(uid, report_root=report_root)  # type: ignore[arg-type]
+        )
+        _assert("§Facts" not in interp_proj, interp_proj)
+
+        status = chb_stale_status(uid, report_root=report_root)
+        _assert(not status["is_stale"], status)
+        chb_text, chb_meta = build_fact_card_background_brief(
+            uid, locale="zh-CN", prefer_chb=True
+        )
+        _assert(chb_meta.get("brief_source") == "chb", chb_meta)
+        _assert("药物项A" in chb_text, chb_text)
+
+        _insert("最近睡眠都偏晚而且容易醒")
+        status = chb_stale_status(uid, report_root=report_root)
+        _assert(status["is_stale"], status)
+        status, path = recompile_chb_if_stale(uid, report_root=report_root)
+        _assert(path is not None and path.is_file(), path)
+        _assert(not status["is_stale"], status)
+
+        now = datetime.now(timezone.utc).isoformat()
+        repeated = "力量训练当天建议偏轻松安排，注意恢复。"
+        once = "这句注意事项只出现一次所以不进脉络。"
+        other = "完全不同的第三句注意事项足够长。"
+        table = "今日值：32.6 ms。百分位：15.2 pct。近12个月均值：32.3。"
+        for name, text in (
+            ("a", repeated + once),
+            ("b", repeated),
+            ("c", other),
+            ("d", table),
+            ("e", table),
+        ):
+            (interpret_root / f"{name}.json").write_text(
+                json.dumps(
+                    {
+                        "status": "done",
+                        "user_id": uid,
+                        "generated_at": now,
+                        "numerics_audit": {"passed": True},
+                        "text": text,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+        lin_md, _digest = assemble_lineage_section(
+            uid, interpret_root=interpret_root, locale="zh-CN"
+        )
+        _assert("偏轻松" in lin_md, lin_md)
+        _assert("只出现一次" not in lin_md, lin_md)
+        _assert("今日值" not in lin_md, lin_md)
+        _assert("百分位" not in lin_md, lin_md)
+        _assert("均值" not in lin_md, lin_md)
+
+        first = maybe_autocompile_chb(uid, report_root=report_root, now=date(2026, 9, 10))
+        second = maybe_autocompile_chb(uid, report_root=report_root, now=date(2026, 9, 10))
+        _assert(second.get("skipped") == "same_day", (first, second))
+    finally:
+        _restore()
+
+
 def main() -> int:
     test_facts_section_has_refs()
     print("PASS §Facts ref markers")
@@ -261,13 +456,17 @@ def main() -> int:
     print("PASS USER_CONTEXT_BRIEF empty without artifact")
     test_user_context_brief_forbidden_on_grounded()
     print("PASS USER_CONTEXT_BRIEF forbidden on grounded")
+    test_wearable_supplement_brief_mount()
+    print("PASS wearable_only mounts USER_CONTEXT_BRIEF on schema positive score")
     test_write_artifact()
     print("PASS write artifact")
     test_chb_stale_detection()
     print("PASS CHB stale detection (4-β-2c)")
     test_recompile_if_stale_dry_run_and_write()
     print("PASS recompile_if_stale dry-run + write")
-    print("OK pha_chb_compiler_selfcheck (Stage 4-β-2a/b/c)")
+    test_p15_background_lineage_projection_autocompile()
+    print("PASS P15 background + lineage + projection + same-day compile")
+    print("OK pha_chb_compiler_selfcheck (Stage 4-β-2a/b/c + M1-P15)")
     return 0
 
 

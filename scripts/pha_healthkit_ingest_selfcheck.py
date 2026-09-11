@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import plistlib
 import sys
 import tempfile
 from datetime import date, datetime, time, timedelta
@@ -1043,6 +1044,25 @@ def test_time_grain_binds_time_anchor_slots() -> bool:
             print("FAIL time grain", msg, grain)
             return False
     print("OK time-anchor slots bind wearable window (not catalog aliases)")
+    eleven = date_cls(2026, 9, 11)
+    two = resolve_wearable_time_grain(
+        "今天是9月11号，昨天是9月10号，请对比我的这两天的HRV",
+        reference=eleven,
+    )
+    if two.aggregation != "enumerate" or two.named_days != (
+        date_cls(2026, 9, 10),
+        date_cls(2026, 9, 11),
+    ):
+        print("FAIL named-day enumerate", two)
+        return False
+    cal = resolve_wearable_time_grain("对比9月3号和9月4号的HRV", reference=eleven)
+    if cal.aggregation != "enumerate" or cal.named_days != (
+        date_cls(2026, 9, 3),
+        date_cls(2026, 9, 4),
+    ):
+        print("FAIL calendar enumerate", cal)
+        return False
+    print("OK named calendar days enumerate without rank collapse")
     return True
 
 
@@ -1789,6 +1809,98 @@ def test_sleep_bundle_clears_old_daily_keys(client) -> bool:
     return True
 
 
+def test_public_daily_shortcut_template() -> bool:
+    sys.path.insert(0, str(ROOT / "scripts" / "macos"))
+    from build_pha_ingest_shortcuts import (
+        PUBLIC_BASE_PLACEHOLDER,
+        PUBLIC_NAME,
+        PUBLIC_TOKEN_PLACEHOLDER,
+        build_daily,
+        build_daily_public,
+        public_template_leak,
+    )
+    from pha.healthkit_sync_plan import shortcut_sleep_specs, shortcut_sync_specs
+    from pha.wearable_metric_registry import shortcut_pack_version
+
+    fake_env = {"PHA_INGEST_TOKEN": "unit-test-only-secret-token-aa"}
+    baked = build_daily(
+        base_text="http://secret-host.example:8788",
+        token_text=fake_env["PHA_INGEST_TOKEN"],
+        specs=shortcut_sync_specs("default"),
+        sleep_specs=shortcut_sleep_specs("default"),
+        pack_version=shortcut_pack_version(),
+        import_questions=False,
+    )
+    if not public_template_leak(str(baked), fake_env):
+        print("FAIL leak scanner missed a baked token")
+        return False
+
+    wf = build_daily_public()
+    if wf.get("WFWorkflowName") != PUBLIC_NAME:
+        print("FAIL public shortcut name", wf.get("WFWorkflowName"))
+        return False
+    questions = wf.get("WFWorkflowImportQuestions") or []
+    if len(questions) != 2:
+        print("FAIL expected 2 import questions", questions)
+        return False
+    leak = public_template_leak(str(wf), fake_env)
+    if leak:
+        print("FAIL public template leak", leak)
+        return False
+    actions = wf["WFWorkflowActions"]
+    texts = [
+        a["WFWorkflowActionParameters"].get("WFTextActionText")
+        for a in actions
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.gettext"
+    ]
+    if PUBLIC_BASE_PLACEHOLDER not in texts:
+        print("FAIL public base placeholder missing")
+        return False
+    if PUBLIC_TOKEN_PLACEHOLDER not in texts[:2]:
+        print("FAIL first token text must stay empty")
+        return False
+    blob = str(wf)
+    if fake_env["PHA_INGEST_TOKEN"] in blob:
+        print("FAIL unit-test token leaked into public workflow")
+        return False
+    if "is.workflow.actions.showresult" in blob:
+        print("FAIL daily shortcut must not Show Result (blocks automation)")
+        return False
+    finds = [
+        a
+        for a in actions
+        if a["WFWorkflowActionIdentifier"] == "is.workflow.actions.filter.health.quantity"
+    ]
+    if len(finds) < 8:
+        print("FAIL daily should include sleep Find + 7 quantity Finds", len(finds))
+        return False
+    if "is.workflow.actions.openurl" not in blob:
+        print("FAIL daily must open the full card")
+        return False
+    if "is.workflow.actions.notification" not in blob:
+        print("FAIL daily must post the lock-screen teaser")
+        return False
+
+    tracked = ROOT / "shortcuts" / "pha-daily.plist"
+    if tracked.is_file():
+        shipped = plistlib.loads(tracked.read_bytes())
+        if shipped != wf:
+            print("FAIL shortcuts/pha-daily.plist is stale; run: python scripts/macos/build_pha_ingest_shortcuts.py --public")
+            return False
+        leaked = public_template_leak(tracked.read_bytes(), fake_env)
+        if leaked:
+            print("FAIL tracked plist", leaked)
+            return False
+        shortcut = ROOT / "shortcuts" / "pha-daily.shortcut"
+        if shortcut.is_file():
+            leaked = public_template_leak(shortcut.read_bytes(), fake_env)
+            if leaked:
+                print("FAIL tracked shortcut", leaked)
+                return False
+    print("OK public PHA Daily template has import questions and no secrets")
+    return True
+
+
 def main() -> int:
     os.environ["PHA_INGEST_TZ"] = TZ
     db = _bind_temp_db()
@@ -1832,6 +1944,7 @@ def main() -> int:
             test_skip_llm_reads_healthkit_steps(client),
             test_time_grain_binds_time_anchor_slots(),
             test_skip_llm_time_grain_not_90d_mean(client),
+            test_public_daily_shortcut_template(),
         ],
     )
     print("pha_healthkit_ingest_selfcheck:", "PASS" if ok else "FAIL")
