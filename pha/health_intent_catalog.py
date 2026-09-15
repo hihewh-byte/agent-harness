@@ -131,6 +131,8 @@ def infer_metrics_from_message(message: str) -> list[str]:
     msg = (message or "").strip()
     if not msg:
         return []
+    if message_names_unpromoted_metric(msg):
+        return []
     found: list[str] = []
     for key in catalog_all_metric_keys():
         for alias in catalog_metric_aliases(key):
@@ -405,6 +407,8 @@ def catalog_assessment_outline() -> dict[str, Any]:
 def classify_outline_mode(message: str) -> str:
     """exclusive > emphasis > cover-card from catalog tokens. No metric-id parsing."""
     msg = (message or "").strip()
+    if message_names_unpromoted_metric(msg):
+        return "exclusive"
     spec = catalog_assessment_outline()
     modes = spec.get("modes") if isinstance(spec.get("modes"), dict) else {}
     priority = spec.get("priority") or ["exclusive", "emphasis", "cover-card"]
@@ -418,6 +422,21 @@ def classify_outline_mode(message: str) -> str:
             if token_in_message(str(tok), msg, case_insensitive=True):
                 return key
     return "cover-card"
+
+
+def catalog_unpromoted_named_tokens() -> list[str]:
+    return [str(t) for t in (load_health_intent_catalog().get("unpromoted_named_tokens") or [])]
+
+
+def message_names_unpromoted_metric(message: str) -> bool:
+    """Named Health-app metric with no registry/catalog promotion yet (P21a fail-closed)."""
+    msg = (message or "").strip()
+    if not msg:
+        return False
+    for tok in catalog_unpromoted_named_tokens():
+        if token_in_message(str(tok), msg, case_insensitive=True):
+            return True
+    return False
 
 
 def catalog_holistic_proxy_metrics() -> list[str]:

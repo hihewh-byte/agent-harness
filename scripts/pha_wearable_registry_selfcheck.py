@@ -30,7 +30,10 @@ from pha.shortcut_find_catalog import (
     DEVICE_VERIFIED,
     find_catalog_entry,
     find_catalog_path,
+    list_find_catalog_entries,
     never_use_find_labels,
+    picker_search_probes,
+    quantity_find_allowed,
 )
 
 
@@ -90,6 +93,11 @@ def main() -> int:
         if skip:
             if str(cat.get("status") or "") != "skipped":
                 errors.append(f"{mid!r} has shortcut_skip_reason but catalog status is {cat.get('status')!r}")
+            if str(cat.get("shortcut_find_type") or "").strip():
+                errors.append(f"{mid!r} is skipped but catalog still has shortcut_find_type")
+            for probe in picker_search_probes(mid):
+                if quantity_find_allowed(mid, probe):
+                    errors.append(f"{mid!r} probe {probe!r} must not unlock quantity Find")
             continue
         if str(cat.get("status") or "") != DEVICE_VERIFIED:
             errors.append(
@@ -107,6 +115,22 @@ def main() -> int:
                 f"{mid!r} shortcut_health_type {health_type!r} != catalog "
                 f"{cat.get('shortcut_find_type')!r}"
             )
+
+    for cat in list_find_catalog_entries():
+        mid = str(cat.get("metric_id") or "").strip()
+        status = str(cat.get("status") or "").strip()
+        find_type = str(cat.get("shortcut_find_type") or "").strip()
+        if status != DEVICE_VERIFIED and find_type:
+            errors.append(f"{mid!r} status {status!r} must not set shortcut_find_type")
+        if str(cat.get("skip_reason") or "") == "shortcuts_find_unverified" and not picker_search_probes(mid):
+            errors.append(f"{mid!r} shortcuts_find_unverified needs picker_search_probes")
+        if find_type and find_type in forbidden:
+            errors.append(f"{mid!r} uses never_use Find label {find_type!r}")
+        for probe in picker_search_probes(mid):
+            if probe == find_type and status != DEVICE_VERIFIED:
+                errors.append(f"{mid!r} copied probe {probe!r} into shortcut_find_type")
+            if quantity_find_allowed(mid, probe) and status != DEVICE_VERIFIED:
+                errors.append(f"{mid!r} probe {probe!r} unlocked Find")
 
     import re
 

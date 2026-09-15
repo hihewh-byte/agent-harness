@@ -1,6 +1,6 @@
 {
   "schema_version": "wearable_metric_registry_v1",
-  "version": "2026.09.09",
+  "version": "2026.09.15-batch2",
   "shortcut_pack_version": "2026.09.11.hrv-today",
   "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。捷径包版本见 shortcut_pack_version；zip 为最终真值。",
   "ingest_modules": [],
@@ -861,6 +861,63 @@
       }
     },
     {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "cardio_recovery_1min_bpm",
+        "zip_metric_type": "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute",
+        "daily_agg": "max"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "bpm",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "有氧恢复",
+        "label_en": "Cardio Recovery",
+        "group_zh": "心脏"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "bpm",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "latest",
+          "freshness_days": 180
+        }
+      },
+      "intent_hints": [
+        "Cardio Recovery",
+        "cardio recovery",
+        "Heart Rate Recovery",
+        "heart rate recovery",
+        "有氧恢复",
+        "有氧恢复能力",
+        "心肺恢复",
+        "心率恢复",
+        "一分钟心率恢复",
+        "运动后心率恢复"
+      ],
+      "catalog": {
+        "key": "cardio_recovery",
+        "cluster": "cardio_recovery",
+        "expand_on_cluster_query": false,
+        "label_zh": "有氧恢复",
+        "label_en": "Cardio Recovery",
+        "point_en": "Latest Cardio Recovery",
+        "span_en": "Mean Cardio Recovery",
+        "that_day_en": "Cardio Recovery that day"
+      }
+    },
+    {
       "metric_id": "wrist_temp",
       "l1": {
         "kind": "wearable_daily",
@@ -905,6 +962,898 @@
         "span_en": "Mean wrist temp",
         "that_day_en": "wrist temp that day"
       }
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "apple_exercise_time_min",
+        "zip_metric_type": "HKQuantityTypeIdentifierAppleExerciseTime",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "min",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "锻炼分钟",
+        "label_en": "Exercise Minutes",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "min",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "锻炼分钟",
+        "锻炼时长",
+        "exercise minutes",
+        "apple exercise time",
+        "Exercise Time"
+      ],
+      "catalog": {
+        "key": "exercise_minutes",
+        "cluster": "exercise_minutes",
+        "expand_on_cluster_query": false,
+        "label_zh": "锻炼分钟",
+        "label_en": "Exercise Minutes",
+        "point_en": "Exercise Minutes",
+        "span_en": "Mean Exercise Minutes",
+        "that_day_en": "Exercise Minutes that day"
+      }
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "apple_stand_time_min",
+        "zip_metric_type": "HKQuantityTypeIdentifierAppleStandTime",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "min",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "站立时间",
+        "label_en": "Stand Time",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "min",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "站立时间",
+        "站立时长",
+        "stand time",
+        "apple stand time"
+      ],
+      "catalog": {
+        "key": "stand_time",
+        "cluster": "stand_time",
+        "expand_on_cluster_query": false,
+        "label_zh": "站立时间",
+        "label_en": "Stand Time",
+        "point_en": "Stand Time",
+        "span_en": "Mean Stand Time",
+        "that_day_en": "Stand Time that day"
+      }
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "distance_walking_running_km",
+        "zip_metric_type": "HKQuantityTypeIdentifierDistanceWalkingRunning",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "km",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步行+跑步距离",
+        "label_en": "Walking + Running Distance",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "km",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "步行+跑步距离",
+        "步行跑步距离",
+        "walking + running distance",
+        "walking running distance"
+      ],
+      "catalog": {
+        "key": "walk_run_distance",
+        "cluster": "walk_run_distance",
+        "expand_on_cluster_query": false,
+        "label_zh": "步行+跑步距离",
+        "label_en": "Walking + Running Distance",
+        "point_en": "Walking + Running Distance",
+        "span_en": "Mean Walking + Running Distance",
+        "that_day_en": "Walking + Running Distance that day"
+      }
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "walking_hr_avg_bpm",
+        "zip_metric_type": "HKQuantityTypeIdentifierWalkingHeartRateAverage",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "bpm",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步行心率",
+        "label_en": "Walking Heart Rate",
+        "group_zh": "心脏"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "bpm",
+        "higher_is_better": false,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "daily_lagged",
+          "freshness_days": 2
+        }
+      },
+      "intent_hints": [
+        "步行心率",
+        "walking heart rate average",
+        "walking heart rate"
+      ],
+      "catalog": {
+        "key": "walking_hr",
+        "cluster": "walking_hr",
+        "expand_on_cluster_query": false,
+        "label_zh": "步行心率",
+        "label_en": "Walking Heart Rate",
+        "point_en": "Walking Heart Rate",
+        "span_en": "Mean Walking Heart Rate",
+        "that_day_en": "Walking Heart Rate that day"
+      }
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "walking_steadiness",
+        "zip_metric_type": "HKQuantityTypeIdentifierAppleWalkingSteadiness",
+        "daily_agg": "latest"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "ratio",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步行稳定性",
+        "label_en": "Walking Steadiness",
+        "group_zh": "行动能力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "ratio",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "latest",
+          "freshness_days": 180
+        }
+      },
+      "intent_hints": [
+        "步行稳定性",
+        "walking steadiness",
+        "apple walking steadiness"
+      ],
+      "catalog": {
+        "key": "walking_steadiness",
+        "cluster": "walking_steadiness",
+        "expand_on_cluster_query": false,
+        "label_zh": "步行稳定性",
+        "label_en": "Walking Steadiness",
+        "point_en": "Walking Steadiness",
+        "span_en": "Mean Walking Steadiness",
+        "that_day_en": "Walking Steadiness that day"
+      }
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "time_in_daylight_min",
+        "zip_metric_type": "HKQuantityTypeIdentifierTimeInDaylight",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "min",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "日光暴露",
+        "label_en": "Time in Daylight",
+        "group_zh": "环境"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "min",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "日光暴露",
+        "日照时长",
+        "time in daylight",
+        "daylight"
+      ],
+      "catalog": {
+        "key": "daylight",
+        "cluster": "daylight",
+        "expand_on_cluster_query": false,
+        "label_zh": "日光暴露",
+        "label_en": "Time in Daylight",
+        "point_en": "Time in Daylight",
+        "span_en": "Mean Time in Daylight",
+        "that_day_en": "Time in Daylight that day"
+      }
+    },
+    {
+      "metric_id": "flights_climbed",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "flights_climbed",
+        "zip_metric_type": "HKQuantityTypeIdentifierFlightsClimbed",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "flights",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "爬楼层数",
+        "label_en": "Flights Climbed",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "flights",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "爬楼层数",
+        "爬楼",
+        "flights climbed"
+      ],
+      "catalog": {
+        "key": "flights",
+        "cluster": "flights",
+        "expand_on_cluster_query": false,
+        "label_zh": "爬楼层数",
+        "label_en": "Flights Climbed",
+        "point_en": "Flights Climbed",
+        "span_en": "Mean Flights Climbed",
+        "that_day_en": "Flights Climbed that day"
+      }
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "walking_speed_kmh",
+        "zip_metric_type": "HKQuantityTypeIdentifierWalkingSpeed",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "km/h",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步行速度",
+        "label_en": "Walking Speed",
+        "group_zh": "行动能力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "km/h",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "步行速度",
+        "步速",
+        "walking speed"
+      ],
+      "catalog": {
+        "key": "walking_speed",
+        "cluster": "walking_speed",
+        "expand_on_cluster_query": false,
+        "label_zh": "步行速度",
+        "label_en": "Walking Speed",
+        "point_en": "Walking Speed",
+        "span_en": "Mean Walking Speed",
+        "that_day_en": "Walking Speed that day"
+      }
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "six_minute_walk_m",
+        "zip_metric_type": "HKQuantityTypeIdentifierSixMinuteWalkTestDistance",
+        "daily_agg": "latest"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "m",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "六分钟步行",
+        "label_en": "Six-Minute Walk",
+        "group_zh": "行动能力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "m",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "latest",
+          "freshness_days": 180
+        }
+      },
+      "intent_hints": [
+        "六分钟步行",
+        "six-minute walk",
+        "six minute walk"
+      ],
+      "catalog": {
+        "key": "six_minute_walk",
+        "cluster": "six_minute_walk",
+        "expand_on_cluster_query": false,
+        "label_zh": "六分钟步行",
+        "label_en": "Six-Minute Walk",
+        "point_en": "Six-Minute Walk",
+        "span_en": "Mean Six-Minute Walk",
+        "that_day_en": "Six-Minute Walk that day"
+      }
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "body_mass_kg",
+        "zip_metric_type": "HKQuantityTypeIdentifierBodyMass",
+        "daily_agg": "latest"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "kg",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "体重",
+        "label_en": "Body Mass",
+        "group_zh": "身体"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "kg",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "latest",
+          "freshness_days": 30
+        }
+      },
+      "intent_hints": [
+        "体重",
+        "body mass",
+        "body weight"
+      ],
+      "catalog": {
+        "key": "body_mass",
+        "cluster": "body_mass",
+        "expand_on_cluster_query": false,
+        "label_zh": "体重",
+        "label_en": "Body Mass",
+        "point_en": "Body Mass",
+        "span_en": "Mean Body Mass",
+        "that_day_en": "Body Mass that day"
+      }
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "body_fat_fraction",
+        "zip_metric_type": "HKQuantityTypeIdentifierBodyFatPercentage",
+        "daily_agg": "latest"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "ratio",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "体脂率",
+        "label_en": "Body Fat Percentage",
+        "group_zh": "身体"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "ratio",
+        "higher_is_better": false,
+        "daily_key": true,
+        "coverage_denominator": false,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "latest",
+          "freshness_days": 30
+        }
+      },
+      "intent_hints": [
+        "体脂率",
+        "体脂",
+        "body fat percentage",
+        "body fat"
+      ],
+      "catalog": {
+        "key": "body_fat",
+        "cluster": "body_fat",
+        "expand_on_cluster_query": false,
+        "label_zh": "体脂率",
+        "label_en": "Body Fat Percentage",
+        "point_en": "Body Fat Percentage",
+        "span_en": "Mean Body Fat Percentage",
+        "that_day_en": "Body Fat Percentage that day"
+      }
+    },
+    {
+      "metric_id": "physical_effort",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "physical_effort",
+        "zip_metric_type": "HKQuantityTypeIdentifierPhysicalEffort",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "score",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "体力活动努力",
+        "label_en": "Physical Effort",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "score",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "体力活动努力",
+        "physical effort"
+      ],
+      "catalog": {
+        "key": "physical_effort",
+        "cluster": "physical_effort",
+        "expand_on_cluster_query": false,
+        "label_zh": "体力活动努力",
+        "label_en": "Physical Effort",
+        "point_en": "Physical Effort",
+        "span_en": "Mean Physical Effort",
+        "that_day_en": "Physical Effort that day"
+      }
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "basal_energy_kcal",
+        "zip_metric_type": "HKQuantityTypeIdentifierBasalEnergyBurned",
+        "daily_agg": "sum"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "kcal",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "基础消耗",
+        "label_en": "Basal Energy",
+        "group_zh": "活动"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "kcal",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "基础消耗",
+        "基础代谢消耗",
+        "basal energy burned",
+        "basal energy"
+      ],
+      "catalog": {
+        "key": "basal_energy",
+        "cluster": "basal_energy",
+        "expand_on_cluster_query": false,
+        "label_zh": "基础消耗",
+        "label_en": "Basal Energy",
+        "point_en": "Basal Energy",
+        "span_en": "Mean Basal Energy",
+        "that_day_en": "Basal Energy that day"
+      }
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "running_speed_kmh",
+        "zip_metric_type": "HKQuantityTypeIdentifierRunningSpeed",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "km/h",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "跑步速度",
+        "label_en": "Running Speed",
+        "group_zh": "跑步"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "km/h",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "跑步速度",
+        "跑步配速",
+        "running speed"
+      ],
+      "catalog": {
+        "key": "running_speed",
+        "cluster": "running_speed",
+        "expand_on_cluster_query": false,
+        "label_zh": "跑步速度",
+        "label_en": "Running Speed",
+        "point_en": "Running Speed",
+        "span_en": "Mean Running Speed",
+        "that_day_en": "Running Speed that day"
+      }
+    },
+    {
+      "metric_id": "running_power_w",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "running_power_w",
+        "zip_metric_type": "HKQuantityTypeIdentifierRunningPower",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "W",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "跑步功率",
+        "label_en": "Running Power",
+        "group_zh": "跑步"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "W",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "跑步功率",
+        "running power"
+      ],
+      "catalog": {
+        "key": "running_power",
+        "cluster": "running_power",
+        "expand_on_cluster_query": false,
+        "label_zh": "跑步功率",
+        "label_en": "Running Power",
+        "point_en": "Running Power",
+        "span_en": "Mean Running Power",
+        "that_day_en": "Running Power that day"
+      }
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "walking_step_length_cm",
+        "zip_metric_type": "HKQuantityTypeIdentifierWalkingStepLength",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "cm",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "步幅",
+        "label_en": "Walking Step Length",
+        "group_zh": "行动能力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "cm",
+        "higher_is_better": true,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "步幅",
+        "walking step length",
+        "step length"
+      ],
+      "catalog": {
+        "key": "step_length",
+        "cluster": "step_length",
+        "expand_on_cluster_query": false,
+        "label_zh": "步幅",
+        "label_en": "Walking Step Length",
+        "point_en": "Walking Step Length",
+        "span_en": "Mean Walking Step Length",
+        "that_day_en": "Walking Step Length that day"
+      }
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "environmental_audio_db",
+        "zip_metric_type": "HKQuantityTypeIdentifierEnvironmentalAudioExposure",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "dB",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "环境声暴露",
+        "label_en": "Environmental Audio Exposure",
+        "group_zh": "听力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "dB",
+        "higher_is_better": false,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "环境声暴露",
+        "环境噪音",
+        "environmental audio exposure"
+      ],
+      "catalog": {
+        "key": "env_audio",
+        "cluster": "env_audio",
+        "expand_on_cluster_query": false,
+        "label_zh": "环境声暴露",
+        "label_en": "Environmental Audio Exposure",
+        "point_en": "Environmental Audio Exposure",
+        "span_en": "Mean Environmental Audio Exposure",
+        "that_day_en": "Environmental Audio Exposure that day"
+      }
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "l1": {
+        "kind": "wearable_daily",
+        "field": "headphone_audio_db",
+        "zip_metric_type": "HKQuantityTypeIdentifierHeadphoneAudioExposure",
+        "daily_agg": "mean"
+      },
+      "compare": {
+        "comparable_90d": false
+      },
+      "snapshot": {
+        "unit": "dB",
+        "parser": "numeric"
+      },
+      "ui": {
+        "label_zh": "耳机音量暴露",
+        "label_en": "Headphone Audio Exposure",
+        "group_zh": "听力"
+      },
+      "fact_card": {
+        "eligible": true,
+        "enabled_default": false,
+        "ingest_key": "",
+        "unit": "dB",
+        "higher_is_better": false,
+        "daily_key": true,
+        "coverage_denominator": true,
+        "shortcut_skip_reason": "shortcuts_find_unverified",
+        "temporal": {
+          "kind": "accrual"
+        }
+      },
+      "intent_hints": [
+        "耳机音量暴露",
+        "耳机音量",
+        "headphone audio exposure"
+      ],
+      "catalog": {
+        "key": "headphone_audio",
+        "cluster": "headphone_audio",
+        "expand_on_cluster_query": false,
+        "label_zh": "耳机音量暴露",
+        "label_en": "Headphone Audio Exposure",
+        "point_en": "Headphone Audio Exposure",
+        "span_en": "Mean Headphone Audio Exposure",
+        "that_day_en": "Headphone Audio Exposure that day"
+      }
     }
   ],
   "bundle_catalog": {
@@ -917,7 +1866,26 @@
       "spo2",
       "respiratory_rate",
       "vo2max",
-      "wrist_temp"
+      "wrist_temp",
+      "cardio_recovery",
+      "exercise_minutes",
+      "stand_time",
+      "walk_run_distance",
+      "walking_hr",
+      "walking_steadiness",
+      "daylight",
+      "flights",
+      "walking_speed",
+      "six_minute_walk",
+      "body_mass",
+      "body_fat",
+      "physical_effort",
+      "basal_energy",
+      "running_speed",
+      "running_power",
+      "step_length",
+      "env_audio",
+      "headphone_audio"
     ],
     "core": [
       "hrv",

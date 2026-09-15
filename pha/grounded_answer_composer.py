@@ -422,8 +422,24 @@ def build_manifest_metric_focus_summary(
         missing_text = _missing_grain_summary(grain, locale=loc, requested_ids=missing_ids)
     body = "\n".join(lines).strip()
     if body and missing_text:
-        return f"{body}\n{missing_text}"
-    return body or missing_text
+        out = f"{body}\n{missing_text}"
+    else:
+        out = body or missing_text
+    if out and manifest is not None and (manifest.wearable_unresolved_residue or "").strip():
+        note = _unresolved_intent_disclosure(locale=loc)
+        if note:
+            out = f"{out}\n{note}"
+    return out
+
+
+def _unresolved_intent_disclosure(*, locale: str) -> str:
+    """Fixed-template disclosure when core slots closed but NL residue remains."""
+    if locale == "en":
+        return (
+            "Pulled the named metric as requested; "
+            "other phrasing in the question was not fully resolved and did not add numbers."
+        )
+    return "已按点名指标取数；句中其余表述未完全识别，未据此补充数字。"
 
 
 def build_generic_english_locale_fallback(*, user_message: str = "") -> str:
@@ -560,6 +576,18 @@ def _label_for_metric_id(mid: str, *, locale: str, grain_point: bool, same_day_t
     return labels.span_zh
 
 
+def _allowed_manifest_labels_for_metric(mid: str, *, locale: str = "zh") -> set[str]:
+    """All catalog surface forms for one metric (point / that-day / span)."""
+    from pha.wearable_metric_registry import catalog_labels
+
+    labels = catalog_labels(mid)
+    if labels is None:
+        return {mid}
+    if locale == "en":
+        return {labels.point_en, labels.that_day_en, labels.span_en, mid}
+    return {labels.point_zh, labels.that_day_zh, labels.span_zh, mid}
+
+
 def _requested_focus_metric_ids(user_message: str) -> list[str]:
     from pha.intent_gates import infer_wearable_metric_ids
     from pha.wearable_metric_registry import cluster_of
@@ -573,23 +601,27 @@ def _requested_focus_metric_ids(user_message: str) -> list[str]:
     return ids
 
 
-def is_warehouse_metric_focus_turn(user_message: str) -> bool:
+def is_warehouse_metric_focus_turn(user_message: str, *, user_id: str = "default") -> bool:
     """Pure warehouse cluster/single-metric query (skip heavy 90d snapshot assembly)."""
     msg = (user_message or "").strip()
     if not msg:
         return False
     from pha.goal_classifier import classify_goal, context_lookup_enabled
     from pha.health_intent_catalog import catalog_goal_markers
-    from pha.intent_gates import infer_wearable_metric_ids
+    from pha.ledger_passthrough_lookup import resolve_turn_wearable_scope
     from pha.wearable_metric_registry import cluster_of
 
+    uid = (user_id or "default").strip() or "default"
     if context_lookup_enabled():
-        goal = classify_goal(msg)
+        goal = classify_goal(msg, user_id=uid)
         lookup = catalog_goal_markers().get("context_lookup") or {}
         if goal.goal_class == "context_lookup" and lookup.get("wins_over_warehouse_skip"):
             return False
 
-    ids = infer_wearable_metric_ids(msg)
+    scope = resolve_turn_wearable_scope(uid, msg)
+    if scope.ledger_types or scope.fail_closed_named:
+        return True
+    ids = list(scope.registry_ids)
     if not ids:
         return False
     clusters = {cluster_of(mid) or f"solo:{mid}" for mid in ids}
@@ -614,17 +646,21 @@ def _filter_manifest_to_metric_focus(
         episodic=episodic,
     )
     same_day_today = grain.is_point_day() and grain.end == effective_query_reference_date()
-    labels: list[str] = []
+    # Enumerate / multi-day grains emit per-day point labels (今日/当日); a single
+    # span label must not empty the focus filter.
+    allowed: set[str] = set()
     for mid in requested_ids:
-        labels.append(
-            _label_for_metric_id(
-                mid,
-                locale="zh",
-                grain_point=grain.is_point_day(),
-                same_day_today=same_day_today,
+        if grain.is_enumerate() or (not grain.is_point_day() and grain.source != "default"):
+            allowed |= _allowed_manifest_labels_for_metric(mid, locale="zh")
+        else:
+            allowed.add(
+                _label_for_metric_id(
+                    mid,
+                    locale="zh",
+                    grain_point=grain.is_point_day(),
+                    same_day_today=same_day_today,
+                )
             )
-        )
-    allowed = set(labels)
     filtered = [e for e in manifest.entries if e.metric in allowed]
     if not filtered:
         return NumericsManifest(
@@ -636,6 +672,7 @@ def _filter_manifest_to_metric_focus(
             wearable_grain_source=manifest.wearable_grain_source,
             wearable_window_start=manifest.wearable_window_start,
             wearable_window_end=manifest.wearable_window_end,
+            wearable_unresolved_residue=manifest.wearable_unresolved_residue,
         )
     return NumericsManifest(
         profile=manifest.profile,
@@ -646,6 +683,7 @@ def _filter_manifest_to_metric_focus(
         wearable_grain_source=manifest.wearable_grain_source,
         wearable_window_start=manifest.wearable_window_start,
         wearable_window_end=manifest.wearable_window_end,
+        wearable_unresolved_residue=manifest.wearable_unresolved_residue,
     )
 
 
@@ -705,7 +743,7 @@ def try_warehouse_metric_focus_skip(
     if not msg:
         return ""
     requested_ids = _requested_focus_metric_ids(msg)
-    if not is_warehouse_metric_focus_turn(msg):
+    if not is_warehouse_metric_focus_turn(msg, user_id=user_id):
         return ""
     grain = resolve_wearable_time_grain(
         msg,
@@ -733,14 +771,19 @@ def try_warehouse_metric_focus_skip(
     missing_ids: list[str] = []
     same_day_today = grain.is_point_day() and grain.end == effective_query_reference_date()
     for mid in requested_ids:
-        label = _label_for_metric_id(
-            mid,
-            locale="zh",
-            grain_point=grain.is_point_day(),
-            same_day_today=same_day_today,
-        )
-        if label not in present_labels:
-            missing_ids.append(mid)
+        if grain.is_enumerate() or (not grain.is_point_day() and grain.source != "default"):
+            allowed = _allowed_manifest_labels_for_metric(mid, locale="zh")
+            if not (allowed & present_labels):
+                missing_ids.append(mid)
+        else:
+            label = _label_for_metric_id(
+                mid,
+                locale="zh",
+                grain_point=grain.is_point_day(),
+                same_day_today=same_day_today,
+            )
+            if label not in present_labels:
+                missing_ids.append(mid)
     summary = build_manifest_metric_focus_summary(
         wm,
         locale=response_locale,

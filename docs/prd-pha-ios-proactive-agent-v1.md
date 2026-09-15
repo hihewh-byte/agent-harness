@@ -3,7 +3,7 @@
 > **Language / 语言**：[English](prd-pha-ios-proactive-agent-v1.en.md) · 中文（本文）
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.23 · 2026-09-11  
+> **版本**：v1.31 · 2026-09-15  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -124,8 +124,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-1.1 | ingest JSON：`metric_type, timestamp, value, source=healthkit` | selfcheck 假数据入库 |
 | FR-1.2 | 鉴权 token；无 token 401 | 单测或 selfcheck |
 | FR-1.3 | 真机：捷径推送 Watch 已有指标 | 库中 `as_of` 与健康 App 同日、数值量级合理 |
-| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`, **`spo2`, `respiratory_rate`, `vo2max`, `wrist_temp`（M1-P12）**。`hrv` 与 `hrv_sdnn` 均写入 `hrv_sdnn_ms`（Apple SDNN）。入睡总时长由分期相加。POST 应带 `unit`；未知单位或量级越界 400 |
-| FR-1.5 | **多指标入库**（数量型优先级包） | **v1.9**：捷径对 Find 总表 `device_verified` 的优先级包同步（步数 / 消耗 / RHR / HRV / 血氧 / 呼吸率 / VO2max），与勾选无关。腕温 `shortcuts_find_unverified`，暂不进捷径。累计型当日 Sum；**HRV 为当日 Average**（与健康 App「今天」均值对齐，`temporal.kind=accrual`）；`daily_lagged` / `latest` last-N Limit 1 带日期；睡眠等 `overnight` last-N Average 带日期。空集跳过。JSON 含 `pack_version`（注册表 `shortcut_pack_version`）；卡顶在设备包版本落后时提示重装。只有包版本变化才需重装捷径。新增指标必须先写入 `shortcut_health_find_catalog.json` 并真机验证 Find 标签，禁止猜 SDK / 健康 App 标题。 |
+| FR-1.4 | ingest 可写入的指标白名单（管道允许集，不是用户看见的死列表） | `hrv`, `hrv_sdnn`, `rhr`, `steps`, `sleep_hours`, `sleep_core`, `sleep_deep`, `sleep_rem`, `sleep_in_bed`, `sleep_awake`, `active_energy`, **`spo2`, `respiratory_rate`, `vo2max`, `wrist_temp`（M1-P12）**。`hrv` 与 `hrv_sdnn` 均写入 `hrv_sdnn_ms`（Apple SDNN）。入睡总时长由分期相加。POST 应带 `unit`；未知单位或量级越界 400。**zip 原样账本（M1-P21a）不是本表**：白名单外的数量 `Record` 以完整 HK `type` 写入 `wearable_data`，不自动进日表、不进本 POST 允许集；升舱（日表/事实卡/捷径）见 M1-P21b。**对话点名（v1.27 / v1.31）**：先 catalog；未命中则对账本里未升舱的 `HKQuantityTypeIdentifier*` 用 HK id 派生针做最长唯一匹配，命中则写入本轮 Numerics Manifest。**实体优先门闩（v1.31）**：核心槽（合法 metric + 时间 grain）闭环即放行；自然语言残渣不否决已解析实体，记 `unresolved_residue` 并在 skip-LLM 摘要固定模板披露；**零实体且有残渣**才 fail-closed（禁止 HRV/VO2max 顶台）。中文健康 App 名对不上派生词且零实体 → fail-closed（别名走 catalog，不改导入器）。 |
+| FR-1.5 | **多指标入库**（数量型优先级包） | **v1.9**：捷径对 Find 总表 `device_verified` 的优先级包同步（步数 / 消耗 / RHR / HRV / 血氧 / 呼吸率 / VO2max），与勾选无关。腕温 `shortcuts_find_unverified`，暂不进捷径。累计型当日 Sum；**HRV 为当日 Average**（与健康 App「今天」均值对齐，`temporal.kind=accrual`）；`daily_lagged` / `latest` last-N Limit 1 带日期；睡眠等 `overnight` last-N Average 带日期。空集跳过。JSON 含 `pack_version`（注册表 `shortcut_pack_version`）；卡顶在设备包版本落后时提示重装。只有包版本变化才需重装捷径。新增指标必须先写入 `shortcut_health_find_catalog.json` 并真机验证 Find 标签，禁止猜 SDK / 健康 App 标题。**v1.30**：`picker_search_probes` 只供真机英文选择器搜索，不得复制进 `shortcut_find_type`、不得 bump `shortcut_pack_version`。 |
 | FR-1.8 | **zip 覆盖捷径增量** | 全量 export.zip 导入后：对账报告写入 `data/zip_vs_healthkit_reconcile.json`；删除 `xml_max` 当日及之前的 `sample_id LIKE healthkit|%` 行（含睡眠分段）；该日之后的增量保留。验收：selfcheck 覆盖日后 HealthKit 行被删、zip 日值保留 |
 | FR-1.6 | **睡眠分期 + HRV SDNN**（另卡 M1-P6） | 见 [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md)。SDNN 不得写入 RMSSD 列。睡眠：分段落库、入睡 = 核心∪深∪REM 一次总并集、清醒 = 健康 App 原值不拆、在床只取 In Bed 样本（健康 App 无则 PHA 必须空）、醒来日由数据推导；**PHA 不判定某夜是否异常、不修正、不排除**，偏离个人基线时只出「请到健康 App 核对」提醒句；`入睡 + 清醒 ≤ 会话跨度`。验收：**只比健康 App 当天有、且用户已勾选的项**，各 ≤ ±10 分钟；健康 App 没有的项双方皆空算过，禁止为凑项硬编码必采列表（与 FR-2.7 一致）。产品真源 = **健康 App 展现**；M1 过渡可简化为单写入源（如仅 Watch），多源按系统优先级对齐属 M2 |
 | FR-1.7 | **同步回执** | `GET /ingest/healthkit/last?user_id=` 返回最近一次成功/失败时间、指标、审计摘要；完整卡顶部显示「上次同步」。捷径 POST 成功响应含审计行，手机上可直接与健康 App 比对（呼应 §10「UI 必须显示上次成功时间」） |
@@ -275,7 +275,10 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P19** | **评测审计落地**：emphasis 结构句 + Tier0 不尾截断 + 对话发卡 ⊆ FACT_CARD_CONTEXT + workout hints 收窄（FR-6.8 / FR-6.13 v1.15） | `DONE*` | 2026-09-10：离线 `pha_p19_selfcheck` PASS。真机 20+20+10 见评测目录。交接 [`handoff-2026-09-10-eval-audit-solution.md`](handoff-2026-09-10-eval-audit-solution.md)。**不做** must 覆盖/缺行重试/prefs∩ |
 | **M1-P20** | **exclusive 注入 ⊆ catalog 点名行**（FR-6.8 v1.16） | `DONE` | 2026-09-11：iPhone 同网盖章。Safari `*.local:8788` 完整卡；prefs exclusive「只看今天的静息心率…」注入仅 `resting_heart_rate_bpm`；截图数字 ⊆ 卡/Manifest。Mac 另验「只看今天的深睡」注入仅深睡、审计过。软漏：文末点到 HRV（维护者接受） |
 | **M1-P15** | **CHB 统一供给**（C 层 · 闭环） | `DONE` | 2026-09-11：维护者盖章。CHB 路径验收；黄金句门槛为槽内 ≥2 具体项（药物项A∧补剂项B不适用于训练黄金句）；`population_commons` 已落地。**遗留（非阻塞）**：`slot_named_ge2` 频率、审计小数/个别整数、prefs 勾选漂移、think 性能 — 另开卡 |
-| **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE` | P0–P7 / P12 / P15 / P20 已落地。未开 M2。腕温进第二批勾选。 |
+| **M1** | （汇总）iPhone 主动事实卡：通道 + 完整卡 + 可选指标 | `DONE` | P0–P7 / P12 / P15 / P20 已落地。未开 M2。2026-09-15 第二批勾选 19 项（含腕温）已升舱；Find 仍未进捷径。 |
+| **M1-P21a** | zip 未知数量 `Record` 原样入 `wearable_data` | `DONE` | 2026-09-14 入库；2026-09-15 对话读路径：catalog → L0 唯一命中 → 本轮 Manifest，否则 fail-closed。不自动升舱。selfcheck `pha_p21a_zip_passthrough_selfcheck` + `pha_ledger_passthrough_lookup_selfcheck` |
+| **M1-P21b** | Cardio Recovery 注册表 + 日聚合 + catalog（有样本才 DONE） | `DONE` | 2026-09-15：Registry + 日表 max + catalog。2026-09-15 勾选：default prefs 含 `cardio_recovery_1min_bpm`；中文别名含有氧恢复/一分钟心率恢复等。Find 未抄录。 |
+| **M1-P21c** | 捷径 Find 真机抄录后才增量同步 | `TODO` | 2026-09-15：Find 总表已写入社区/Gemini 英文 `picker_search_probes`（含 `Step Count` / `Sleep Analysis` 进 `never_use_find_labels`）。探针不得当 Find、不 bump `shortcut_pack_version`。仍须真机点中选择器字面量后一次一条升 `device_verified`。 |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
 | **M4** | 端侧推理 | `TODO` | 触发：有明确机型与模型方案 |
@@ -353,6 +356,14 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-11 | iPhone 同网：Safari `*.local:8788` 生成 exclusive 静息心率解读；维护者接受截图（文末 HRV 软漏可接受） | §8 M1-P20 / M1 → `DONE`；PRD v1.23 |
 | 2026-09-11 | 维护者盖章 P15：药物项A不宜作训练黄金句；`slot_named_ge2` 5/10 可接受；遗留审计/频率/prefs 漂移另开 | §8 M1-P15 → `DONE`；PRD v1.22 |
 | 2026-09-10 | 黄金句审计熔断虚构百分位 21.5/85/95。维护者采纳 TASK 槽契约：零编数 + brief 在场不得 skip。不放水审计、不上药名表 | v1.19 FR-6.8 / FR-6.12；P15 仍 IN_PROGRESS |
+| 2026-09-14 | 健康 App **Cardio Recovery**（HK `HeartRateRecoveryOneMinute`）不在 zip `_SUPPORTED_RECORD_TYPES`，账本无行。对话问该项后模型用 HRV/VO2max 换指标顶台。维护者定：未知 zip Record 应原样入库；Loop A 不得发明列。方案三卡 P21a→b→c，本条只落文档 | v1.24；交接 [`handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md`](handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md)。不改代码；不改 FR-1.4 正文（编码 PR 再改） |
+| 2026-09-14 | M1-P21a 编码：zip 未知数量 Record 原样入 `wearable_data`；点名 Cardio Recovery fail-closed；FR-1.4 区分 POST 允许集 vs zip 账本。未开 P21b/c、未改 prefs | v1.25；selfcheck `pha_p21a_zip_passthrough_selfcheck` |
+| 2026-09-15 | M1-P21b：Registry `cardio_recovery_1min_bpm` + 日表 max + catalog `cardio_recovery`。导入器仍通用 passthrough。Find 未抄录。本机账本待 zip 回灌 | v1.26；`pha_p21b_cardio_recovery_selfcheck` |
+| 2026-09-15 | 维护者：点名有数不应每次改代码升舱。对话路径改为 catalog → 未升舱 L0 唯一命中写入本轮 Manifest，否则 fail-closed，禁止 core 顶台。P21b 仍管日表/发卡/捷径 | v1.27；`pha_ledger_passthrough_lookup_selfcheck` |
+| 2026-09-15 | 维护者：M1 本切片先完成事实卡勾选与中文别名。default prefs 勾选 `cardio_recovery_1min_bpm`；catalog 补「有氧恢复能力 / 一分钟心率恢复 / 运动后心率恢复」。P21c Find 仍未抄录 | v1.28；`pha_p21b_cardio_recovery_selfcheck` |
+| 2026-09-15 | 维护者同意第二批 19 项进事实卡。Registry/日表/catalog 升舱；Apple HK 文档只提供 identifier 与累计/离散，Find 仍 skip。default prefs 32 项。build `pha-v2.3.53-batch2-19` | v1.29；`pha_m1_batch2_selfcheck` |
+| 2026-09-15 | 维护者「执行」Find 探针切片：社区/Gemini 英文只进 `picker_search_probes`，不升 `device_verified`、不写捷径、不 bump pack。build `pha-v2.3.54-find-probes` | v1.30；`pha_m1_batch2_selfcheck` |
+| 2026-09-15 | 维护者：勿打 NL corner-case 补丁。门闩改为实体优先：metric+grain 闭环即放行；残渣只披露不熔断；零实体仍 fail-closed。build `pha-v2.3.55-entity-first-scope` | v1.31；`pha_ledger_passthrough_lookup_selfcheck` |
 
 ---
 
@@ -388,6 +399,14 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-10 | v1.17 | FR-2.8 v1 参考层去掉深睡/REM 占比（不编造指南）；腕温推迟第二批勾选（P12 去 `*`）；P15 开剩余验收 |
 | 2026-09-10 | v1.18 | FR-6.12：CHB `background_rows`（无剂量自述行）+ `USER_CONTEXT_BRIEF` 必须投影 §Background。解读轮仍只 `USER_BACKGROUND_BRIEF`。TASK 不改。不进 §Facts / Manifest |
 | 2026-09-10 | v1.19 | FR-6.8 TASK：禁止派生百分位；brief 在场不得整槽 skip。审计不放水。P15 仍 IN_PROGRESS |
+| 2026-09-14 | v1.24 | §8 立 M1-P21a/b/c（zip 原样入库 → Cardio Recovery 升舱 → 捷径）；§11 一条。文档改动，无代码。交接 [`handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md`](handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md) |
+| 2026-09-14 | v1.25 | M1-P21a DONE：zip passthrough + 点名 fail-closed；FR-1.4 正文区分管道允许集与原样账本。未开 P21b |
+| 2026-09-15 | v1.26 | M1-P21b DONE：Registry/日列/catalog 升舱；导入器不把 HeartRateRecovery 写入类型化白名单。未开 P21c、未改 prefs |
+| 2026-09-15 | v1.27 | 对话点名未升舱 HK 数量：catalog → L0 唯一命中 → 本轮 Manifest，否则 fail-closed。不每问升舱。P21c / prefs 不动 |
+| 2026-09-15 | v1.28 | default prefs 勾选有氧恢复；catalog 中文别名补全。P21c 仍须真机 Find |
+| 2026-09-15 | v1.29 | 第二批 19 项事实卡升舱（含腕温）。Find 不用 HK 文档标题。日表 sum/mean/latest 分轨 |
+| 2026-09-15 | v1.30 | Find 探针：`picker_search_probes` + never_use 增 Step Count / Sleep Analysis。不 bump `shortcut_pack_version`。P21c 仍 TODO |
+| 2026-09-15 | v1.31 | FR-1.4 对话门闩：实体优先放行；残渣 → `unresolved_residue` 披露；零实体 fail-closed。删 `residue_overrides` 长度熔断 |
 | 2026-09-11 | v1.23 | §8 M1-P20 / M1 → DONE（iPhone 同网 exclusive 静息心率截图盖章；注入仅 RHR） |
 | 2026-09-11 | v1.22 | §8 M1-P15 → DONE（维护者：黄金句 5/10 槽内 ≥2 可接受；药物项A不宜作训练黄金句）。遗留审计/频率/prefs 漂移另开 |
 | 2026-09-11 | v1.21 | FR-6.10：Manifest `population_commons`（训练常识整数 ∧ 同句无卡标签）。P15 黄金句门槛：槽内 ≥2 具体项；药物项A∧补剂项B仅 meds-HRV |

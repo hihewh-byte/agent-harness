@@ -966,6 +966,12 @@ def load_fact_card(
         from pha.loop_weekly import attach_loop_approvals_to_fact_card
 
         loc = locale or load_fact_card_locale(uid)
+        try:
+            from pha.loop_live_harvest import sync_live_alias_approvals
+
+            sync_live_alias_approvals(uid)
+        except Exception:
+            pass
         attach_loop_approvals_to_fact_card(card, locale=loc)
     except Exception:
         card["loop_approvals"] = {"pending_n": 0, "pending": []}

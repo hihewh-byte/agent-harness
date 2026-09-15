@@ -1,4 +1,8 @@
-"""Weekly Loop harvest → multi-channel notify → human approval (no catalog auto-merge).
+"""Loop harvest → pending fact-card approval (no catalog auto-merge).
+
+Live chat harvest is ``pha.loop_live_harvest``. Weekly/e2e JSONL remains
+``weekly_harvest_and_notify`` for offline batches only.
+"""
 
 Iron rules:
 - Harvest / proposals may write under ``reports/loop/`` only.

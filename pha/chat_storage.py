@@ -391,6 +391,30 @@ def maybe_set_title_from_first_message(session_id: str, user_text: str) -> None:
         conn.close()
 
 
+def list_recent_user_messages(user_id: str, *, limit: int = 40) -> List[ChatMessageRow]:
+    """Newest-first user utterances across sessions (Loop live harvest)."""
+    init_chat_schema()
+    uid = (user_id or "default").strip() or "default"
+    cap = max(1, min(int(limit or 40), 80))
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            SELECT m.id, m.session_id, m.role, m.content, m.created_at,
+                   m.attachment_path, m.attachment_name, m.parsed_json, m.ingested_at
+            FROM chat_messages m
+            JOIN chat_sessions s ON s.id = m.session_id
+            WHERE s.user_id = ? AND m.role = 'user'
+            ORDER BY m.id DESC
+            LIMIT ?
+            """,
+            (uid, cap),
+        )
+        return [_row_to_message(r) for r in cur.fetchall()]
+    finally:
+        conn.close()
+
+
 def search_messages_by_keywords(
     user_id: str,
     keywords: List[str],

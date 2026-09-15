@@ -52,6 +52,11 @@ class WearableDayMetricAgg:
     vo2max_n: int = 0
     wrist_temp_sum: float = 0.0
     wrist_temp_n: int = 0
+    passthrough_max: Dict[str, float] = field(default_factory=dict)
+    passthrough_sum: Dict[str, float] = field(default_factory=dict)
+    passthrough_n: Dict[str, int] = field(default_factory=dict)
+    passthrough_latest: Dict[str, float] = field(default_factory=dict)
+    passthrough_how: Dict[str, str] = field(default_factory=dict)
     # Scalar daily sleep (HealthKit ingest). Segments still win when present.
     sleep_hours_max: Optional[float] = None
     sleep_core_hours: Optional[float] = None
@@ -63,6 +68,35 @@ class WearableDayMetricAgg:
 
 
 _HEALTHKIT_SOURCE_KEY = "healthkit"
+
+
+def fold_passthrough_value(
+    dest_max: Dict[str, float],
+    dest_sum: Dict[str, float],
+    dest_n: Dict[str, int],
+    *,
+    field: str,
+    how: str,
+    value: float,
+    dest_latest: Optional[Dict[str, float]] = None,
+    dest_how: Optional[Dict[str, str]] = None,
+) -> None:
+    kind = (how or "mean").strip() or "mean"
+    if dest_how is not None:
+        dest_how[field] = kind
+    if kind == "max":
+        cur = dest_max.get(field)
+        if cur is None or value > cur:
+            dest_max[field] = value
+        return
+    if kind == "latest":
+        if dest_latest is not None:
+            dest_latest[field] = value
+        else:
+            dest_max[field] = value
+        return
+    dest_sum[field] = dest_sum.get(field, 0.0) + value
+    dest_n[field] = dest_n.get(field, 0) + 1
 
 
 def _source_key_from_sample_id(sample_id: str) -> str:
@@ -158,6 +192,22 @@ def accumulate_wearable_sample(
         agg.in_bed_hours = value
     elif mt == _METRIC_AWAKE:
         agg.awake_hours = value
+    else:
+        from pha.wearable_metric_registry import zip_passthrough_rollups
+
+        spec = zip_passthrough_rollups().get(mt)
+        if spec:
+            field, how = spec
+            fold_passthrough_value(
+                agg.passthrough_max,
+                agg.passthrough_sum,
+                agg.passthrough_n,
+                field=field,
+                how=how,
+                value=value,
+                dest_latest=agg.passthrough_latest,
+                dest_how=agg.passthrough_how,
+            )
 
 
 def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
@@ -179,7 +229,7 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
     resp = (agg.respiratory_sum / agg.respiratory_n) if agg.respiratory_n > 0 else None
     vo2 = (agg.vo2max_sum / agg.vo2max_n) if agg.vo2max_n > 0 else None
     wrist = (agg.wrist_temp_sum / agg.wrist_temp_n) if agg.wrist_temp_n > 0 else None
-    return {
+    out: Dict[str, Any] = {
         "steps": steps,
         "resting_heart_rate_bpm": rhr,
         # Legacy RMSSD column: no Apple sample writes here after M1-P8.
@@ -191,6 +241,20 @@ def resolve_daily_metrics(agg: WearableDayMetricAgg) -> Dict[str, Any]:
         "vo2max_ml_kg_min": vo2,
         "wrist_temp_c": wrist,
     }
+    for field, val in agg.passthrough_max.items():
+        out[field] = val
+    for field, val in agg.passthrough_latest.items():
+        out[field] = val
+    for field, total in agg.passthrough_sum.items():
+        if field in agg.passthrough_max or field in agg.passthrough_latest:
+            continue
+        n = agg.passthrough_n.get(field) or 0
+        kind = (agg.passthrough_how.get(field) or "mean").strip() or "mean"
+        if kind == "sum":
+            out[field] = total
+        elif n > 0:
+            out[field] = total / n
+    return out
 
 
 _ASLEEP_STAGE_KINDS = frozenset({"core", "deep", "rem", "asleep"})
@@ -396,15 +460,9 @@ def build_wearable_daily_summary(
 
     if not sleep_only and metrics is not None:
         resolved = resolve_daily_metrics(metrics)
-        row.steps = resolved["steps"]
-        row.resting_heart_rate_bpm = resolved["resting_heart_rate_bpm"]
-        row.hrv_rmssd_ms = resolved["hrv_rmssd_ms"]
-        row.hrv_sdnn_ms = resolved["hrv_sdnn_ms"]
-        row.active_energy_kcal = resolved["active_energy_kcal"]
-        row.spo2_pct = resolved["spo2_pct"]
-        row.respiratory_rate_bpm = resolved["respiratory_rate_bpm"]
-        row.vo2max_ml_kg_min = resolved["vo2max_ml_kg_min"]
-        row.wrist_temp_c = resolved["wrist_temp_c"]
+        for key, val in resolved.items():
+            if hasattr(row, key):
+                setattr(row, key, val)
 
     if segment_rows:
         hk_rows = [raw for raw in segment_rows if _is_healthkit_sleep_segment(raw)]

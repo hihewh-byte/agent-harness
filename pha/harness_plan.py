@@ -10,7 +10,6 @@ from pha.health_data import effective_query_reference_date, get_health_data, def
 from pha.intent_gates import (
     QuestionType,
     classify_question_type,
-    infer_wearable_metric_ids,
     infer_wearable_metrics,
     resolve_schema_intent,
     user_message_needs_lab_dossier,
@@ -702,15 +701,9 @@ def build_wearable_90d_summary_block(user_id: str, user_message: str) -> str:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
     start, end = default_last_n_days_range(reference_date=ref, days=90)
-    metrics = infer_wearable_metric_ids(user_message)
-    if not metrics:
-        from pha.wearable_metric_registry import catalog_keys_core, primary_metric_id_for_catalog_key
+    from pha.ledger_passthrough_lookup import registry_metric_ids_for_turn
 
-        metrics = [
-            mid
-            for key in catalog_keys_core()[:2]
-            if (mid := primary_metric_id_for_catalog_key(key))
-        ]
+    metrics = registry_metric_ids_for_turn(uid, user_message)
     result = get_health_data(
         uid,
         start,

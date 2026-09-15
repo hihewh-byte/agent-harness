@@ -430,7 +430,7 @@ def _fetch_activity_kcal_series(
 
 
 def _metric_unit(metric: str) -> str:
-    return {
+    known = {
         "sleep": "hours",
         "hrv": "ms",
         "steps": "count",
@@ -440,7 +440,13 @@ def _metric_unit(metric: str) -> str:
         "respiratory_rate": "breaths/min",
         "vo2max": "mL/kg/min",
         "wrist_temp": "°C",
-    }.get(metric, "")
+    }
+    if metric in known:
+        return known[metric]
+    from pha.wearable_metric_registry import catalog_unit_for, primary_metric_id_for_catalog_key
+
+    mid = primary_metric_id_for_catalog_key(metric) or metric
+    return catalog_unit_for(mid)
 
 
 def _fetch_rows_for_range(uid: str, start_date: date, end_date: date) -> list:

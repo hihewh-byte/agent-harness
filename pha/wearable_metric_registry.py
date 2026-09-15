@@ -280,6 +280,19 @@ def wearable_daily_metric_ids() -> Tuple[str, ...]:
     return tuple(out)
 
 
+def zip_passthrough_rollups() -> Dict[str, Tuple[str, str]]:
+    """HK quantity type string → (daily field, daily_agg) from Registry. Not a name table."""
+    out: Dict[str, Tuple[str, str]] = {}
+    for m in list_metric_entries():
+        l1 = m.get("l1") or {}
+        hk = str(l1.get("zip_metric_type") or "").strip()
+        field = str(l1.get("field") or "").strip()
+        how = str(l1.get("daily_agg") or "mean").strip() or "mean"
+        if hk.startswith("HKQuantityTypeIdentifier") and field:
+            out[hk] = (field, how)
+    return out
+
+
 def l1_field_for(metric_id: str) -> Optional[str]:
     entry = metric_entry(metric_id)
     if not entry:
@@ -549,4 +562,5 @@ __all__ = [
     "snapshot_only_fallback_metric_ids",
     "wearable_daily_metric_ids",
     "workout_compare_metric_ids",
+    "zip_passthrough_rollups",
 ]

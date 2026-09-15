@@ -339,6 +339,7 @@ class NumericsManifest:
     wearable_window_start: str = ""
     wearable_window_end: str = ""
     wearable_named_days: Tuple[str, ...] = ()
+    wearable_unresolved_residue: str = ""
     card_labels: Set[str] = field(default_factory=set)
     card_units: Set[str] = field(default_factory=set)
     window_day_tokens: Set[str] = field(default_factory=set)
@@ -402,6 +403,7 @@ class NumericsManifest:
             "wearable_window_start": self.wearable_window_start,
             "wearable_window_end": self.wearable_window_end,
             "wearable_named_days": list(self.wearable_named_days),
+            "wearable_unresolved_residue": self.wearable_unresolved_residue,
             "card_labels": sorted(self.card_labels),
             "card_units": sorted(self.card_units),
             "window_day_tokens": sorted(self.window_day_tokens),
@@ -502,7 +504,7 @@ def _wearable_entries(
     *,
     wearable_result: Optional[HealthDataResult] = None,
     episodic: Any = None,
-) -> tuple[List[ManifestEntry], Tuple[str, ...], date, date]:
+) -> tuple[List[ManifestEntry], Tuple[str, ...], date, date, str]:
     uid = (user_id or "default").strip() or "default"
     ref = effective_query_reference_date()
     from pha.wearable_time_grain import resolve_wearable_time_grain
@@ -527,18 +529,44 @@ def _wearable_entries(
         if grain.is_point_day():
             named = grain.named_days or (grain.start,)
 
+    named_iso = tuple(d.isoformat() for d in named)
+    from pha.ledger_passthrough_lookup import (
+        fold_ledger_samples,
+        resolve_turn_wearable_scope,
+        registry_metric_ids_for_turn,
+    )
+
+    scope = resolve_turn_wearable_scope(uid, user_message)
+    unresolved = str(scope.unresolved_residue or "")
+    if scope.ledger_types:
+        latest_fallback = (
+            not enumerate_days and explicit is None and not grain.is_point_day()
+        )
+        samples = fold_ledger_samples(
+            uid,
+            scope.ledger_types,
+            win_start=win_start,
+            win_end=win_end,
+            named_days=named if enumerate_days else (),
+            latest_fallback=latest_fallback,
+        )
+        out = [
+            ManifestEntry(
+                domain="wearable",
+                metric=sample.label,
+                value=round(float(sample.value), 2),
+                unit="",
+                anchor=sample.day.isoformat(),
+                source="wearable.ledger",
+            )
+            for sample in samples
+        ]
+        return out, named_iso, win_start, win_end, unresolved
+    if scope.fail_closed_named:
+        return [], named_iso, win_start, win_end, ""
+
     if wearable_result is None or win_start == win_end or enumerate_days:
-        from pha.intent_gates import infer_wearable_metric_ids
-
-        metrics = infer_wearable_metric_ids(user_message)
-        if not metrics:
-            from pha.wearable_metric_registry import catalog_keys_core, primary_metric_id_for_catalog_key
-
-            metrics = [
-                mid
-                for key in catalog_keys_core()[:2]
-                if (mid := primary_metric_id_for_catalog_key(key))
-            ]
+        metrics = registry_metric_ids_for_turn(uid, user_message)
         wearable_result = get_health_data(
             uid,
             win_start,
@@ -548,7 +576,6 @@ def _wearable_entries(
         )
 
     out: List[ManifestEntry] = []
-    named_iso = tuple(d.isoformat() for d in named)
 
     if enumerate_days and named:
         from pha.wearable_metric_registry import catalog_unit_for
@@ -576,7 +603,7 @@ def _wearable_entries(
                         source="wearable.daily",
                     ),
                 )
-        return out, named_iso, win_start, win_end
+        return out, named_iso, win_start, win_end, unresolved
 
     same_day = win_start == win_end
     anchor = win_start.isoformat() if same_day else f"{win_start.isoformat()}~{win_end.isoformat()}"
@@ -596,7 +623,7 @@ def _wearable_entries(
                 source="wearable.summary" if not same_day else "wearable.daily",
             ),
         )
-    return out, named_iso, win_start, win_end
+    return out, named_iso, win_start, win_end, unresolved
 
 
 def build_numerics_manifest(
@@ -622,12 +649,13 @@ def build_numerics_manifest(
     if include_lipid and profile in ("combined_review", "lab_cross_year", "lifestyle"):
         entries.extend(_lipid_entries(user_id))
 
+    unresolved_residue = ""
     if include_wearable and profile in (
         "combined_review",
         "wearable_only",
         "wearable_screenshot_review",
     ):
-        wear_entries, named_iso, win_start, win_end = _wearable_entries(
+        wear_entries, named_iso, win_start, win_end, unresolved_residue = _wearable_entries(
             user_id,
             user_message,
             wearable_result=wearable_result,
@@ -645,6 +673,7 @@ def build_numerics_manifest(
         wearable_window_start=win_start.isoformat(),
         wearable_window_end=win_end.isoformat(),
         wearable_named_days=named_iso,
+        wearable_unresolved_residue=unresolved_residue,
     )
 
 

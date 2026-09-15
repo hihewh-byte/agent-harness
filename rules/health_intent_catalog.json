@@ -1,5 +1,5 @@
 {
-  "version": "1.9",
+  "version": "1.10",
   "anaphora": {
     "tokens": [
       "那",
@@ -104,6 +104,113 @@
       "氧饱和",
       "blood oxygen",
       "oxygen saturation"
+    ],
+    "cardio_recovery": [
+      "Cardio Recovery",
+      "cardio recovery",
+      "Heart Rate Recovery",
+      "heart rate recovery",
+      "有氧恢复",
+      "有氧恢复能力",
+      "心肺恢复",
+      "心率恢复",
+      "一分钟心率恢复",
+      "运动后心率恢复"
+    ],
+    "exercise_minutes": [
+      "锻炼分钟",
+      "锻炼时长",
+      "exercise minutes",
+      "apple exercise time",
+      "Exercise Time"
+    ],
+    "stand_time": [
+      "站立时间",
+      "站立时长",
+      "stand time",
+      "apple stand time"
+    ],
+    "walk_run_distance": [
+      "步行+跑步距离",
+      "步行跑步距离",
+      "walking + running distance",
+      "walking running distance"
+    ],
+    "walking_hr": [
+      "步行心率",
+      "walking heart rate average",
+      "walking heart rate"
+    ],
+    "walking_steadiness": [
+      "步行稳定性",
+      "walking steadiness",
+      "apple walking steadiness"
+    ],
+    "daylight": [
+      "日光暴露",
+      "日照时长",
+      "time in daylight",
+      "daylight"
+    ],
+    "flights": [
+      "爬楼层数",
+      "爬楼",
+      "flights climbed"
+    ],
+    "walking_speed": [
+      "步行速度",
+      "步速",
+      "walking speed"
+    ],
+    "six_minute_walk": [
+      "六分钟步行",
+      "six-minute walk",
+      "six minute walk"
+    ],
+    "body_mass": [
+      "体重",
+      "body mass",
+      "body weight"
+    ],
+    "body_fat": [
+      "体脂率",
+      "体脂",
+      "body fat percentage",
+      "body fat"
+    ],
+    "physical_effort": [
+      "体力活动努力",
+      "physical effort"
+    ],
+    "basal_energy": [
+      "基础消耗",
+      "基础代谢消耗",
+      "basal energy burned",
+      "basal energy"
+    ],
+    "running_speed": [
+      "跑步速度",
+      "跑步配速",
+      "running speed"
+    ],
+    "running_power": [
+      "跑步功率",
+      "running power"
+    ],
+    "step_length": [
+      "步幅",
+      "walking step length",
+      "step length"
+    ],
+    "env_audio": [
+      "环境声暴露",
+      "环境噪音",
+      "environmental audio exposure"
+    ],
+    "headphone_audio": [
+      "耳机音量暴露",
+      "耳机音量",
+      "headphone audio exposure"
     ]
   },
   "episodic_delta_followup": {
@@ -287,7 +394,74 @@
         "化验",
         "血脂",
         "LDL",
-        "lipid"
+        "lipid",
+        "cardio recovery",
+        "heart rate recovery",
+        "有氧恢复",
+        "有氧恢复能力",
+        "心率恢复",
+        "心肺恢复",
+        "一分钟心率恢复",
+        "运动后心率恢复",
+        "锻炼分钟",
+        "锻炼时长",
+        "exercise minutes",
+        "apple exercise time",
+        "Exercise Time",
+        "站立时间",
+        "站立时长",
+        "stand time",
+        "apple stand time",
+        "步行+跑步距离",
+        "步行跑步距离",
+        "walking + running distance",
+        "walking running distance",
+        "步行心率",
+        "walking heart rate average",
+        "walking heart rate",
+        "步行稳定性",
+        "walking steadiness",
+        "apple walking steadiness",
+        "日光暴露",
+        "日照时长",
+        "time in daylight",
+        "daylight",
+        "爬楼层数",
+        "爬楼",
+        "flights climbed",
+        "步行速度",
+        "步速",
+        "walking speed",
+        "六分钟步行",
+        "six-minute walk",
+        "six minute walk",
+        "体重",
+        "body mass",
+        "body weight",
+        "体脂率",
+        "体脂",
+        "body fat percentage",
+        "body fat",
+        "体力活动努力",
+        "physical effort",
+        "基础消耗",
+        "基础代谢消耗",
+        "basal energy burned",
+        "basal energy",
+        "跑步速度",
+        "跑步配速",
+        "running speed",
+        "跑步功率",
+        "running power",
+        "步幅",
+        "walking step length",
+        "step length",
+        "环境声暴露",
+        "环境噪音",
+        "environmental audio exposure",
+        "耳机音量暴露",
+        "耳机音量",
+        "headphone audio exposure"
       ],
       "domain": "wearable",
       "precedence_over": [
@@ -334,7 +508,74 @@
           "只看",
           "仅看",
           "only look at",
-          "only look"
+          "only look",
+          "cardio recovery",
+          "heart rate recovery",
+          "有氧恢复",
+          "有氧恢复能力",
+          "心率恢复",
+          "心肺恢复",
+          "一分钟心率恢复",
+          "运动后心率恢复",
+          "锻炼分钟",
+          "锻炼时长",
+          "exercise minutes",
+          "apple exercise time",
+          "Exercise Time",
+          "站立时间",
+          "站立时长",
+          "stand time",
+          "apple stand time",
+          "步行+跑步距离",
+          "步行跑步距离",
+          "walking + running distance",
+          "walking running distance",
+          "步行心率",
+          "walking heart rate average",
+          "walking heart rate",
+          "步行稳定性",
+          "walking steadiness",
+          "apple walking steadiness",
+          "日光暴露",
+          "日照时长",
+          "time in daylight",
+          "daylight",
+          "爬楼层数",
+          "爬楼",
+          "flights climbed",
+          "步行速度",
+          "步速",
+          "walking speed",
+          "六分钟步行",
+          "six-minute walk",
+          "six minute walk",
+          "体重",
+          "body mass",
+          "body weight",
+          "体脂率",
+          "体脂",
+          "body fat percentage",
+          "body fat",
+          "体力活动努力",
+          "physical effort",
+          "基础消耗",
+          "基础代谢消耗",
+          "basal energy burned",
+          "basal energy",
+          "跑步速度",
+          "跑步配速",
+          "running speed",
+          "跑步功率",
+          "running power",
+          "步幅",
+          "walking step length",
+          "step length",
+          "环境声暴露",
+          "环境噪音",
+          "environmental audio exposure",
+          "耳机音量暴露",
+          "耳机音量",
+          "headphone audio exposure"
         ]
       },
       "emphasis": {
@@ -358,6 +599,7 @@
     "vo2max",
     "resting_hr"
   ],
+  "unpromoted_named_tokens": [],
   "clarify_kinds": {
     "intent_scope": {
       "prompt_template": "您希望基于库内哪些数据做综合评估？",

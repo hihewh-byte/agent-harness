@@ -214,6 +214,10 @@ def infer_wearable_metric_ids(user_message: str) -> List[str]:
     msg = (user_message or "").strip()
     if not msg:
         return []
+    from pha.health_intent_catalog import message_names_unpromoted_metric
+
+    if message_names_unpromoted_metric(msg):
+        return []
     ordered: List[str] = []
     seen: set[str] = set()
 

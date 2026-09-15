@@ -61,6 +61,23 @@ def find_catalog_entry(metric_id: str) -> Optional[dict[str, Any]]:
     return None
 
 
+def picker_search_probes(metric_id: str) -> tuple[str, ...]:
+    """Community/Gemini English strings for the on-device picker. Never a Find write."""
+    entry = find_catalog_entry(metric_id)
+    if not entry:
+        return ()
+    raw = entry.get("picker_search_probes") or entry.get("tried_labels") or []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        label = str(item or "").strip()
+        if not label or label in seen:
+            continue
+        seen.add(label)
+        out.append(label)
+    return tuple(out)
+
+
 def quantity_find_allowed(metric_id: str, health_type: str) -> bool:
     """True only when the quantity Find label is device-verified for this metric."""
     label = (health_type or "").strip()
@@ -104,6 +121,7 @@ __all__ = [
     "list_find_catalog_entries",
     "load_shortcut_find_catalog",
     "never_use_find_labels",
+    "picker_search_probes",
     "quantity_find_allowed",
     "sleep_find_allowed",
 ]

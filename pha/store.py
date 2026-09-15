@@ -46,6 +46,14 @@ def _earliest_optional(a: datetime | None, b: datetime | None) -> datetime | Non
     return a if a <= b else b
 
 
+def _max_optional(a: float | None, b: float | None) -> float | None:
+    if a is None:
+        return b
+    if b is None:
+        return a
+    return max(a, b)
+
+
 def _sum_optional(a: float | None, b: float | None) -> float | None:
     if a is None:
         return b
@@ -67,7 +75,7 @@ def _merge_wearable_same_day(a: WearableDailySummary, b: WearableDailySummary) -
         steps = b.steps
     else:
         steps = None
-    return WearableDailySummary(
+    merged = WearableDailySummary(
         user_id=a.user_id,
         day=a.day,
         steps=steps,
@@ -83,6 +91,27 @@ def _merge_wearable_same_day(a: WearableDailySummary, b: WearableDailySummary) -
         vo2max_ml_kg_min=_avg_optional(a.vo2max_ml_kg_min, b.vo2max_ml_kg_min),
         wrist_temp_c=_avg_optional(a.wrist_temp_c, b.wrist_temp_c),
     )
+    data = merged.model_dump()
+    try:
+        from pha.wearable_metric_registry import zip_passthrough_rollups
+
+        seen: set[str] = set()
+        for field, how in zip_passthrough_rollups().values():
+            if field in seen:
+                continue
+            seen.add(field)
+            av = getattr(a, field, None)
+            bv = getattr(b, field, None)
+            kind = (how or "mean").strip() or "mean"
+            if kind == "sum":
+                data[field] = _sum_optional(av, bv)
+            elif kind in ("max", "latest"):
+                data[field] = _max_optional(av, bv) if kind == "max" else (bv if bv is not None else av)
+            else:
+                data[field] = _avg_optional(av, bv)
+    except Exception:
+        pass
+    return WearableDailySummary.model_validate(data)
 
 
 class HealthStore(MilestoneDatabasePort):

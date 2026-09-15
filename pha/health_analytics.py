@@ -171,6 +171,40 @@ def build_analytics_snapshot(
         metric_specs.append(("VO2max", lambda r: r.vo2max_ml_kg_min))
     if not dynamic or "wrist_temp" in mset:
         metric_specs.append(("手腕体温", lambda r: r.wrist_temp_c))
+    if dynamic:
+        from pha.wearable_metric_registry import (
+            catalog_labels,
+            l1_field_for,
+            metric_ids_for_catalog_key,
+        )
+
+        covered = {
+            "sleep",
+            "hrv",
+            "steps",
+            "rhr",
+            "spo2",
+            "respiratory_rate",
+            "vo2max",
+            "wrist_temp",
+            "activity_kcal",
+        }
+        seen_fields: set[str] = set()
+        for key in mset:
+            if key in covered:
+                continue
+            mids = list(metric_ids_for_catalog_key(key) or ())
+            if l1_field_for(key):
+                mids = [key] + mids
+            for mid in mids:
+                field = l1_field_for(mid)
+                if not field or field in seen_fields:
+                    continue
+                labels = catalog_labels(mid)
+                label = labels.stem_zh if labels else mid
+                metric_specs.append((label, lambda r, f=field: getattr(r, f, None)))
+                seen_fields.add(field)
+                break
     if not dynamic:
         metric_specs.append(("清醒", lambda r: r.awake_duration_hours))
 

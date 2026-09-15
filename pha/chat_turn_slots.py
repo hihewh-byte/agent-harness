@@ -331,7 +331,9 @@ def iter_turn_harness_assembly_phase(
     if "WEARABLE_90D_SUMMARY" in plan.slots_tier0:
         from pha.grounded_answer_composer import is_warehouse_metric_focus_turn
 
-        _wm_focus_turn = plan.profile == "wearable_only" and is_warehouse_metric_focus_turn(msg)
+        _wm_focus_turn = plan.profile == "wearable_only" and is_warehouse_metric_focus_turn(
+            msg, user_id=uid
+        )
         if _wm_focus_turn:
             ctx.wearable_summary = ""
         elif is_wearable_screenshot_profile(plan.profile):

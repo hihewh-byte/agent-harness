@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import math
+import resource
 import zipfile
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -71,6 +73,9 @@ _SUPPORTED_RECORD_TYPES = frozenset(
     },
 )
 
+_HK_QUANTITY_PREFIX = "HKQuantityTypeIdentifier"
+_HK_CATEGORY_PREFIX = "HKCategoryTypeIdentifier"
+
 ProgressCallback = Callable[[int, int, str], None]
 
 
@@ -133,9 +138,21 @@ def _rebucket_and_rebuild_sleep(user_id: str) -> None:
 
 def _safe_float(value: str) -> Optional[float]:
     try:
-        return float(value)
+        v = float(value)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(v):
+        return None
+    return v
+
+
+def _rss_kb() -> int:
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    rss = int(usage.ru_maxrss or 0)
+    # macOS ru_maxrss is bytes; Linux is kilobytes.
+    if rss >= 10_000_000:
+        return rss // 1024
+    return rss
 
 
 def _normalize_spo2_percent(value: float) -> float:
@@ -175,6 +192,11 @@ class _DayAgg:
     vo2max_n: int = 0
     wrist_temp_sum: float = 0.0
     wrist_temp_n: int = 0
+    passthrough_max: Dict[str, float] = field(default_factory=dict)
+    passthrough_sum: Dict[str, float] = field(default_factory=dict)
+    passthrough_n: Dict[str, int] = field(default_factory=dict)
+    passthrough_latest: Dict[str, float] = field(default_factory=dict)
+    passthrough_how: Dict[str, str] = field(default_factory=dict)
     sleep_segments: List[SleepSegment] = field(default_factory=list)
     sleep_deep_seconds: float = 0.0
     sleep_rem_seconds: float = 0.0
@@ -251,6 +273,8 @@ class AppleHealthParser:
         self._watermark: Optional[datetime] = None
         self._affected_days: set[date] = set()
         self._records_skipped_watermark: int = 0
+        self._passthrough_written: int = 0
+        self._passthrough_skipped: int = 0
 
     def parse_export_zip(
         self,
@@ -277,6 +301,11 @@ class AppleHealthParser:
             f"ZIP XML budget: {bytes_total:,} bytes across {xml_files_precount} file(s)",
         )
 
+        from pha.sqlite_storage import count_wearable_samples
+
+        rows_before = count_wearable_samples(self._user_id)
+        rss_before = _rss_kb()
+
         if clear_before_import:
             logger.info(
                 "Clearing wearable_data + wearable_daily for user_id=%s (preserve_healthkit=1)",
@@ -296,6 +325,8 @@ class AppleHealthParser:
         records = 0
         bytes_done = 0
         self._xml_max_dt = None
+        self._passthrough_written = 0
+        self._passthrough_skipped = 0
         writer = WearableDataBatchWriter(self._user_id)
         sleep_writer = SleepSegmentBatchWriter(self._user_id)
         workout_writer = WorkoutSessionBatchWriter(self._user_id)
@@ -383,6 +414,19 @@ class AppleHealthParser:
             message=integrity.message,
         )
 
+        rows_after = count_wearable_samples(self._user_id)
+        logger.info(
+            "event=zip_passthrough_telemetry user_id=%s rows_before=%s rows_after=%s "
+            "passthrough_written=%s passthrough_skipped=%s rss_kb_before=%s rss_kb_after=%s",
+            self._user_id,
+            rows_before,
+            rows_after,
+            self._passthrough_written,
+            self._passthrough_skipped,
+            rss_before,
+            _rss_kb(),
+        )
+
         result = AppleImportResult(
             user_id=self._user_id,
             zip_filename=filename,
@@ -443,6 +487,8 @@ class AppleHealthParser:
         self._watermark = resolve_import_watermark(self._user_id)
         self._affected_days = set()
         self._records_skipped_watermark = 0
+        self._passthrough_written = 0
+        self._passthrough_skipped = 0
         self._pending_workout = None
         self._xml_max_dt = None
 
@@ -682,12 +728,14 @@ class AppleHealthParser:
                     continue
                 if tag == "Record" and event == "end":
                     rtype = elem.attrib.get("type") or ""
+                    start_raw = elem.attrib.get("startDate") or elem.attrib.get("creationDate") or ""
+                    end_raw = elem.attrib.get("endDate") or start_raw
                     if rtype in _SUPPORTED_RECORD_TYPES:
-                        start_raw = elem.attrib.get("startDate") or elem.attrib.get("creationDate") or ""
-                        end_raw = elem.attrib.get("endDate") or start_raw
                         self._note_xml_datetime(_parse_apple_datetime(start_raw))
                         self._note_xml_datetime(_parse_apple_datetime(end_raw))
                         self._consume_record(elem, per_day, writer, sleep_writer)
+                    elif rtype.startswith(_HK_QUANTITY_PREFIX):
+                        self._passthrough_quantity_record(elem, per_day, writer)
                     count += 1
                     elem.clear()
                     continue
@@ -698,6 +746,67 @@ class AppleHealthParser:
             logger.exception("XML stream aborted")
             raise
         return count
+
+    def _passthrough_quantity_record(
+        self,
+        elem: Element,
+        per_day: DefaultDict[date, _DayAgg],
+        writer: WearableDataBatchWriter,
+    ) -> None:
+        """M1-P21a: untyped HK quantity Records → wearable_data as the HK type string."""
+        att = elem.attrib
+        rtype = (att.get("type") or "").strip()
+        if not rtype or rtype in _SUPPORTED_RECORD_TYPES:
+            return
+        if rtype.startswith(_HK_CATEGORY_PREFIX):
+            self._passthrough_skipped += 1
+            return
+        start_raw = att.get("startDate") or att.get("creationDate") or ""
+        end_raw = att.get("endDate") or start_raw
+        value = att.get("value") or ""
+        source_name = att.get("sourceName") or att.get("device") or ""
+        v = _safe_float(value)
+        if v is None:
+            self._passthrough_skipped += 1
+            return
+        start_dt = _parse_apple_datetime(start_raw)
+        if start_dt is None:
+            self._passthrough_skipped += 1
+            return
+        end_dt = _parse_apple_datetime(end_raw) or start_dt
+        if not self._is_after_watermark(start_dt, end_dt):
+            self._records_skipped_watermark += 1
+            return
+        sample_id = make_sleep_sample_id(
+            record_type=rtype,
+            start_raw=start_raw,
+            end_raw=end_raw,
+            value=value,
+            source_name=source_name,
+        )
+        writer.add_sample(rtype, start_dt, v, sample_id=sample_id)
+        self._note_xml_datetime(start_dt)
+        self._note_xml_datetime(end_dt)
+        self._passthrough_written += 1
+        from pha.wearable_daily_aggregator import fold_passthrough_value
+        from pha.wearable_metric_registry import zip_passthrough_rollups
+
+        spec = zip_passthrough_rollups().get(rtype)
+        if spec:
+            field, how = spec
+            day = _as_utc_date(start_dt)
+            bucket = per_day[day]
+            fold_passthrough_value(
+                bucket.passthrough_max,
+                bucket.passthrough_sum,
+                bucket.passthrough_n,
+                field=field,
+                how=how,
+                value=v,
+                dest_latest=bucket.passthrough_latest,
+                dest_how=bucket.passthrough_how,
+            )
+            self._affected_days.add(day)
 
     def _consume_record(
         self,
@@ -999,6 +1108,11 @@ class AppleHealthParser:
                 vo2max_n=agg.vo2max_n,
                 wrist_temp_sum=agg.wrist_temp_sum,
                 wrist_temp_n=agg.wrist_temp_n,
+                passthrough_max=dict(agg.passthrough_max),
+                passthrough_sum=dict(agg.passthrough_sum),
+                passthrough_n=dict(agg.passthrough_n),
+                passthrough_latest=dict(agg.passthrough_latest),
+                passthrough_how=dict(agg.passthrough_how),
             )
             rows.append(
                 build_wearable_daily_summary(

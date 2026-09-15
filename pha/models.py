@@ -113,6 +113,82 @@ class WearableDailySummary(BaseModel):
         default=None,
         description="Sleeping wrist / body temperature daily mean (°C).",
     )
+    cardio_recovery_1min_bpm: Optional[float] = Field(
+        default=None,
+        description="Max 1-minute heart-rate recovery that calendar day (bpm drop).",
+    )
+    apple_exercise_time_min: Optional[float] = Field(
+        default=None,
+        description="Apple Exercise Time daily sum (minutes).",
+    )
+    apple_stand_time_min: Optional[float] = Field(
+        default=None,
+        description="Apple Stand Time daily sum (minutes).",
+    )
+    distance_walking_running_km: Optional[float] = Field(
+        default=None,
+        description="Walking + running distance daily sum (km).",
+    )
+    walking_hr_avg_bpm: Optional[float] = Field(
+        default=None,
+        description="Walking heart-rate average (bpm).",
+    )
+    walking_steadiness: Optional[float] = Field(
+        default=None,
+        description="Apple Walking Steadiness (0–1 fraction as stored).",
+    )
+    time_in_daylight_min: Optional[float] = Field(
+        default=None,
+        description="Time in daylight daily sum (minutes).",
+    )
+    flights_climbed: Optional[float] = Field(
+        default=None,
+        description="Flights climbed daily sum.",
+    )
+    walking_speed_kmh: Optional[float] = Field(
+        default=None,
+        description="Walking speed daily mean (km/h as stored).",
+    )
+    six_minute_walk_m: Optional[float] = Field(
+        default=None,
+        description="Six-minute walk distance latest (m).",
+    )
+    body_mass_kg: Optional[float] = Field(
+        default=None,
+        description="Body mass latest (kg).",
+    )
+    body_fat_fraction: Optional[float] = Field(
+        default=None,
+        description="Body fat fraction latest (0–1 as stored).",
+    )
+    physical_effort: Optional[float] = Field(
+        default=None,
+        description="Physical Effort daily mean.",
+    )
+    basal_energy_kcal: Optional[float] = Field(
+        default=None,
+        description="Basal energy burned daily sum (kcal).",
+    )
+    running_speed_kmh: Optional[float] = Field(
+        default=None,
+        description="Running speed daily mean (km/h as stored).",
+    )
+    running_power_w: Optional[float] = Field(
+        default=None,
+        description="Running power daily mean (W).",
+    )
+    walking_step_length_cm: Optional[float] = Field(
+        default=None,
+        description="Walking step length daily mean (cm).",
+    )
+    environmental_audio_db: Optional[float] = Field(
+        default=None,
+        description="Environmental audio exposure daily mean (dB).",
+    )
+    headphone_audio_db: Optional[float] = Field(
+        default=None,
+        description="Headphone audio exposure daily mean (dB).",
+    )
     workout_session_count: Optional[int] = Field(
         default=None,
         description="HKWorkout sessions completed on this calendar day.",

@@ -1,12 +1,14 @@
 {
   "schema_version": "shortcut_health_find_catalog_v1",
-  "updated": "2026-09-08",
-  "rule": "shortcut_find_type 只能是 iOS 快捷指令「查找健康样本」选择器里的字面量，从真机抄录。禁止用 HealthKit SDK 名、健康 App 浏览页英文标题、权限面板别名去猜。status 不是 device_verified 的行禁止写入任何捷径。新增或勾选指标时先查本表，再 bump shortcut_pack_version。",
+  "updated": "2026-09-15",
+  "rule": "shortcut_find_type 只能是 iOS 快捷指令「查找健康样本」选择器里的字面量，从真机抄录。禁止用 HealthKit SDK 名、健康 App 浏览页英文标题、权限面板别名去猜。status 不是 device_verified 的行禁止写入任何捷径。picker_search_probes 只供真机英文选择器搜索，不得复制进 shortcut_find_type、不得生成捷径。新增或勾选指标时先查本表，再 bump shortcut_pack_version。",
   "never_use_find_labels": [
     "Active Energy",
     "Blood Oxygen",
     "Apple Sleeping Wrist Temperature",
-    "Cardio Fitness"
+    "Cardio Fitness",
+    "Step Count",
+    "Sleep Analysis"
   ],
   "entries": [
     {
@@ -21,7 +23,7 @@
       "hk_identifier": "HKQuantityTypeIdentifierStepCount",
       "status": "device_verified",
       "verified_on": "2026-09-05",
-      "notes": "M0-P2 真机入库。"
+      "notes": "M0-P2 真机入库。社区表「Step Count」与本机 Find 不符，已列入 never_use_find_labels。"
     },
     {
       "metric_id": "active_energy",
@@ -108,6 +110,23 @@
       "notes": "权限面板叫 Cardio Fitness；Find 必须是 VO2 Max。latest，不计覆盖率。"
     },
     {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "picker_search_probes": [
+        "Cardio Recovery",
+        "Heart Rate Recovery"
+      ],
+      "health_app_en": "Cardio Recovery",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "P21c：社区/Gemini 探针仅供英文选择器搜索。未点中、无 Allow Access 前禁止写捷径。"
+    },
+    {
       "metric_id": "wrist_temp",
       "ingest_key": "wrist_temp",
       "channel": "quantity",
@@ -122,7 +141,11 @@
       "status": "skipped",
       "skip_reason": "shortcuts_find_unverified",
       "verified_on": null,
-      "notes": "2026-09-08 真机：两种 Find 标签均无权限开关、无 POST。卡上仍可勾选看 zip 历史。晋升捷径前必须在本表改成 device_verified。"
+      "notes": "2026-09-08 真机：两种探针均无权限开关。Gemini 仍列 Wrist Temperature，不得再当 Find 写入。 picker_search_probes 仅供英文选择器搜索。",
+      "picker_search_probes": [
+        "Wrist Temperature",
+        "Apple Sleeping Wrist Temperature"
+      ]
     },
     {
       "metric_id": "sleep_time_asleep",
@@ -188,6 +211,298 @@
       "status": "device_verified",
       "verified_on": "2026-09-07",
       "notes": "睡眠捷径整包。"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Exercise Time",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierAppleExerciseTime",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "社区观察 Exercise Minutes，Gemini 写 Apple Exercise Time；两说并存故只作探针。 picker_search_probes 仅供英文选择器搜索。",
+      "picker_search_probes": [
+        "Exercise Minutes",
+        "Apple Exercise Time"
+      ]
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Stand Time",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierAppleStandTime",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "数量型 AppleStandTime。Gemini 的 Apple Stand Hour 是另一套类别样本，不是本行。 picker_search_probes 仅供英文选择器搜索。",
+      "picker_search_probes": [
+        "Stand Time",
+        "Apple Stand Time"
+      ]
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Walking + Running Distance",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierDistanceWalkingRunning",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierDistanceWalkingRunning (Walking + Running Distance, daily_agg=sum). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Walking + Running Distance"
+      ]
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Walking Heart Rate Average",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierWalkingHeartRateAverage",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierWalkingHeartRateAverage (Walking Heart Rate Average, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Walking Heart Rate Average"
+      ]
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Walking Steadiness",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierAppleWalkingSteadiness",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierAppleWalkingSteadiness (Walking Steadiness, daily_agg=latest). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Walking Steadiness"
+      ]
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Time in Daylight",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierTimeInDaylight",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierTimeInDaylight (Time in Daylight, daily_agg=sum). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Time in Daylight"
+      ]
+    },
+    {
+      "metric_id": "flights_climbed",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Flights Climbed",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierFlightsClimbed",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierFlightsClimbed (Flights Climbed, daily_agg=sum). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Flights Climbed"
+      ]
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Walking Speed",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierWalkingSpeed",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierWalkingSpeed (Walking Speed, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Walking Speed"
+      ]
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Six-Minute Walk Test Distance",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierSixMinuteWalkTestDistance",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierSixMinuteWalkTestDistance (Six-Minute Walk Test Distance, daily_agg=latest). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Six-Minute Walk Test Distance"
+      ]
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Body Mass",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierBodyMass",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Gemini 写 Body Mass 或 Weight，两说并存故只作探针。 picker_search_probes 仅供英文选择器搜索。",
+      "picker_search_probes": [
+        "Body Mass",
+        "Weight"
+      ]
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Body Fat Percentage",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierBodyFatPercentage",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierBodyFatPercentage (Body Fat Percentage, daily_agg=latest). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Body Fat Percentage"
+      ]
+    },
+    {
+      "metric_id": "physical_effort",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Physical Effort",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierPhysicalEffort",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierPhysicalEffort (Physical Effort, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Physical Effort"
+      ]
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Basal Energy Burned",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierBasalEnergyBurned",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "比照 Active Calories 模式，探针含 Basal Calories；未验证不得写入捷径。 picker_search_probes 仅供英文选择器搜索。",
+      "picker_search_probes": [
+        "Basal Calories",
+        "Basal Energy"
+      ]
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Running Speed",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierRunningSpeed",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierRunningSpeed (Running Speed, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Running Speed"
+      ]
+    },
+    {
+      "metric_id": "running_power_w",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Running Power",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierRunningPower",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierRunningPower (Running Power, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Running Power"
+      ]
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Walking Step Length",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierWalkingStepLength",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierWalkingStepLength (Walking Step Length, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Walking Step Length"
+      ]
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Environmental Audio Exposure",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierEnvironmentalAudioExposure",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierEnvironmentalAudioExposure (Environmental Audio Exposure, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Environmental Audio Exposure"
+      ]
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "ingest_key": null,
+      "channel": "quantity",
+      "shortcut_find_type": null,
+      "health_app_en": "Headphone Audio Exposure",
+      "permission_panel": null,
+      "hk_identifier": "HKQuantityTypeIdentifierHeadphoneAudioExposure",
+      "status": "skipped",
+      "skip_reason": "shortcuts_find_unverified",
+      "verified_on": null,
+      "notes": "Apple developer.apple.com/documentation/healthkit/hkquantitytypeidentifier documents HKQuantityTypeIdentifierHeadphoneAudioExposure (Headphone Audio Exposure, daily_agg=mean). Apple does not publish Shortcuts Find Health Samples picker literals; do not copy HK id or this docs title into a shortcut. 探针仅供真机英文选择器搜索，禁止写入捷径。",
+      "picker_search_probes": [
+        "Headphone Audio Exposure"
+      ]
     }
   ]
 }

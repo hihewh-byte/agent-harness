@@ -54,7 +54,7 @@ def context_lookup_enabled() -> bool:
     )
 
 
-def classify_goal(user_message: str) -> GoalClassification:
+def classify_goal(user_message: str, *, user_id: str = "default") -> GoalClassification:
     msg = (user_message or "").strip()
     if not msg:
         return GoalClassification("casual", 1.0, "empty")
@@ -63,6 +63,16 @@ def classify_goal(user_message: str) -> GoalClassification:
         return GoalClassification("casual", 1.0, "casual_gate")
 
     metrics = infer_metrics_from_message(msg)
+    from pha.health_intent_catalog import message_names_unpromoted_metric
+
+    if message_names_unpromoted_metric(msg):
+        return GoalClassification("metric_specific", 1.0, "unpromoted_named")
+
+    from pha.ledger_passthrough_lookup import match_ledger_passthrough_types
+
+    if match_ledger_passthrough_types(user_id, msg):
+        return GoalClassification("metric_specific", 1.0, "ledger_passthrough")
+
     readiness = catalog_goal_markers().get("daily_readiness") or {}
     if daily_readiness_profile_enabled() and message_matches_goal_class(msg, "daily_readiness"):
         anti = readiness.get("anti_tokens") or []

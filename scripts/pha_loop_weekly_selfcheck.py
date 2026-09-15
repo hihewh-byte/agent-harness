@@ -157,6 +157,37 @@ def main() -> int:
             print("FAIL local aliases summary missing in html")
             return 1
         print("OK fact card loop section")
+
+        from pha.loop_live_harvest import consider_utterance, enqueue_live_proposal
+
+        os.environ["PHA_HEALTH_INTENT_CATALOG"] = "1"
+        if consider_utterance("谢谢") is not None:
+            print("FAIL live skip weak close")
+            return 1
+        if consider_utterance("Rely") is not None:
+            print("FAIL live skip single latin junk")
+            return 1
+        if consider_utterance("How is my HRV?") is not None:
+            print("FAIL live skip already-known alias")
+            return 1
+        live_alias = "respiratory loop nick extra"
+        hit = consider_utterance(live_alias)
+        if not hit or hit.get("metric_id") != "respiratory_rate" or hit.get("alias") != live_alias:
+            print("FAIL live unique overlap", hit)
+            return 1
+        prior = consider_utterance("weird unused nickname phrase", session_prior_metric="steps")
+        if not prior or prior.get("metric_id") != "steps":
+            print("FAIL live session prior metric", prior)
+            return 1
+        pending_live = enqueue_live_proposal(hit)
+        if not pending_live or pending_live.get("status") != "pending":
+            print("FAIL live enqueue", pending_live)
+            return 1
+        again = enqueue_live_proposal(hit)
+        if again is not None:
+            print("FAIL live enqueue must dedupe", again)
+            return 1
+        print("OK live phrase harvest")
         return 0
 
 

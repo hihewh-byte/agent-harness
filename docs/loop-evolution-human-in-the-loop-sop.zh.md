@@ -145,13 +145,23 @@ python3 scripts/pha_chb_daily_recompile.py
 
 | 日期 | 说明 |
 |------|------|
-| 2026-09-11 | v1.2 — 路径 B：同意 → 本机 `data/loop_local_aliases.json`（不落仓库 catalog） |
+| 2026-09-15 | v1.3 — 事实卡实时 harvest（路径 L）；周更 launchd 改为可选 |
 | 2026-09-11 | v1.1 — 周更 harvest + 多渠道通知 + 人审批准页（不落 catalog） |
 | 2026-07-13 | v1.0 — 首条人审 alias 已合入（`steps←多少步`，PR #2） |
 
 ---
 
-## 路径 W — 每周自动 harvest + 通知 + 审批（不落库）
+## 路径 L — 事实卡实时审批（本机别名，不落仓库）
+
+> **铁律**：对话轮与发卡只产生 pending；**永不**自动改 `health_intent_catalog.json`。同意仍写 gitignored 的 `data/loop_local_aliases.json`。
+>
+> 默认开 `PHA_LOOP_LIVE_HARVEST=1`。发卡 `GET /proactive/fact-card` 会扫最近对话；对话结束后后台再扫一次。不再依赖周一 launchd。离线 e2e 批次仍可用 `pha_loop_weekly_harvest.py`。
+
+整句提案（不把英文句拆成 `Rely` / `already`）。没有唯一 catalog key 的未知指标直接跳过。待审上限 `PHA_LOOP_LIVE_MAX_PENDING`（默认 5）。
+
+审批方式与原先完整卡「同意 · 本机生效」相同。
+
+## 路径 W — 离线 e2e harvest（可选，不替代路径 L）
 
 > **铁律**：自动部分只到「提案 + 通知」；**永不**自动改仓库 `health_intent_catalog.json`。
 >

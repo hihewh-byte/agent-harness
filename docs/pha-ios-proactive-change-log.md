@@ -2,6 +2,69 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-15 (Loop：事实卡实时审批，不再靠周更)
+
+- **类别**：P1 / Loop A。维护者：手机完整卡已有审批模块，不要周更，改成实时。
+- **改动**：发卡与对话结束后扫最近用户句，整句提案进 pending；同意仍只写本机 `loop_local_aliases.json`。不跑拆词 distiller。build `pha-v2.3.56-loop-live`。
+- **证据**：`pha_loop_weekly_selfcheck`（含 live phrase harvest）。
+- **回滚**：`PHA_LOOP_LIVE_HARVEST=0`；回 v2.3.55。
+
+## 2026-09-15 (对话门闩：实体优先，残渣不熔断)
+
+- **类别**：P1 / 对话取数。维护者：禁止 NL corner-case 词表补丁；修机制。
+- **改动**：`resolve_turn_wearable_scope` 删 `residue_overrides`；metric 槽闭环即放行；`unresolved_residue` 透传 Manifest；skip-LLM 固定模板披露。enumerate 窗口 focus 过滤认全套 point/that-day/span 标签。build `pha-v2.3.55-entity-first-scope`。PRD v1.31。
+- **证据**：`pha_ledger_passthrough_lookup_selfcheck`；`pha_p21a_zip_passthrough_selfcheck`；离线「今天的HRV跟昨天的相比」出 09-14/09-15 两行。
+- **回滚**：恢复 `residue_overrides`；回 v2.3.54。
+
+## 2026-09-15 (Find 探针：社区英文只搜索、不写捷径)
+
+- **类别**：P1 / P21c 准备。维护者执行：Gemini/社区英文只作 `picker_search_probes`。已验证 Find（`Steps` / `Active Calories` 等）冻结。`Step Count` 与 `Sleep Analysis` 进 `never_use_find_labels`。不 bump `shortcut_pack_version`。
+- **改动**：Find 总表探针 + helper `picker_search_probes`；selfcheck 禁止探针解锁捷径。build `pha-v2.3.54-find-probes`。PRD v1.30。
+- **证据**：`pha_m1_batch2_selfcheck`；`pha_wearable_registry_selfcheck`。
+- **回滚**：去掉探针字段与 never_use 两行；回 v2.3.53。
+
+## 2026-09-15 (事实卡第二批 19 项)
+
+- **类别**：P1 / 事实卡。维护者同意 19 项（腕温 + 18 个 zip 升舱）。Find 查过 Apple HealthKit 文档：无 Shortcuts 选择器字面量，禁止用 HK id / 文档标题写捷径。
+- **改动**：Registry `zip_metric_type` + 日列；`daily_agg` 区分 sum/mean/latest（锻炼分钟等累计不再被做成均值）。default prefs 勾选这 19 项。Find 总表 `skipped`。build `pha-v2.3.53-batch2-19`。
+- **证据**：`pha_m1_batch2_selfcheck`；日表回灌 `backfill_passthrough_daily_from_l0`。
+- **回滚**：从 prefs 去掉这 19 个 id；回 v2.3.52。
+
+## 2026-09-15 (有氧恢复：事实卡勾选 + 中文别名)
+
+- **类别**：P1 / 事实卡。维护者：M1 本切片先完成勾选与中文别名。P21c Find 仍未真机抄录，不写捷径。
+- **改动**：`data/fact_card_prefs.json` default 勾选 `cardio_recovery_1min_bpm`（`enabled_default` 仍 false）。catalog / hints 补「有氧恢复能力」「一分钟心率恢复」「运动后心率恢复」。build `pha-v2.3.52-cardio-card`。
+- **证据**：`pha_p21b_cardio_recovery_selfcheck`（含 有氧恢复 / prefs）。
+- **回滚**：从 prefs 去掉该 id；回 v2.3.51。
+
+## 2026-09-15 (对话点名：catalog → 账本 L0 → Manifest)
+
+- **类别**：P1 / 对话取数。维护者：用户问到库里已有的数，不应每次改代码升舱。先 catalog；没有则对未升舱 HKQuantity type 用 HK id 派生针最长唯一匹配；命中写入本轮 Manifest；未命中 fail-closed；禁止 HRV/VO2max 顶台。P21b 仍只负责日表/发卡/捷径/中文别名。
+- **改动**：`pha/ledger_passthrough_lookup.py`；Numerics / 90d / warehouse-focus 接线。夹具加 `AppleWalkingSteadiness`。build `pha-v2.3.51-ledger-lookup`。PRD v1.27。未改 prefs。
+- **证据**：`pha_ledger_passthrough_lookup_selfcheck`；`pha_p21a_zip_passthrough_selfcheck`；`pha_p21b_cardio_recovery_selfcheck`。
+- **回滚**：去掉 lookup 接线与 core 禁垫；回 v2.3.50。P21c 仍 TODO。
+
+## 2026-09-15 (M1-P21b：Cardio Recovery 注册表升舱)
+
+- **类别**：P1 / 账本升舱。以 Registry JSON 声明 HK `zip_metric_type` → 日列 max；**不**把该类型写进 importer `_SUPPORTED_RECORD_TYPES`。独立 catalog key；无人群范围；Find 未抄录故 `shortcut_skip_reason`。未改 prefs。
+- **改动**：`wearable_metric_registry.json` `cardio_recovery_1min_bpm`；日列 + aggregator 通用 passthrough 折叠；catalog aliases。build `pha-v2.3.50-p21b-registry`。PRD v1.26。
+- **证据**：`pha_p21b_cardio_recovery_selfcheck`；`pha_p21a_zip_passthrough_selfcheck`（夹具日表 max=32）。
+- **回滚**：删 registry 行与日列；回 v2.3.49。P21c 仍 TODO。本机 `wearable_data` 无 recovery 行直至 zip 回灌。
+
+## 2026-09-14 (M1-P21a：zip 未知数量 Record 原样入库)
+
+- **类别**：P1 / 账本补全。白名单外 HKQuantity `Record` 以完整 HK `type` 写入 `wearable_data`；已支持类型不双写；不进日表/prefs/registry。点名 Cardio Recovery 不得用 HRV/VO2max 顶台。
+- **改动**：`pha/data_importer.py` passthrough；catalog `unpromoted_named_tokens`；Numerics/90d 摘要禁 core 回退。PRD v1.25 FR-1.4。build `pha-v2.3.49-p21a-passthrough`。
+- **证据**：`scripts/pha_p21a_zip_passthrough_selfcheck.py`。
+- **回滚**：恢复 importer 白名单门与 catalog 未升舱词；回 v2.3.48。P21b/c 仍 TODO。
+
+## 2026-09-14 (文档：zip 原样入库 + Cardio Recovery 升舱方案)
+
+- **类别**：P1 / 账本补全（编码未开）。维护者同意：未知 zip `Record` 应原样进 `wearable_data`；Loop A 不得发明 metric 列。现场：问 Cardio Recovery 后模型用 HRV/VO2max 顶台（FR-6.13 违规，作反例写入交接）。
+- **改动**：交接 [`handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md`](handoff-2026-09-14-zip-passthrough-and-cardio-recovery.md)；PRD v1.24 立 **M1-P21a/b/c**（a 原样入库 → b 注册表升舱 → c 捷径真机 Find）。**零生产代码**；不改 FR-1.4 正文、prefs、importer。
+- **证据**：文档对账；本机库无 recovery 行（此前查询）。
+- **回滚**：删交接、§8 三行、§11 本条、本 change-log；PRD 回 v1.23。
+
 ## 2026-09-11 (英文事实卡参考层中文壳)
 
 - **类别**：P1 / FR-2.8 本地化。截图：en-US 下参考句仍带 `【参考标准】` / 中文 note·source。

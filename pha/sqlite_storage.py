@@ -72,6 +72,25 @@ _WEARABLE_DAILY_EXTENSION_COLS = (
     "sleep_core_hours",
     "in_bed_hours",
     "sleep_period_hours",
+    "cardio_recovery_1min_bpm",
+    "apple_exercise_time_min",
+    "apple_stand_time_min",
+    "distance_walking_running_km",
+    "walking_hr_avg_bpm",
+    "walking_steadiness",
+    "time_in_daylight_min",
+    "flights_climbed",
+    "walking_speed_kmh",
+    "six_minute_walk_m",
+    "body_mass_kg",
+    "body_fat_fraction",
+    "physical_effort",
+    "basal_energy_kcal",
+    "running_speed_kmh",
+    "running_power_w",
+    "walking_step_length_cm",
+    "environmental_audio_db",
+    "headphone_audio_db",
 )
 _WEARABLE_DAILY_DATA_COLS = (
     "user_id",
@@ -333,6 +352,53 @@ def count_wearable_samples(user_id: str) -> int:
             (user_id.strip() or "default",),
         ).fetchone()
         return int(row["c"] or 0) if row else 0
+    finally:
+        _release_connection(conn)
+
+
+def list_distinct_wearable_metric_types(user_id: str) -> List[str]:
+    """Distinct ``wearable_data.metric_type`` values for this user (L0 ledger)."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    conn = _connect()
+    try:
+        cur = conn.execute(
+            """
+            SELECT DISTINCT metric_type FROM wearable_data
+            WHERE user_id = ? AND metric_type IS NOT NULL AND metric_type != ''
+            ORDER BY metric_type
+            """,
+            (uid,),
+        )
+        return [str(row["metric_type"]) for row in cur.fetchall() if row["metric_type"]]
+    finally:
+        _release_connection(conn)
+
+
+def query_latest_wearable_sample(
+    user_id: str,
+    metric_type: str,
+) -> Optional[tuple[str, float]]:
+    """Latest sample for one metric_type: (timestamp, value)."""
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    mt = (metric_type or "").strip()
+    if not mt:
+        return None
+    conn = _connect()
+    try:
+        row = conn.execute(
+            """
+            SELECT timestamp, value FROM wearable_data
+            WHERE user_id = ? AND metric_type = ? AND value IS NOT NULL
+            ORDER BY timestamp DESC
+            LIMIT 1
+            """,
+            (uid, mt),
+        ).fetchone()
+        if not row or row["value"] is None:
+            return None
+        return (str(row["timestamp"]), float(row["value"]))
     finally:
         _release_connection(conn)
 
@@ -1118,6 +1184,7 @@ def rebuild_wearable_daily_for_days(user_id: str, days: Sequence[date]) -> int:
                 SELECT metric_type, timestamp, value, sample_id
                 FROM wearable_data
                 WHERE user_id = ? AND substr(timestamp, 1, 10) = ?
+                ORDER BY timestamp ASC
                 """,
                 (uid, day_s),
             )
@@ -1149,6 +1216,92 @@ def rebuild_wearable_daily_for_days(user_id: str, days: Sequence[date]) -> int:
         upsert_wearable_daily_batch(rows)
         sync_wearable_data_from_daily(rows, user_id=uid)
     return len(rows)
+
+
+def backfill_passthrough_daily_from_l0(user_id: str = "default") -> int:
+    """Fill registry passthrough daily columns from ``wearable_data`` (grouped, not per-row correlated)."""
+    from pha.wearable_metric_registry import zip_passthrough_rollups
+
+    init_schema()
+    uid = (user_id or "default").strip() or "default"
+    touched = 0
+    conn = _connect()
+    try:
+        conn.execute("DROP TABLE IF EXISTS _pt_agg")
+        conn.execute("CREATE TEMP TABLE _pt_agg (day TEXT PRIMARY KEY, v REAL)")
+        for hk, (field, how) in zip_passthrough_rollups().items():
+            col = str(field or "").strip()
+            if not col.isidentifier():
+                continue
+            kind = (how or "mean").strip() or "mean"
+            conn.execute("DELETE FROM _pt_agg")
+            if kind == "sum":
+                conn.execute(
+                    """
+                    INSERT INTO _pt_agg(day, v)
+                    SELECT substr(timestamp, 1, 10), SUM(value)
+                    FROM wearable_data
+                    WHERE user_id = ? AND metric_type = ? AND value IS NOT NULL
+                    GROUP BY 1
+                    """,
+                    (uid, hk),
+                )
+            elif kind == "max":
+                conn.execute(
+                    """
+                    INSERT INTO _pt_agg(day, v)
+                    SELECT substr(timestamp, 1, 10), MAX(value)
+                    FROM wearable_data
+                    WHERE user_id = ? AND metric_type = ? AND value IS NOT NULL
+                    GROUP BY 1
+                    """,
+                    (uid, hk),
+                )
+            elif kind == "latest":
+                conn.execute(
+                    """
+                    INSERT INTO _pt_agg(day, v)
+                    SELECT day, value FROM (
+                      SELECT substr(timestamp, 1, 10) AS day, value,
+                             ROW_NUMBER() OVER (
+                               PARTITION BY substr(timestamp, 1, 10)
+                               ORDER BY timestamp DESC
+                             ) AS rn
+                      FROM wearable_data
+                      WHERE user_id = ? AND metric_type = ? AND value IS NOT NULL
+                    )
+                    WHERE rn = 1
+                    """,
+                    (uid, hk),
+                )
+            else:
+                conn.execute(
+                    """
+                    INSERT INTO _pt_agg(day, v)
+                    SELECT substr(timestamp, 1, 10), AVG(value)
+                    FROM wearable_data
+                    WHERE user_id = ? AND metric_type = ? AND value IS NOT NULL
+                    GROUP BY 1
+                    """,
+                    (uid, hk),
+                )
+            cur = conn.execute(
+                f"""
+                UPDATE wearable_daily
+                SET {col} = (SELECT v FROM _pt_agg WHERE _pt_agg.day = wearable_daily.day),
+                    updated_at = datetime('now')
+                WHERE user_id = ?
+                  AND day IN (SELECT day FROM _pt_agg)
+                """,
+                (uid,),
+            )
+            touched += int(cur.rowcount or 0)
+            logger.info("backfill %s %s rows=%s", col, kind, cur.rowcount)
+        conn.execute("DROP TABLE IF EXISTS _pt_agg")
+        conn.commit()
+    finally:
+        _release_connection(conn)
+    return touched
 
 
 def rebuild_daily_sleep_from_segments(user_id: str) -> int:
@@ -1243,6 +1396,25 @@ def _row_to_model(row: sqlite3.Row) -> WearableDailySummary:
         respiratory_rate_bpm=_opt_float("respiratory_rate_bpm"),
         vo2max_ml_kg_min=_opt_float("vo2max_ml_kg_min"),
         wrist_temp_c=_opt_float("wrist_temp_c"),
+        cardio_recovery_1min_bpm=_opt_float("cardio_recovery_1min_bpm"),
+        apple_exercise_time_min=_opt_float("apple_exercise_time_min"),
+        apple_stand_time_min=_opt_float("apple_stand_time_min"),
+        distance_walking_running_km=_opt_float("distance_walking_running_km"),
+        walking_hr_avg_bpm=_opt_float("walking_hr_avg_bpm"),
+        walking_steadiness=_opt_float("walking_steadiness"),
+        time_in_daylight_min=_opt_float("time_in_daylight_min"),
+        flights_climbed=_opt_float("flights_climbed"),
+        walking_speed_kmh=_opt_float("walking_speed_kmh"),
+        six_minute_walk_m=_opt_float("six_minute_walk_m"),
+        body_mass_kg=_opt_float("body_mass_kg"),
+        body_fat_fraction=_opt_float("body_fat_fraction"),
+        physical_effort=_opt_float("physical_effort"),
+        basal_energy_kcal=_opt_float("basal_energy_kcal"),
+        running_speed_kmh=_opt_float("running_speed_kmh"),
+        running_power_w=_opt_float("running_power_w"),
+        walking_step_length_cm=_opt_float("walking_step_length_cm"),
+        environmental_audio_db=_opt_float("environmental_audio_db"),
+        headphone_audio_db=_opt_float("headphone_audio_db"),
     )
 
 
@@ -1273,6 +1445,25 @@ def _model_to_tuple(row: WearableDailySummary) -> tuple:
         row.sleep_core_hours,
         row.in_bed_hours,
         row.sleep_period_hours,
+        row.cardio_recovery_1min_bpm,
+        row.apple_exercise_time_min,
+        row.apple_stand_time_min,
+        row.distance_walking_running_km,
+        row.walking_hr_avg_bpm,
+        row.walking_steadiness,
+        row.time_in_daylight_min,
+        row.flights_climbed,
+        row.walking_speed_kmh,
+        row.six_minute_walk_m,
+        row.body_mass_kg,
+        row.body_fat_fraction,
+        row.physical_effort,
+        row.basal_energy_kcal,
+        row.running_speed_kmh,
+        row.running_power_w,
+        row.walking_step_length_cm,
+        row.environmental_audio_db,
+        row.headphone_audio_db,
     )
 
 

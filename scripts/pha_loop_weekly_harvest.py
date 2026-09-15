@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Weekly Loop harvest + multi-channel notify (proposal-only; no catalog write).
+"""Weekly Loop harvest + multi-channel notify (e2e JSONL / offline only).
+
+Phone fact-card approvals harvest live chat instead (see pha/loop_live_harvest.py).
+This script remains for e2e telemetry batches. Never auto-merges catalog.
+"""
 
 Example (dry-run notify)::
 

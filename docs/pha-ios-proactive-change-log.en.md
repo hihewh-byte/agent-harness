@@ -2,6 +2,69 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-15 (Loop: live fact-card approvals, no weekly cron)
+
+- **Class**: P1 / Loop A. Maintainer: the phone full card already has the approval block — harvest live, not weekly.
+- **Change**: fact-card GET and post-chat scan recent user utterances; phrase-level pending only; approve still writes this-Mac `loop_local_aliases.json`. No token-splitting distiller. build `pha-v2.3.56-loop-live`.
+- **Evidence**: `pha_loop_weekly_selfcheck` (live phrase harvest).
+- **Rollback**: `PHA_LOOP_LIVE_HARVEST=0`; revert to v2.3.55.
+
+## 2026-09-15 (chat gate: entity-first; residue does not trip)
+
+- **Class**: P1 / chat fetch. Maintainer: no NL corner-case word patches; fix the mechanism.
+- **Change**: drop `residue_overrides` in `resolve_turn_wearable_scope`; closed metric slots pass; `unresolved_residue` on Manifest; fixed-template skip-LLM disclosure. Enumerate focus filter accepts point/that-day/span labels. build `pha-v2.3.55-entity-first-scope`. PRD v1.31.
+- **Evidence**: `pha_ledger_passthrough_lookup_selfcheck`; `pha_p21a_zip_passthrough_selfcheck`; offline “today’s HRV vs yesterday” emits 09-14/09-15 rows.
+- **Rollback**: restore `residue_overrides`; revert to v2.3.54.
+
+## 2026-09-15 (Find probes: community English is search-only)
+
+- **Class**: P1 / P21c prep. Maintainer execute: Gemini/community English is `picker_search_probes` only. Verified Finds (`Steps` / `Active Calories` / …) stay frozen. `Step Count` and `Sleep Analysis` join `never_use_find_labels`. No `shortcut_pack_version` bump.
+- **Change**: Find-catalog probes + helper `picker_search_probes`; selfcheck forbids probes unlocking the Shortcut. build `pha-v2.3.54-find-probes`. PRD v1.30.
+- **Evidence**: `pha_m1_batch2_selfcheck`; `pha_wearable_registry_selfcheck`.
+- **Rollback**: drop probe fields and the two never_use rows; revert to v2.3.53.
+
+## 2026-09-15 (fact-card second batch of 19)
+
+- **Class**: P1 / fact card. Maintainer agreed 19 items (wrist temp + 18 zip promotions). Apple HealthKit docs checked: no Shortcuts Find picker literals; do not copy HK ids or doc titles into a Shortcut.
+- **Change**: Registry `zip_metric_type` + daily columns; `daily_agg` distinguishes sum/mean/latest (exercise minutes no longer averaged). Default prefs enable the 19. Find catalog `skipped`. build `pha-v2.3.53-batch2-19`.
+- **Evidence**: `pha_m1_batch2_selfcheck`; daily backfill `backfill_passthrough_daily_from_l0`.
+- **Rollback**: drop the 19 prefs ids; revert to v2.3.52.
+
+## 2026-09-15 (Cardio Recovery: fact-card checkbox + zh aliases)
+
+- **Class**: P1 / fact card. Maintainer: finish this-slice M1 checkbox and Chinese aliases first. P21c Find still unverified; no Shortcut write.
+- **Change**: `data/fact_card_prefs.json` default enables `cardio_recovery_1min_bpm` (`enabled_default` stays false). Catalog/hints add 有氧恢复能力 / 一分钟心率恢复 / 运动后心率恢复. build `pha-v2.3.52-cardio-card`.
+- **Evidence**: `pha_p21b_cardio_recovery_selfcheck` (zh aliases + prefs).
+- **Rollback**: drop the prefs id; revert to v2.3.51.
+
+## 2026-09-15 (named chat: catalog → L0 ledger → Manifest)
+
+- **Class**: P1 / chat fetch. Maintainer: a stored number must not require a promotion PR per question. Catalog first; else longest unique needle from unpromoted HKQuantity types; hit → this-turn Manifest; miss → fail-closed; no HRV/VO2max padding. P21b still owns daily/card/Shortcut/Chinese aliases.
+- **Change**: `pha/ledger_passthrough_lookup.py`; Numerics / 90d / warehouse-focus wiring. Fixture adds `AppleWalkingSteadiness`. build `pha-v2.3.51-ledger-lookup`. PRD v1.27. Prefs untouched.
+- **Evidence**: `pha_ledger_passthrough_lookup_selfcheck`; `pha_p21a_zip_passthrough_selfcheck`; `pha_p21b_cardio_recovery_selfcheck`.
+- **Rollback**: drop lookup wiring and restore core padding; revert to v2.3.50. P21c still TODO.
+
+## 2026-09-15 (M1-P21b: Cardio Recovery registry promotion)
+
+- **Class**: P1 / ledger promotion. Registry JSON maps HK `zip_metric_type` → daily max; the type is **not** added to importer `_SUPPORTED_RECORD_TYPES`. Own catalog key; no population range; Find unverified (`shortcut_skip_reason`). Prefs untouched.
+- **Change**: `wearable_metric_registry.json` `cardio_recovery_1min_bpm`; daily column + generic passthrough fold; catalog aliases. build `pha-v2.3.50-p21b-registry`. PRD v1.26.
+- **Evidence**: `pha_p21b_cardio_recovery_selfcheck`; `pha_p21a_zip_passthrough_selfcheck` (fixture daily max=32).
+- **Rollback**: drop registry row and daily column; revert to v2.3.49. P21c still TODO. Live `wearable_data` has no recovery rows until zip re-import.
+
+## 2026-09-14 (M1-P21a: zip unknown quantity Records stored as-is)
+
+- **Class**: P1 / ledger. Off-allowlist HKQuantity `Record`s land in `wearable_data` under the full HK `type`; typed types are not double-written; no daily/prefs/registry. Named Cardio Recovery must not pad with HRV/VO2max.
+- **Change**: `pha/data_importer.py` passthrough; catalog `unpromoted_named_tokens`; Numerics/90d summary skip core fallback. PRD v1.25 FR-1.4. build `pha-v2.3.49-p21a-passthrough`.
+- **Evidence**: `scripts/pha_p21a_zip_passthrough_selfcheck.py`.
+- **Rollback**: restore importer allow-set gate and catalog tokens; revert to v2.3.48. P21b/c still TODO.
+
+## 2026-09-14 (docs: zip as-is ingest + Cardio Recovery promotion plan)
+
+- **Class**: P1 / ledger completion (coding not started). Maintainer: unknown zip `Record`s should land as-is in `wearable_data`; Loop A must not invent metric columns. Field: asking Cardio Recovery then padding with HRV/VO2max (FR-6.13 violation; recorded as a counterexample in the handoff).
+- **Change**: handoff [`handoff-2026-09-14-zip-passthrough-and-cardio-recovery.en.md`](handoff-2026-09-14-zip-passthrough-and-cardio-recovery.en.md); PRD v1.24 stood up **M1-P21a/b/c** (as-is store → registry promotion → on-device Find Shortcut). **Zero production code**; FR-1.4 body, prefs, importer untouched.
+- **Evidence**: docs reconcile; live store had no recovery rows (prior query).
+- **Rollback**: drop the handoff, three §8 rows, the §11 row, this change-log entry; PRD back to v1.23.
+
 ## 2026-09-11 (English fact-card reference shell still Chinese)
 
 - **Category**: P1 / FR-2.8 localization. Screenshot: en-US card still showed `【参考标准】` / Chinese note·source.

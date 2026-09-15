@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HealthData locale="en_US">
+  <Record type="HKQuantityTypeIdentifierHeartRateRecoveryOneMinute" sourceName="Wind’s Apple Watch" unit="count/min" creationDate="2026-03-01 08:00:00 +0800" startDate="2026-03-01 08:00:00 +0800" endDate="2026-03-01 08:01:00 +0800" value="32"/>
+  <Record type="HKQuantityTypeIdentifierVO2Max" sourceName="Wind’s Apple Watch" unit="mL/min·kg" creationDate="2026-03-01 09:00:00 +0800" startDate="2026-03-01 09:00:00 +0800" endDate="2026-03-01 09:00:00 +0800" value="51.5"/>
+  <Record type="HKQuantityTypeIdentifierHeartRateRecoveryOneMinute" sourceName="Wind’s Apple Watch" unit="count/min" creationDate="2026-03-02 08:00:00 +0800" startDate="2026-03-02 08:00:00 +0800" endDate="2026-03-02 08:01:00 +0800" value="not-a-number"/>
+  <Record type="HKCategoryTypeIdentifierAppleStandHour" sourceName="Wind’s Apple Watch" creationDate="2026-03-01 10:00:00 +0800" startDate="2026-03-01 10:00:00 +0800" endDate="2026-03-01 11:00:00 +0800" value="HKCategoryValueAppleStandHourStood"/>
+  <Record type="HKQuantityTypeIdentifierAppleWalkingSteadiness" sourceName="Wind’s Apple Watch" unit="%" creationDate="2026-03-01 11:00:00 +0800" startDate="2026-03-01 11:00:00 +0800" endDate="2026-03-01 11:00:00 +0800" value="0.72"/>
+  <Record type="HKQuantityTypeIdentifierStairAscentSpeed" sourceName="Wind’s Apple Watch" unit="m/s" creationDate="2026-03-01 12:00:00 +0800" startDate="2026-03-01 12:00:00 +0800" endDate="2026-03-01 12:00:00 +0800" value="0.41"/>
+</HealthData>

@@ -1011,6 +1011,12 @@ def orchestrate_chat_turn_events(
             yield json.dumps(_composer_follow_ups, ensure_ascii=False)
         _phase_rec.enter(ChatTurnPhase.DONE)
         yield json.dumps(done_payload, ensure_ascii=False)
+        try:
+            from pha.loop_live_harvest import schedule_live_alias_sync
+
+            schedule_live_alias_sync(uid)
+        except Exception:
+            logger.debug("loop live harvest schedule skipped", exc_info=True)
     except Exception as exc:
         _phase_rec.enter(ChatTurnPhase.ERROR)
         log_exception(

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Weekly PHA Loop harvest + notify (proposal-only).
+  Weekly PHA Loop harvest + notify (legacy / e2e JSONL only).
 
-  Install:
+  Phone fact-card Loop approvals now harvest live chat on card load
+  (pha/loop_live_harvest.py). Do not install this plist for daily use.
+
+  Optional offline e2e harvest:
     1. Copy to ~/Library/LaunchAgents/com.pha.loop-weekly.plist
     2. Edit PATHS / env below (REPO, E2E jsonl, tokens, SMTP, webhook)
     3. launchctl load ~/Library/LaunchAgents/com.pha.loop-weekly.plist

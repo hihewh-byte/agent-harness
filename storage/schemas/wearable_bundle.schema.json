@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pha://schemas/wearable_bundle.schema.json",
-  "schema_version": "1.2.3",
+  "schema_version": "1.2.5",
   "contract": {
     "name": "pha-evidence-asset",
     "revision": "2026-09-09",
@@ -453,6 +453,56 @@
         "zh": "VO2max"
       },
       {
+        "token": "Cardio Recovery",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "cardio recovery",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "Heart Rate Recovery",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "heart rate recovery",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "有氧恢复",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "有氧恢复能力",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "心肺恢复",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "心率恢复",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "一分钟心率恢复",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
+        "token": "运动后心率恢复",
+        "metric_id": "cardio_recovery",
+        "zh": "有氧恢复"
+      },
+      {
         "token": "腕温",
         "metric_id": "wrist_temp",
         "zh": "手腕体温"
@@ -471,6 +521,301 @@
         "token": "sleeping wrist",
         "metric_id": "wrist_temp",
         "zh": "手腕体温"
+      },
+      {
+        "token": "锻炼分钟",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "锻炼时长",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "exercise minutes",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "apple exercise time",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "Exercise Time",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "站立时间",
+        "metric_id": "stand_time",
+        "zh": "站立时间"
+      },
+      {
+        "token": "站立时长",
+        "metric_id": "stand_time",
+        "zh": "站立时间"
+      },
+      {
+        "token": "stand time",
+        "metric_id": "stand_time",
+        "zh": "站立时间"
+      },
+      {
+        "token": "apple stand time",
+        "metric_id": "stand_time",
+        "zh": "站立时间"
+      },
+      {
+        "token": "步行+跑步距离",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "步行跑步距离",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "walking + running distance",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "walking running distance",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "步行心率",
+        "metric_id": "walking_hr",
+        "zh": "步行心率"
+      },
+      {
+        "token": "walking heart rate average",
+        "metric_id": "walking_hr",
+        "zh": "步行心率"
+      },
+      {
+        "token": "walking heart rate",
+        "metric_id": "walking_hr",
+        "zh": "步行心率"
+      },
+      {
+        "token": "步行稳定性",
+        "metric_id": "walking_steadiness",
+        "zh": "步行稳定性"
+      },
+      {
+        "token": "walking steadiness",
+        "metric_id": "walking_steadiness",
+        "zh": "步行稳定性"
+      },
+      {
+        "token": "apple walking steadiness",
+        "metric_id": "walking_steadiness",
+        "zh": "步行稳定性"
+      },
+      {
+        "token": "日光暴露",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "日照时长",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "time in daylight",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "daylight",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "爬楼层数",
+        "metric_id": "flights",
+        "zh": "爬楼层数"
+      },
+      {
+        "token": "爬楼",
+        "metric_id": "flights",
+        "zh": "爬楼层数"
+      },
+      {
+        "token": "flights climbed",
+        "metric_id": "flights",
+        "zh": "爬楼层数"
+      },
+      {
+        "token": "步行速度",
+        "metric_id": "walking_speed",
+        "zh": "步行速度"
+      },
+      {
+        "token": "步速",
+        "metric_id": "walking_speed",
+        "zh": "步行速度"
+      },
+      {
+        "token": "walking speed",
+        "metric_id": "walking_speed",
+        "zh": "步行速度"
+      },
+      {
+        "token": "六分钟步行",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "six-minute walk",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "six minute walk",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "体重",
+        "metric_id": "body_mass",
+        "zh": "体重"
+      },
+      {
+        "token": "body mass",
+        "metric_id": "body_mass",
+        "zh": "体重"
+      },
+      {
+        "token": "body weight",
+        "metric_id": "body_mass",
+        "zh": "体重"
+      },
+      {
+        "token": "体脂率",
+        "metric_id": "body_fat",
+        "zh": "体脂率"
+      },
+      {
+        "token": "体脂",
+        "metric_id": "body_fat",
+        "zh": "体脂率"
+      },
+      {
+        "token": "body fat percentage",
+        "metric_id": "body_fat",
+        "zh": "体脂率"
+      },
+      {
+        "token": "body fat",
+        "metric_id": "body_fat",
+        "zh": "体脂率"
+      },
+      {
+        "token": "体力活动努力",
+        "metric_id": "physical_effort",
+        "zh": "体力活动努力"
+      },
+      {
+        "token": "physical effort",
+        "metric_id": "physical_effort",
+        "zh": "体力活动努力"
+      },
+      {
+        "token": "基础消耗",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
+        "token": "基础代谢消耗",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
+        "token": "basal energy burned",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
+        "token": "basal energy",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
+        "token": "跑步速度",
+        "metric_id": "running_speed",
+        "zh": "跑步速度"
+      },
+      {
+        "token": "跑步配速",
+        "metric_id": "running_speed",
+        "zh": "跑步速度"
+      },
+      {
+        "token": "running speed",
+        "metric_id": "running_speed",
+        "zh": "跑步速度"
+      },
+      {
+        "token": "跑步功率",
+        "metric_id": "running_power",
+        "zh": "跑步功率"
+      },
+      {
+        "token": "running power",
+        "metric_id": "running_power",
+        "zh": "跑步功率"
+      },
+      {
+        "token": "步幅",
+        "metric_id": "step_length",
+        "zh": "步幅"
+      },
+      {
+        "token": "walking step length",
+        "metric_id": "step_length",
+        "zh": "步幅"
+      },
+      {
+        "token": "step length",
+        "metric_id": "step_length",
+        "zh": "步幅"
+      },
+      {
+        "token": "环境声暴露",
+        "metric_id": "env_audio",
+        "zh": "环境声暴露"
+      },
+      {
+        "token": "环境噪音",
+        "metric_id": "env_audio",
+        "zh": "环境声暴露"
+      },
+      {
+        "token": "environmental audio exposure",
+        "metric_id": "env_audio",
+        "zh": "环境声暴露"
+      },
+      {
+        "token": "耳机音量暴露",
+        "metric_id": "headphone_audio",
+        "zh": "耳机音量暴露"
+      },
+      {
+        "token": "耳机音量",
+        "metric_id": "headphone_audio",
+        "zh": "耳机音量暴露"
+      },
+      {
+        "token": "headphone audio exposure",
+        "metric_id": "headphone_audio",
+        "zh": "耳机音量暴露"
       }
     ]
   },
@@ -499,7 +844,26 @@
       "spo2",
       "respiratory_rate",
       "vo2max",
-      "wrist_temp"
+      "wrist_temp",
+      "cardio_recovery",
+      "exercise_minutes",
+      "stand_time",
+      "walk_run_distance",
+      "walking_hr",
+      "walking_steadiness",
+      "daylight",
+      "flights",
+      "walking_speed",
+      "six_minute_walk",
+      "body_mass",
+      "body_fat",
+      "physical_effort",
+      "basal_energy",
+      "running_speed",
+      "running_power",
+      "step_length",
+      "env_audio",
+      "headphone_audio"
     ],
     "core": [
       "hrv",

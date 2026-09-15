@@ -170,8 +170,15 @@ Defer unattended cron until Path B validated on real data at least once.
 
 ---
 
+## Path L — live fact-card approval (this Mac only)
+
+> Chat turns and fact-card GETs only enqueue pending rows. Approve still writes gitignored `data/loop_local_aliases.json`. Default `PHA_LOOP_LIVE_HARVEST=1`. Weekly launchd is not required.
+
+---
+
 ## Revision log
 
 | Date | Note |
 |------|------|
+| 2026-09-15 | v1.3 — live fact-card harvest (Path L); weekly plist optional |
 | 2026-07-13 | v1.0 — first human-reviewed alias merged (`steps←多少步`, PR #2) |
