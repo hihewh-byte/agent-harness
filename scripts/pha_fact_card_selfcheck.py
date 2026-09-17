@@ -911,6 +911,190 @@ def main() -> int:
     ):
         return _fail(f"365d card must reject 90, got {near90}")
 
+    # --- M1-P22: assessment rolling window + vs-yesterday compile ---
+    from pha.fact_card_assessment_window import (
+        attach_assessment_evidence,
+        parse_assessment_window_plan,
+    )
+    from pha.numerics_manifest import audit_response_numerics
+
+    plan14 = parse_assessment_window_plan("只看HRV，对比近14天")
+    if plan14.window_days != 14 or plan14.ambiguous:
+        return _fail(f"parse 近14天, got {plan14}")
+    plan2w = parse_assessment_window_plan("近2周与昨天比较")
+    if plan2w.window_days != 14 or plan2w.point_compare != "yesterday":
+        return _fail(f"parse 近2周+昨天, got {plan2w}")
+    plan_amb = parse_assessment_window_plan("近7天和近30天")
+    if not plan_amb.ambiguous:
+        return _fail(f"dual N must be ambiguous, got {plan_amb}")
+    plan7 = parse_assessment_window_plan("近一周")
+    if plan7.window_days != 7:
+        return _fail(f"近一周 → 7, got {plan7}")
+    plan30 = parse_assessment_window_plan("最近一个月")
+    if plan30.window_days != 30:
+        return _fail(f"一个月 → 30, got {plan30}")
+
+    anchor = date(2026, 9, 16)
+    hrv_rows = []
+    for i in range(1, 15):
+        d = anchor - timedelta(days=i)
+        hrv_rows.append(
+            WearableDailySummary(
+                user_id="selfcheck",
+                day=d,
+                hrv_sdnn_ms=30.0 + i,
+            )
+        )
+    p22_card = {
+        "schema": "pha.fact_card/v1",
+        "user_id": "selfcheck",
+        "facts": {
+            "calendar_day": "2026-09-16",
+            "as_of": "2026-09-16",
+            "stale": False,
+            "metrics": [
+                {
+                    "metric": "hrv_sdnn_ms",
+                    "label": "HRV",
+                    "value": 53.7,
+                    "unit": "ms",
+                    "value_field": "hrv_sdnn_ms",
+                    "day": "2026-09-16",
+                    "baseline_window": "90d",
+                    "baseline_n": 80,
+                    "baseline_mean": 35.0,
+                    "baseline_min": 20.0,
+                    "baseline_max": 50.0,
+                    "percentile": 90.0,
+                }
+            ],
+        },
+        "assessment": {"summary": {"text": "ok"}, "advice": []},
+    }
+    injected = attach_assessment_evidence(
+        p22_card,
+        "只看HRV，对比近14天，跟昨天的数据比较",
+        rows=hrv_rows,
+    )
+    ac = (injected.get("facts") or {}).get("assessment_compare") or {}
+    if ac.get("window_days") != 14 or "14" not in (ac.get("spoken_day_tokens") or []):
+        return _fail(f"assessment_compare missing 14, got {ac}")
+    hrv_cmp = (ac.get("per_metric") or {}).get("hrv_sdnn_ms") or {}
+    if not hrv_cmp.get("n") or hrv_cmp.get("mean") is None:
+        return _fail(f"14d compare stats missing, got {hrv_cmp}")
+    apc = (injected.get("facts") or {}).get("assessment_point_compare") or {}
+    if apc.get("kind") != "yesterday" or apc.get("day") != "2026-09-15":
+        return _fail(f"yesterday point compare, got {apc}")
+    y_hrv = (apc.get("per_metric") or {}).get("hrv_sdnn_ms") or {}
+    if y_hrv.get("value") is None:
+        return _fail(f"yesterday HRV value missing, got {y_hrv}")
+
+    man22 = build_fact_card_numerics_manifest(injected, user_id="selfcheck")
+    if "14" not in man22.window_day_tokens:
+        return _fail(f"Manifest must whitelist 14, got {sorted(man22.window_day_tokens)}")
+    if "90" not in man22.window_day_tokens:
+        return _fail("dual token: progressive 90 must remain alongside 14")
+    if "2026-09-15" not in man22.allowed_dates:
+        return _fail(f"yesterday date must be allowed, got {sorted(man22.allowed_dates)}")
+    mean14 = hrv_cmp["mean"]
+    y_val = y_hrv["value"]
+    ok14 = audit_response_numerics(
+        f"近 14 日 HRV 均值约 {mean14} ms，昨天是 {y_val} ms，今天 53.7 ms。",
+        man22,
+    )
+    if not ok14.get("passed"):
+        return _fail(f"compiled 14d+yesterday must pass audit, got {ok14}")
+    bad14 = run_interpretation(
+        user_id="selfcheck",
+        card=p22_card,
+        assessment_prompt="",
+        model="selfcheck-model",
+        stream_fn=_done("近 14 日 HRV 回升。"),
+        daily_rows=[],
+    )
+    if bad14.get("status") != "failed" or "unauthorized_window:14" not in (
+        bad14.get("violations") or []
+    ):
+        return _fail(f"without assessment window, 近14日 must reject, got {bad14}")
+    good14 = run_interpretation(
+        user_id="selfcheck",
+        card=p22_card,
+        assessment_prompt="对比近14天",
+        model="selfcheck-model",
+        stream_fn=_done(f"近 14 日均值 {mean14} ms，今天 53.7 ms。"),
+        daily_rows=hrv_rows,
+    )
+    if good14.get("status") != "done":
+        return _fail(f"with assessment 近14天 must pass, got {good14}")
+    bad_other = run_interpretation(
+        user_id="selfcheck",
+        card=p22_card,
+        assessment_prompt="对比近10天",
+        model="selfcheck-model",
+        stream_fn=_done("近 14 日回升。"),
+        daily_rows=hrv_rows,
+    )
+    if bad_other.get("status") != "failed" or "unauthorized_window:14" not in (
+        bad_other.get("violations") or []
+    ):
+        return _fail(f"近10天 prompt must not unlock 14, got {bad_other}")
+
+    from pha.fact_card_assessment_window import strip_orphan_baseline_stats
+
+    orphan_src = {
+        "schema": "pha.fact_card/v1",
+        "facts": {
+            "calendar_day": "2026-09-16",
+            "as_of": "2026-09-16",
+            "metrics": [
+                {
+                    "metric": "hrv_sdnn_ms",
+                    "label": "HRV",
+                    "value": 53.7,
+                    "unit": "ms",
+                    "value_field": "hrv_sdnn_ms",
+                    "day": "2026-09-16",
+                    "baseline_window": None,
+                    "baseline_n": 5,
+                    "baseline_mean": 34.7,
+                    "baseline_min": 29.8,
+                    "baseline_max": 37.6,
+                    "percentile": None,
+                    "band": "pending",
+                }
+            ],
+        },
+    }
+    orphan = strip_orphan_baseline_stats(orphan_src)
+    o_hrv = next(m for m in orphan["facts"]["metrics"] if m["metric"] == "hrv_sdnn_ms")
+    if o_hrv.get("baseline_mean") is not None or o_hrv.get("baseline_min") is not None:
+        return _fail(f"orphan baseline stats must strip when no window, got {o_hrv}")
+    if o_hrv.get("baseline_n") != 5:
+        return _fail("baseline_n must remain after orphan strip")
+    # pending HRV + yesterday-only: inventing 近15天 still rejected; yesterday path OK
+    y_only = run_interpretation(
+        user_id="selfcheck",
+        card=p22_card,
+        assessment_prompt="只看HRV，跟昨天比较",
+        model="selfcheck-model",
+        stream_fn=_done("今天 53.7 ms，昨天 31.0 ms。"),
+        daily_rows=hrv_rows,
+    )
+    if y_only.get("status") != "done":
+        return _fail(f"yesterday-only must pass without invented window, got {y_only}")
+    invent15 = run_interpretation(
+        user_id="selfcheck",
+        card=orphan_src,
+        assessment_prompt="只看HRV，跟昨天比较",
+        model="selfcheck-model",
+        stream_fn=_done("近 15 日均值 34.7 ms，今天 53.7。"),
+        daily_rows=hrv_rows,
+    )
+    if invent15.get("status") != "failed" or "unauthorized_window:15" not in (
+        invent15.get("violations") or []
+    ):
+        return _fail(f"invented 近15日 must still reject, got {invent15}")
+
     foreign_date = run_interpretation(
         user_id="selfcheck",
         card=p91_card,

@@ -199,6 +199,8 @@ def build_fact_card_context_block(card: dict[str, Any]) -> str:
         "calendar_day": facts.get("calendar_day"),
         "stale": facts.get("stale"),
         "metrics": facts.get("metrics"),
+        "assessment_compare": facts.get("assessment_compare"),
+        "assessment_point_compare": facts.get("assessment_point_compare"),
         "summary": summary.get("text") if isinstance(summary, dict) else summary,
         "advice": assessment.get("advice"),
     }
@@ -206,6 +208,24 @@ def build_fact_card_context_block(card: dict[str, Any]) -> str:
         "以下为唯一可引用数字与日期。大纲是 USER_ASSESSMENT_PROMPT，不是 summary/advice。\n"
         + json.dumps(slim, ensure_ascii=False, indent=2)
     )
+
+
+def _load_daily_rows_for_assessment(user_id: str, card: dict[str, Any]):
+    from datetime import date as _date
+
+    from pha.health_data import effective_query_reference_date
+    from pha.sqlite_storage import query_max_wearable_daily_day, query_wearable_daily_range
+
+    uid = (user_id or "default").strip() or "default"
+    facts = card.get("facts") or {}
+    ref_s = str(facts.get("calendar_day") or facts.get("as_of") or "")[:10]
+    try:
+        ref = _date.fromisoformat(ref_s) if len(ref_s) == 10 else effective_query_reference_date()
+    except ValueError:
+        ref = effective_query_reference_date()
+    max_day = query_max_wearable_daily_day(uid)
+    end = max(ref, max_day or ref)
+    return query_wearable_daily_range(uid, _date(2000, 1, 1), end)
 
 
 def _audit_interpretation_text(
@@ -252,9 +272,15 @@ def run_interpretation(
     model: str,
     stream_fn: Optional[StreamFn] = None,
     locale: str = _DEFAULT_LOCALE,
+    daily_rows: Optional[list[Any]] = None,
 ) -> dict[str, Any]:
     """Synchronously generate one interpretation; used by worker and selfcheck."""
     from pha.chat_service import stream_pha_chat_events
+    from pha.fact_card_assessment_window import (
+        assessment_window_compare_enabled,
+        attach_assessment_evidence,
+        strip_orphan_baseline_stats,
+    )
     from pha.goal_classifier import assessment_outline_enabled
     from pha.health_intent_catalog import classify_outline_mode
 
@@ -269,6 +295,17 @@ def run_interpretation(
         outline_mode=outline_mode,
         assessment_prompt=outline_src,
     )
+    if assessment_window_compare_enabled():
+        rows = daily_rows
+        if rows is None:
+            try:
+                rows = _load_daily_rows_for_assessment(user_id, card)
+            except Exception:
+                rows = []
+        inject_card = attach_assessment_evidence(
+            inject_card, outline_src, rows=rows or []
+        )
+    inject_card = strip_orphan_baseline_stats(inject_card)
     if exclusive_inject_is_empty(
         card,
         outline_mode=outline_mode,
