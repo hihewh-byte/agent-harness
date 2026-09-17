@@ -2,6 +2,34 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-17 (Docs: chat wearable trend/compare evidence recipe · M1-P23)
+
+- **Class**: P1 / chat harness. Maintainer: past-week HRV+deep “changes” returned focal means only and claimed no history; not Loop / online LLM backfill; stand a shape recipe.
+- **Change**: Handoff [`handoff-2026-09-17-chat-wearable-trend-compare.en.md`](handoff-2026-09-17-chat-wearable-trend-compare.en.md); PRD **v1.33** stands **M1-P23** / FR-6.16. **Docs only, not coded**.
+- **Evidence**: Maintainer chat repro; review agreed “shape, not corner case”.
+- **Rollback**: Drop handoff + PRD v1.33 delta.
+
+## 2026-09-16 (P22 follow-up: strip orphan baseline means from interpret inject)
+
+- **Class**: P1 / fact-card interpret. Cache `unauthorized_window:15`: assessment only asked vs-yesterday; model invented “last 15 days” around pending HRV mean with no window.
+- **Change**: inject `strip_orphan_baseline_stats`; TASK forbids inventing last-N when `assessment_compare` absent. build `pha-v2.3.58-p22-orphan-baseline`.
+- **Evidence**: `pha_fact_card_selfcheck` PASS.
+- **Rollback**: drop strip; revert to v2.3.57.
+
+## 2026-09-16 (M1-P22: compile assessment window / vs-yesterday into Manifest)
+
+- **Class**: P1 / fact-card interpret. Maintainer: generalize last-N assembly; dual 90 + assessment tokens; vs-yesterday this phase; do not relax audit.
+- **Change**: `pha/fact_card_assessment_window.py`; interpret inject attach; Manifest/TASK/context; selfcheck. build `pha-v2.3.57-p22-assess-window`. PRD FR-6.15 / M1-P22 DONE. Flag `PHA_ASSESSMENT_WINDOW_COMPARE` (default on).
+- **Evidence**: `python3 scripts/pha_fact_card_selfcheck.py` PASS.
+- **Rollback**: `PHA_ASSESSMENT_WINDOW_COMPARE=0`; revert to v2.3.56.
+
+## 2026-09-16 (docs: compile assessment window into Manifest · option B)
+
+- **Class**: P1 / fact-card interpret. Maintainer: last-10-days / last-2-weeks should pass when accurate; do not relax `unauthorized_window`; compile in the rule layer first.
+- **Change**: handoff [`handoff-2026-09-16-assessment-window-compile.en.md`](handoff-2026-09-16-assessment-window-compile.en.md); PRD v1.32 stands **M1-P22**. Same day coded (see above).
+- **Evidence**: today’s cache `unauthorized_window:14`; card window tokens only `90` etc.
+- **Rollback**: see above.
+
 ## 2026-09-15 (Loop: live fact-card approvals, no weekly cron)
 
 - **Class**: P1 / Loop A. Maintainer: the phone full card already has the approval block — harvest live, not weekly.

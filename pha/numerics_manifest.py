@@ -650,6 +650,7 @@ def build_numerics_manifest(
         entries.extend(_lipid_entries(user_id))
 
     unresolved_residue = ""
+    compare_tokens: Set[str] = set()
     if include_wearable and profile in (
         "combined_review",
         "wearable_only",
@@ -662,8 +663,28 @@ def build_numerics_manifest(
             episodic=episodic,
         )
         entries.extend(wear_entries)
+        from pha.chat_trend_compare import (
+            compile_trend_compare_stats,
+            is_trend_compare_turn,
+            trend_compare_manifest_entries,
+        )
+        from pha.ledger_passthrough_lookup import registry_metric_ids_for_turn
 
-    return NumericsManifest(
+        if is_trend_compare_turn(user_message, user_id=user_id, episodic=episodic):
+            metric_ids = registry_metric_ids_for_turn(user_id, user_message)
+            stats = compile_trend_compare_stats(
+                user_id,
+                user_message,
+                metric_ids=metric_ids,
+                focal_start=win_start,
+                focal_end=win_end,
+                grain_source=grain.source,
+            )
+            cmp_entries, compare_tokens = trend_compare_manifest_entries(stats)
+            # Prepend compare atoms so Tier0 600-char trim keeps them.
+            entries = list(cmp_entries) + list(entries)
+
+    manifest = NumericsManifest(
         profile=profile,
         user_id=(user_id or "default").strip() or "default",
         entries=entries,
@@ -674,7 +695,16 @@ def build_numerics_manifest(
         wearable_window_end=win_end.isoformat(),
         wearable_named_days=named_iso,
         wearable_unresolved_residue=unresolved_residue,
+        window_day_tokens=set(compare_tokens),
     )
+    if include_wearable and profile in (
+        "combined_review",
+        "wearable_only",
+        "wearable_screenshot_review",
+    ):
+        focal_days = max(1, (win_end - win_start).days + 1)
+        manifest.window_day_tokens.add(str(int(focal_days)))
+    return manifest
 
 
 def _window_short(window: Optional[str], *, night: bool) -> str:
@@ -876,6 +906,108 @@ def build_fact_card_numerics_manifest(
         except (TypeError, ValueError):
             pass
 
+    # M1-P22: assessment rolling window + vs-yesterday (inject-only; dual with progressive 90).
+    ac = facts.get("assessment_compare")
+    if isinstance(ac, dict) and str(ac.get("status") or "") == "ok":
+        for tok in ac.get("spoken_day_tokens") or []:
+            t = str(tok or "").strip()
+            if t.isdigit():
+                window_day_tokens.add(t)
+        wd = ac.get("window_days")
+        if wd is not None:
+            try:
+                window_day_tokens.add(str(int(wd)))
+            except (TypeError, ValueError):
+                pass
+        wlabel = str(ac.get("window_label") or "").strip() or (
+            f"{wd}d" if wd is not None else "Nd"
+        )
+        per = ac.get("per_metric") or {}
+        if isinstance(per, dict):
+            for mid, block in per.items():
+                if not isinstance(block, dict):
+                    continue
+                label = ""
+                unit = "-"
+                for item in facts.get("metrics") or []:
+                    if isinstance(item, dict) and str(item.get("metric") or "") == str(mid):
+                        label = str(item.get("label") or mid)
+                        unit = str(item.get("unit") or "-") or "-"
+                        break
+                label = label or str(mid)
+                anchor = f"assessment:{wlabel}"
+                for key, suffix in (
+                    ("mean", f"评估窗{wlabel}均值"),
+                    ("min", f"评估窗{wlabel}最低"),
+                    ("max", f"评估窗{wlabel}最高"),
+                    ("percentile", f"评估窗{wlabel}百分位"),
+                ):
+                    raw = block.get(key)
+                    if raw is None:
+                        continue
+                    entries.append(
+                        ManifestEntry(
+                            domain="fact_card",
+                            metric=f"{label}·{suffix}",
+                            value=float(raw),
+                            unit="pct" if key == "percentile" else unit,
+                            anchor=anchor,
+                            source="fact_card_assessment_compare",
+                        )
+                    )
+                bn = block.get("n")
+                if bn is not None:
+                    entries.append(
+                        ManifestEntry(
+                            domain="fact_card",
+                            metric=f"{label}·评估窗{wlabel}天数",
+                            value=float(int(bn)),
+                            unit="days",
+                            anchor=anchor,
+                            source="fact_card_assessment_compare",
+                        )
+                    )
+
+    apc = facts.get("assessment_point_compare")
+    if isinstance(apc, dict) and str(apc.get("kind") or "") == "yesterday":
+        yday = str(apc.get("day") or "")[:10]
+        per_y = apc.get("per_metric") or {}
+        if isinstance(per_y, dict):
+            for mid, block in per_y.items():
+                if not isinstance(block, dict):
+                    continue
+                label = ""
+                unit = "-"
+                for item in facts.get("metrics") or []:
+                    if isinstance(item, dict) and str(item.get("metric") or "") == str(mid):
+                        label = str(item.get("label") or mid)
+                        unit = str(item.get("unit") or "-") or "-"
+                        break
+                label = label or str(mid)
+                day_anchor = str(block.get("day") or yday or "")[:10] or "-"
+                if block.get("value") is not None:
+                    entries.append(
+                        ManifestEntry(
+                            domain="fact_card",
+                            metric=f"{label}·昨天",
+                            value=float(block["value"]),
+                            unit=unit,
+                            anchor=day_anchor,
+                            source="fact_card_assessment_point",
+                        )
+                    )
+                if block.get("delta") is not None:
+                    entries.append(
+                        ManifestEntry(
+                            domain="fact_card",
+                            metric=f"{label}·较昨天差",
+                            value=float(block["delta"]),
+                            unit=unit,
+                            anchor=day_anchor,
+                            source="fact_card_assessment_point",
+                        )
+                    )
+
     _append_population_commons_entries(entries)
 
     return NumericsManifest(
@@ -934,7 +1066,12 @@ def format_manifest_tier0_block(
             body = f"{body}\n{_WEARABLE_MANIFEST_FORBIDDEN_FOOTER}"
         return body
     trimmed = [header.strip()]
-    for e in manifest.entries:
+    # Prefer trend_compare atoms under the 600-char Tier0 cap (M1-P23).
+    ordered = sorted(
+        manifest.entries,
+        key=lambda e: (0 if (e.source or "").startswith("wearable.trend_compare") else 1),
+    )
+    for e in ordered:
         line = e.kv_line()
         candidate = "\n".join(trimmed + [line])
         if len(candidate) > cap - 20:

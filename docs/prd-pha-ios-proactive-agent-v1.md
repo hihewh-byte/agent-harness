@@ -3,7 +3,7 @@
 > **Language / 语言**：[English](prd-pha-ios-proactive-agent-v1.en.md) · 中文（本文）
 
 > **状态**：跨 agent **产品共识真源**（强制）  
-> **版本**：v1.31 · 2026-09-15  
+> **版本**：v1.33 · 2026-09-17  
 > **确认行**：`CONSENSUS_ACK: pha-ios-proactive-prd-v1 read`  
 > **变更日志**：[`pha-ios-proactive-change-log.md`](pha-ios-proactive-change-log.md)（本轨道代码/契约改动须同 PR 更新）  
 > **上位法**：[`pha-pm-constitution.md`](pha-pm-constitution.md) · [`harness-consensus-opus48-2026-06-08.md`](harness-consensus-opus48-2026-06-08.md) · 非医疗器械声明（README）  
@@ -186,6 +186,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | FR-6.12 | **非数字背景**（v1.12）：`fact_card_interpret` 允许**唯一**一个 Tier1 槽 `USER_BACKGROUND_BRIEF`：来源为用户聊天自述（`user_health_background_notes` 的 supplement / medication / sleep_lifestyle / symptom / general），去重、按类配额、**去数字去日期**（标识符 `D3`/`Omega-3` 保留；时间只用相对词表）、整行截断限长，并经审计同一套抽取器后验「无 S 级 token」；只影响建议措辞与注意事项，不得引用为数值、不得复述剂量。`SUPPLEMENT_BG` / RECALL / `EPISODIC_BRIDGE` / `WEARABLE_90D_SUMMARY` 继续禁止。审计策略不变：brief 内数字不是 manifest 成员。缓存键增 `sha256(brief)`；响应带 `background_used` 与 `brief_source ∈ {chb, live_notes}`。**读侧过滤（v1.16）**：配额前用与捕获同一套 schema `background_capture_negative_keywords` 丢掉问句，禁止「偏爱更长历史笔记」。**P15 供给源**：CHB 工件新鲜（`is_stale=False`）→ 投影 §Background + 解读脉络（**不含** §Facts）；否则回落 P14 live notes。**脉络（v1.20）**：只保留反复出现的注意事项/建议句；去数字后的指标字段残行（今日值/百分位/窗口均值标签）丢弃，空则整段不注入。**编译画像（v1.18）**：CHB 把 notes 编成 `background_rows[]`：`{category, text, rel_key, prov_type=user_statement}`，无 `value`/`unit`/`metric_id`；text 去数字、按时段词拆行；配额仍按原笔记。同一组行渲染 §Background。聊天侧 `USER_CONTEXT_BRIEF`（仅 `lifestyle` / `combined_review`）**必须**投影 §Background，禁止再物理丢弃。解读轮**仍只**走 `USER_BACKGROUND_BRIEF`（同一组行），**禁止**把 `fact_card_interpret` 加进 `USER_CONTEXT_BRIEF_PROFILES`。**TASK 槽契约（v1.19）**：禁止派生百分位；brief 在场不得整槽 skip；导语不得写「无关则忽略」。禁止药名/补剂名表；自述行**不进** §Facts / Manifest | **已落地（M1-P14 + P15 编码）**。selfcheck：`每晚补剂项B 400mg` → brief 含 `补剂项B` 不含 `400`；问句不进 brief；CHB 投影无 §Facts；`lifestyle` 的 `USER_CONTEXT_BRIEF` 含 §Background；interpret profile 不含该槽。P15 已 DONE（v1.22；槽内 ≥2 具体项；训练黄金句不用具名药物对） |
 | FR-6.13 | **对话框解读与事实卡同源**（v1.13）：Mac 网页对话与 iOS 主动事实卡共用 Registry 指标真源。对话侧取数用 registry `metric_id` + `l1.field`；簇/标签/词表不得在 Python 再写一份。`daily_readiness`（今天状态/能否训练）升舱 `wearable_daily_review`，槽位与 `fact_card_interpret` 同构（TASK / FACT_CARD_CONTEXT / NUMERICS_MANIFEST / USER_ASSESSMENT_PROMPT），`memory_write_policy=chat`。无日期词的指标追问可继承会话点日粒度；查不到须 fail-closed，禁止换日换指标。SSE `fact_card` 披露 `metrics_in_scope` / `available_not_selected`；follow_ups 双语进 Intent Catalog。**发卡 ⊆ 本轮 scope（v1.14）**：`fact_card` 的 entries 必须 ⊆ `metrics_in_scope`；scope 为空则**不上卡**。fail-closed 缺行只在正文声明，禁止用默认 90d 核心（HRV 均值、活动消耗日均等）顶台。**`wearable_daily_review` 发卡真源（v1.15）**：有本轮 `FACT_CARD_CONTEXT` 时，SSE entries / `metrics_in_scope` ⊆ 该卡 metric 行（与解读同一张卡，含因「睡眠各项」等点名而簇展开并入卡的行）。禁止用 iOS 勾选去裁掉本轮合法簇展开。`daily_readiness` 的训练/力量/运动类型词只进 TASK 大纲，Registry 不得把光秃「运动/training」映射为 `workout_*`。无卡才允许 `infer_wearable_metric_ids` 作 scope 兜底 | `pha_chat_fact_card_parity_selfcheck` H9–H13 / H9E–H13E；C1 无卡、C2 可出 HRV 卡；P19-C/K。交接 parity + [`handoff-2026-09-10-eval-audit-solution.md`](handoff-2026-09-10-eval-audit-solution.md) |
 | FR-6.14 | **对话档案查询**（v1.14）：Intent Catalog `goal_class=context_lookup`（有没有药/哪些补剂等）。仅档案问句 → 已有 context/lifestyle 车道，不组装穿戴默认核心、不发数字卡；命中 notes 则列自述品类（去剂量），未命中一句没有。与显式指标共存（药物对 HRV）→ **不** warehouse skip-LLM；数字 ⊆ 点名指标；背景 ⊆ P14 同款 brief 切片（去重配额），禁止全量 `SUPPLEMENT_BG`、禁止翻转 Data > Context。不得把未注入档案的品类说成「您正在服用」。P15 CHB 是代表条编译终态；本 FR **不**翻转 Data > Context，也禁止「偏爱更长历史笔记」启发式 | C1–C4；3F §15。交接同上 |
+| FR-6.15 | **评估滚动窗口 + 点日对比编译**（v1.32 / M1-P22）：评估要求中的显式滚动窗（近/过去 N 天或周，含一周/两周/一个月等）与「跟昨天比」须在 `fact_card_interpret` 调 LLM **前**解析，并由规则层重算对比统计，写入解读**注入卡**的 `assessment_compare` / `assessment_point_compare` 与 Numerics Manifest（窗口 day token、compare 均值/极值/n、昨天值/差值、昨天 ISO 日期）。**任意显式 N**（clamp 1–365）按窗组装，不是只白名单 7/14/30。HTML 可见卡递进基线（90d→365d→all）**不变**；Manifest **双 token**（递进窗与评估窗可并存）。多不同 N 歧义 → 不挂 rolling compare。评估要求仍不得直接解锁未入 Manifest 的 S 级。Flag `PHA_ASSESSMENT_WINDOW_COMPARE`（默认开） | selfcheck：近14天解锁 `14`；无评估窗拒 `unauthorized_window:14`；近10天不解锁14；近2周+昨天含日期与数值；双 N 歧义 |
+| FR-6.16 | **对话穿戴趋势/对比证据配方**（v1.33 / M1-P23）：`/api/chat` 穿戴路径上，意图落入「变化 / 趋势 / 对比 / 以往 / 升降」且指标为穿戴时，须在调 LLM **前**由规则层装齐 **本窗汇总 + 对照侧**（递进个人基线或近 90 日同指标统计），数字均入 Numerics Manifest；对照不足则 skip-LLM/定账模板披露，禁止只塞本窗均值却谈升降。与 FR-6.15 同构、路径分立（对话用户句 vs 评估要求）。触发词进 Intent Catalog/schema，**禁止** Python 单句 `if`。跨域「化验 vs 穿戴以往」须 clarify，不得用一周穿戴均值冒充化验对比。**禁止** Loop 别名或在线 Reflection 改 Plan 补证。Flag `PHA_CHAT_TREND_COMPARE`（默认开） | selfcheck：≥2 组不同 grain/指标；库有历史时不得正文称「缺乏此前数据」；点查不强制对照；续问化验 → clarify 或 lab 路径。交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md) |
 
 ### 5.1 事实卡内容契约（v1.3 · 完整卡必须遵守）
 
@@ -279,6 +281,8 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P21a** | zip 未知数量 `Record` 原样入 `wearable_data` | `DONE` | 2026-09-14 入库；2026-09-15 对话读路径：catalog → L0 唯一命中 → 本轮 Manifest，否则 fail-closed。不自动升舱。selfcheck `pha_p21a_zip_passthrough_selfcheck` + `pha_ledger_passthrough_lookup_selfcheck` |
 | **M1-P21b** | Cardio Recovery 注册表 + 日聚合 + catalog（有样本才 DONE） | `DONE` | 2026-09-15：Registry + 日表 max + catalog。2026-09-15 勾选：default prefs 含 `cardio_recovery_1min_bpm`；中文别名含有氧恢复/一分钟心率恢复等。Find 未抄录。 |
 | **M1-P21c** | 捷径 Find 真机抄录后才增量同步 | `TODO` | 2026-09-15：Find 总表已写入社区/Gemini 英文 `picker_search_probes`（含 `Step Count` / `Sleep Analysis` 进 `never_use_find_labels`）。探针不得当 Find、不 bump `shortcut_pack_version`。仍须真机点中选择器字面量后一次一条升 `device_verified`。 |
+| **M1-P22** | **评估滚动窗口编译进解读 Manifest**（FR-6.15） | `DONE` | 2026-09-16：任意显式 N 天/周 + 跟昨天比 → inject `assessment_compare`/`assessment_point_compare` + Manifest；90 与评估窗双 token；不放宽审计。build `pha-v2.3.57-p22-assess-window`。交接 [`handoff-2026-09-16-assessment-window-compile.md`](handoff-2026-09-16-assessment-window-compile.md) |
+| **M1-P23** | **对话穿戴趋势/对比：本窗 + 对照进 Manifest**（FR-6.16） | `IN_PROGRESS` | 2026-09-17：Step0 磁盘核实；Step1–2 编码（catalog + Manifest 原子）。T3 跨域 clarify 降级。build `pha-v2.3.59-p23-trend-compare`。交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md) |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
 | **M4** | 端侧推理 | `TODO` | 触发：有明确机型与模型方案 |
@@ -364,6 +368,8 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-15 | 维护者同意第二批 19 项进事实卡。Registry/日表/catalog 升舱；Apple HK 文档只提供 identifier 与累计/离散，Find 仍 skip。default prefs 32 项。build `pha-v2.3.53-batch2-19` | v1.29；`pha_m1_batch2_selfcheck` |
 | 2026-09-15 | 维护者「执行」Find 探针切片：社区/Gemini 英文只进 `picker_search_probes`，不升 `device_verified`、不写捷径、不 bump pack。build `pha-v2.3.54-find-probes` | v1.30；`pha_m1_batch2_selfcheck` |
 | 2026-09-15 | 维护者：勿打 NL corner-case 补丁。门闩改为实体优先：metric+grain 闭环即放行；残渣只披露不熔断；零实体仍 fail-closed。build `pha-v2.3.55-entity-first-scope` | v1.31；`pha_ledger_passthrough_lookup_selfcheck` |
+| 2026-09-16 | 解读因 `unauthorized_window:14` 丢弃。维护者：近 N 天泛化组装应可过，不放水审计；90 与评估窗双 token；本期做跟昨天比。M1-P22 编码完成 | v1.32；交接 [`handoff-2026-09-16-assessment-window-compile.md`](handoff-2026-09-16-assessment-window-compile.md)；build `pha-v2.3.57-p22-assess-window` |
+| 2026-09-17 | 对话框「近一周 HRV+深睡变化」+「与以往化验对比」仅本窗均值、称无历史。维护者：不靠 Loop/在线 LLM 补取；按证据形状立对话趋势/对比配方 | v1.33；立 M1-P23 / FR-6.16；交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md)。**仅文档，未编码** |
 
 ---
 
@@ -407,6 +413,8 @@ M1 代码落点：`pha/fact_card.py`；`GET /proactive/fact-card` + `/view` + `/
 | 2026-09-15 | v1.29 | 第二批 19 项事实卡升舱（含腕温）。Find 不用 HK 文档标题。日表 sum/mean/latest 分轨 |
 | 2026-09-15 | v1.30 | Find 探针：`picker_search_probes` + never_use 增 Step Count / Sleep Analysis。不 bump `shortcut_pack_version`。P21c 仍 TODO |
 | 2026-09-15 | v1.31 | FR-1.4 对话门闩：实体优先放行；残渣 → `unresolved_residue` 披露；零实体 fail-closed。删 `residue_overrides` 长度熔断 |
+| 2026-09-16 | v1.32 | §8 立并完成 **M1-P22**（FR-6.15：评估滚动窗/跟昨天比编译进解读 Manifest）；任意显式 N；双 token；交接 [`handoff-2026-09-16-assessment-window-compile.md`](handoff-2026-09-16-assessment-window-compile.md) |
+| 2026-09-17 | v1.33 | §8 立 **M1-P23**（FR-6.16：对话穿戴趋势/对比 = 本窗+对照进 Manifest）；与 P22 同构、路径分立；禁 Loop/在线改 Plan 补证。交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md)。仅文档 |
 | 2026-09-11 | v1.23 | §8 M1-P20 / M1 → DONE（iPhone 同网 exclusive 静息心率截图盖章；注入仅 RHR） |
 | 2026-09-11 | v1.22 | §8 M1-P15 → DONE（维护者：黄金句 5/10 槽内 ≥2 可接受；药物项A不宜作训练黄金句）。遗留审计/频率/prefs 漂移另开 |
 | 2026-09-11 | v1.21 | FR-6.10：Manifest `population_commons`（训练常识整数 ∧ 同句无卡标签）。P15 黄金句门槛：槽内 ≥2 具体项；药物项A∧补剂项B仅 meds-HRV |

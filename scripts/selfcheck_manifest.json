@@ -11,6 +11,7 @@
     {"id": "dch", "script": "scripts/pha_dch_selfcheck.py"},
     {"id": "schema_intent", "script": "scripts/pha_schema_intent_selfcheck.py"},
     {"id": "numerics_manifest", "script": "scripts/pha_numerics_manifest_selfcheck.py"},
+    {"id": "chat_trend_compare", "script": "scripts/pha_chat_trend_compare_selfcheck.py", "tags": ["m1", "p23", "harness"]},
     {"id": "harness_report_v11", "script": "scripts/pha_harness_report_v11_selfcheck.py"},
     {"id": "harness_golden_run", "script": "scripts/pha_harness_golden_run.py", "tags": ["golden"]},
     {"id": "harness_core_adapter", "script": "scripts/pha_harness_core_adapter_selfcheck.py", "tags": ["harness", "core"]},

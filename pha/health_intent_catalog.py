@@ -458,3 +458,8 @@ def message_matches_goal_class(message: str, goal_class: str) -> bool:
         if token_in_message(str(tok), msg, case_insensitive=True):
             return True
     return False
+
+
+def is_trend_compare_message(message: str) -> bool:
+    """Catalog trend_compare tokens only (no metric/scope gate). Prefer pha.chat_trend_compare.is_trend_compare_turn."""
+    return message_matches_goal_class(message, "trend_compare")

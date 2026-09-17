@@ -2,6 +2,42 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-17 (M1-P23 Step1–2：trend_compare + Manifest 对照原子)
+
+- **类别**：P1 / 对话 harness。Step 0 证实：Manifest 仅本窗；90D 槽同窗噪音；「与以往化验对比」= presentation_filter 伪需求（T3 砍掉）。
+- **改动**：catalog `goal_markers.trend_compare`；`pha/chat_trend_compare.py` 递进基线（排本窗、防同窗）；`build_numerics_manifest` 注入原子并前置防 600 字尾切；`trend_compare` 禁 warehouse skip。Flag `PHA_CHAT_TREND_COMPARE`。build `pha-v2.3.59-p23-trend-compare`。
+- **证据**：`python3 scripts/pha_chat_trend_compare_selfcheck.py` PASS（T1/T5/anti/flag）。
+- **回滚**：`PHA_CHAT_TREND_COMPARE=0`；回 v2.3.58。
+- **未做**：TASK/不足模板精修、真机复现、T3 clarify、P23 DONE 盖章。
+
+## 2026-09-17 (文档：对话穿戴趋势/对比证据配方 · M1-P23)
+
+- **类别**：P1 / 对话 harness。维护者：近一周 HRV+深睡变化仅本窗均值、称无历史；不靠 Loop/在线 LLM 补取；按证据形状立配方。
+- **改动**：交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md)；PRD **v1.33** 立 **M1-P23** / FR-6.16。**仅文档，未编码**。
+- **证据**：维护者对话框复现；方案评审同意「形状非 corner case」。
+- **回滚**：删交接与 PRD v1.33 增量即可。
+
+## 2026-09-16 (P22 补刀：无 baseline_window 不向解读注入均值)
+
+- **类别**：P1 / 事实卡解读。缓存 `unauthorized_window:15`：评估只要「跟昨天比」，模型用 pending HRV 的无窗均值自编「近 15 天」。
+- **改动**：inject `strip_orphan_baseline_stats`；TASK 禁止无 assessment_compare 时发明近 N。build `pha-v2.3.58-p22-orphan-baseline`。
+- **证据**：`pha_fact_card_selfcheck` PASS。
+- **回滚**：去掉 strip；回 v2.3.57。
+
+## 2026-09-16 (M1-P22：评估窗/跟昨天比编译进 Manifest)
+
+- **类别**：P1 / 事实卡解读。维护者：近 N 天泛化组装；90 与评估窗双 token；本期做跟昨天比；不放宽审计。
+- **改动**：`pha/fact_card_assessment_window.py`；interpret 注入 attach；Manifest/TASK/context；selfcheck W 段。build `pha-v2.3.57-p22-assess-window`。PRD FR-6.15 / M1-P22 DONE。Flag `PHA_ASSESSMENT_WINDOW_COMPARE`（默认开）。
+- **证据**：`python3 scripts/pha_fact_card_selfcheck.py` PASS。
+- **回滚**：`PHA_ASSESSMENT_WINDOW_COMPARE=0`；回 v2.3.56。
+
+## 2026-09-16 (文档：评估窗口编译进 Manifest · 方案 B)
+
+- **类别**：P1 / 事实卡解读。维护者：近 10 天 / 近 2 周若数准应可过；不得放宽 `unauthorized_window`；须先规则层编译。
+- **改动**：交接 [`handoff-2026-09-16-assessment-window-compile.md`](handoff-2026-09-16-assessment-window-compile.md)；PRD v1.32 立 **M1-P22**。同日已编码完成（见上条）。
+- **证据**：今日缓存 `unauthorized_window:14`；卡上递进窗 token 仅 `90` 等。
+- **回滚**：见上条。
+
 ## 2026-09-15 (Loop：事实卡实时审批，不再靠周更)
 
 - **类别**：P1 / Loop A。维护者：手机完整卡已有审批模块，不要周更，改成实时。

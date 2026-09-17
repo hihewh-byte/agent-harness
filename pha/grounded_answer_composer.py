@@ -606,12 +606,17 @@ def is_warehouse_metric_focus_turn(user_message: str, *, user_id: str = "default
     msg = (user_message or "").strip()
     if not msg:
         return False
+    from pha.chat_trend_compare import is_trend_compare_turn
     from pha.goal_classifier import classify_goal, context_lookup_enabled
     from pha.health_intent_catalog import catalog_goal_markers
     from pha.ledger_passthrough_lookup import resolve_turn_wearable_scope
     from pha.wearable_metric_registry import cluster_of
 
     uid = (user_id or "default").strip() or "default"
+    # M1-P23: trend/compare must not warehouse-skip (need TASK + compare Manifest).
+    if is_trend_compare_turn(msg, user_id=uid):
+        return False
+
     if context_lookup_enabled():
         goal = classify_goal(msg, user_id=uid)
         lookup = catalog_goal_markers().get("context_lookup") or {}

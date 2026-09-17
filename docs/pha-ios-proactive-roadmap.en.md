@@ -29,6 +29,12 @@ Public README first screen stays harness-first. Do not change `packages/harness_
 
 ## Next cuts (in order, do not skip)
 
+### 0. M1-P23 chat wearable trend/compare evidence recipe · TODO (docs only 2026-09-17)
+
+- Source: PRD **v1.33** FR-6.16; handoff [`handoff-2026-09-17-chat-wearable-trend-compare.en.md`](handoff-2026-09-17-chat-wearable-trend-compare.en.md)
+- Code only when maintainer orders; shape acceptance ≥2 grain/metrics; no Loop / online Plan backfill
+- Isomorphic to M1-P22 (interpret `assessment_compare`), separate path
+
 ### 1. M1-P6 device: PHA sync sleep · DONE 2026-09-10
 
 T9 verbal confirm 9/8–9/10 roughly matches. Task card [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md).

@@ -494,6 +494,44 @@
       ],
       "wins_over_warehouse_skip": true,
       "notes": "档案列举/用药对指标的询问；非穿戴大盘。不用光秃「有没有」「我现在服用」，以免陈述自述或存在性问句被抢走。"
+    },
+    "trend_compare": {
+      "tokens": [
+        "有什么变化",
+        "有没有变化",
+        "变化趋势",
+        "趋势如何",
+        "趋势怎么样",
+        "升降",
+        "上升还是下降",
+        "比以前",
+        "跟以往",
+        "与以往",
+        "和以往",
+        "以往比",
+        "变好了吗",
+        "变差了吗",
+        "how has",
+        "how have",
+        "trended",
+        "trend over",
+        "changed over",
+        "any change",
+        "vs before",
+        "compared to before",
+        "compared with before"
+      ],
+      "anti_tokens": [
+        "是否正常",
+        "是不是都",
+        "所有指标",
+        "各项指标",
+        "全部指标",
+        "are they all",
+        "compare all",
+        "every metric"
+      ],
+      "notes": "M1-P23：穿戴本窗+对照配方。勿用光秃「对比/相比」（属 broad_compare）。短续问「和昨天比」走 episodic_delta_followup，由 is_trend_compare_turn 并入。点查「昨天深睡多少」无本表 token → 不触发。"
     }
   },
   "assessment_outline": {
@@ -702,7 +740,8 @@
       "overall",
       "compare all",
       "are they all"
-    ]
+    ],
+    "notes": "整卡/多指标是否正常类；光秃「对比/相比」属此类。trend_compare（M1-P23）用更长变化/趋势词，二者勿合并。"
   },
   "episodic_grain_ttl_turns": 6,
   "follow_ups": {

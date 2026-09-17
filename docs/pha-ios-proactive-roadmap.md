@@ -29,6 +29,12 @@ M1-P6（睡眠各项 + HRV SDNN）2026-09-10 T9 已过。未开 M2 前，不要�
 
 ## 下一刀（按序，不要跳）
 
+### 0. M1-P23 对话穿戴趋势/对比证据配方 · TODO（仅文档 2026-09-17）
+
+- 真源：PRD **v1.33** FR-6.16；交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md)
+- 编码前须维护者下令；形状验收 ≥2 grain/指标；禁 Loop/在线改 Plan 补证
+- 与 M1-P22（解读 `assessment_compare`）同构、路径分立
+
 ### 1. M1-P6 真机：PHA 同步睡眠 · DONE 2026-09-10
 
 T9 维护者口头确认 9/8–9/10 基本对上。任务卡 [`pha-healthkit-sleep-hrv.md`](pha-healthkit-sleep-hrv.md)。
