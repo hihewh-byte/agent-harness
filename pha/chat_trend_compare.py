@@ -349,11 +349,111 @@ def trend_compare_manifest_entries(
     return entries, tokens
 
 
+def trend_compare_task_text(*, locale: str = "zh") -> str:
+    """TASK when trend_compare: cite Manifest focal + compare only; no rise/fall without compare."""
+    loc = (locale or "zh").lower()
+    if loc.startswith("en"):
+        return (
+            "【TASK · trend_compare】Answer the change/trend question using only Numerics Manifest KV. "
+            "Cite both the focal-window values and the personal-baseline compare means/n when present. "
+            "If no compare (baseline) atoms are in Manifest, say history is short for direction and "
+            "do not claim rising/falling/stable. Do not invent prior means. Do not cite WEARABLE_90D "
+            "prose that is not in Manifest. Plain continuous paragraphs; no Markdown lists. "
+            "Weak correlational wording only."
+        )
+    return (
+        "【本轮任务 · 趋势/对比】只根据 Numerics Manifest 的 KV 回答变化/趋势："
+        "须同时引用本窗数值与对照基线均值/n（若 Manifest 已有对照原子）。"
+        "若 Manifest 无对照原子，只说明对照历史不足、不作上升/下降/稳定判断；禁止编造以往均值。"
+        "禁止引用未写入 Manifest 的近90日摘要散文数字。"
+        "连续段落、无 Markdown 列表；弱相关措辞，禁止强因果。"
+    )
+
+
+def manifest_has_trend_compare_atoms(manifest: Any) -> bool:
+    if manifest is None:
+        return False
+    for e in getattr(manifest, "entries", None) or []:
+        if str(getattr(e, "source", "") or "").startswith("wearable.trend_compare"):
+            return True
+    return False
+
+
+def build_compare_insufficient_answer(
+    manifest: Any,
+    *,
+    locale: str | None = None,
+) -> str:
+    """Deterministic reply when trend_compare fired but no baseline atoms."""
+    from pha.fact_card import MIN_BASELINE_N
+    from pha.response_language import default_response_locale, normalize_response_locale
+
+    loc = normalize_response_locale(locale or default_response_locale())
+    en = str(loc).startswith("en")
+    focal_bits: list[str] = []
+    for e in getattr(manifest, "entries", None) or []:
+        src = str(getattr(e, "source", "") or "")
+        if src not in ("wearable.summary", "wearable.daily", "wearable.ledger"):
+            continue
+        if e.value is None:
+            continue
+        unit = (e.unit or "").strip()
+        shown = f"{e.value} {unit}".strip() if unit and unit != "-" else str(e.value)
+        focal_bits.append(f"{e.metric} {shown}（{e.anchor}）" if not en else f"{e.metric} {shown} ({e.anchor})")
+    focal = "；".join(focal_bits) if not en else "; ".join(focal_bits)
+    if en:
+        head = (
+            f"This window has readings"
+            + (f": {focal}." if focal else ".")
+            + f" Personal compare history is short (need about {MIN_BASELINE_N} comparable days outside this window), "
+            "so no rising/falling/stable call is made."
+        )
+        return head
+    head = (
+        f"本窗有记录"
+        + (f"：{focal}。" if focal else "。")
+        + f"个人对照历史不足（窗外可比样本未达约 {MIN_BASELINE_N} 天），暂不作上升、下降或稳定判断。"
+    )
+    return head
+
+
+def try_trend_compare_deterministic_reply(
+    *,
+    user_id: str,
+    user_message: str,
+    manifest: Any = None,
+    response_locale: str | None = None,
+    episodic: Any = None,
+) -> str:
+    """Skip-LLM only when trend_compare and Manifest lacks compare atoms."""
+    if not is_trend_compare_turn(user_message, user_id=user_id, episodic=episodic):
+        return ""
+    from pha.numerics_manifest import build_numerics_manifest
+
+    wm = manifest
+    if wm is None or not getattr(wm, "entries", None):
+        wm = build_numerics_manifest(
+            user_id,
+            profile="wearable_only",
+            user_message=user_message,
+            include_lipid=False,
+            include_wearable=True,
+            episodic=episodic,
+        )
+    if manifest_has_trend_compare_atoms(wm):
+        return ""
+    return build_compare_insufficient_answer(wm, locale=response_locale)
+
+
 __all__ = [
     "TrendCompareStat",
+    "build_compare_insufficient_answer",
     "chat_trend_compare_enabled",
     "compile_trend_compare_stats",
     "is_trend_compare_turn",
+    "manifest_has_trend_compare_atoms",
     "pick_compare_baseline_excluding_focal",
     "trend_compare_manifest_entries",
+    "trend_compare_task_text",
+    "try_trend_compare_deterministic_reply",
 ]

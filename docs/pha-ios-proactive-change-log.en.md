@@ -2,6 +2,19 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-17 (M1-P23 Step3: trend_compare TASK + compare-insufficient skip-LLM)
+
+- **Class**: P1 / chat harness. After compare atoms in Manifest, TASK still forced 90d prose; insufficient compare could still allow rise/fall talk.
+- **Change**: `trend_compare_task_text` on `wearable_only`; `try_trend_compare_deterministic_reply` via `chat_skip_llm` (no compare atoms → ledger disclose, no direction). selfcheck T2/T4. build `pha-v2.3.60-p23-task-insuff`.
+- **Evidence**: `python3 scripts/pha_chat_trend_compare_selfcheck.py` PASS.
+- **Pending**: Maintainer 8788 device stamp; T3 cut. M1-P23 DONE only after device OK.
+- **Rollback**: `PHA_CHAT_TREND_COMPARE=0`; revert wearable_only TASK.
+
+## 2026-09-17 (M1-P23 Step1–2: trend_compare + Manifest compare atoms)
+
+- **Class**: P1 / chat harness. Step0: Manifest focal-only; 90D same-window noise; “vs prior labs” = presentation_filter (T3 cut).
+- **Change**: catalog `goal_markers.trend_compare`; `pha/chat_trend_compare.py` progressive baseline; Manifest inject + prepend; ban warehouse skip. Flag `PHA_CHAT_TREND_COMPARE`. build `pha-v2.3.59-p23-trend-compare`.
+
 ## 2026-09-17 (Docs: chat wearable trend/compare evidence recipe · M1-P23)
 
 - **Class**: P1 / chat harness. Maintainer: past-week HRV+deep “changes” returned focal means only and claimed no history; not Loop / online LLM backfill; stand a shape recipe.

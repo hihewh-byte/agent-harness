@@ -4,7 +4,7 @@ Bump PHA_SERVER_BUILD on release; console static assets pick up the same token
 via asset_cache_version() (no manual index.html edits).
 """
 
-PHA_SERVER_BUILD: str = "pha-v2.3.59-p23-trend-compare"
+PHA_SERVER_BUILD: str = "pha-v2.3.60-p23-task-insuff"
 
 
 def asset_cache_version() -> str:

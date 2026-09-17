@@ -2,7 +2,7 @@
 
 > **Language / 语言**：[English](handoff-2026-09-17-chat-wearable-trend-compare.en.md) · 中文（本文）
 
-> 写给接替的 coding agent · **仅文档；零生产代码直至维护者下令编码**  
+> 写给接替的 coding agent · **Step0–3 已编码**；Step5 DONE 须维护者真机点头  
 > 触发对话：Mac 对话框「最近一周我的 HRV 和深睡的数据有什么变化？」+「与以往化验对比」→ 模型只引用 2026-09-11～17 均值，称「缺乏此前 HRV/深睡数据」无法谈趋势。  
 > 维护者裁定：不靠 Loop / 不靠在线 LLM→harness 补取；按**证据形状**补一类配方（非单句 corner case）。  
 > 真源：[`prd-pha-ios-proactive-agent-v1.md`](prd-pha-ios-proactive-agent-v1.md) **v1.33** · 任务卡 **M1-P23** · FR-6.16
@@ -179,11 +179,11 @@ Step 0：触发会话无用户「与以往化验对比」；标题来自 `presen
 | 序 | 步骤 | 完成标志 |
 |----|------|----------|
 | 0 | 磁盘核实触发会话的 plan/slots/Manifest（telemetry 或复现） | ✅ 2026-09-17：Manifest 仅本窗 2 原子；90D 槽同窗噪音；无用户跨域句 |
-| 1 | Catalog/schema：`trend_compare` 触发（无 Python 长列表） | selfcheck T1/T5 |
-| 2 | 对照重算 + 写入 chat Manifest（策略 1、防重叠、前置防截断） | T1/T2/T4 |
-| 3 | TASK + skip-LLM/不足模板；禁 warehouse skip | 无对照不谈升降 |
+| 1 | Catalog/schema：`trend_compare` 触发（无 Python 长列表） | ✅ selfcheck T1/T5 |
+| 2 | 对照重算 + 写入 chat Manifest（策略 1、防重叠、前置防截断） | ✅ T1/T2；build `pha-v2.3.59` |
+| 3 | TASK + skip-LLM/不足模板；禁 warehouse skip | ✅ 2026-09-17：`trend_compare_task_text` + `try_trend_compare_deterministic_reply`；T4；build `pha-v2.3.60-p23-task-insuff` |
 | 4 | ~~跨域 clarify~~ | **砍掉（本刀）** |
-| 5 | PRD §8 M1-P23 → DONE；change-log；build bump | 维护者真机点头 |
+| 5 | PRD §8 M1-P23 → DONE；change-log；build bump | ⏳ 编码完成；**待维护者真机点头** |
 
 只本地 commit；**维护者说 commit 才 commit**；不 push。
 

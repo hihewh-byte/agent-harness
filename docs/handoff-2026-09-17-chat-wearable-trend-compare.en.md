@@ -135,7 +135,16 @@ Do **not** change `packages/harness_core`, Loop promote, or HTML baseline defaul
 
 ## 8. Order of work
 
-0 Disk-verify trigger turn’s plan/Manifest → 1 catalog triggers → 2 compare into Manifest → 3 TASK/skip-LLM → 4 clarify → 5 mark M1-P23 DONE + change-log + build. Commit only when maintainer asks; no push.
+| Step | Work | Status |
+|------|------|--------|
+| 0 | Disk-verify plan/Manifest | ✅ 2026-09-17 |
+| 1 | Catalog `trend_compare` | ✅ T1/T5 |
+| 2 | Compare into Manifest | ✅ T1/T2; build `pha-v2.3.59` |
+| 3 | TASK + skip-LLM insufficient | ✅ T4; build `pha-v2.3.60-p23-task-insuff` |
+| 4 | Cross-domain clarify | **Cut** (presentation_filter false demand) |
+| 5 | Mark M1-P23 DONE | ⏳ pending maintainer 8788 device OK |
+
+Local commit OK when coding steps land; no push unless asked.
 
 ---
 

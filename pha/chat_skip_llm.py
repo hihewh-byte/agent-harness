@@ -96,6 +96,21 @@ def evaluate_skip_llm_path(
         return out
 
     if plan.profile == "wearable_only" and not wearable_screenshot_review:
+        from pha.chat_trend_compare import try_trend_compare_deterministic_reply
+
+        trend_insuff = try_trend_compare_deterministic_reply(
+            user_id=user_id,
+            user_message=msg,
+            manifest=numerics_manifest,
+            response_locale=response_locale,
+            episodic=episodic,
+        )
+        if trend_insuff:
+            out.skip_llm = True
+            out.answer_text = trend_insuff
+            out.status_events.append(_status("趋势对照不足：已返回定账披露"))
+            return out
+
         from pha.grounded_answer_composer import try_warehouse_metric_focus_skip
 
         manifest_focus = try_warehouse_metric_focus_skip(

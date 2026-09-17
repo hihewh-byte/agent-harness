@@ -81,17 +81,24 @@ def _wearable_only_turn_plan(qtype: QuestionType, msg: str = "") -> TurnEvidence
 
     if supplement_context_brief_should_mount(msg):
         t1.append("USER_CONTEXT_BRIEF")
+    from pha.chat_trend_compare import is_trend_compare_turn, trend_compare_task_text
+
+    task = (
+        trend_compare_task_text(locale="zh")
+        if is_trend_compare_turn(msg)
+        else (
+            "【本轮任务】回答穿戴/睡眠/血氧/HRV 等问题；"
+            "必须引用 Tier0「近90日穿戴摘要 / User Data Snapshot」中的区间均值与 n 天数；"
+            "禁止引用已省略的近7日 Patient State 表；禁止向用户索要 export 原始数据。"
+        )
+    )
     return TurnEvidencePlan(
         profile="wearable_only",
         slots_tier0=["MASTER_ANCHOR", "NUMERICS_MANIFEST", "WEARABLE_90D_SUMMARY", "TASK"],
         slots_tier1=t1,
         forbidden=["USER_SNAPSHOT_IN_RAW_USER"],
         tools_allowed=["get_health_data"],
-        task_text=(
-            "【本轮任务】回答穿戴/睡眠/血氧/HRV 等问题；"
-            "必须引用 Tier0「近90日穿戴摘要 / User Data Snapshot」中的区间均值与 n 天数；"
-            "禁止引用已省略的近7日 Patient State 表；禁止向用户索要 export 原始数据。"
-        ),
+        task_text=task,
         legacy_question_type=qtype,
     )
 

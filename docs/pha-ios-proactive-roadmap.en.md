@@ -29,10 +29,11 @@ Public README first screen stays harness-first. Do not change `packages/harness_
 
 ## Next cuts (in order, do not skip)
 
-### 0. M1-P23 chat wearable trend/compare evidence recipe · TODO (docs only 2026-09-17)
+### 0. M1-P23 chat wearable trend/compare evidence recipe · coded, pending device (2026-09-17)
 
 - Source: PRD **v1.33** FR-6.16; handoff [`handoff-2026-09-17-chat-wearable-trend-compare.en.md`](handoff-2026-09-17-chat-wearable-trend-compare.en.md)
-- Code only when maintainer orders; shape acceptance ≥2 grain/metrics; no Loop / online Plan backfill
+- Step0–3 landed: catalog + Manifest compare + TASK + insufficient skip-LLM; build `pha-v2.3.60-p23-task-insuff`
+- **DONE after maintainer 8788 device OK**; T3 cross-domain clarify cut
 - Isomorphic to M1-P22 (interpret `assessment_compare`), separate path
 
 ### 1. M1-P6 device: PHA sync sleep · DONE 2026-09-10

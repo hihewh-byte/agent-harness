@@ -2,6 +2,14 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-17 (M1-P23 Step3：trend_compare TASK + 对照不足 skip-LLM)
+
+- **类别**：P1 / 对话 harness。对照原子进 Manifest 后，TASK 仍逼近90日散文、不足时仍可能谈升降。
+- **改动**：`trend_compare_task_text` 挂 `wearable_only`；`try_trend_compare_deterministic_reply` 走 `chat_skip_llm`（无对照原子 → 定账披露、不作升降）。selfcheck T2/T4。build `pha-v2.3.60-p23-task-insuff`。
+- **证据**：`python3 scripts/pha_chat_trend_compare_selfcheck.py` PASS。
+- **未做**：真机 8788 复现盖章；T3 跨域 clarify（已砍）。M1-P23 仍待维护者真机点头后 DONE。
+- **回滚**：`PHA_CHAT_TREND_COMPARE=0`；TASK 回默认 wearable_only。
+
 ## 2026-09-17 (M1-P23 Step1–2：trend_compare + Manifest 对照原子)
 
 - **类别**：P1 / 对话 harness。Step 0 证实：Manifest 仅本窗；90D 槽同窗噪音；「与以往化验对比」= presentation_filter 伪需求（T3 砍掉）。
