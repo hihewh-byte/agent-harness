@@ -282,7 +282,7 @@ zip **保留** 作为冷启动/搬家。HealthKit 是增量通道。全量 zip *
 | **M1-P21b** | Cardio Recovery 注册表 + 日聚合 + catalog（有样本才 DONE） | `DONE` | 2026-09-15：Registry + 日表 max + catalog。2026-09-15 勾选：default prefs 含 `cardio_recovery_1min_bpm`；中文别名含有氧恢复/一分钟心率恢复等。Find 未抄录。 |
 | **M1-P21c** | 捷径 Find 真机抄录后才增量同步 | `TODO` | 2026-09-15：Find 总表已写入社区/Gemini 英文 `picker_search_probes`（含 `Step Count` / `Sleep Analysis` 进 `never_use_find_labels`）。探针不得当 Find、不 bump `shortcut_pack_version`。仍须真机点中选择器字面量后一次一条升 `device_verified`。 |
 | **M1-P22** | **评估滚动窗口编译进解读 Manifest**（FR-6.15） | `DONE` | 2026-09-16：任意显式 N 天/周 + 跟昨天比 → inject `assessment_compare`/`assessment_point_compare` + Manifest；90 与评估窗双 token；不放宽审计。build `pha-v2.3.57-p22-assess-window`。交接 [`handoff-2026-09-16-assessment-window-compile.md`](handoff-2026-09-16-assessment-window-compile.md) |
-| **M1-P23** | **对话穿戴趋势/对比：本窗 + 对照进 Manifest**（FR-6.16） | `IN_PROGRESS` | 2026-09-17：Step0–3 编码完成（catalog + Manifest 对照原子 + TASK + 不足 skip-LLM）。T3 砍。selfcheck T1/T2/T4/T5。build `pha-v2.3.60-p23-task-insuff`。**待真机 8788 点头再 DONE**。交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md) |
+| **M1-P23** | **对话穿戴趋势/对比：本窗 + 对照进 Manifest**（FR-6.16） | `DONE` | 2026-09-17：Step0–3 + 真机验收。触发句「近一周 HRV/深睡变化趋势」：深睡对照 90d/n=79 入 Manifest；HRV 窗外仅 1 天 → 规则层不注入对照（正确）。正文不再称「缺乏此前数据」。build `pha-v2.3.60-p23-task-insuff`。残余：模型偶发把本窗 HRV 误标「近90日」→ 另开合规卡。T3 砍。交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md) |
 | **M2** | TestFlight 薄 App：授权、同步、事实卡、登记提醒、通知点开 | `TODO` | |
 | **M3** | App 内接同一解读/问答端点（UI 接线） | `TODO` | 触发：M2 稳定。能力由 M1-P9 先在完整卡网页落地，M3 不重写逻辑 |
 | **M4** | 端侧推理 | `TODO` | 触发：有明确机型与模型方案 |

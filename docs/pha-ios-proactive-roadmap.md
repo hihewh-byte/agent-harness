@@ -29,12 +29,11 @@ M1-P6（睡眠各项 + HRV SDNN）2026-09-10 T9 已过。未开 M2 前，不要�
 
 ## 下一刀（按序，不要跳）
 
-### 0. M1-P23 对话穿戴趋势/对比证据配方 · 编码完成、待真机（2026-09-17）
+### 0. M1-P23 对话穿戴趋势/对比证据配方 · DONE 2026-09-17
 
 - 真源：PRD **v1.33** FR-6.16；交接 [`handoff-2026-09-17-chat-wearable-trend-compare.md`](handoff-2026-09-17-chat-wearable-trend-compare.md)
-- Step0–3 已落地：catalog + Manifest 对照 + TASK + 不足 skip-LLM；build `pha-v2.3.60-p23-task-insuff`
-- **待维护者 8788 真机复现点头 → DONE**；T3 跨域 clarify 已砍
-- 与 M1-P22（解读 `assessment_compare`）同构、路径分立
+- 真机：本窗 + 深睡对照入 Manifest；不再「缺乏此前数据」。HRV 窗外样本不足时规则层不注入对照。
+- 残余：模型误标本窗为「近90日」→ 另开合规卡；T3 已砍
 
 ### 1. M1-P6 真机：PHA 同步睡眠 · DONE 2026-09-10
 

@@ -2,6 +2,14 @@
 
 > **Language / 语言**：English (this document) · [中文](pha-ios-proactive-change-log.md)
 
+## 2026-09-17 (M1-P23 DONE: device OK + loop_weekly docstring fix)
+
+- **Class**: P1 / chat harness. Maintainer device: past-week HRV/deep trend cites focal + deep-sleep 90d compare; no “no prior data”.
+- **Disk**: Manifest has deep-sleep 90d mean/n; HRV only 1 day outside focal → no compare atom (correct). Residual: model mislabeled focal 35.39 as “90d HRV” — compliance follow-up, not recipe blocker.
+- **Change**: PRD §8 M1-P23 → `DONE`; fix `pha/loop_weekly.py` early-closed module docstring (restart preflight SyntaxError).
+- **Evidence**: 8788 `/health` `pha-v2.3.60-p23-task-insuff`.
+- **Rollback**: `PHA_CHAT_TREND_COMPARE=0`.
+
 ## 2026-09-17 (M1-P23 Step3: trend_compare TASK + compare-insufficient skip-LLM)
 
 - **Class**: P1 / chat harness. After compare atoms in Manifest, TASK still forced 90d prose; insufficient compare could still allow rise/fall talk.

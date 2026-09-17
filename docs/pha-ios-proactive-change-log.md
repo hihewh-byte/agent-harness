@@ -2,6 +2,14 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-09-17 (M1-P23 DONE：真机验收 + loop_weekly docstring 修复)
+
+- **类别**：P1 / 对话 harness。维护者真机：「请分析我近一周的 HRV/深睡变化趋势」——正文引用本窗 + 深睡近90日对照，不再称「缺乏此前数据」。
+- **磁盘核实**：Manifest 含 `深睡·近90日均值/n`；HRV 窗外仅 1 天 → 不注入对照（正确 fail-closed）。模型把本窗 35.39 误标「近90日 HRV」登记为残余合规，不挡配方 DONE。
+- **改动**：PRD §8 M1-P23 → `DONE`；修 `pha/loop_weekly.py` 模块 docstring 提前闭合（否则 restart preflight SyntaxError）。
+- **证据**：8788 `/health` `pha-v2.3.60-p23-task-insuff`；selfcheck 此前 PASS。
+- **回滚**：`PHA_CHAT_TREND_COMPARE=0`。
+
 ## 2026-09-17 (M1-P23 Step3：trend_compare TASK + 对照不足 skip-LLM)
 
 - **类别**：P1 / 对话 harness。对照原子进 Manifest 后，TASK 仍逼近90日散文、不足时仍可能谈升降。

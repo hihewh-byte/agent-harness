@@ -142,7 +142,7 @@ Do **not** change `packages/harness_core`, Loop promote, or HTML baseline defaul
 | 2 | Compare into Manifest | ✅ T1/T2; build `pha-v2.3.59` |
 | 3 | TASK + skip-LLM insufficient | ✅ T4; build `pha-v2.3.60-p23-task-insuff` |
 | 4 | Cross-domain clarify | **Cut** (presentation_filter false demand) |
-| 5 | Mark M1-P23 DONE | ⏳ pending maintainer 8788 device OK |
+| 5 | Mark M1-P23 DONE | ✅ 2026-09-17 device OK (see change-log DONE entry) |
 
 Local commit OK when coding steps land; no push unless asked.
 
