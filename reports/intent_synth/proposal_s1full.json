@@ -1,0 +1,7605 @@
+{
+  "schema": "pha.intent_synth_proposal/v1",
+  "tag": "s1full",
+  "synth": "reports/intent_synth/synth_s1full.json",
+  "generated_at": "2026-10-08T04:51:35.686455+00:00",
+  "summary": {
+    "candidates": 531,
+    "covered": 124,
+    "accepted": 151,
+    "rejected": 256
+  },
+  "review_note": "Edit decision accept|reject before `apply`. Only decision=accept is written.",
+  "candidates": [
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "深睡",
+      "core": "深睡",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "深度睡眠",
+      "core": "深度睡眠",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠阶段",
+      "core": "睡眠阶段",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠阶段' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "深睡眠",
+      "core": "深睡眠",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠质量",
+      "core": "睡眠质量",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠质量' → schema:wearable_bundle:睡眠, catalog:sleep",
+        "cross_cluster_utterance:hrv_sdnn_ms:睡眠质量好，心率变异性应该会高吧？",
+        "same_cluster_utterance:3:sleep_awake:睡眠质量怎么样，是不是经常醒？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠时长",
+      "core": "睡眠时长",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠时长' → schema:wearable_bundle:睡眠, catalog:sleep",
+        "registry_dup:sleep_time_asleep",
+        "same_cluster_utterance:4:sleep_time_asleep:睡眠时长是不是影响身体恢复？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠情况",
+      "core": "睡眠情况",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠情况' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "deep sleep",
+      "core": "deep sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep quality",
+      "core": "sleep quality",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleepquality' → catalog",
+        "cross_cluster_utterance:hrv_sdnn_ms:Is my heart rate variability consistent "
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rest time",
+      "core": "rest time",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "night rest",
+      "core": "night rest",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'nightrest' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "deep rest",
+      "core": "deep rest",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep stage",
+      "core": "sleep stage",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rest depth",
+      "core": "rest depth",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'restdepth' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "night stage",
+      "core": "night stage",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'nightstage' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "清醒时间",
+      "core": "清醒时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠醒",
+      "core": "睡眠醒",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠醒' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "醒着时间",
+      "core": "醒着时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "夜间醒",
+      "core": "夜间醒",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠间断",
+      "core": "睡眠间断",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠间断' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "醒的时间",
+      "core": "醒的时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠中断",
+      "core": "睡眠中断",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠中断' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠清醒",
+      "core": "睡眠清醒",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "awake time",
+      "core": "awake time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "time not sleeping",
+      "core": "time not sleeping",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'timenotsleeping' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "awake hours",
+      "core": "awake hours",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "not sleeping",
+      "core": "not sleeping",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'notsleeping' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "time up",
+      "core": "time up",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "awake during sleep",
+      "core": "awake during sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "not asleep",
+      "core": "not asleep",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'notasleep' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "awake duration",
+      "core": "awake duration",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡多久",
+      "core": "睡多久",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠时长",
+      "core": "睡眠时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡了多久",
+      "core": "睡了多久",
+      "reasons": [
+        "same_cluster_utterance:2:sleep_awake:我每天睡了多久，但感觉还是没休息好？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠时间",
+      "core": "睡眠时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡时长",
+      "core": "睡时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡多久了",
+      "core": "睡多久了",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡了多少",
+      "core": "睡了多少",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡时",
+      "core": "睡时",
+      "reasons": [
+        "cross_cluster_utterance:wrist_temp:手腕温度和深睡时间有没有关系？",
+        "same_cluster_utterance:4:sleep_deep:我昨晚的深睡时间有多长？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep time",
+      "core": "sleep time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "hours asleep",
+      "core": "hours asleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "total sleep",
+      "core": "total sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep duration",
+      "core": "sleep duration",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how long sleep",
+      "core": "how long sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep length",
+      "core": "sleep length",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "asleep hours",
+      "core": "asleep hours",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep total",
+      "core": "sleep total",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率波动",
+      "core": "心率波动",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率稳定性",
+      "core": "心率稳定性",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率变异性",
+      "core": "心率变异性",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率变异",
+      "core": "心率变异",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率波动性",
+      "core": "心率波动性",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率变动",
+      "core": "心率变动",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率起伏",
+      "core": "心率起伏",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率波动值",
+      "core": "心率波动值",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart fluctuation",
+      "core": "heart fluctuation",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartfluctuation' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart rhythm",
+      "core": "heart rhythm",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartrhythm' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart variation",
+      "core": "heart variation",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartvariation' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rate fluctuation",
+      "core": "rate fluctuation",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'ratefluctuation' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rhythm stability",
+      "core": "rhythm stability",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'rhythmstability' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "variation pattern",
+      "core": "variation pattern",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'variationpattern' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fluctuation trend",
+      "core": "fluctuation trend",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'fluctuationtrend' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rate stability",
+      "core": "rate stability",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'ratestability' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳",
+      "core": "心跳",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "平时心跳",
+      "core": "平时心跳",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "日常心跳",
+      "core": "日常心跳",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳数值",
+      "core": "心跳数值",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳指标",
+      "core": "心跳指标",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳频率",
+      "core": "心跳频率",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳基准",
+      "core": "心跳基准",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心跳状态",
+      "core": "心跳状态",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart rate",
+      "core": "heart rate",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartrate' → catalog",
+        "cross_cluster_utterance:spo2_percent:How does my oxygen saturation look compa",
+        "same_cluster_utterance:10:hrv_sdnn_ms:What's my heart rate variability like la"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "resting number",
+      "core": "resting number",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "still heart",
+      "core": "still heart",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'stillheart' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "base beat",
+      "core": "base beat",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "non-moving heart",
+      "core": "non-moving heart",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'non-movingheart' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "unmoving pulse",
+      "core": "unmoving pulse",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'unmovingpulse' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "idle heart",
+      "core": "idle heart",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'idleheart' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "key": "rhr",
+      "cluster": "cardiac",
+      "locale": "en",
+      "source": "synth",
+      "raw": "resting beat",
+      "core": "resting beat",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "血氧值",
+      "core": "血氧值",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "氧饱和",
+      "core": "氧饱和",
+      "reasons": [
+        "tier:rejected:gate_1e_b_catalog_exists: token '氧饱和' → spo2"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "血氧数值",
+      "core": "血氧数值",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "血氧水平",
+      "core": "血氧水平",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "血氧读数",
+      "core": "血氧读数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "氧含量",
+      "core": "氧含量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "血氧数据",
+      "core": "血氧数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "blood oxygen",
+      "core": "blood oxygen",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen level",
+      "core": "oxygen level",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'oxygenlevel' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "SpO2 reading",
+      "core": "SpO2 reading",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen saturation",
+      "core": "oxygen saturation",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "blood oxy",
+      "core": "blood oxy",
+      "reasons": [
+        "validate:gate_1e_a_too_long: token 'blood oxy' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen levels",
+      "core": "oxygen levels",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'oxygenlevels' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "SpO2 value",
+      "core": "SpO2 value",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen reading",
+      "core": "oxygen reading",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'oxygenreading' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸次数",
+      "core": "呼吸次数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸频率",
+      "core": "呼吸频率",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸节奏",
+      "core": "呼吸节奏",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸快慢",
+      "core": "呼吸快慢",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸节拍",
+      "core": "呼吸节拍",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸速度",
+      "core": "呼吸速度",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸频率变化",
+      "core": "呼吸频率变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "呼吸频率高低",
+      "core": "呼吸频率高低",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breath speed",
+      "core": "breath speed",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathspeed' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breathing frequency",
+      "core": "breathing frequency",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathingfrequency' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breath count",
+      "core": "breath count",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathcount' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "respiratory count",
+      "core": "respiratory count",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breath number",
+      "core": "breath number",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathnumber' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "respiratory speed",
+      "core": "respiratory speed",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breathing number",
+      "core": "breathing number",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathingnumber' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "locale": "en",
+      "source": "synth",
+      "raw": "breath per minute",
+      "core": "breath per minute",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'breathperminute' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "REM时长",
+      "core": "REM时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "快速眼动阶段",
+      "core": "快速眼动阶段",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "REM睡眠",
+      "core": "REM睡眠",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "眼动阶段",
+      "core": "眼动阶段",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "REM时间",
+      "core": "REM时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "眼动睡眠",
+      "core": "眼动睡眠",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '眼动睡眠' → schema:wearable_bundle:睡眠, catalog:sleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "眼动时长",
+      "core": "眼动时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "REM时数",
+      "core": "REM时数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM sleep",
+      "core": "REM sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM stage",
+      "core": "REM stage",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM phase",
+      "core": "REM phase",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM cycles",
+      "core": "REM cycles",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM time",
+      "core": "REM time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM period",
+      "core": "REM period",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM duration",
+      "core": "REM duration",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "REM level",
+      "core": "REM level",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "核心睡眠",
+      "core": "核心睡眠",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡得实",
+      "core": "睡得实",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠时长",
+      "core": "睡眠时长",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠时长' → schema:wearable_bundle:睡眠, catalog:sleep",
+        "registry_dup:sleep_time_asleep",
+        "same_cluster_utterance:3:sleep_deep:深睡眠时长和之前相比有没有减少？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡多久",
+      "core": "睡多久",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_catalog_exists: token '睡多久' → sleep",
+        "registry_dup:sleep_time_asleep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠时间",
+      "core": "睡眠时间",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠时间' → schema:wearable_bundle:睡眠, catalog:sleep",
+        "same_cluster_utterance:11:sleep_deep:怎么提高我的深度睡眠时间？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "核心时长",
+      "core": "核心时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡眠质量",
+      "core": "睡眠质量",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_b_schema_covers: token '睡眠质量' → schema:wearable_bundle:睡眠, catalog:sleep",
+        "cross_cluster_utterance:hrv_sdnn_ms:睡眠质量好，心率变异性应该会高吧？",
+        "same_cluster_utterance:4:sleep_deep:和上周相比，我现在的睡眠质量有提升吗？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡得深",
+      "core": "睡得深",
+      "reasons": [
+        "batch_dup:sleep_core,sleep_deep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core sleep",
+      "core": "core sleep",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core hours",
+      "core": "core hours",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'corehours' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep core",
+      "core": "sleep core",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleepcore' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core rest",
+      "core": "core rest",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core time",
+      "core": "core time",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep core hours",
+      "core": "sleep core hours",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleepcorehours' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core duration",
+      "core": "core duration",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'coreduration' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_core",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "core rest time",
+      "core": "core rest time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'coreresttime' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "在床上",
+      "core": "在床上",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床时间",
+      "core": "床时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "在床时间",
+      "core": "在床时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床待多久",
+      "core": "床待多久",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床时长",
+      "core": "床时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床时",
+      "core": "床时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床待",
+      "core": "床待",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "床时数",
+      "core": "床时数",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "in bed",
+      "core": "in bed",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed time",
+      "core": "bed time",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "time in bed",
+      "core": "time in bed",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed duration",
+      "core": "bed duration",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'bedduration' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed hours",
+      "core": "bed hours",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed period",
+      "core": "bed period",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'bedperiod' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed stay",
+      "core": "bed stay",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "en",
+      "source": "synth",
+      "raw": "bed time spent",
+      "core": "bed time spent",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'bedtimespent' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路",
+      "core": "走路",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步数",
+      "core": "步数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步频",
+      "core": "步频",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走动",
+      "core": "走动",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "行走",
+      "core": "行走",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步量",
+      "core": "步量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步数统计",
+      "core": "步数统计",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步数变化",
+      "core": "步数变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walked",
+      "core": "walked",
+      "reasons": [
+        "cross_cluster_utterance:distance_walking_running_km:How far have I walked and run today?"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step count",
+      "core": "step count",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking distance",
+      "core": "walking distance",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkingdistance' → catalog",
+        "cross_cluster_utterance:six_minute_walk_m:What was my walking distance during that"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "steps taken",
+      "core": "steps taken",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk total",
+      "core": "walk total",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walktotal' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "daily steps",
+      "core": "daily steps",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "movement total",
+      "core": "movement total",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'movementtotal' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step total",
+      "core": "step total",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'steptotal' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路消耗",
+      "core": "走路消耗",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动热量",
+      "core": "活动热量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路能量",
+      "core": "走路能量",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路热量",
+      "core": "走路热量",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路消耗能量",
+      "core": "走路消耗能量",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动消耗",
+      "core": "活动消耗",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路用能",
+      "core": "走路用能",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路耗能",
+      "core": "走路耗能",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "activity calories",
+      "core": "activity calories",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activitycalories' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy used",
+      "core": "energy used",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energyused' → catalog",
+        "cross_cluster_utterance:basal_energy_kcal:I'm curious about my energy used when I'"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "calories burned",
+      "core": "calories burned",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'caloriesburned' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "active energy",
+      "core": "active energy",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "movement calories",
+      "core": "movement calories",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'movementcalories' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy from moving",
+      "core": "energy from moving",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energyfrommoving' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "calories spent",
+      "core": "calories spent",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'caloriesspent' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "locale": "en",
+      "source": "synth",
+      "raw": "activity energy",
+      "core": "activity energy",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activityenergy' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体能",
+      "core": "体能",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "有氧能力",
+      "core": "有氧能力",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "摄氧",
+      "core": "摄氧",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心肺表现",
+      "core": "心肺表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动表现",
+      "core": "运动表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "有氧表现",
+      "core": "有氧表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "最大摄氧",
+      "core": "最大摄氧",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体能表现",
+      "core": "体能表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "cardio fitness",
+      "core": "cardio fitness",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "max oxygen",
+      "core": "max oxygen",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'maxoxygen' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "aerobic capacity",
+      "core": "aerobic capacity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'aerobiccapacity' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen intake",
+      "core": "oxygen intake",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'oxygenintake' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "lung capacity",
+      "core": "lung capacity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'lungcapacity' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart efficiency",
+      "core": "heart efficiency",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartefficiency' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "oxygen consumption",
+      "core": "oxygen consumption",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'oxygenconsumption' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "locale": "en",
+      "source": "synth",
+      "raw": "endurance level",
+      "core": "endurance level",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'endurancelevel' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率降速",
+      "core": "心率降速",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心肺恢复",
+      "core": "心肺恢复",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动后心率",
+      "core": "运动后心率",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率下降",
+      "core": "心率下降",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "恢复速度",
+      "core": "恢复速度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率恢复",
+      "core": "心率恢复",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率恢复能力",
+      "core": "心率恢复能力",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "心率恢复情况",
+      "core": "心率恢复情况",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart recovery",
+      "core": "heart recovery",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartrecovery' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "recovery rate",
+      "core": "recovery rate",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'recoveryrate' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart bounce",
+      "core": "heart bounce",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartbounce' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "post-exercise drop",
+      "core": "post-exercise drop",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'post-exercisedrop' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart return",
+      "core": "heart return",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartreturn' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart drop speed",
+      "core": "heart drop speed",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartdropspeed' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "recovery ability",
+      "core": "recovery ability",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'recoveryability' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart rate bounce",
+      "core": "heart rate bounce",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartratebounce' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕温度",
+      "core": "手腕温度",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡觉手腕",
+      "core": "睡觉手腕",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕热",
+      "core": "手腕热",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕数据",
+      "core": "手腕数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "睡觉温度",
+      "core": "睡觉温度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕变化",
+      "core": "手腕变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕记录",
+      "core": "手腕记录",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "手腕影响",
+      "core": "手腕影响",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep wrist",
+      "core": "sleep wrist",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleepwrist' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "wrist sleep",
+      "core": "wrist sleep",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'wristsleep' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "night wrist",
+      "core": "night wrist",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'nightwrist' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "wrist during sleep",
+      "core": "wrist during sleep",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'wristduringsleep' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleep temp",
+      "core": "sleep temp",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleeptemp' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "wrist temp sleep",
+      "core": "wrist temp sleep",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'wristtempsleep' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sleeping temp",
+      "core": "sleeping temp",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'sleepingtemp' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "en",
+      "source": "synth",
+      "raw": "temp during sleep",
+      "core": "temp during sleep",
+      "reasons": [
+        "core_cross_hit:sleep_time_asleep",
+        "tier:rejected:gate_1e_a_too_long: token 'tempduringsleep' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "锻炼时长",
+      "core": "锻炼时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动时长",
+      "core": "运动时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动时间",
+      "core": "活动时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "锻炼时数",
+      "core": "锻炼时数",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动时间",
+      "core": "运动时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动时长",
+      "core": "活动时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "锻炼时",
+      "core": "锻炼时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动时",
+      "core": "运动时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "workout time",
+      "core": "workout time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'workouttime' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "exercise length",
+      "core": "exercise length",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'exerciselength' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "active time",
+      "core": "active time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activetime' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "moving minutes",
+      "core": "moving minutes",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'movingminutes' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "exercise time",
+      "core": "exercise time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "training duration",
+      "core": "training duration",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'trainingduration' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "motion minutes",
+      "core": "motion minutes",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'motionminutes' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "locale": "en",
+      "source": "synth",
+      "raw": "activity span",
+      "core": "activity span",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activityspan' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站立",
+      "core": "站立",
+      "reasons": [
+        "cross_cluster_utterance:steps:走路的步数和站立时间有什么联系？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站多",
+      "core": "站多",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站时",
+      "core": "站时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站久",
+      "core": "站久",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站久时",
+      "core": "站久时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站时长",
+      "core": "站时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站久时间",
+      "core": "站久时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "站时间",
+      "core": "站时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stand time",
+      "core": "stand time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "standing minutes",
+      "core": "standing minutes",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'standingminutes' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "on feet",
+      "core": "on feet",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stand duration",
+      "core": "stand duration",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'standduration' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "time standing",
+      "core": "time standing",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'timestanding' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "standing time",
+      "core": "standing time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'standingtime' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "time on feet",
+      "core": "time on feet",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'timeonfeet' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stand minutes",
+      "core": "stand minutes",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'standminutes' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行距离",
+      "core": "步行距离",
+      "reasons": [
+        "cross_cluster_utterance:six_minute_walk_m:我六分钟步行距离是不是比别人低？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步距离",
+      "core": "跑步距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走跑总距离",
+      "core": "走跑总距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走跑距离",
+      "core": "走跑距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步跑距离",
+      "core": "步跑距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步跑总距离",
+      "core": "步跑总距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路跑步距离",
+      "core": "走路跑步距离",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行跑步总距离",
+      "core": "步行跑步总距离",
+      "reasons": [
+        "shape:too_long"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk run dist",
+      "core": "walk run dist",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkrundist' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "activity dist",
+      "core": "activity dist",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activitydist' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "move dist",
+      "core": "move dist",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step run dist",
+      "core": "step run dist",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'steprundist' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk run km",
+      "core": "walk run km",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkrunkm' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "active km",
+      "core": "active km",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "total walk run",
+      "core": "total walk run",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'totalwalkrun' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk run sum",
+      "core": "walk run sum",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkrunsum' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路心跳",
+      "core": "走路心跳",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm,steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行心跳",
+      "core": "步行心跳",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路时心率",
+      "core": "走路时心率",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路心率",
+      "core": "走路心率",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行心率",
+      "core": "步行心率",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路心跳数值",
+      "core": "走路心跳数值",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm,steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行时心跳",
+      "core": "步行时心跳",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路心率数据",
+      "core": "走路心率数据",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk heart",
+      "core": "walk heart",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkheart' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart while walking",
+      "core": "heart while walking",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartwhilewalking' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking heart",
+      "core": "walking heart",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkingheart' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart rate on walk",
+      "core": "heart rate on walk",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartrateonwalk' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart during walk",
+      "core": "heart during walk",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartduringwalk' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart when walking",
+      "core": "heart when walking",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartwhenwalking' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart rate walking",
+      "core": "heart rate walking",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartratewalking' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "locale": "en",
+      "source": "synth",
+      "raw": "heart during walks",
+      "core": "heart during walks",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'heartduringwalks' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路平衡",
+      "core": "走路平衡",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体晃动",
+      "core": "身体晃动",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步态稳定",
+      "core": "步态稳定",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "行走协调",
+      "core": "行走协调",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步态变化",
+      "core": "步态变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路平衡度",
+      "core": "走路平衡度",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步态稳定性",
+      "core": "步态稳定性",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "行走稳性",
+      "core": "行走稳性",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking balance",
+      "core": "walking balance",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkingbalance' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "steady walk",
+      "core": "steady walk",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'steadywalk' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk stability",
+      "core": "walk stability",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkstability' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk steadiness",
+      "core": "walk steadiness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walksteadiness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "steady walking",
+      "core": "steady walking",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'steadywalking' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking hold",
+      "core": "walking hold",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkinghold' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk smoothness",
+      "core": "walk smoothness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walksmoothness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk firmness",
+      "core": "walk firmness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkfirmness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "日照时间",
+      "core": "日照时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "日光时长",
+      "core": "日光时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "白天暴露",
+      "core": "白天暴露",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "阳光接触",
+      "core": "阳光接触",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "户外时间",
+      "core": "户外时间",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "光照时长",
+      "core": "光照时长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "自然光时",
+      "core": "自然光时",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "光照接触",
+      "core": "光照接触",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sun time",
+      "core": "sun time",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "daylight time",
+      "core": "daylight time",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sun exposure",
+      "core": "sun exposure",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'sunexposure' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sunlight time",
+      "core": "sunlight time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'sunlighttime' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "outdoor time",
+      "core": "outdoor time",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'outdoortime' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sun duration",
+      "core": "sun duration",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'sunduration' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sun hours",
+      "core": "sun hours",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "cluster": "daylight",
+      "locale": "en",
+      "source": "synth",
+      "raw": "daylight duration",
+      "core": "daylight duration",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "爬楼",
+      "core": "爬楼",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "层数",
+      "core": "层数",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "爬楼次数",
+      "core": "爬楼次数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "楼层数",
+      "core": "楼层数",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "爬楼数据",
+      "core": "爬楼数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "爬楼记录",
+      "core": "爬楼记录",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "楼层",
+      "core": "楼层",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "爬楼量",
+      "core": "爬楼量",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "climb stairs",
+      "core": "climb stairs",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'climbstairs' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "flights",
+      "core": "flights",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stair climbing",
+      "core": "stair climbing",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'stairclimbing' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "climbing activity",
+      "core": "climbing activity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'climbingactivity' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stairs climbed",
+      "core": "stairs climbed",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'stairsclimbed' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "climbed flights",
+      "core": "climbed flights",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'climbedflights' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "stair count",
+      "core": "stair count",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'staircount' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "key": "flights",
+      "cluster": "flights",
+      "locale": "en",
+      "source": "synth",
+      "raw": "climbing steps",
+      "core": "climbing steps",
+      "reasons": [
+        "core_cross_hit:steps",
+        "tier:rejected:gate_1e_a_too_long: token 'climbingsteps' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路节奏",
+      "core": "走路节奏",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步速变化",
+      "core": "步速变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行节奏",
+      "core": "步行节奏",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路快慢",
+      "core": "走路快慢",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "行走速度",
+      "core": "行走速度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步速表现",
+      "core": "步速表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步频情况",
+      "core": "步频情况",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "行走步速",
+      "core": "行走步速",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking pace",
+      "core": "walking pace",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkingpace' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "my walk speed",
+      "core": "my walk speed",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'mywalkspeed' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how I walk",
+      "core": "how I walk",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "my gait",
+      "core": "my gait",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "pace when walking",
+      "core": "pace when walking",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'pacewhenwalking' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "speed on foot",
+      "core": "speed on foot",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'speedonfoot' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk tempo",
+      "core": "walk tempo",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walktempo' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how fast I move",
+      "core": "how fast I move",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'howfastImove' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟走",
+      "core": "六分钟走",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟测试",
+      "core": "六分钟测试",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步行测试",
+      "core": "步行测试",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟距离",
+      "core": "六分钟距离",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走六分钟",
+      "core": "走六分钟",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟步行",
+      "core": "六分钟步行",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟走远",
+      "core": "六分钟走远",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "六分钟走多",
+      "core": "六分钟走多",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "six minute walk",
+      "core": "six minute walk",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "six minute test",
+      "core": "six minute test",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'sixminutetest' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "six minute distance",
+      "core": "six minute distance",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'sixminutedistance' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk test distance",
+      "core": "walk test distance",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walktestdistance' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk six minutes",
+      "core": "walk six minutes",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walksixminutes' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "six minute walk distance",
+      "core": "six minute walk distance",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk distance six",
+      "core": "walk distance six",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkdistancesix' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "locale": "en",
+      "source": "synth",
+      "raw": "six minute walk result",
+      "core": "six minute walk result",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体重",
+      "core": "体重",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体质量",
+      "core": "身体质量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体重数",
+      "core": "体重数",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "我多重",
+      "core": "我多重",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体重量",
+      "core": "身体重量",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体重数据",
+      "core": "体重数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "当前体重",
+      "core": "当前体重",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体质量数",
+      "core": "身体质量数",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "weight",
+      "core": "weight",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "current weight",
+      "core": "current weight",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'currentweight' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "body mass",
+      "core": "body mass",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how much do I weigh",
+      "core": "how much do I weigh",
+      "reasons": [
+        "shape:too_long"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "my weight",
+      "core": "my weight",
+      "reasons": [
+        "validate:gate_1e_a_too_long: token 'my weight' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "weight now",
+      "core": "weight now",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'weightnow' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "my body mass",
+      "core": "my body mass",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "locale": "en",
+      "source": "synth",
+      "raw": "weight change",
+      "core": "weight change",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'weightchange' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "脂肪比例",
+      "core": "脂肪比例",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体脂肪",
+      "core": "身体脂肪",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "脂肪含量",
+      "core": "脂肪含量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "脂肪数据",
+      "core": "脂肪数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "脂肪数值",
+      "core": "脂肪数值",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体脂肪比例",
+      "core": "身体脂肪比例",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "脂肪变化",
+      "core": "脂肪变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "身体脂肪数值",
+      "core": "身体脂肪数值",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fat ratio",
+      "core": "fat ratio",
+      "reasons": [
+        "validate:gate_1e_a_too_long: token 'fat ratio' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "body fat",
+      "core": "body fat",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fat level",
+      "core": "fat level",
+      "reasons": [
+        "validate:gate_1e_a_too_long: token 'fat level' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fat percentage",
+      "core": "fat percentage",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'fatpercentage' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fat measure",
+      "core": "fat measure",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'fatmeasure' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "locale": "en",
+      "source": "synth",
+      "raw": "fat number",
+      "core": "fat number",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'fatnumber' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动努力",
+      "core": "运动努力",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动强度",
+      "core": "活动强度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "用力程度",
+      "core": "用力程度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体能付出",
+      "core": "体能付出",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "活动消耗",
+      "core": "活动消耗",
+      "reasons": [
+        "core_cross_hit:active_energy",
+        "registry_dup:active_energy",
+        "cross_cluster_utterance:active_energy:活动消耗的热量是不是比基础代谢高？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "努力程度",
+      "core": "努力程度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "体力付出",
+      "core": "体力付出",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "运动强度",
+      "core": "运动强度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "effort level",
+      "core": "effort level",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'effortlevel' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "physical exertion",
+      "core": "physical exertion",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'physicalexertion' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "movement intensity",
+      "core": "movement intensity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'movementintensity' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "exercise intensity",
+      "core": "exercise intensity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'exerciseintensity' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "activity energy",
+      "core": "activity energy",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'activityenergy' → catalog",
+        "own_support:0<1",
+        "cross_cluster_utterance:active_energy:How does my activity energy use compare "
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "workout effort",
+      "core": "workout effort",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'workouteffort' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "effort during activity",
+      "core": "effort during activity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'effortduringactivity' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how hard I moved",
+      "core": "how hard I moved",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'howhardImoved' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "静息消耗",
+      "core": "静息消耗",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "基础热量",
+      "core": "基础热量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "静止能量",
+      "core": "静止能量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "静息能量",
+      "core": "静息能量",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "基础代谢",
+      "core": "基础代谢",
+      "reasons": [
+        "cross_cluster_utterance:active_energy:活动消耗的热量是不是比基础代谢高？"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "基础热量消耗",
+      "core": "基础热量消耗",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "静息热量",
+      "core": "静息热量",
+      "reasons": [
+        "core_cross_hit:resting_heart_rate_bpm"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "维持能量",
+      "core": "维持能量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rest energy",
+      "core": "rest energy",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'restenergy' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy burn",
+      "core": "energy burn",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energyburn' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "body use",
+      "core": "body use",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "calorie base",
+      "core": "calorie base",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'caloriebase' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy rest",
+      "core": "energy rest",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energyrest' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "base burn",
+      "core": "base burn",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "rest use",
+      "core": "rest use",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy base",
+      "core": "energy base",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energybase' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步速度",
+      "core": "跑步速度",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步快慢",
+      "core": "跑步快慢",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步移动",
+      "core": "跑步移动",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步移动速度",
+      "core": "跑步移动速度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步速率",
+      "core": "跑步速率",
+      "reasons": [
+        "core_cross_hit:walking_speed_kmh"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步步速",
+      "core": "跑步步速",
+      "reasons": [
+        "core_cross_hit:walking_speed_kmh"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步速率变化",
+      "core": "跑步速率变化",
+      "reasons": [
+        "core_cross_hit:walking_speed_kmh"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步快慢变化",
+      "core": "跑步快慢变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run pace",
+      "core": "run pace",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "running speed",
+      "core": "running speed",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "my run speed",
+      "core": "my run speed",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'myrunspeed' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "how fast run",
+      "core": "how fast run",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'howfastrun' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run rate",
+      "core": "run rate",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run velocity",
+      "core": "run velocity",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'runvelocity' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run quickness",
+      "core": "run quickness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'runquickness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run tempo",
+      "core": "run tempo",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步发力",
+      "core": "跑步发力",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步输出",
+      "core": "跑步输出",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步动力",
+      "core": "跑步动力",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步强度",
+      "core": "跑步强度",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步体力",
+      "core": "跑步体力",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步能量",
+      "core": "跑步能量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步功率",
+      "core": "跑步功率",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "跑步表现",
+      "core": "跑步表现",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "running power",
+      "core": "running power",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "power output",
+      "core": "power output",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'poweroutput' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "energy used",
+      "core": "energy used",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'energyused' → catalog",
+        "own_support:0<1",
+        "cross_cluster_utterance:active_energy:What's the total energy used during phys"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run energy",
+      "core": "run energy",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'runenergy' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run power",
+      "core": "run power",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "power during run",
+      "core": "power during run",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'powerduringrun' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "run wattage",
+      "core": "run wattage",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'runwattage' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "running_power_w",
+      "key": "running_power",
+      "cluster": "running_power",
+      "locale": "en",
+      "source": "synth",
+      "raw": "running watt",
+      "core": "running watt",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'runningwatt' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步长",
+      "core": "步长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路步长",
+      "core": "走路步长",
+      "reasons": [
+        "core_cross_hit:steps"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "每步多长",
+      "core": "每步多长",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步幅",
+      "core": "步幅",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步长数据",
+      "core": "步长数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "走路步幅",
+      "core": "走路步幅",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步长变化",
+      "core": "步长变化",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "步长情况",
+      "core": "步长情况",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step length",
+      "core": "step length",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walking stride",
+      "core": "walking stride",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'walkingstride' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step size",
+      "core": "step size",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step measure",
+      "core": "step measure",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'stepmeasure' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "gait length",
+      "core": "gait length",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'gaitlength' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step span",
+      "core": "step span",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "walk step",
+      "core": "walk step",
+      "reasons": [
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "cluster": "step_length",
+      "locale": "en",
+      "source": "synth",
+      "raw": "step reach",
+      "core": "step reach",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'stepreach' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "环境音",
+      "core": "环境音",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "声音水平",
+      "core": "声音水平",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "噪音大小",
+      "core": "噪音大小",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "声音环境",
+      "core": "声音环境",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "音量暴露",
+      "core": "音量暴露",
+      "reasons": [
+        "batch_dup:environmental_audio_db,headphone_audio_db"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "日常音量",
+      "core": "日常音量",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "环境声响",
+      "core": "环境声响",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "听觉环境",
+      "core": "听觉环境",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "noise exposure",
+      "core": "noise exposure",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'noiseexposure' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sound levels",
+      "core": "sound levels",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'soundlevels' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "ambient noise",
+      "core": "ambient noise",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'ambientnoise' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "environmental noise",
+      "core": "environmental noise",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'environmentalnoise' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "noise around me",
+      "core": "noise around me",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'noisearoundme' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sound environment",
+      "core": "sound environment",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'soundenvironment' → catalog"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "noise I've been in",
+      "core": "noise I've been in",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token \"noiseI'vebeenin\" → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "noise levels I've been in",
+      "core": "noise levels I've been in",
+      "reasons": [
+        "shape:too_long"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "耳机音量",
+      "core": "耳机音量",
+      "reasons": [],
+      "warnings": [],
+      "status": "covered",
+      "decision": "skip"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "音量暴露",
+      "core": "音量暴露",
+      "reasons": [
+        "batch_dup:environmental_audio_db,headphone_audio_db"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "听力影响",
+      "core": "听力影响",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "耳机使用",
+      "core": "耳机使用",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "音量水平",
+      "core": "音量水平",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "耳朵舒适",
+      "core": "耳朵舒适",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "音量数据",
+      "core": "音量数据",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "zh",
+      "source": "synth",
+      "raw": "音量安全",
+      "core": "音量安全",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "headphone loudness",
+      "core": "headphone loudness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'headphoneloudness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "earbud sound",
+      "core": "earbud sound",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'earbudsound' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "music volume",
+      "core": "music volume",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'musicvolume' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "headphone exposure",
+      "core": "headphone exposure",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'headphoneexposure' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "sound level",
+      "core": "sound level",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'soundlevel' → catalog",
+        "cross_cluster_utterance:environmental_audio_db:I'm curious about the sound levels I've "
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "listening volume",
+      "core": "listening volume",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'listeningvolume' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "audio loudness",
+      "core": "audio loudness",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'audioloudness' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "locale": "en",
+      "source": "synth",
+      "raw": "earphone noise",
+      "core": "earphone noise",
+      "reasons": [
+        "tier:rejected:gate_1e_a_too_long: token 'earphonenoise' → catalog",
+        "own_support:0<1"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "睡得沉",
+      "core": "睡得沉",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "睡得深",
+      "core": "睡得深",
+      "reasons": [
+        "batch_dup:sleep_core,sleep_deep"
+      ],
+      "warnings": [],
+      "status": "rejected",
+      "decision": "reject"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "睡得熟",
+      "core": "睡得熟",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "老醒",
+      "core": "老醒",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "夜醒",
+      "core": "夜醒",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "cluster": "sleep",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "醒了几次",
+      "core": "醒了几次",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "locale": "zh",
+      "source": "reviewer",
+      "raw": "手腕体温",
+      "core": "手腕体温",
+      "reasons": [],
+      "warnings": [],
+      "status": "accepted",
+      "decision": "accept"
+    }
+  ]
+}

@@ -1,0 +1,241 @@
+{
+  "schema": "pha.intent_synth/v1",
+  "tag": "smoke",
+  "model": "qwen3:14b",
+  "metrics": {
+    "sleep_deep": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚的深睡时间有多长？",
+            "最近几天我的深度睡眠情况怎么样？",
+            "和上周相比，我现在的睡眠质量有提升吗？",
+            "睡眠质量不好，是不是深睡时间太少了？",
+            "晚上睡得怎么样，有没有足够深的睡眠？",
+            "这个月的睡眠数据里，深睡时间有变化吗？",
+            "我睡得够深吗？",
+            "深睡眠时长和之前相比有没有减少？",
+            "晚上睡觉时，有没有进入深睡眠阶段？",
+            "每天晚上都能睡到深睡眠吗？",
+            "最近一周的深睡时间比之前少了，为什么？",
+            "怎么提高我的深度睡眠时间？"
+          ],
+          "cores": [
+            "深睡",
+            "深度睡眠",
+            "睡眠阶段",
+            "深睡眠",
+            "睡眠质量",
+            "睡眠时长",
+            "睡眠情况",
+            "睡眠阶段"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How much deep sleep did I get last night?",
+            "What was my deep sleep time?",
+            "I feel like I didn't get enough deep sleep. What does the data say?",
+            "Can you compare my deep sleep from yesterday to today?",
+            "I'm curious about my sleep quality. How much deep sleep am I getting?",
+            "What's the average deep sleep time for my age group?",
+            "I'm not getting enough rest. How much deep sleep am I getting?",
+            "I had a tough day. How much deep sleep did I manage to get?",
+            "How can I improve my deep sleep time?",
+            "I want to see how my deep sleep has changed this month.",
+            "How does my deep sleep compare to other users?",
+            "I've been having trouble sleeping. How much deep sleep am I getting?"
+          ],
+          "cores": [
+            "deep sleep",
+            "sleep quality",
+            "rest time",
+            "night rest",
+            "deep rest",
+            "sleep stage",
+            "rest depth",
+            "night stage"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？深度睡眠时间够吗？",
+          "能告诉我昨晚有几小时是特别深的睡眠吗？",
+          "深度睡眠对我健康有多重要？",
+          "我怎么才能增加深度睡眠的时间？",
+          "昨晚的睡眠质量怎么样？有没有足够的深度睡眠？",
+          "深度睡眠和浅睡有什么区别？",
+          "我需要多少小时的深度睡眠才算是好的？",
+          "深度睡眠时间不够会影响第二天的精神吗？",
+          "怎么判断自己有没有足够的深度睡眠？",
+          "有没有办法改善深度睡眠的质量？"
+        ],
+        "en": [
+          "How much deep sleep did I get last night?",
+          "Can you tell me how long I was in deep sleep?",
+          "I want to know how many hours I spent in the deepest part of my sleep.",
+          "What's the time I was actually in deep sleep?",
+          "How long was I in that really restful sleep stage?",
+          "How many hours of deep rest did I have?",
+          "I'm curious about how much of my sleep was really deep and restful.",
+          "How long did I stay in the most restorative sleep phase?",
+          "Can you check how much deep rest I had last night?",
+          "How many hours of the deepest sleep did I get?"
+        ]
+      }
+    },
+    "sleep_awake": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚清醒的时间有多长？",
+            "这段时间我睡眠中醒来的次数变多了吗？",
+            "有没有办法减少夜间清醒的时间？",
+            "睡眠质量怎么样，是不是经常醒？",
+            "最近几天晚上醒着的时间比之前多了吗？",
+            "为什么我感觉睡得不够，是不是清醒时间太长？",
+            "和朋友比较，我的清醒时间是不是更长？",
+            "我每天睡了多久，但感觉还是没休息好？",
+            "睡眠中的清醒时间对健康有什么影响？",
+            "有没有办法让睡眠更连续，减少清醒时间？",
+            "睡着之后多久会醒？",
+            "我是不是在睡觉的时候经常醒？"
+          ],
+          "cores": [
+            "清醒时间",
+            "睡眠醒",
+            "醒着时间",
+            "夜间醒",
+            "睡眠间断",
+            "醒的时间",
+            "睡眠中断",
+            "睡眠清醒"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long was I awake during the night?",
+            "I feel tired even after a full night's rest, how much time was I actually awake?",
+            "What's the total time I spent not sleeping?",
+            "Can you tell me about the time I was awake last night?",
+            "I had trouble falling asleep, how long was I actually awake?",
+            "How does my awake time compare to the average?",
+            "I want to know how many hours I was up during sleep.",
+            "How much of my sleep time was spent being awake?",
+            "I woke up multiple times, how much time was I awake overall?",
+            "What's the time I was not sleeping during the night?",
+            "I'm curious about how long I was awake during my sleep cycle.",
+            "Could you show me my awake time over the past few nights?"
+          ],
+          "cores": [
+            "awake time",
+            "time not sleeping",
+            "awake hours",
+            "not sleeping",
+            "time up",
+            "awake during sleep",
+            "not asleep",
+            "awake duration"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？有没有很多次醒过来？",
+          "睡了一觉，但感觉没怎么休息，是不是醒的时间太长了？",
+          "有没有办法知道我晚上醒了多少次？",
+          "我是不是经常在半夜醒来？",
+          "我睡得不踏实，是不是因为醒的时间太多？",
+          "能不能告诉我晚上我大概醒了多少时间？",
+          "睡着了但又老是醒，这是怎么回事？",
+          "有没有数据能显示我晚上醒了多少次？",
+          "我是不是经常被什么吵醒？",
+          "有没有办法知道我是不是睡得不深？"
+        ],
+        "en": [
+          "How long was I actually awake during the night?",
+          "Can you tell me how much time I spent not sleeping?",
+          "I want to know how many hours I was up when I should have been asleep.",
+          "What's the total time I was awake while trying to sleep?",
+          "How much of the night did I spend just lying there awake?",
+          "Could you check how much time I was wide awake during my sleep?",
+          "I'm curious about how long I was awake during my sleep cycles.",
+          "Tell me how much time I was not in a deep sleep or REM.",
+          "How many hours did I spend awake when I was supposed to be resting?",
+          "I'd like to know how long I was just sitting there awake during the night."
+        ]
+      }
+    }
+  },
+  "negatives": {
+    "zh": [
+      "最近总觉得提不起精神，做什么都觉得很累。",
+      "最近压力有点大，晚上经常睡不着。",
+      "总觉得心里空空的，没什么特别的原因。",
+      "最近吃东西没胃口，但又饿得快。",
+      "走路的时候感觉腿有点发软，不太舒服。",
+      "最近经常头晕，但又不是特别严重。",
+      "最近情绪波动比较大，有时候莫名会难过。",
+      "最近感觉身体不太对劲，但又说不上来哪里不舒服。",
+      "最近经常忘记事情，记忆力好像变差了。",
+      "最近经常觉得胸口闷闷的，有点不舒服。",
+      "最近和朋友见面的时候，总觉得有点紧张。",
+      "最近经常觉得口干舌燥，喝再多水也没用。",
+      "最近经常觉得头有点晕，像是缺氧的感觉。",
+      "最近经常感到焦虑，但又不知道为什么。",
+      "最近总觉得身体像被掏空了一样，很疲惫。",
+      "最近经常觉得心慌，但心跳又正常。",
+      "最近吃东西之后胃有点不舒服，但不是特别严重。",
+      "最近经常觉得手心出汗，有点奇怪。",
+      "最近情绪不太稳定，有时候会莫名发脾气。",
+      "最近经常觉得喉咙有东西卡着，但又咽不下去。",
+      "最近经常觉得身体沉重，走路都费劲。",
+      "最近经常觉得脑子转不动，反应变慢了。",
+      "最近经常觉得耳朵里有嗡嗡声，但又不是特别明显。",
+      "最近经常觉得身体忽冷忽热，不太舒服。",
+      "最近经常觉得嘴巴里有苦味，但又不是生病。",
+      "最近经常感到胸口发紧，但又不是特别疼。",
+      "最近经常觉得眼睛干涩，看东西有点模糊。",
+      "最近经常觉得膝盖有点酸，走路多了就更明显。",
+      "最近经常觉得喉咙发痒，但又不是感冒。",
+      "最近经常觉得整个人很疲惫，但又没做什么重活。"
+    ],
+    "en": [
+      "I've been feeling really down lately, even though nothing seems to be wrong.",
+      "I can't seem to focus on anything, my mind keeps drifting.",
+      "I had a rough day at work and I'm still feeling it.",
+      "I've been eating a lot more than usual, and I don't know why.",
+      "I woke up this morning with a heavy feeling in my chest.",
+      "I've been avoiding social interactions more than I normally do.",
+      "I feel like I'm not getting enough rest, even after a full night's sleep.",
+      "I've been unusually irritable and short-tempered with my family.",
+      "I'm not sure why, but I've been feeling restless and unable to relax.",
+      "I've been struggling with motivation for things I usually enjoy.",
+      "I've been traveling a lot recently and it's starting to take a toll.",
+      "I've been experiencing a dull ache in my head that won't go away.",
+      "I feel like I'm constantly on edge and can't shake the anxiety.",
+      "I've been neglecting my usual routines and haven't been taking care of myself.",
+      "I've been feeling disconnected from the people around me.",
+      "I've been having trouble with my appetite, not eating much at all.",
+      "I've been feeling unusually emotional, crying over small things.",
+      "I've been having a hard time keeping up with my usual schedule.",
+      "I've been feeling physically sluggish, like I can't move as easily as before.",
+      "I've been dealing with a lot of stress lately and it's hard to shake.",
+      "I'm not sure what's going on, but I've been feeling uncharacteristically low.",
+      "I've been experiencing a general sense of unease that I can't explain.",
+      "I've been eating more junk food and skipping meals, which I'm not proud of.",
+      "I've been having trouble falling asleep and staying asleep.",
+      "I've been feeling like I'm going through the motions without any real purpose.",
+      "I've been dealing with a lot of mental fog and can't think clearly.",
+      "I've been feeling more anxious than usual, even in calm situations.",
+      "I've been avoiding things I used to enjoy, like going out or spending time with friends.",
+      "I've been feeling like I'm not in control of my own emotions lately.",
+      "I've been experiencing a general sense of fatigue that doesn't seem to go away."
+    ]
+  }
+}

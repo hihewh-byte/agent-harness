@@ -220,19 +220,24 @@ def _named_registry_metric_ids(message: str) -> tuple[str, ...]:
             seen.add(mid)
             ordered.append(mid)
 
-    for mid in hint_match_metric_ids(msg):
+    from pha.semantic_intent import adopted_metric_ids_for
+
+    adopted = adopted_metric_ids_for(msg)
+    for mid in adopted or hint_match_metric_ids(msg):
         _add(mid)
     hinted_clusters = {cluster_of(mid) for mid in ordered if cluster_of(mid)}
-    keys: list[str] = list(infer_metrics_from_message(msg))
-    doc = get_catalog_manager().get_asset("wearable_bundle") or {}
-    keys.extend(
-        infer_wearable_metrics_from_schema(
-            msg,
-            doc,
-            default_if_wearable_query=False,
-            has_lab_only=False,
+    keys: list[str] = []
+    if not adopted:
+        keys.extend(infer_metrics_from_message(msg))
+        doc = get_catalog_manager().get_asset("wearable_bundle") or {}
+        keys.extend(
+            infer_wearable_metrics_from_schema(
+                msg,
+                doc,
+                default_if_wearable_query=False,
+                has_lab_only=False,
+            )
         )
-    )
     for key in keys:
         primary = primary_metric_id_for_catalog_key(key)
         key_cluster = cluster_of(primary) if primary else None

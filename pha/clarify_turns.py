@@ -211,6 +211,13 @@ def resolve_scope_from_clarify_choice(
         for choice in pending_scope.clarify_choices:
             if str(choice.get("id")) == cid:
                 payload = dict(choice.get("payload") or {})
+                if payload.get("action") == "metric_pick":
+                    return HealthTurnScope(
+                        metric_source="semantic_pick",
+                        needs_clarification=False,
+                        clarify_kind=pending_scope.clarify_kind,
+                        clarify_choices=[dict(choice)],
+                    )
                 if payload.get("action") == "intent_scope":
                     hint = str(payload.get("profile_hint") or "combined_review")
                     from pha.health_intent_catalog import catalog_holistic_proxy_metrics

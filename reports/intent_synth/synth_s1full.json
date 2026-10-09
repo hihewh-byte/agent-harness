@@ -1,0 +1,2845 @@
+{
+  "schema": "pha.intent_synth/v1",
+  "tag": "s1full",
+  "model": "qwen3:14b",
+  "metrics": {
+    "sleep_deep": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚的深睡时间有多长？",
+            "最近几天我的深度睡眠情况怎么样？",
+            "和上周相比，我现在的睡眠质量有提升吗？",
+            "睡眠质量不好，是不是深睡时间太少了？",
+            "晚上睡得怎么样，有没有足够深的睡眠？",
+            "这个月的睡眠数据里，深睡时间有变化吗？",
+            "我睡得够深吗？",
+            "深睡眠时长和之前相比有没有减少？",
+            "晚上睡觉时，有没有进入深睡眠阶段？",
+            "每天晚上都能睡到深睡眠吗？",
+            "最近一周的深睡时间比之前少了，为什么？",
+            "怎么提高我的深度睡眠时间？"
+          ],
+          "cores": [
+            "深睡",
+            "深度睡眠",
+            "睡眠阶段",
+            "深睡眠",
+            "睡眠质量",
+            "睡眠时长",
+            "睡眠情况",
+            "睡眠阶段"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How much deep sleep did I get last night?",
+            "What was my deep sleep time?",
+            "I feel like I didn't get enough deep sleep. What does the data say?",
+            "Can you compare my deep sleep from yesterday to today?",
+            "I'm curious about my sleep quality. How much deep sleep am I getting?",
+            "What's the average deep sleep time for my age group?",
+            "I'm not getting enough rest. How much deep sleep am I getting?",
+            "I had a tough day. How much deep sleep did I manage to get?",
+            "How can I improve my deep sleep time?",
+            "I want to see how my deep sleep has changed this month.",
+            "How does my deep sleep compare to other users?",
+            "I've been having trouble sleeping. How much deep sleep am I getting?"
+          ],
+          "cores": [
+            "deep sleep",
+            "sleep quality",
+            "rest time",
+            "night rest",
+            "deep rest",
+            "sleep stage",
+            "rest depth",
+            "night stage"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？深度睡眠时间够吗？",
+          "能告诉我昨晚有几小时是特别深的睡眠吗？",
+          "深度睡眠对我健康有多重要？",
+          "我怎么才能增加深度睡眠的时间？",
+          "昨晚的睡眠质量怎么样？有没有足够的深度睡眠？",
+          "深度睡眠和浅睡有什么区别？",
+          "我需要多少小时的深度睡眠才算是好的？",
+          "深度睡眠时间不够会影响第二天的精神吗？",
+          "怎么判断自己有没有足够的深度睡眠？",
+          "有没有办法改善深度睡眠的质量？"
+        ],
+        "en": [
+          "How much deep sleep did I get last night?",
+          "Can you tell me how long I was in deep sleep?",
+          "I want to know how many hours I spent in the deepest part of my sleep.",
+          "What's the time I was actually in deep sleep?",
+          "How long was I in that really restful sleep stage?",
+          "How many hours of deep rest did I have?",
+          "I'm curious about how much of my sleep was really deep and restful.",
+          "How long did I stay in the most restorative sleep phase?",
+          "Can you check how much deep rest I had last night?",
+          "How many hours of the deepest sleep did I get?"
+        ]
+      }
+    },
+    "sleep_awake": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚清醒的时间有多长？",
+            "这段时间我睡眠中醒来的次数变多了吗？",
+            "有没有办法减少夜间清醒的时间？",
+            "睡眠质量怎么样，是不是经常醒？",
+            "最近几天晚上醒着的时间比之前多了吗？",
+            "为什么我感觉睡得不够，是不是清醒时间太长？",
+            "和朋友比较，我的清醒时间是不是更长？",
+            "我每天睡了多久，但感觉还是没休息好？",
+            "睡眠中的清醒时间对健康有什么影响？",
+            "有没有办法让睡眠更连续，减少清醒时间？",
+            "睡着之后多久会醒？",
+            "我是不是在睡觉的时候经常醒？"
+          ],
+          "cores": [
+            "清醒时间",
+            "睡眠醒",
+            "醒着时间",
+            "夜间醒",
+            "睡眠间断",
+            "醒的时间",
+            "睡眠中断",
+            "睡眠清醒"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long was I awake during the night?",
+            "I feel tired even after a full night's rest, how much time was I actually awake?",
+            "What's the total time I spent not sleeping?",
+            "Can you tell me about the time I was awake last night?",
+            "I had trouble falling asleep, how long was I actually awake?",
+            "How does my awake time compare to the average?",
+            "I want to know how many hours I was up during sleep.",
+            "How much of my sleep time was spent being awake?",
+            "I woke up multiple times, how much time was I awake overall?",
+            "What's the time I was not sleeping during the night?",
+            "I'm curious about how long I was awake during my sleep cycle.",
+            "Could you show me my awake time over the past few nights?"
+          ],
+          "cores": [
+            "awake time",
+            "time not sleeping",
+            "awake hours",
+            "not sleeping",
+            "time up",
+            "awake during sleep",
+            "not asleep",
+            "awake duration"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？有没有很多次醒过来？",
+          "睡了一觉，但感觉没怎么休息，是不是醒的时间太长了？",
+          "有没有办法知道我晚上醒了多少次？",
+          "我是不是经常在半夜醒来？",
+          "我睡得不踏实，是不是因为醒的时间太多？",
+          "能不能告诉我晚上我大概醒了多少时间？",
+          "睡着了但又老是醒，这是怎么回事？",
+          "有没有数据能显示我晚上醒了多少次？",
+          "我是不是经常被什么吵醒？",
+          "有没有办法知道我是不是睡得不深？"
+        ],
+        "en": [
+          "How long was I actually awake during the night?",
+          "Can you tell me how much time I spent not sleeping?",
+          "I want to know how many hours I was up when I should have been asleep.",
+          "What's the total time I was awake while trying to sleep?",
+          "How much of the night did I spend just lying there awake?",
+          "Could you check how much time I was wide awake during my sleep?",
+          "I'm curious about how long I was awake during my sleep cycles.",
+          "Tell me how much time I was not in a deep sleep or REM.",
+          "How many hours did I spend awake when I was supposed to be resting?",
+          "I'd like to know how long I was just sitting there awake during the night."
+        ]
+      }
+    },
+    "sleep_time_asleep": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚睡了多久？",
+            "最近几天睡眠时间有变化吗？",
+            "睡眠时间比上周少了多久？",
+            "我每天睡几小时？",
+            "这段时间睡得怎么样？",
+            "睡眠时间有没有达到建议的时长？",
+            "和上周相比，我睡得更久了吗？",
+            "我睡得时间比朋友多吗？",
+            "睡眠时长是不是影响身体恢复？",
+            "我最近睡眠时间有波动吗？",
+            "睡得时间够不够？",
+            "这段时间的睡眠总时长是多少？"
+          ],
+          "cores": [
+            "睡多久",
+            "睡眠时长",
+            "睡了多久",
+            "睡眠时间",
+            "睡时长",
+            "睡多久了",
+            "睡了多少",
+            "睡时"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many hours did I sleep last night?",
+            "I feel tired, was my sleep time enough?",
+            "What was my total sleep last night?",
+            "Can you show me my sleep duration from yesterday?",
+            "I want to check my hours of sleep this week.",
+            "I need to know how long I was asleep last night.",
+            "How long did I sleep last night?",
+            "I want to see my total sleep time for the past few days.",
+            "Did I get enough hours of sleep last night?",
+            "I'm not feeling well, maybe my sleep was short?",
+            "How much time did I spend sleeping last night?",
+            "Can you tell me my total sleep time over the last few nights?"
+          ],
+          "cores": [
+            "sleep time",
+            "hours asleep",
+            "total sleep",
+            "sleep duration",
+            "how long sleep",
+            "sleep length",
+            "asleep hours",
+            "sleep total"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡了多久？",
+          "最近几天我平均睡多久？",
+          "你能告诉我这周我每天睡了多久吗？",
+          "我每天晚上睡几个小时？",
+          "昨晚我睡得怎么样？",
+          "我最近睡眠时间有变化吗？",
+          "我每天大概睡多长时间？",
+          "昨晚我睡了多久？",
+          "我睡眠时间是不是太少了？",
+          "这周我平均每天睡多久？"
+        ],
+        "en": [
+          "How many hours did I sleep last night?",
+          "Can you tell me how long I was asleep?",
+          "I want to know the total time I spent sleeping.",
+          "How much time did I spend sleeping?",
+          "What was my total sleep time?",
+          "Could you check how long I slept?",
+          "I'm curious about the number of hours I slept.",
+          "Tell me how long I was actually sleeping.",
+          "How many hours of sleep did I get?",
+          "What's the total sleep time recorded?"
+        ]
+      }
+    },
+    "hrv_sdnn_ms": {
+      "key": "hrv",
+      "cluster": "cardiac",
+      "train": {
+        "zh": {
+          "utterances": [
+            "最近心率变异性变低了，这是怎么回事？",
+            "我的心率波动是不是和睡眠有关？",
+            "有没有办法提高心率变异性？",
+            "今天的心率稳定性怎么样？",
+            "心率变异性的数值代表什么？",
+            "心率变异性下降是不是心脏有问题？",
+            "睡眠质量好，心率变异性应该会高吧？",
+            "心率变异性的高低对健康有什么影响？",
+            "我该怎么改善心率变异性？",
+            "心率变异性数据是不是和压力有关？",
+            "最近心率波动是不是不太正常？",
+            "有没有办法通过运动提高心率变异性？"
+          ],
+          "cores": [
+            "心率波动",
+            "心率稳定性",
+            "心率变异性",
+            "心率变异",
+            "心率波动性",
+            "心率变动",
+            "心率起伏",
+            "心率波动值"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my heart rate variability like lately?",
+            "Has my heart rate fluctuation changed over the past few weeks?",
+            "I noticed my heart rhythm seems less stable than before, is that true?",
+            "How does my HRV compare to other users in my age group?",
+            "Can I see my heart rate variation from last month?",
+            "I feel more stressed lately, is my heart rate variability affected?",
+            "What's the pattern of my heart rate variation over time?",
+            "Is my heart rate variability consistent with my sleep quality?",
+            "How does my heart rate fluctuation look now compared to a few months ago?",
+            "I'm curious about my heart rate variability, can you show me the data?",
+            "Why is my heart rate variation lower than usual this week?",
+            "Can I track how my heart rate changes throughout the day?"
+          ],
+          "cores": [
+            "heart fluctuation",
+            "heart rhythm",
+            "heart variation",
+            "rate fluctuation",
+            "rhythm stability",
+            "variation pattern",
+            "fluctuation trend",
+            "rate stability"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我最近感觉心跳不太规律，这个指标能说明什么吗？",
+          "这个数据和我的心跳稳定性有关系吗？",
+          "能告诉我一下这个指标代表的是什么吗？",
+          "这个数值对心脏健康有什么影响？",
+          "怎么通过这个指标判断心脏状况？",
+          "这个数值高或低意味着什么？",
+          "这个指标和我平时的睡眠质量有关系吗？",
+          "这个数据是不是和我的心率有关？",
+          "这个指标能反映出我的心脏功能吗？",
+          "这个数值的变化是不是说明身体有什么问题？"
+        ],
+        "en": [
+          "How steady is my heart's rhythm over time?",
+          "Can you tell me about the changes in my heart's beat patterns?",
+          "What does my heart's variability in beats say about my health?",
+          "I'm curious about how my heart's beat patterns are doing lately.",
+          "Is there a way to check how my heart's rhythm is fluctuating?",
+          "Could you explain what my heart's beat consistency means for me?",
+          "What's the status of my heart's beat regularity?",
+          "How does my heart's beat variation look these days?",
+          "I want to know more about how my heart's beat patterns are changing.",
+          "What can my heart's beat fluctuations tell me about my well-being?"
+        ]
+      }
+    },
+    "resting_heart_rate_bpm": {
+      "key": "rhr",
+      "cluster": "cardiac",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我的心跳平时是多少？",
+            "最近几天心跳感觉比以前快，正常吗？",
+            "昨晚睡得不错，但心跳好像比平时高一点。",
+            "日常的心跳数值在什么范围？",
+            "心跳和睡眠质量有没有关系？",
+            "有没有办法让心跳保持更稳定？",
+            "平时的心跳数值是多少？",
+            "心跳数据有没有参考标准？",
+            "感觉最近心跳有点不规律，是正常现象吗？",
+            "心跳和运动有没有什么联系？",
+            "我平时的心跳稳定吗？",
+            "早上醒来的时候心跳是多少？"
+          ],
+          "cores": [
+            "心跳",
+            "平时心跳",
+            "日常心跳",
+            "心跳数值",
+            "心跳指标",
+            "心跳频率",
+            "心跳基准",
+            "心跳状态"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What was my heart rate when I was just sitting still?",
+            "Is my heart rate lower than usual lately?",
+            "How does my resting heart rate compare to others my age?",
+            "I feel my heart is beating slower than before, is that normal?",
+            "Can I see my heart rate when I'm not moving?",
+            "What's the number for my heart rate at rest?",
+            "I've been feeling tired, could that be linked to my heart rate?",
+            "Has my heart rate been consistent over the past few days?",
+            "What's the typical range for someone my age?",
+            "I noticed my heart rate is higher today, why might that be?",
+            "Could my heart rate be affected by stress or lack of sleep?",
+            "I want to track my heart rate without any activity involved."
+          ],
+          "cores": [
+            "heart rate",
+            "resting number",
+            "still heart",
+            "base beat",
+            "non-moving heart",
+            "unmoving pulse",
+            "idle heart",
+            "resting beat"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我最近感觉心跳有点快，是不是该测一下心跳情况？",
+          "早上醒来的时候，我的心跳感觉不太对，有什么办法能知道正常范围吗？",
+          "有没有办法可以知道我平时的心跳速度是多少？",
+          "我经常觉得胸闷，是不是和心跳有关？",
+          "能帮我看看我的心跳是不是在正常范围内吗？",
+          "我最近经常熬夜，会不会影响到我的心跳？",
+          "有没有什么方法可以每天记录一下我的心跳情况？",
+          "我感觉心跳有时候快有时候慢，是不是有问题？",
+          "有没有什么指标可以反映我心脏的健康状况？",
+          "我的心跳是不是应该保持在一个稳定的范围内？"
+        ],
+        "en": [
+          "What's my average heart rate when I'm just sitting around doing nothing?",
+          "How often does my heart beat per minute when I'm not moving?",
+          "Can you tell me my heart rate when I'm completely relaxed?",
+          "What's the number of times my heart beats in a minute when I'm at rest?",
+          "What's my heart rate like when I'm just lying down and not doing anything?",
+          "How does my heart rate look when I'm not active or working out?",
+          "Could you check my heart rate when I'm just resting and not doing anything?",
+          "What's my heart rate when I'm just chilling and not moving?",
+          "What's the rate of my heartbeat when I'm not doing any physical activity?",
+          "What's my heart rate when I'm not stressed or exerting myself?"
+        ]
+      }
+    },
+    "spo2_percent": {
+      "key": "spo2",
+      "cluster": "spo2_percent",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我现在的血氧水平是多少？",
+            "最近几天我的血氧有没有变化？",
+            "血氧低是不是代表身体有问题？",
+            "和昨天相比，血氧有没有下降？",
+            "晚上睡觉时血氧会下降吗？",
+            "我今天血氧数值比平时高，正常吗？",
+            "血氧数值偏低，是不是需要关注呼吸问题？",
+            "血氧值最近几次都比平时低，是为什么？",
+            "我早上起来血氧值偏低，这是怎么回事？",
+            "和同龄人相比，我的血氧值正常吗？",
+            "血氧值偏低，是不是和睡眠质量有关？",
+            "血氧值偏低会不会影响心率？"
+          ],
+          "cores": [
+            "血氧值",
+            "氧饱和",
+            "血氧数值",
+            "血氧水平",
+            "血氧读数",
+            "血氧数值",
+            "氧含量",
+            "血氧数据"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What was my blood oxygen level during the workout?",
+            "How's my oxygen saturation been lately?",
+            "I feel out of breath, what does my SpO2 say?",
+            "Have my oxygen levels been consistent over the past few days?",
+            "I was climbing stairs, did my blood oxygen drop?",
+            "How does my oxygen saturation compare to others my age?",
+            "I've been feeling tired, is my SpO2 low?",
+            "What's the trend of my blood oxygen levels this month?",
+            "I was at altitude, how did my oxygen saturation change?",
+            "Did my oxygen saturation improve after the breathing exercise?",
+            "I feel lightheaded, what's my current blood oxygen?",
+            "How does my oxygen saturation look compared to my resting heart rate?"
+          ],
+          "cores": [
+            "blood oxygen",
+            "oxygen level",
+            "SpO2 reading",
+            "oxygen saturation",
+            "blood oxy",
+            "oxygen levels",
+            "SpO2 value",
+            "oxygen reading"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我现在的血氧水平怎么样？",
+          "最近感觉有点喘，是不是血氧低了？",
+          "血氧饱和度正常范围是多少？",
+          "我走路时血氧会不会变低？",
+          "血氧低的话会有哪些症状？",
+          "我晚上睡觉时血氧会不会下降？",
+          "血氧低是不是代表身体有问题？",
+          "怎么才能提高血氧水平？",
+          "血氧和呼吸频率有什么关系？",
+          "血氧低的话需要看医生吗？"
+        ],
+        "en": [
+          "How much oxygen is in my blood right now?",
+          "Can you check my blood oxygen level for me?",
+          "What's the current oxygen saturation in my body?",
+          "I'm feeling a bit out of breath, what's my blood oxygen percentage?",
+          "Is my blood getting enough oxygen?",
+          "Could you tell me my oxygen levels?",
+          "I'm curious, what's my blood's oxygen level?",
+          "How's my blood oxygen doing today?",
+          "What's my current blood oxygen percentage?",
+          "Can you let me know how well my blood is carrying oxygen?"
+        ]
+      }
+    },
+    "respiratory_rate": {
+      "key": "respiratory_rate",
+      "cluster": "respiratory_rate",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我最近呼吸频率好像变快了，这是怎么回事？",
+            "今天感觉呼吸有点急促，是不是呼吸率高了？",
+            "和上周比，我的呼吸频率有变化吗？",
+            "呼吸的次数是不是比平常多了？",
+            "呼吸频率会不会影响睡眠质量？",
+            "最近几天的呼吸频率数据是怎样的？",
+            "我是不是该关注一下呼吸的节奏？",
+            "呼吸频率和血氧有什么联系？",
+            "呼吸的次数是不是和心率有关？",
+            "为什么我的呼吸频率有时候会突然升高？",
+            "呼吸的节奏是不是和运动有关？",
+            "呼吸频率是不是应该保持在一个稳定的范围？"
+          ],
+          "cores": [
+            "呼吸次数",
+            "呼吸频率",
+            "呼吸节奏",
+            "呼吸快慢",
+            "呼吸节拍",
+            "呼吸速度",
+            "呼吸频率变化",
+            "呼吸频率高低"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many breaths per minute did I take last night?",
+            "What's my breathing speed been like lately?",
+            "I feel out of breath more often, is that normal?",
+            "Can you show me my breathing frequency over the past few days?",
+            "I think my breathing has gotten faster recently, is that true?",
+            "I'm curious about my breaths per minute during the day.",
+            "Is my respiratory rate within a healthy range?",
+            "Could you compare my breathing rate now to a month ago?",
+            "I've been more aware of my breathing, can you track that?",
+            "What's the average number of breaths I take every minute?",
+            "I've noticed I'm breathing more quickly lately, can you check?",
+            "I want to know how my breathing rate has changed over time."
+          ],
+          "cores": [
+            "breath speed",
+            "breathing frequency",
+            "breath count",
+            "respiratory count",
+            "breath number",
+            "respiratory speed",
+            "breathing number",
+            "breath per minute"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我最近感觉呼吸有点急促，这是不是有什么问题？",
+          "怎么才能知道我每分钟呼吸多少次？",
+          "有没有办法监测我平时呼吸的频率？",
+          "我晚上睡觉时呼吸是不是正常？",
+          "呼吸太快是不是说明身体哪里有问题？",
+          "我能不能通过手机知道自己的呼吸频率？",
+          "我的呼吸是不是太慢了？",
+          "有没有什么办法可以提高我的呼吸频率？",
+          "呼吸频率对健康有什么影响？",
+          "平时怎么才能知道自己呼吸的次数？"
+        ],
+        "en": [
+          "How many breaths per minute am I taking on average?",
+          "Can you tell me how fast I'm breathing right now?",
+          "What's my breathing speed looking like today?",
+          "I'm curious about my breaths per minute—what does that show?",
+          "Is there a way to track how quickly I'm breathing throughout the day?",
+          "Could you check my breathing rate for me?",
+          "How does my breathing compare to what's considered normal?",
+          "I want to know how many times I'm breathing every minute.",
+          "Can you give me an update on my breathing pace?",
+          "What's the current number of breaths I'm taking each minute?"
+        ]
+      }
+    },
+    "sleep_rem": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚的快速眼动睡眠时长是多少？",
+            "最近几天的REM睡眠时间有变化吗？",
+            "我的睡眠质量好像不太稳定，REM睡眠是不是少了？",
+            "REM睡眠对大脑有什么影响？",
+            "这个月REM睡眠时间比上个月多了吗？",
+            "REM睡眠时间少会不会影响记忆力？",
+            "我睡眠的时候，REM阶段持续多久？",
+            "和同龄人相比，我的REM睡眠时间正常吗？",
+            "REM睡眠是不是越长越好？",
+            "我的REM睡眠时间最近一直偏低，这是为什么？",
+            "REM睡眠和深睡有什么区别？",
+            "我每天的REM睡眠时间大概在多少小时左右？"
+          ],
+          "cores": [
+            "REM时长",
+            "快速眼动阶段",
+            "REM睡眠",
+            "眼动阶段",
+            "REM时间",
+            "眼动睡眠",
+            "眼动时长",
+            "REM时数"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How much REM sleep did I get last night?",
+            "I noticed my REM was lower this week, any ideas why?",
+            "What's the average REM sleep for someone my age?",
+            "I had a dream last night, does that mean my REM was high?",
+            "Can you show me my REM sleep over the past month?",
+            "I feel more rested when my REM is higher, is that normal?",
+            "How does my REM compare to other users with similar sleep patterns?",
+            "I woke up a lot during the night, could that affect my REM?",
+            "I want to improve my REM sleep, what can I do?",
+            "Why is my REM sleep so low even though I feel like I slept well?",
+            "I read that REM is important for memory, is that true?",
+            "How can I track my REM sleep without a device?"
+          ],
+          "cores": [
+            "REM sleep",
+            "REM stage",
+            "REM phase",
+            "REM cycles",
+            "REM time",
+            "REM period",
+            "REM duration",
+            "REM level"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？能说说快速眼动阶段的时间吗？",
+          "这个阶段对睡眠质量有多重要？",
+          "我的快速眼动睡眠时间是不是太少了？",
+          "睡眠中哪个部分最能让人恢复精力？",
+          "有没有办法让这个阶段的睡眠时间增加？",
+          "这个阶段是不是和做梦有关系？",
+          "为什么这个阶段的睡眠时间会变化这么大？",
+          "我这个阶段的睡眠时间正常吗？",
+          "这个阶段的睡眠时间对记忆力有帮助吗？",
+          "能不能通过一些方法提高这个阶段的睡眠质量？"
+        ],
+        "en": [
+          "How much of my sleep was the REM stage?",
+          "What's the time I spend in the REM phase during the night?",
+          "Can you tell me how long I was in that light sleep phase?",
+          "How many hours of my sleep were in the REM stage?",
+          "I heard REM is important for memory—how much of my sleep was in that stage?",
+          "What's the average time I spend in that dreamy sleep phase?",
+          "Could you show me how much of my sleep was in the REM part?",
+          "How long was I in the REM phase during my last sleep?",
+          "I want to know how much of my sleep time was in that REM phase.",
+          "What's the time I was in the REM stage during the night?"
+        ]
+      }
+    },
+    "sleep_core": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "昨晚睡得怎么样？",
+            "我最近的睡眠质量好像变差了，是怎么回事？",
+            "核心睡眠时长和深睡眠有什么区别？",
+            "这个指标对健康有什么影响？",
+            "我今天的核心睡眠时长比昨天少了，正常吗？",
+            "怎么提高核心睡眠的时长？",
+            "我睡了多久才算够？",
+            "和朋友比起来，我的核心睡眠怎么样？",
+            "如果核心睡眠太短，会不会影响白天的精神？",
+            "这个数据是不是和睡眠总时长有关？",
+            "最近熬夜，核心睡眠数据下降了，怎么办？",
+            "核心睡眠有没有最低标准？"
+          ],
+          "cores": [
+            "核心睡眠",
+            "睡得实",
+            "睡眠时长",
+            "睡多久",
+            "睡眠时间",
+            "核心时长",
+            "睡眠质量",
+            "睡得深"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How much core sleep did I get last night?",
+            "What was my core sleep time?",
+            "I feel tired, maybe my core sleep was low.",
+            "Can you show me my core sleep trends this month?",
+            "Is my core sleep improving over time?",
+            "I had a rough night, how did that affect my core sleep?",
+            "I want to compare my core sleep with last week.",
+            "What's the average core sleep for my age group?",
+            "Why is my core sleep lower than usual?",
+            "How does my core sleep compare to others with similar habits?",
+            "I'm trying to improve my core sleep, any suggestions?",
+            "My core sleep seems to be dropping, any ideas why?"
+          ],
+          "cores": [
+            "core sleep",
+            "core hours",
+            "sleep core",
+            "core rest",
+            "core time",
+            "sleep core hours",
+            "core duration",
+            "core rest time"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚睡得怎么样？核心睡眠时间够吗？",
+          "睡眠质量好不好，主要看核心睡眠时间对吧？",
+          "怎么才能提高我的核心睡眠时长？",
+          "核心睡眠时间对健康有多重要？",
+          "昨晚的核心睡眠时间好像有点短，这是怎么回事？",
+          "我的核心睡眠时间是不是太少了？",
+          "有没有办法让我每天的核心睡眠时间更长一点？",
+          "核心睡眠时间不够会影响第二天的精神状态吗？",
+          "晚上睡了八个小时，但核心睡眠好像只有五个小时，正常吗？",
+          "怎么知道我的核心睡眠时间有没有达标？"
+        ],
+        "en": [
+          "How many hours of deep rest did I get last night?",
+          "What's the amount of really restful sleep I had?",
+          "Can you tell me how much quality sleep I got?",
+          "How long was my most restorative sleep?",
+          "What's the number of hours I spent in really good sleep?",
+          "How much of my sleep was actually helpful for recovery?",
+          "Could you check how much of my sleep was truly restful?",
+          "How many hours of real sleep did I have?",
+          "What's the count of my most restful sleep hours?",
+          "How much of my sleep was actually deep and restful?"
+        ]
+      }
+    },
+    "sleep_in_bed": {
+      "key": "sleep",
+      "cluster": "sleep",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚在床上待了多久？",
+            "最近几天在床的时间变化大吗？",
+            "今天睡得怎么样？",
+            "和昨天相比，我今天在床上的时间少了多久？",
+            "我最近有没有经常在床上待着？",
+            "这周在床的时间和上周相比有什么不同？",
+            "昨晚在床的时间比平时少了很多，为什么？",
+            "我今天在床上的时间和上周平均相比怎样？",
+            "这段时间在床的时间是不是有点短？",
+            "我最近在床的时间有没有比之前更长？",
+            "在床的时间是不是和睡眠总时长相近？",
+            "我平时在床的时间大概多久？"
+          ],
+          "cores": [
+            "在床上",
+            "床时间",
+            "在床时间",
+            "床待多久",
+            "床时长",
+            "床时",
+            "床待",
+            "床时数"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long was I in bed last night?",
+            "What's my time in bed for the past few days?",
+            "I feel like I didn't sleep well—how much time was I actually in bed?",
+            "Can you show me my in bed duration over the last week?",
+            "I'm trying to improve my sleep—how much time do I spend in bed on average?",
+            "What's the total time I've been in bed this month?",
+            "I'm not getting enough rest—how many hours was I in bed last night?",
+            "I want to track how much time I'm actually spending in bed each night.",
+            "Could you compare my time in bed this week with the previous one?",
+            "I noticed my sleep hasn't been great—how long was I in bed last night?",
+            "How does my in bed time compare with the recommended hours for good sleep?",
+            "I'm curious about my sleep patterns—what's my average time in bed?"
+          ],
+          "cores": [
+            "in bed",
+            "bed time",
+            "time in bed",
+            "bed duration",
+            "bed hours",
+            "bed period",
+            "bed stay",
+            "bed time spent"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我昨晚在床上待了多久？",
+          "睡了多少小时才算够？",
+          "今天早上在床上的时间长吗？",
+          "系统怎么算我在床上的时间？",
+          "有没有办法知道我每天在床上待多久？",
+          "我在床上的时间和睡眠质量有关系吗？",
+          "晚上睡不着的时候，算不算在床上的时间？",
+          "这个数据能告诉我睡得怎么样吗？",
+          "为什么我在床上的时间和睡眠总时长不一样？",
+          "能不能帮我看看我最近在床上的时间变化？"
+        ],
+        "en": [
+          "How long was I actually in bed last night?",
+          "Can you tell me how much time I spent in bed today?",
+          "I want to know how many hours I was in bed yesterday.",
+          "What's the total time I was in bed this week?",
+          "How much time did I spend in bed last week?",
+          "Could you check how long I was in bed this morning?",
+          "I'm curious about how long I was in bed on Sunday.",
+          "How many hours did I spend in bed this morning?",
+          "Can you let me know how much time I was in bed last night?",
+          "What was my total time in bed this past weekend?"
+        ]
+      }
+    },
+    "steps": {
+      "key": "steps",
+      "cluster": "activity",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天走了多少路？",
+            "最近几天走路的步数变化大吗？",
+            "和上周相比，走路的次数有没有增加？",
+            "昨天走的步数比前天多吗？",
+            "走路的步数有没有达到目标？",
+            "走路的步数是不是和锻炼分钟有关？",
+            "我每天走路的步数稳定吗？",
+            "走路的步数和站立时间有什么联系？",
+            "走路的步数有没有影响睡眠质量？",
+            "走路的步数是不是和体脂率有关？",
+            "我走路的步数最近是不是少了？",
+            "走路的步数是不是和呼吸率有关？"
+          ],
+          "cores": [
+            "走路",
+            "步数",
+            "步频",
+            "走动",
+            "行走",
+            "步量",
+            "步数统计",
+            "步数变化"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many steps did I take yesterday?",
+            "Did I hit my daily goal for walking?",
+            "What was my step count during the hike?",
+            "I feel like I walked a lot today, was that true?",
+            "Can I see my steps from the morning walk?",
+            "I want to track how much I move each day.",
+            "How far did I walk in total?",
+            "I think I walked more than usual, can you check?",
+            "What's the total walking distance for the week?",
+            "I'm curious how many steps I've taken so far today.",
+            "I walked a lot, but the app didn't show it, why?",
+            "Can you tell me how many steps I took during my lunch break?"
+          ],
+          "cores": [
+            "walked",
+            "step count",
+            "walking distance",
+            "steps taken",
+            "walk total",
+            "daily steps",
+            "movement total",
+            "step total"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天走了多少步啊？",
+          "你能告诉我最近几天我每天走了多少步吗？",
+          "我走路的步数记录在哪里可以看？",
+          "我每天大概走多少步？",
+          "我想知道我今天走了多少步。",
+          "我走路的步数是不是可以用来计算运动量？",
+          "我今天走路的步数是多少？",
+          "我每天走路的步数有没有目标？",
+          "我最近走路的步数变化大不大？",
+          "我想查看我最近一周每天走路的步数。"
+        ],
+        "en": [
+          "How many steps did I take today?",
+          "Can you tell me how much I walked?",
+          "What's my step count for the day?",
+          "How far did I walk today?",
+          "I want to know how many steps I took yesterday.",
+          "How much walking have I done this week?",
+          "Could you check how many steps I've done so far?",
+          "Tell me how many steps I walked today.",
+          "I'm curious about how much I've walked lately.",
+          "How many steps have I taken over the past few days?"
+        ]
+      }
+    },
+    "active_energy": {
+      "key": "activity_kcal",
+      "cluster": "activity",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天走路消耗了多少热量？",
+            "走路时消耗的卡路里是不是比跑步少？",
+            "最近一周每天的活动热量消耗趋势是怎样的？",
+            "昨天活动时用了多少能量？",
+            "走路和爬楼梯消耗的热量差不多吗？",
+            "我今天运动后消耗了多少能量？",
+            "走路消耗的能量是不是和体重有关？",
+            "活动消耗的热量是不是比基础代谢高？",
+            "走路时热量消耗是不是和速度有关？",
+            "我最近活动消耗的热量比之前少了，这是怎么回事？",
+            "走路和骑车消耗的热量哪个更多？",
+            "我今天活动消耗的热量是不是正常？"
+          ],
+          "cores": [
+            "走路消耗",
+            "活动热量",
+            "走路能量",
+            "走路热量",
+            "走路消耗能量",
+            "活动消耗",
+            "走路用能",
+            "走路耗能"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many calories did I burn from activities today?",
+            "What's my active energy expenditure?",
+            "I feel more tired than usual—could it be because I burned more calories moving around?",
+            "Did I use up more energy through movement compared to yesterday?",
+            "What's the total energy used during physical activities?",
+            "I want to know how much energy I burned while being active.",
+            "How does my activity energy use compare to the average?",
+            "I noticed I moved a lot yesterday—how much energy did that use?",
+            "What's the amount of energy I used while doing physical things?",
+            "I'm curious about the calories I spent on being active.",
+            "How much energy did I use from moving around?",
+            "I'm trying to track how much I burned through movement."
+          ],
+          "cores": [
+            "activity calories",
+            "energy used",
+            "calories burned",
+            "active energy",
+            "movement calories",
+            "energy from moving",
+            "calories spent",
+            "activity energy"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "今天运动大概消耗了多少热量？",
+          "走路和跑步一共烧了多少卡路里？",
+          "我今天活动大概用了多少能量？",
+          "运动之后，身体大概消耗了多少能量？",
+          "走路和锻炼加起来，消耗了多少热量？",
+          "我今天运动一共消耗了多少热量？",
+          "走路和跑步总共消耗了多少能量？",
+          "活动之后，大概消耗了多少卡路里？",
+          "走路、跑步和其他活动一共用了多少能量？",
+          "我今天运动大概用了多少热量？"
+        ],
+        "en": [
+          "How many calories did I burn from being active today?",
+          "Can you tell me how much energy I used up moving around?",
+          "How much did my activities burn in terms of calories?",
+          "What's the total number of calories I used up during the day from moving?",
+          "How much energy did I use from all my activities?",
+          "How many calories did I lose from being active?",
+          "How much energy did I spend just from moving around?",
+          "How many calories did I use up while doing things today?",
+          "How much did my body burn from all the activity I did?",
+          "Can you show me how many calories I burned from moving?"
+        ]
+      }
+    },
+    "vo2max": {
+      "key": "vo2max",
+      "cluster": "vo2max",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我最近的体能表现怎么样？",
+            "最大摄氧量有没有提高？",
+            "这个指标和心率变异性有关系吗？",
+            "我的有氧能力最近是不是变差了？",
+            "为什么我的体能得分比上周低？",
+            "最大摄氧量对跑步有什么影响？",
+            "怎么提高这个数值？",
+            "我的运动表现和这个指标有关吗？",
+            "最近几天体能变化大不大？",
+            "这个数据能说明我的心肺功能吗？",
+            "有没有办法让这个数值变得更好？",
+            "最大摄氧量是不是越高中枢神经越好？"
+          ],
+          "cores": [
+            "体能",
+            "有氧能力",
+            "摄氧",
+            "心肺表现",
+            "运动表现",
+            "有氧表现",
+            "最大摄氧",
+            "体能表现"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my cardio fitness level?",
+            "Can you show me my max oxygen uptake?",
+            "How has my aerobic capacity changed over time?",
+            "I want to track my endurance performance.",
+            "What's the current value for my maximum oxygen consumption?",
+            "How does my VO2 compare to the average for my age?",
+            "I'm curious about my lung capacity during exercise.",
+            "How can I improve my aerobic fitness?",
+            "What's the best way to measure my heart's efficiency?",
+            "Is my cardio fitness improving with my training?",
+            "How does my oxygen intake affect my workout performance?",
+            "Can you explain my maximum oxygen consumption in simple terms?"
+          ],
+          "cores": [
+            "cardio fitness",
+            "max oxygen",
+            "aerobic capacity",
+            "oxygen intake",
+            "lung capacity",
+            "heart efficiency",
+            "oxygen consumption",
+            "endurance level"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我怎么知道自己心肺功能有多好？",
+          "有没有办法测测我运动时的最大氧气消耗？",
+          "我的心肺耐力怎么样？",
+          "这个指标能告诉我身体的耐力水平吗？",
+          "有没有什么方法可以提高我的最大摄氧能力？",
+          "能帮我看看我的心肺功能有没有进步吗？",
+          "我平时锻炼，但不知道自己的心肺能力如何？",
+          "这个数据能不能反映我身体的健康状况？",
+          "怎么才能知道我的身体在运动时的氧气利用率？",
+          "有没有什么指标可以衡量我的有氧能力？"
+        ],
+        "en": [
+          "How good is my heart and lungs when I exercise?",
+          "Can you tell me how well my body uses oxygen during workouts?",
+          "What's my maximum oxygen intake level?",
+          "How does my body handle intense physical activity?",
+          "What's my cardio fitness level based on oxygen usage?",
+          "How efficient is my breathing during exercise?",
+          "What's my peak oxygen consumption?",
+          "Can you check how my heart and lungs perform under stress?",
+          "How well can my body take in oxygen when I'm working out hard?",
+          "What's my overall stamina based on oxygen use?"
+        ]
+      }
+    },
+    "cardio_recovery_1min_bpm": {
+      "key": "cardio_recovery",
+      "cluster": "cardio_recovery",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我运动后心率降得慢吗？",
+            "心肺功能恢复怎么样？",
+            "刚刚跑步完，心率恢复得快吗？",
+            "运动后心率下降情况正常吗？",
+            "有没有办法提高运动后的心率恢复速度？",
+            "为什么我运动后心率降得比别人慢？",
+            "心肺恢复能力是不是和心率恢复有关？",
+            "我最近心率恢复速度变慢了，怎么回事？",
+            "心率下降的幅度是否反映了心脏健康？",
+            "心率恢复是不是衡量心脏功能的一个指标？",
+            "有没有办法通过训练提升心率恢复能力？",
+            "运动后心率多久能恢复到正常？"
+          ],
+          "cores": [
+            "心率降速",
+            "心肺恢复",
+            "运动后心率",
+            "心率下降",
+            "恢复速度",
+            "心率恢复",
+            "心率恢复能力",
+            "心率恢复情况"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How does my heart rate recover after a workout?",
+            "What's my heart recovery rate?",
+            "I feel like my heart rate isn't going back down fast enough, is that normal?",
+            "Can you show me how my heart rate recovers over time?",
+            "What's my post-exercise heart rate recovery like?",
+            "Is my heart rate recovery improving lately?",
+            "How does my heart recovery compare to others?",
+            "What's the best way to improve my heart recovery?",
+            "I noticed my heart rate drops slower than before, is that a problem?",
+            "How does my heart rate return to normal after exercise?",
+            "What's my heart's ability to bounce back after working out?",
+            "Could my heart recovery be affecting my overall fitness?"
+          ],
+          "cores": [
+            "heart recovery",
+            "recovery rate",
+            "heart bounce",
+            "post-exercise drop",
+            "heart return",
+            "heart drop speed",
+            "recovery ability",
+            "heart rate bounce"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我运动后心跳降得慢吗？",
+          "锻炼完心率恢复得怎么样？",
+          "运动完多久心跳能回到正常？",
+          "有没有办法看看我心率恢复的情况？",
+          "我心肺功能恢复得还好吗？",
+          "运动后心跳下降的速度正常吗？",
+          "心率恢复能力好不好？",
+          "锻炼后心率下降得快吗？",
+          "能告诉我我的心率恢复情况吗？",
+          "我运动完心率恢复得慢吗？"
+        ],
+        "en": [
+          "How quickly does my heart rate come back down after I exercise?",
+          "What's my heart recovery speed after working out?",
+          "How well does my heart recover after I'm done moving?",
+          "Can you tell me how my heart rate drops after I finish a workout?",
+          "I want to know how my heart returns to normal after I exercise.",
+          "How fast does my heart slow down after I'm done being active?",
+          "What's my heart's ability to recover after physical activity?",
+          "How does my heart rate change after I stop exercising?",
+          "I'm curious about how my heart recovers after I work out.",
+          "How well does my heart handle coming back to rest after exercise?"
+        ]
+      }
+    },
+    "wrist_temp": {
+      "key": "wrist_temp",
+      "cluster": "wrist_temp",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨晚睡觉时手腕的温度是多少？",
+            "最近几天手腕温度有变化吗？",
+            "睡觉时手腕温度是不是正常？",
+            "我睡觉时手腕为什么会感觉热？",
+            "和之前相比，手腕温度有升高吗？",
+            "手腕温度对睡眠质量有影响吗？",
+            "我晚上睡觉时手腕的温度数据在哪里看？",
+            "为什么我手腕温度比别人高？",
+            "睡觉时手腕温度数据记录准确吗？",
+            "手腕温度和深睡时间有没有关系？",
+            "我这几天手腕温度一直偏高，是怎么回事？",
+            "睡觉时手腕温度会不会影响心率？"
+          ],
+          "cores": [
+            "手腕温度",
+            "睡觉手腕",
+            "手腕热",
+            "手腕数据",
+            "睡觉温度",
+            "手腕变化",
+            "手腕记录",
+            "手腕影响"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What was my wrist temperature while sleeping last night?",
+            "How does my sleeping wrist temp compare to the average?",
+            "Did my wrist get too hot during the night?",
+            "I noticed my sleeping temperature went up, why might that be?",
+            "Is there a way to track my wrist temp during sleep?",
+            "I'm curious about my nighttime wrist temperature trends.",
+            "What's the normal range for sleeping wrist temperature?",
+            "I had a rough night's sleep, could my wrist temp have affected it?",
+            "How does my sleeping wrist temp relate to my sleep quality?",
+            "Could my wrist temp during sleep be causing me to wake up more?",
+            "I want to see if my wrist temp changes with different sleep positions.",
+            "Is my sleeping wrist temp higher than usual lately?"
+          ],
+          "cores": [
+            "sleep wrist",
+            "wrist sleep",
+            "night wrist",
+            "wrist during sleep",
+            "sleep temp",
+            "wrist temp sleep",
+            "sleeping temp",
+            "temp during sleep"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我睡觉的时候手腕温度怎么样？",
+          "夜里手腕热不热？",
+          "睡觉时手腕会变热吗？",
+          "手腕在睡觉时温度变化大吗？",
+          "晚上睡觉时手腕温度有记录吗？",
+          "睡觉的时候手腕温度高吗？",
+          "手腕在睡眠时的温度情况如何？",
+          "睡觉时手腕会不会感觉热？",
+          "有没有记录我睡觉时手腕的温度？",
+          "睡觉时手腕温度会不会影响睡眠质量？"
+        ],
+        "en": [
+          "How warm was my wrist while I was sleeping last night?",
+          "What was the temperature of my wrist during the night?",
+          "Did my wrist stay cool while I was asleep?",
+          "Can you tell me the temperature of my wrist while I was in bed?",
+          "Was my wrist warm when I was sleeping?",
+          "What's the temperature of my wrist during sleep?",
+          "How hot or cold was my wrist while I was resting?",
+          "What was the wrist temperature during my sleep time?",
+          "Can you check the temperature of my wrist when I was sleeping?",
+          "How did my wrist temperature change while I was asleep?"
+        ]
+      }
+    },
+    "apple_exercise_time_min": {
+      "key": "exercise_minutes",
+      "cluster": "exercise_minutes",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我昨天运动了多久？",
+            "最近几天的运动时间变化大吗？",
+            "和上周相比，我这周的活动量怎么样？",
+            "今天有氧运动的时间是多少？",
+            "我每天运动的时长有没有记录？",
+            "昨天的锻炼时间比前天多了吗？",
+            "我最近运动的总时长是多少？",
+            "今天走路和跑步加起来用了多少分钟？",
+            "运动时间是不是比之前少了？",
+            "最近有没有发现运动时长变长了？",
+            "我每天的活动时间有没有增加？",
+            "今天和昨天相比，运动时间有变化吗？"
+          ],
+          "cores": [
+            "锻炼时长",
+            "运动时长",
+            "活动时间",
+            "锻炼时数",
+            "运动时间",
+            "活动时长",
+            "锻炼时",
+            "运动时"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many minutes did I spend working out yesterday?",
+            "I want to track how long I exercise each day.",
+            "Can I see how much time I've been active lately?",
+            "Did I get enough exercise time today?",
+            "What was my workout time like this morning?",
+            "I think I exercised longer than usual today.",
+            "I need to know the total exercise minutes for the past week.",
+            "How can I check my daily activity minutes?",
+            "I spent more time moving than usual yesterday.",
+            "I want to compare my exercise time from last week to this week.",
+            "What's my usual amount of exercise time?",
+            "I feel like I haven't been as active lately."
+          ],
+          "cores": [
+            "workout time",
+            "exercise length",
+            "active time",
+            "moving minutes",
+            "exercise time",
+            "training duration",
+            "motion minutes",
+            "activity span"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天运动了多久？",
+          "最近几天我每天锻炼多长时间？",
+          "有没有记录我每天运动的时间？",
+          "我想知道我每天花多少时间在锻炼上。",
+          "能告诉我这周我总共运动了多少分钟吗？",
+          "我每天锻炼的时间有多长？",
+          "有没有办法查看我每天运动的时间？",
+          "我想了解自己每天运动时长的情况。",
+          "有没有办法知道我每天锻炼的时间？",
+          "我运动的时间多久？"
+        ],
+        "en": [
+          "How many minutes did I spend working out today?",
+          "Can you tell me how long I exercised yesterday?",
+          "I want to know the total time I was active and moving.",
+          "What was my exercise time over the past week?",
+          "How much time did I spend on physical activity last night?",
+          "Could you show me how many minutes I spent exercising this morning?",
+          "I'm curious about how long I was active during the day.",
+          "What's the total time I've been exercising recently?",
+          "How long was I moving and working out today?",
+          "Tell me how many minutes I spent on exercise yesterday."
+        ]
+      }
+    },
+    "apple_stand_time_min": {
+      "key": "stand_time",
+      "cluster": "stand_time",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天站了多久？",
+            "最近站立的时间有变化吗？",
+            "我是不是站得不够？",
+            "站立时间比上周多了吗？",
+            "早上起来站了多久？",
+            "有没有办法增加站立时间？",
+            "站立时长和步数有关系吗？",
+            "我站立的时长怎么样？",
+            "站立时间比昨天少了，怎么回事？",
+            "我一天里站了多少分钟？",
+            "我应该每天站多久才健康？",
+            "站立时间对健康有什么影响？"
+          ],
+          "cores": [
+            "站立",
+            "站多",
+            "站时",
+            "站久",
+            "站久时",
+            "站时长",
+            "站久时间",
+            "站时间"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long have I been standing today?",
+            "What's my stand time for the day?",
+            "Can I see how much I stood up yesterday?",
+            "I want to check my standing duration over the past few days.",
+            "How does my standing time compare to my usual?",
+            "I need to know my standing minutes for the last week.",
+            "I was on my feet a lot today, can you confirm?",
+            "I'm trying to track how much I stand each day, any data?",
+            "How much time did I spend standing last night?",
+            "I think I stood more than usual today, any stats?",
+            "Could you show me my standing time for the past two days?",
+            "I need to know how many minutes I've spent standing recently."
+          ],
+          "cores": [
+            "stand time",
+            "standing minutes",
+            "on feet",
+            "stand duration",
+            "time standing",
+            "standing time",
+            "time on feet",
+            "stand minutes"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天站了多久？",
+          "能告诉我一下我今天站着的时间吗？",
+          "我平时站立的时间有多长？",
+          "今天有没有记录我站立的时间？",
+          "我今天站立了多少分钟？",
+          "站立的时间是怎么计算的？",
+          "我今天有没有一直站着？",
+          "能不能看一下我最近站立的时间？",
+          "站立时间对健康有什么影响？",
+          "我今天站着的时间比昨天多吗？"
+        ],
+        "en": [
+          "How long have I been standing today?",
+          "Can you tell me how much time I spent on my feet?",
+          "I want to know how many minutes I stood up during the day.",
+          "What's the total time I was standing around?",
+          "How much of my day did I spend just standing there?",
+          "Could you check how long I was standing without sitting?",
+          "Tell me how many minutes I was up on my feet.",
+          "I'm curious about how much time I've been standing lately.",
+          "How much time did I spend standing instead of sitting?",
+          "Can you show me how long I stood during my daily routine?"
+        ]
+      }
+    },
+    "distance_walking_running_km": {
+      "key": "walk_run_distance",
+      "cluster": "walk_run_distance",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天走了多少公里？",
+            "走路和跑步加起来一共走了多远？",
+            "最近几周走路和跑步的总距离是多少？",
+            "步行和跑步加起来的总距离有没有变多？",
+            "走路和跑步的距离总和有没有增加？",
+            "昨天走路和跑步加起来走了多少？",
+            "走路和跑步加起来的总距离和上周比怎么样？",
+            "我走路和跑步的总距离比上周多了多少？",
+            "步行和跑步加起来的总距离有没有下降？",
+            "走路和跑步加起来一共走了多少公里？",
+            "步行和跑步加起来的总距离有没有变化？",
+            "走路和跑步加起来的总距离最近是不是变多了？"
+          ],
+          "cores": [
+            "步行距离",
+            "跑步距离",
+            "走跑总距离",
+            "走跑距离",
+            "步跑距离",
+            "步跑总距离",
+            "走路跑步距离",
+            "步行跑步总距离"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How far have I walked and run today?",
+            "What's my total distance from walking and running?",
+            "I want to check my activity distance for the past few days.",
+            "Can you show me the combined distance from my walks and runs?",
+            "I've been more active lately, has my walking and running distance increased?",
+            "How does my walking and running distance compare to last month?",
+            "I noticed my movement has been less, can you tell me my walking and running distance?",
+            "What's the total distance covered through walking and running this week?",
+            "I feel like I've been moving more, can you confirm my walking and running distance?",
+            "I need to track how much I've walked and run so far this month.",
+            "I'm trying to stay active, what's my current walking and running distance?",
+            "I'd like to see how much I've moved through walking and running over the last few weeks."
+          ],
+          "cores": [
+            "walk run dist",
+            "activity dist",
+            "move dist",
+            "step run dist",
+            "walk run km",
+            "active km",
+            "total walk run",
+            "walk run sum"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天走了多少路加跑步的距离总共有多少公里？",
+          "走路和跑步加起来一共走了多远？",
+          "走路加上跑步的总距离是多少？",
+          "我今天走路和跑步加起来走了多少公里？",
+          "走路和跑步加起来一共走了多少？",
+          "我今天走路和跑步加起来的总距离是多少公里？",
+          "走路和跑步加起来的总里程数是多少？",
+          "走路加跑步一共走了多少？",
+          "走路加上跑步的总距离是多远？",
+          "走路和跑步加起来的总距离是多少？"
+        ],
+        "en": [
+          "How far have I walked and run today?",
+          "Can you tell me the total distance I've covered by walking and running?",
+          "What's the combined walking and running distance I've done so far?",
+          "I want to know how many kilometers I've walked and ran altogether.",
+          "Could you check how much I've walked and run in total?",
+          "What's the total distance I've covered on foot and while running?",
+          "How much have I walked and run in total this week?",
+          "I'd like to see the total walking and running distance I've done.",
+          "Can you show me the total distance from both walking and running activities?",
+          "How far have I gone by walking and running combined?"
+        ]
+      }
+    },
+    "walking_hr_avg_bpm": {
+      "key": "walking_hr",
+      "cluster": "walking_hr",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我走路的时候心跳有多快？",
+            "最近走路时的心跳变化大吗？",
+            "走路时的心率跟平时比怎么样？",
+            "我走路时的心跳正常吗？",
+            "走路时的心率比静息时高多少？",
+            "我走路时的心跳数值是多少？",
+            "走路时的心率有没有异常？",
+            "我每天走路时的心率数据记录在哪里？",
+            "我的心率在走路时是不是比跑步时低？",
+            "走路时的心率跟睡眠时的心率相比如何？",
+            "我今天走路时的心跳感觉不太对，正常吗？",
+            "走路时的心率和静息心率有啥区别？"
+          ],
+          "cores": [
+            "走路心跳",
+            "步行心跳",
+            "走路时心率",
+            "走路心率",
+            "步行心率",
+            "走路心跳数值",
+            "步行时心跳",
+            "走路心率数据"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What was my heart rate while walking today?",
+            "How does my walking heart rate compare to usual?",
+            "I noticed my heart rate is higher when I walk, why?",
+            "Can you show me the trend of my heart rate during walks?",
+            "Is my heart rate during walking within a normal range?",
+            "I walked for 30 minutes, what was my average heart rate?",
+            "Why is my heart rate higher during walking than when I'm resting?",
+            "I want to check my heart rate while I was walking yesterday.",
+            "Has my walking heart rate changed over the past few weeks?",
+            "I feel my heart is beating faster when I walk, what could be the reason?",
+            "I walked a lot today, how did my heart rate respond?",
+            "Can you tell me my heart rate during the last walk I took?"
+          ],
+          "cores": [
+            "walk heart",
+            "heart while walking",
+            "walking heart",
+            "heart rate on walk",
+            "heart during walk",
+            "heart when walking",
+            "heart rate walking",
+            "heart during walks"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我走路的时候心跳快吗？",
+          "走路时我的心跳情况怎么样？",
+          "平时走路时，我的心跳速度是多少？",
+          "有没有记录我走路时的心跳数据？",
+          "我走路时的心跳频率正常吗？",
+          "走路的时候，我的心跳有没有异常？",
+          "有没有办法看看我走路时的心跳情况？",
+          "走路时我的心跳数值是多少？",
+          "我的心跳在走路时的表现如何？",
+          "我走路时的心跳数据能查到吗？"
+        ],
+        "en": [
+          "How fast is my heart beating when I walk?",
+          "What's my average heart rate while I'm walking?",
+          "Can you tell me my heart rate during my daily walks?",
+          "How does my heart rate look when I'm on the move?",
+          "What's my heart rate like when I take a walk?",
+          "I'd like to know my heart rate when I'm walking around.",
+          "What's the typical heart rate I have when I'm walking?",
+          "How does my heart beat when I'm out walking?",
+          "Can you check my heart rate during my walking sessions?",
+          "What's my heart rate when I'm just walking normally?"
+        ]
+      }
+    },
+    "walking_steadiness": {
+      "key": "walking_steadiness",
+      "cluster": "walking_steadiness",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我走路时身体平衡怎么样？",
+            "最近感觉走路不太稳，是哪里出了问题？",
+            "走路的稳定性有没有变化？",
+            "为什么我感觉现在走路比以前容易晃？",
+            "走路时是不是身体协调性变差了？",
+            "走路的稳定性数据和之前相比如何？",
+            "是不是应该多做些平衡训练来改善？",
+            "走路时的稳定性有没有达到正常范围？",
+            "我是不是应该注意走路姿势？",
+            "走路时身体是不是经常晃动？",
+            "我最近走路感觉不太稳，这是怎么回事？",
+            "走路的稳定性数据是不是和体脂率有关？"
+          ],
+          "cores": [
+            "走路平衡",
+            "身体晃动",
+            "步态稳定",
+            "行走协调",
+            "步态变化",
+            "走路平衡度",
+            "步态稳定性",
+            "行走稳性"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How steady was my walking today?",
+            "Did I walk smoothly yesterday?",
+            "Is my walking balance improving?",
+            "What's my walking stability score?",
+            "Has my walking steadiness changed over the past month?",
+            "How does my walking stability compare to last week?",
+            "Am I walking more steadily now than before?",
+            "Can you show me my walking stability trends?",
+            "I feel my walking is less steady lately, is that true?",
+            "What's my walking balance like right now?",
+            "How has my walking stability been lately?",
+            "I want to see how my walking is holding up."
+          ],
+          "cores": [
+            "walking balance",
+            "steady walk",
+            "walk stability",
+            "walk steadiness",
+            "steady walking",
+            "walking hold",
+            "walk smoothness",
+            "walk firmness"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我走路的时候是不是有点不稳？有没有办法测一下？",
+          "走路时身体会不会摇晃？这个有没有数据可以看？",
+          "我感觉走路不太稳，是不是身体出了什么问题？",
+          "有没有什么指标能说明我走路是否平稳？",
+          "我走路老是晃来晃去，这是怎么回事？",
+          "这个app能不能告诉我走路是不是稳当？",
+          "我是不是应该关注一下自己走路的稳定性？",
+          "有没有办法知道我走路时是不是平衡得不错？",
+          "我走路的时候是不是经常不稳？有没有数据能说明？",
+          "这个app有没有记录我走路时是否稳定的功能？"
+        ],
+        "en": [
+          "How steady is my walking lately?",
+          "Can you tell me about my walking balance?",
+          "Is my walking smooth or shaky?",
+          "How does my walking stability look?",
+          "Have you noticed any changes in how I walk?",
+          "Is my gait stable or wobbly?",
+          "Can you check my walking steadiness for me?",
+          "How well do I keep my balance while walking?",
+          "Is my walking pattern consistent?",
+          "Could you give me an idea of how steady I am on my feet?"
+        ]
+      }
+    },
+    "time_in_daylight_min": {
+      "key": "daylight",
+      "cluster": "daylight",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天在户外待了多久？",
+            "最近几天日照时间有没有变化？",
+            "白天暴露的时间对健康有影响吗？",
+            "我白天接触阳光的时间比上周多了吗？",
+            "是不是日照时间越长越好？",
+            "我感觉最近白天的时间变短了，这是怎么回事？",
+            "我的日光暴露和睡眠质量有没有关系？",
+            "有没有办法增加我白天的日光接触时间？",
+            "我今天的日光暴露时长是多少？",
+            "昨天和今天相比，我在户外的时间有什么不同？",
+            "我今天有没有在阳光下待够时间？",
+            "我怎么才能知道我每天在阳光下待了多久？"
+          ],
+          "cores": [
+            "日照时间",
+            "日光时长",
+            "白天暴露",
+            "阳光接触",
+            "户外时间",
+            "光照时长",
+            "自然光时",
+            "光照接触"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long was I outside today?",
+            "Did I get enough sunlight exposure?",
+            "What's my daylight time for the day?",
+            "I feel tired, could it be from not enough daylight?",
+            "How does my daylight time compare to yesterday?",
+            "I was out all morning, but my app says low daylight time?",
+            "What's the best way to track how much sun I'm getting?",
+            "I want to know how much natural light I'm getting each day.",
+            "Why is my daylight time so short even though I went out?",
+            "I think I spent most of the day in the sun, but the numbers don't match.",
+            "How does my time in daylight affect my sleep?",
+            "I'm trying to get more sun, but the app isn't showing it."
+          ],
+          "cores": [
+            "sun time",
+            "daylight time",
+            "sun exposure",
+            "sunlight time",
+            "outdoor time",
+            "sun duration",
+            "sun hours",
+            "daylight duration"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天在户外待了多久？",
+          "我的手机告诉我我在阳光下待的时间有多长？",
+          "我每天晒太阳的时间够不够？",
+          "有没有办法知道我每天在阳光下待了多久？",
+          "我最近是不是晒太阳的时间变少了？",
+          "我今天在阳光下暴露了多久？",
+          "有没有数据能显示我每天晒太阳的时间？",
+          "我每天在户外活动的时间有多长？",
+          "我今天在阳光下待的时间是不是太短了？",
+          "我的健康应用有没有记录我每天晒太阳的时间？"
+        ],
+        "en": [
+          "How much time was I spending outside in the sun today?",
+          "Can you tell me how long I was in daylight this morning?",
+          "I want to know how many minutes I was exposed to sunlight.",
+          "How long was I in the sun during the day?",
+          "Could you check how much daylight I was in yesterday?",
+          "Tell me how much time I spent in the sun today.",
+          "I'm curious about how long I was outside in daylight.",
+          "Can you show me how many minutes I was in the sun?",
+          "How long was I in the sunlight during the day?",
+          "What was my total time in the sun today?"
+        ]
+      }
+    },
+    "flights_climbed": {
+      "key": "flights",
+      "cluster": "flights",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天爬了多少层楼？",
+            "最近几天爬楼的次数有变化吗？",
+            "和上周相比，我爬的楼层数多吗？",
+            "昨天爬楼比前天多吗？",
+            "我今天爬楼的进度怎么样？",
+            "我平时每天大概爬多少层楼？",
+            "有没有办法查看我爬楼的记录？",
+            "我爬楼的数据和别人比怎么样？",
+            "我今天走路的时候爬了多少层楼？",
+            "我最近是不是爬楼变少了？",
+            "爬楼的数据显示我今天很努力？",
+            "我想知道我每天爬楼的次数"
+          ],
+          "cores": [
+            "爬楼",
+            "层数",
+            "爬楼次数",
+            "楼层数",
+            "爬楼数据",
+            "爬楼记录",
+            "楼层",
+            "爬楼量"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How many flights did I climb yesterday?",
+            "Did I do any stairs today?",
+            "I feel like I climbed a lot of stairs, can you check?",
+            "What's my climbing activity for the past week?",
+            "How does my stair climbing compare to last month?",
+            "How many flights have I climbed this month?",
+            "I want to track how much stair climbing I do daily.",
+            "I climbed a lot of stairs today, how does that look?",
+            "Can you show me my stair climbing progress over time?",
+            "I think I climbed more stairs than usual this week.",
+            "How often do I climb stairs in a typical day?",
+            "I want to know how much climbing I've done lately."
+          ],
+          "cores": [
+            "climb stairs",
+            "flights",
+            "stair climbing",
+            "climbing activity",
+            "stairs climbed",
+            "climbed flights",
+            "stair count",
+            "climbing steps"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天爬了多少层楼啊？",
+          "系统能告诉我昨天爬了多少层楼吗？",
+          "有没有记录我最近爬楼的次数？",
+          "我想知道我今天走了多少层楼梯。",
+          "这个应用能统计我每天爬楼的层数吗？",
+          "我今天爬楼的情况怎么样？",
+          "系统有没有记录我今天爬了多少层楼？",
+          "我想看看自己这周爬了多少层楼。",
+          "这个功能可以告诉我我爬了多少次楼梯吗？",
+          "我今天爬楼的次数是多少？"
+        ],
+        "en": [
+          "How many flights of stairs did I climb today?",
+          "Can you tell me how many times I went up the stairs?",
+          "I want to know how many floors I climbed throughout the day.",
+          "Did I do a lot of stair climbing today?",
+          "How many times did I walk up the stairs?",
+          "Could you show me how many flights I climbed?",
+          "How many times did I go up and down the stairs?",
+          "How many stair levels did I ascend today?",
+          "I'd like to know how many staircases I climbed.",
+          "How many flights of stairs did I do yesterday?"
+        ]
+      }
+    },
+    "walking_speed_kmh": {
+      "key": "walking_speed",
+      "cluster": "walking_speed",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我最近走路的速度有变化吗？",
+            "走路的步速是不是变慢了？",
+            "今天走路比平时快吗？",
+            "我每天走路的节奏怎么样？",
+            "我的步幅和步速之间有什么关系？",
+            "走路速度是不是和心率有联系？",
+            "和上周相比，我的步行速度有提升吗？",
+            "感觉走路越来越慢了，是不是身体有问题？",
+            "走路时是不是应该保持一定的速度？",
+            "我走路的节奏是不是太慢了？",
+            "走路时的步速是不是能反映身体状态？",
+            "最近走路是不是比之前快了一些？"
+          ],
+          "cores": [
+            "走路节奏",
+            "步速变化",
+            "步行节奏",
+            "走路快慢",
+            "行走速度",
+            "步速表现",
+            "步频情况",
+            "行走步速"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my usual walking pace?",
+            "How fast have I been walking lately?",
+            "Can I see my average walking speed over the past month?",
+            "Is my walking speed improving?",
+            "How does my walking speed compare to others my age?",
+            "What's the fastest I've walked during a walk?",
+            "I feel like I'm moving slower than before, is that true?",
+            "How can I increase my walking speed?",
+            "What's the best way to track my walking speed?",
+            "Have I been walking faster or slower this week?",
+            "I noticed my walking speed has dropped, is there a reason?",
+            "How often should I check my walking speed?"
+          ],
+          "cores": [
+            "walking pace",
+            "my walk speed",
+            "how I walk",
+            "my gait",
+            "pace when walking",
+            "speed on foot",
+            "walk tempo",
+            "how fast I move"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我走路有多快？",
+          "平时走路的速度怎么样？",
+          "能告诉我我现在走路的快慢吗？",
+          "我每天走路的速度有变化吗？",
+          "走路快不快对健康有什么影响？",
+          "我最近走路是不是变慢了？",
+          "怎么知道我走路的速度是否正常？",
+          "走路速度和步数有什么关系吗？",
+          "我走路的速度是不是太慢了？",
+          "有没有办法提高我的走路速度？"
+        ],
+        "en": [
+          "How fast have I been walking lately?",
+          "Can you tell me my average walking pace?",
+          "What's my usual speed when I'm walking?",
+          "I want to know how quickly I walk on a daily basis.",
+          "Is there a way to check how fast I walk?",
+          "How quick am I when I'm on my feet walking?",
+          "Could you show me my walking speed from the past week?",
+          "I'm curious about my typical walking rate.",
+          "What's the speed I walk at during my daily activities?",
+          "How do I find out my walking pace?"
+        ]
+      }
+    },
+    "six_minute_walk_m": {
+      "key": "six_minute_walk",
+      "cluster": "six_minute_walk",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我走路耐力怎么样？",
+            "这周六分钟走路测试的结果如何？",
+            "六分钟能走多远？",
+            "最近一次六分钟步行测试的成绩是多少？",
+            "这个指标和我的步数有什么关系？",
+            "走六分钟能走多少米？",
+            "六分钟走路测试有没有改善？",
+            "今天六分钟走的距离和之前相比怎样？",
+            "我六分钟步行距离是不是比别人低？",
+            "六分钟走路测试的结果是否正常？",
+            "走路的耐力有没有变强？",
+            "六分钟步行距离有没有变化？"
+          ],
+          "cores": [
+            "六分钟走",
+            "六分钟测试",
+            "步行测试",
+            "六分钟距离",
+            "走六分钟",
+            "六分钟步行",
+            "六分钟走远",
+            "六分钟走多"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How far can I walk in six minutes?",
+            "I did a six-minute walk test yesterday, what was my distance?",
+            "What was my walking distance during that six-minute test?",
+            "How did my six-minute walk distance change last month?",
+            "Can you show me my six-minute walk results from the past week?",
+            "I want to compare my six-minute walk distance with my friend's.",
+            "What's my usual distance for a six-minute walk?",
+            "How does my six-minute walk distance compare to the average?",
+            "I walked for six minutes today, how far did I go?",
+            "Has my six-minute walk distance been increasing over time?",
+            "What's my current six-minute walk distance?",
+            "I think I can walk further now, how does it compare to before?"
+          ],
+          "cores": [
+            "six minute walk",
+            "six minute test",
+            "six minute distance",
+            "walk test distance",
+            "walk six minutes",
+            "six minute walk distance",
+            "walk distance six",
+            "six minute walk result"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我走路的时候能走多远？",
+          "医生让我测一下我走六分钟能走多远，这是什么意思？",
+          "有没有办法知道我走六分钟能走多少米？",
+          "这个测试是看我走路的能力吗？",
+          "我走六分钟大概能走多远？",
+          "这个功能是用来测我走路耐力的吗？",
+          "我走六分钟能走多少米？",
+          "这个测试是评估我身体状况的吗？",
+          "我想知道我走六分钟能走多远。",
+          "这个测试是看我走路的体力吗？"
+        ],
+        "en": [
+          "How far can I walk in six minutes?",
+          "What's the distance I can cover in six minutes of walking?",
+          "Can you tell me how far I walked in six minutes?",
+          "I want to know how far I can walk non-stop for six minutes.",
+          "How long of a walk can I do in six minutes?",
+          "What's the maximum distance I can walk in six minutes?",
+          "I'm curious about how far I can walk in six minutes without stopping.",
+          "How much ground can I cover in six minutes of walking?",
+          "What's the six-minute walking distance for me?",
+          "Can you check how far I walked in six minutes?"
+        ]
+      }
+    },
+    "body_mass_kg": {
+      "key": "body_mass",
+      "cluster": "body_mass",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我现在有多重？",
+            "最近体重有变化吗？",
+            "和上周比，我瘦了还是胖了？",
+            "我现在的体重在正常范围内吗？",
+            "体重数据最近是不是不太稳定？",
+            "和朋友相比，我的体重怎么样？",
+            "今天测量的体重和昨天差不多吗？",
+            "我最近有没有在不知不觉中变重？",
+            "体重有没有下降的趋势？",
+            "我现在的体重跟标准值差多少？",
+            "体重是不是最近有波动？",
+            "我现在的体重跟一个月前相比如何？"
+          ],
+          "cores": [
+            "体重",
+            "身体质量",
+            "体重数",
+            "我多重",
+            "身体重量",
+            "体重数据",
+            "当前体重",
+            "身体质量数"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my current weight?",
+            "Have I lost any weight lately?",
+            "How much do I weigh right now?",
+            "Is my weight the same as it was last month?",
+            "How has my weight changed over the past few weeks?",
+            "Could you show me my weight from yesterday?",
+            "I feel lighter, has my weight gone down?",
+            "What's the difference between my weight today and yesterday?",
+            "How much have I weighed over the last year?",
+            "Has my weight been stable recently?",
+            "I'm curious to know my current body mass.",
+            "Can I see how my weight has fluctuated this month?"
+          ],
+          "cores": [
+            "weight",
+            "current weight",
+            "body mass",
+            "how much do I weigh",
+            "my weight",
+            "weight now",
+            "my body mass",
+            "weight change"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我最近感觉胖了，能帮我测测现在有多重吗？",
+          "我想知道自己现在体重是多少，可以告诉我吗？",
+          "有没有办法知道我现在身体有多重？",
+          "我是不是变重了？能不能帮我查一下？",
+          "我想知道现在的体重情况，你能帮我看看吗？",
+          "我现在体重怎么样？能告诉我吗？",
+          "我最近没怎么运动，体重可能增加了，能测一下吗？",
+          "有没有办法让我知道现在的体重数据？",
+          "我感觉身体比以前重了，能帮我确认一下吗？",
+          "我想了解自己的体重，能帮我查一下吗？"
+        ],
+        "en": [
+          "How much do I weigh right now?",
+          "Can you tell me my current weight?",
+          "What's my body weight today?",
+          "I want to check my weight, can you help?",
+          "What's the number on the scale?",
+          "Could you let me know how many kilograms I'm at?",
+          "I need to know my weight, please.",
+          "What's the reading for my body mass?",
+          "Can you show me my weight measurement?",
+          "I'm curious about my current weight, can you tell me?"
+        ]
+      }
+    },
+    "body_fat_fraction": {
+      "key": "body_fat",
+      "cluster": "body_fat",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我最近的体脂数据怎么样？",
+            "为什么我的身体脂肪比例变高了？",
+            "体脂率是不是和体重有关？",
+            "这个月我的脂肪含量有变化吗？",
+            "我的身体脂肪比例是不是偏高？",
+            "体脂数据和我之前比有什么不同？",
+            "我怎么才能降低身体脂肪比例？",
+            "最近运动后，体脂率有下降吗？",
+            "我的身体脂肪比例和别人相比如何？",
+            "体脂率是不是影响健康的重要指标？",
+            "怎么才能知道我的脂肪含量是否正常？",
+            "最近的脂肪比例比之前稳定吗？"
+          ],
+          "cores": [
+            "脂肪比例",
+            "身体脂肪",
+            "脂肪含量",
+            "脂肪数据",
+            "脂肪数值",
+            "身体脂肪比例",
+            "脂肪变化",
+            "身体脂肪数值"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my body fat percentage?",
+            "How much fat am I carrying?",
+            "I noticed my body fat changed over the past month, can you show me the trend?",
+            "Is my body fat level in a healthy range?",
+            "Can I see how my body fat compares to last month?",
+            "What's the fat percentage in my body?",
+            "I'm curious about my body fat number.",
+            "How does my body fat percentage look compared to others?",
+            "I want to track my fat levels over time.",
+            "What's my current fat ratio?",
+            "I think my fat percentage is up, can you check?",
+            "I'd like to see the latest fat measurement."
+          ],
+          "cores": [
+            "fat ratio",
+            "body fat",
+            "fat level",
+            "fat percentage",
+            "fat measure",
+            "fat number",
+            "fat ratio",
+            "fat level"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我怎么知道自己的身体脂肪比例是多少？",
+          "有没有办法测测我身体里的脂肪含量？",
+          "我最近在关注健康，想知道我的脂肪比例正常吗？",
+          "我的身体里有多少脂肪？",
+          "可以告诉我我的脂肪含量吗？",
+          "我身体里的脂肪占比高吗？",
+          "怎么才能知道我的脂肪比例？",
+          "有没有什么方法能测出我身体的脂肪比例？",
+          "我的脂肪占比是不是偏高？",
+          "我想了解我的身体脂肪情况，该怎么做？"
+        ],
+        "en": [
+          "How much fat am I carrying compared to my weight?",
+          "Can you tell me what percentage of my body is fat?",
+          "What's the ratio of fat to muscle in my body?",
+          "I want to know how fat my body is in terms of percentage.",
+          "What's the proportion of fat in my body?",
+          "Could you check my body's fat percentage for me?",
+          "I'm curious about how much fat I have in my body as a percentage.",
+          "What's my fat level as a percentage of my total body?",
+          "Can you help me find out my body's fat ratio?",
+          "How does my body fat compare to others in terms of percentage?"
+        ]
+      }
+    },
+    "physical_effort": {
+      "key": "physical_effort",
+      "cluster": "physical_effort",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我今天运动的时候感觉有点吃力，这个数据是怎么计算的？",
+            "最近几天的体力活动数据有没有变化？",
+            "有没有办法提高这个指标的数值？",
+            "我走路的时候是不是用力不够？",
+            "这个数值和我的步数有什么关系？",
+            "昨天的数据比前天低了很多，是为什么？",
+            "我是不是应该多做一些需要用力的运动？",
+            "这个指标会不会影响我的睡眠质量？",
+            "我怎么才能让这个数值变得更高？",
+            "这个数据是根据我的心率来判断的吗？",
+            "这个数值会不会和我跑步时的功率有关？",
+            "我感觉今天比昨天更努力了，但数据没变，这是怎么回事？"
+          ],
+          "cores": [
+            "运动努力",
+            "活动强度",
+            "用力程度",
+            "体能付出",
+            "活动消耗",
+            "努力程度",
+            "体力付出",
+            "运动强度"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How hard did I work during my workout today?",
+            "Did I push myself enough during my exercise?",
+            "What was my effort level during the activity?",
+            "Can I see how much physical effort I've been putting in?",
+            "How intense was my movement throughout the day?",
+            "I want to check my activity effort for the past few days.",
+            "What's my overall physical exertion like?",
+            "How much energy did I use during my workouts?",
+            "I feel like I didn't put in much effort today, can I check?",
+            "How does my effort compare to yesterday?",
+            "I'm curious about how physically active I was during my walk.",
+            "What's the measure of how hard I moved throughout the day?"
+          ],
+          "cores": [
+            "effort level",
+            "physical exertion",
+            "movement intensity",
+            "exercise intensity",
+            "activity energy",
+            "workout effort",
+            "effort during activity",
+            "how hard I moved"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我今天运动的时候感觉挺费劲的，这个数据是怎么算的？",
+          "能告诉我一下，系统是怎么判断我运动时的用力程度吗？",
+          "有没有办法知道我平时锻炼有多费力？",
+          "系统是不是能记录我运动时的辛苦程度？",
+          "我跑步的时候是不是可以知道我用了多大劲？",
+          "有没有办法查看我运动时的体力消耗情况？",
+          "系统怎么知道我运动的时候有多努力？",
+          "我走路的时候，是不是能知道我用了多少力气？",
+          "是不是有办法知道我运动时的强度有多大？",
+          "系统怎么评估我运动时的体力付出？"
+        ],
+        "en": [
+          "How hard was I working physically today?",
+          "Can you tell me how much effort I put into my activities?",
+          "What's my activity intensity level like?",
+          "How physically active was I during the day?",
+          "How much energy did I use up from moving around?",
+          "Could you check how much physical effort I've been using?",
+          "How intense were my movements throughout the day?",
+          "What's my overall physical exertion level?",
+          "How much was I pushing myself during the day?",
+          "How hard have I been working physically lately?"
+        ]
+      }
+    },
+    "basal_energy_kcal": {
+      "key": "basal_energy",
+      "cluster": "basal_energy",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我每天静止状态下消耗多少热量？",
+            "为什么我今天的基础代谢比昨天低？",
+            "静息状态下我的身体消耗多少能量？",
+            "最近一周的静息能量消耗变化大吗？",
+            "和上周相比，我现在的基础代谢有没有变化？",
+            "静息时我的身体在燃烧多少卡路里？",
+            "我的基础能量消耗和同龄人相比如何？",
+            "我最近基础消耗有没有下降？",
+            "我每天不动的时候消耗多少能量？",
+            "我今天静息状态下消耗的热量正常吗？",
+            "我最近基础代谢有波动吗？",
+            "我每天身体维持基本功能需要多少热量？"
+          ],
+          "cores": [
+            "静息消耗",
+            "基础热量",
+            "静止能量",
+            "静息能量",
+            "基础代谢",
+            "基础热量消耗",
+            "静息热量",
+            "维持能量"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What's my energy burn at rest?",
+            "How much energy do I burn without moving?",
+            "How many calories does my body use just to function?",
+            "What's the number for my basal energy?",
+            "How does my resting energy compare to others?",
+            "I feel tired, could my basal energy be low?",
+            "What's the average for people like me?",
+            "How much energy does my body burn while I'm asleep?",
+            "How can I increase my basal energy?",
+            "What's my body's basic calorie burn?",
+            "I'm curious about my energy used when I'm not doing anything.",
+            "Is there a way to track my resting energy burn?"
+          ],
+          "cores": [
+            "rest energy",
+            "energy burn",
+            "body use",
+            "calorie base",
+            "energy rest",
+            "base burn",
+            "rest use",
+            "energy base"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我每天不活动的时候大概能消耗多少热量？",
+          "静止不动的时候，身体大概会烧掉多少卡路里？",
+          "躺着的时候，身体自己会消耗多少能量？",
+          "不运动的时候，身体每天大概会消耗多少热量？",
+          "睡觉的时候，身体是不是也在消耗热量？",
+          "如果不做任何事情，一天能消耗多少卡路里？",
+          "身体在休息状态下，每天大概消耗多少能量？",
+          "不吃饭只靠身体消耗，一天能消耗多少热量？",
+          "静坐的时候，身体消耗的热量有多少？",
+          "人在不动的时候，每天大概会消耗多少能量？"
+        ],
+        "en": [
+          "How many calories does my body burn just sitting around doing nothing?",
+          "What's the number of calories I use up every day without even moving?",
+          "Can you tell me how many calories I burn naturally while I'm resting?",
+          "What's the amount of energy my body needs just to keep me alive?",
+          "How much energy does my body use when I'm not doing any activity?",
+          "What's the number that shows how many calories I burn without moving a muscle?",
+          "How many calories do I use just to stay alive and not do anything?",
+          "What's the basic amount of calories my body uses every day?",
+          "Can you show me how many calories I burn without even thinking about it?",
+          "What's the number that represents the calories I use to keep my body running?"
+        ]
+      }
+    },
+    "running_speed_kmh": {
+      "key": "running_speed",
+      "cluster": "running_speed",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我跑步时的速度是多少？",
+            "最近跑步快了不少，是不是进步了？",
+            "昨天跑步感觉比之前快，是为什么？",
+            "我跑步有多快？",
+            "跟上周相比，跑步速度有变化吗？",
+            "我跑步的速度有没有达到平均水平？",
+            "今天跑步比平时快，是不是因为状态好？",
+            "我跑步的快慢有没有记录？",
+            "我跑步快吗？",
+            "跑步时的移动速度如何？",
+            "这段时间跑步速度有没有提高？",
+            "有没有办法看看我跑步的速度数据？"
+          ],
+          "cores": [
+            "跑步速度",
+            "跑步快慢",
+            "跑步移动",
+            "跑步移动速度",
+            "跑步速率",
+            "跑步步速",
+            "跑步速率变化",
+            "跑步快慢变化"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How fast did I run yesterday?",
+            "What was my pace during my morning run?",
+            "Can you show me my running speed from the last few days?",
+            "I want to know how quickly I was moving during my workout.",
+            "What's the average speed I maintain while running?",
+            "Did I run faster today compared to last week?",
+            "How does my running speed compare to my friend's?",
+            "I need to track how fast I run on my daily runs.",
+            "What was my speed during that 5K?",
+            "Could you give me a breakdown of my running speed over time?",
+            "How quick was my run today?",
+            "I want to see my running speed data from the past month."
+          ],
+          "cores": [
+            "run pace",
+            "running speed",
+            "my run speed",
+            "how fast run",
+            "run rate",
+            "run velocity",
+            "run quickness",
+            "run tempo"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我跑步的时候速度怎么样？",
+          "每次跑步能跑多快？",
+          "跑得快不快？",
+          "跑步时我大概能保持什么速度？",
+          "我的跑步速度是不是有点慢？",
+          "跑步速度怎么算？",
+          "跑的时候速度能到多少？",
+          "我跑得快吗？",
+          "跑步时速度能达到多少？",
+          "跑步速度是不是和配速一样？"
+        ],
+        "en": [
+          "How fast was I running during my workout?",
+          "Can you tell me my running pace from yesterday?",
+          "What was my speed while I was jogging this morning?",
+          "How quickly did I move during my run?",
+          "What was my running velocity on my last run?",
+          "How fast did I run on average today?",
+          "Could you show me how quickly I was running last week?",
+          "What was my running speed during that long run?",
+          "How quickly was I going when I ran yesterday?",
+          "What was my average running speed this week?"
+        ]
+      }
+    },
+    "running_power_w": {
+      "key": "running_power",
+      "cluster": "running_power",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我跑步时的功率是多少？",
+            "最近跑步时感觉吃力，功率有没有变化？",
+            "跑步时身体发力情况怎么样？",
+            "跑得快的时候功率会增加吗？",
+            "跑步功率和步数有什么关系？",
+            "我跑步时的发力情况和别人比如何？",
+            "跑步时的体力消耗是不是和功率有关？",
+            "今天跑步功率比上周高，这是为什么？",
+            "跑步时发力强度是不是可以用功率来衡量？",
+            "跑步功率和呼吸频率有没有联系？",
+            "我跑步时的输出功率是否正常？",
+            "跑步时身体的动力表现如何？"
+          ],
+          "cores": [
+            "跑步发力",
+            "跑步输出",
+            "跑步动力",
+            "跑步强度",
+            "跑步体力",
+            "跑步能量",
+            "跑步功率",
+            "跑步表现"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "What was my power output during the run?",
+            "How much energy did I use while running?",
+            "I want to track how hard I ran today.",
+            "Can you show me my running power from yesterday?",
+            "How does my running power compare to last week?",
+            "I noticed my running power dropped, why might that be?",
+            "What's the average power I generate when I run?",
+            "Is there a way to see my running power over the past month?",
+            "I ran a mile, what was my power during that?",
+            "How can I improve my running power?",
+            "I feel like I'm not pushing as hard as before, is my power lower?",
+            "How is my running power affecting my performance?"
+          ],
+          "cores": [
+            "running power",
+            "power output",
+            "energy used",
+            "run energy",
+            "run power",
+            "power during run",
+            "run wattage",
+            "running watt"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我跑步的时候，身体消耗的功率是多少？",
+          "跑步时，我的身体用了多少力气？",
+          "我跑步时的功率表现怎么样？",
+          "跑步时，我的身体在用多大的力量？",
+          "跑步过程中，我的能量输出有多高？",
+          "我跑步时，身体的发力情况如何？",
+          "跑步时，我的身体在消耗多少能量？",
+          "跑步时，我的身体用了多少力？",
+          "跑步时，我的身体功率表现如何？",
+          "我跑步时，身体的功率输出是多少？"
+        ],
+        "en": [
+          "How much power do I use when I run?",
+          "Can you tell me how strong my running is in watts?",
+          "What's the measure of how hard I'm working while running?",
+          "How does the app track my running strength?",
+          "Is there a way to see how powerful my runs are?",
+          "How does the app calculate my running effort in watts?",
+          "What does it mean when the app shows my running power?",
+          "How can I check how powerful my running is?",
+          "What's the term for how much energy I use during a run?",
+          "How does the app show how hard I'm pushing during my runs?"
+        ]
+      }
+    },
+    "walking_step_length_cm": {
+      "key": "step_length",
+      "cluster": "step_length",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我走路的步长是多少？",
+            "最近我的步长变短了吗？",
+            "走路时每步多长？",
+            "步长有没有变化？",
+            "走路时步幅正常吗？",
+            "我每天的步长数据怎么样？",
+            "走路时每一步有多长？",
+            "我的步长和别人相比如何？",
+            "这周步长有没有变？",
+            "走路时步长是不是太小了？",
+            "我的步长数据是怎样的？",
+            "走路时步长有没有变大？"
+          ],
+          "cores": [
+            "步长",
+            "走路步长",
+            "每步多长",
+            "步幅",
+            "步长数据",
+            "走路步幅",
+            "步长变化",
+            "步长情况"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How long is my average step length?",
+            "Can you show me my step length over the past few weeks?",
+            "I noticed my steps feel shorter lately, is that true?",
+            "I want to compare my step length with my friend's, can you help?",
+            "What's the typical length of my steps?",
+            "Is my walking stride length within a normal range?",
+            "I'm curious about how far I walk with each step on average.",
+            "Can you tell me if my step length has changed since last month?",
+            "I'm trying to improve my walking efficiency, how long is my current step length?",
+            "How does my step length compare to the average person?",
+            "I feel like I'm taking smaller steps than before, is that accurate?",
+            "Could you check my step length data for the last two weeks?"
+          ],
+          "cores": [
+            "step length",
+            "walking stride",
+            "step size",
+            "step measure",
+            "gait length",
+            "step span",
+            "walk step",
+            "step reach"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我走路的时候步子大不大？",
+          "我的步子长度怎么样？",
+          "走路时每一步大概有多长？",
+          "我的步幅是不是正常？",
+          "我走路的步子是不是太大了？",
+          "每走一步大概有多远？",
+          "走路时步子的大小有没有记录？",
+          "我的步长是不是偏小？",
+          "走路的步子长度可以测出来吗？",
+          "我走路时每步的长度是多少？"
+        ],
+        "en": [
+          "How long is my average step when I walk?",
+          "Can you tell me how far I move with each step?",
+          "What's the length of my steps during walking?",
+          "I'm curious about how long each step I take is.",
+          "How much distance do I cover with every walk step?",
+          "Could you check the length of my walking steps?",
+          "What's the average distance between my footfalls when I walk?",
+          "I want to know how long my steps are when I'm on my feet.",
+          "Can you measure how far I walk with each step?",
+          "What's the typical step length I have while walking?"
+        ]
+      }
+    },
+    "environmental_audio_db": {
+      "key": "env_audio",
+      "cluster": "env_audio",
+      "train": {
+        "zh": {
+          "utterances": [
+            "最近外面的声音是不是太大了？",
+            "我每天听到的噪音水平怎么样？",
+            "有没有办法知道我平时暴露在多大声响中？",
+            "我晚上听到的环境声音会不会影响听力？",
+            "声音环境对我的健康有什么影响？",
+            "我平时听到的音量和别人相比如何？",
+            "我是否经常处于高分贝的环境里？",
+            "有没有记录我每天接触的声音大小？",
+            "我在家里的声音环境是否安全？",
+            "为什么我感觉耳朵最近有点不舒服？",
+            "有没有办法减少我日常接触的噪音？",
+            "我今天听到的声音比平时大吗？"
+          ],
+          "cores": [
+            "环境音",
+            "声音水平",
+            "噪音大小",
+            "声音环境",
+            "音量暴露",
+            "日常音量",
+            "环境声响",
+            "听觉环境"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How loud has it been around me lately?",
+            "What's the noise level I've been exposed to?",
+            "Is there a way to track how much noise I'm in?",
+            "Have I been in too noisy environments?",
+            "I'm curious about the sound levels I've been exposed to.",
+            "What's the average ambient noise I've been dealing with?",
+            "I want to know how much environmental noise I've been exposed to over time.",
+            "Can the app tell me about the sounds I've been exposed to daily?",
+            "What's the noise exposure like in my daily life?",
+            "I think I've been in noisy places more than usual. Can I check?",
+            "I'm wondering about the sound environment I've been in recently.",
+            "How can I see the noise levels I've been exposed to each day?"
+          ],
+          "cores": [
+            "noise exposure",
+            "sound levels",
+            "ambient noise",
+            "environmental noise",
+            "noise around me",
+            "sound environment",
+            "noise I've been in",
+            "noise levels I've been in"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我平时在户外待的时间多，会不会对耳朵有影响？",
+          "最近感觉耳朵有点不舒服，是不是因为环境太吵了？",
+          "能不能告诉我一下我每天接触的噪音有多大？",
+          "我经常在嘈杂的地方工作，这对听力有伤害吗？",
+          "有没有办法知道我每天暴露在多少分贝的环境中？",
+          "我晚上睡觉的时候，周围的声音会不会影响我的耳朵？",
+          "我应该怎样减少日常生活中对耳朵的伤害？",
+          "我每天接触的环境声音是不是太响了？",
+          "有没有数据能告诉我我的耳朵每天承受了多少噪音？",
+          "我是不是经常在不知不觉中暴露在太大的声音里？"
+        ],
+        "en": [
+          "How loud has it been around me lately?",
+          "Can you tell me about the noise levels I've been exposed to?",
+          "What's the average sound level I've been in?",
+          "I'm curious about the background noise I've been experiencing.",
+          "Have I been in any really noisy environments recently?",
+          "What's the sound exposure like in my everyday surroundings?",
+          "How much noise have I been dealing with on a daily basis?",
+          "Can you check how much environmental noise I've been exposed to?",
+          "I want to know about the sounds I've been hearing in my environment.",
+          "Is there a way to track how noisy my environment has been?"
+        ]
+      }
+    },
+    "headphone_audio_db": {
+      "key": "headphone_audio",
+      "cluster": "headphone_audio",
+      "train": {
+        "zh": {
+          "utterances": [
+            "我最近戴耳机的时间是不是对耳朵不好？",
+            "耳机音量太大会不会影响听力？",
+            "有没有办法知道我每天听音乐的音量是多少？",
+            "我感觉耳朵有点不舒服，是不是音量太高了？",
+            "长时间戴耳机对耳朵有什么影响？",
+            "我听歌时音量是不是经常太大？",
+            "耳朵最近感觉不太舒服，是不是和耳机有关？",
+            "有没有数据可以告诉我耳机使用时的音量水平？",
+            "我是不是经常在嘈杂的地方用耳机？",
+            "耳机音量有没有超过安全范围？",
+            "听音乐时音量是否在合理范围内？",
+            "我是不是经常把耳机音量调得太高？"
+          ],
+          "cores": [
+            "耳机音量",
+            "音量暴露",
+            "听力影响",
+            "耳机使用",
+            "音量水平",
+            "耳朵舒适",
+            "音量数据",
+            "音量安全"
+          ]
+        },
+        "en": {
+          "utterances": [
+            "How loud have I been using my headphones lately?",
+            "I think I might have been listening to music too loudly, can I check my headphone volume exposure?",
+            "Has my headphone volume been too high over the past few days?",
+            "I'm worried about my hearing, is there a way to track how loud I listen to music?",
+            "Can I see how my headphone volume compares to safe levels?",
+            "What's the average sound level from my headphones?",
+            "I've been using earbuds a lot, is there any data on how loud they've been?",
+            "I want to know if my listening habits are damaging my hearing.",
+            "I've been using my headphones a lot, can I see how loud that's been?",
+            "Is there a way to track how loud my music is when I'm using headphones?",
+            "How does my headphone volume exposure compare to others?",
+            "Can the app tell me how loud I've been using my headphones?"
+          ],
+          "cores": [
+            "headphone loudness",
+            "earbud sound",
+            "music volume",
+            "headphone exposure",
+            "sound level",
+            "listening volume",
+            "audio loudness",
+            "earphone noise"
+          ]
+        }
+      },
+      "holdout": {
+        "zh": [
+          "我戴耳机听歌的时候，声音会不会太大，对耳朵不好？",
+          "长时间戴耳机会不会伤耳朵？",
+          "有没有办法知道我平时听音乐的音量是不是太高了？",
+          "我经常用耳机，会不会影响听力？",
+          "怎么知道我用耳机的时候音量是不是在安全范围内？",
+          "有没有数据能告诉我我的耳机音量是否超标？",
+          "我担心自己戴耳机时音量太大，对耳朵有害。",
+          "听音乐时音量是不是太大了，有没有办法监测？",
+          "我经常戴耳机，想了解音量是否对耳朵有影响。",
+          "有没有办法提醒我不要把耳机音量调得太高？"
+        ],
+        "en": [
+          "How loud is my headphone use getting?",
+          "Is my listening through headphones too loud for my ears?",
+          "Does the app track how loud I listen to music with my headphones?",
+          "Can I see if I'm exposing my ears to too much noise from my headphones?",
+          "Does the app check if my headphones are too loud for my hearing?",
+          "Is there a way to know if my headphones are damaging my hearing?",
+          "Does the app monitor how much sound I'm getting from my headphones?",
+          "How does the app tell me if my headphone volume is harmful?",
+          "Can I find out if I'm listening to music at dangerous volumes with my headphones?",
+          "Does the app warn me if I'm using my headphones at unsafe levels?"
+        ]
+      }
+    }
+  },
+  "negatives": {
+    "zh": [
+      "最近总觉得提不起精神，做什么都觉得很累。",
+      "最近压力有点大，晚上经常睡不着。",
+      "总觉得心里空空的，没什么特别的原因。",
+      "最近吃东西没胃口，但又饿得快。",
+      "走路的时候感觉腿有点发软，不太舒服。",
+      "最近经常头晕，但又不是特别严重。",
+      "最近情绪波动比较大，有时候莫名会难过。",
+      "最近感觉身体不太对劲，但又说不上来哪里不舒服。",
+      "最近经常忘记事情，记忆力好像变差了。",
+      "最近经常觉得胸口闷闷的，有点不舒服。",
+      "最近和朋友见面的时候，总觉得有点紧张。",
+      "最近经常觉得口干舌燥，喝再多水也没用。",
+      "最近经常觉得头有点晕，像是缺氧的感觉。",
+      "最近经常感到焦虑，但又不知道为什么。",
+      "最近总觉得身体像被掏空了一样，很疲惫。",
+      "最近经常觉得心慌，但心跳又正常。",
+      "最近吃东西之后胃有点不舒服，但不是特别严重。",
+      "最近经常觉得手心出汗，有点奇怪。",
+      "最近情绪不太稳定，有时候会莫名发脾气。",
+      "最近经常觉得喉咙有东西卡着，但又咽不下去。",
+      "最近经常觉得身体沉重，走路都费劲。",
+      "最近经常觉得脑子转不动，反应变慢了。",
+      "最近经常觉得耳朵里有嗡嗡声，但又不是特别明显。",
+      "最近经常觉得身体忽冷忽热，不太舒服。",
+      "最近经常觉得嘴巴里有苦味，但又不是生病。",
+      "最近经常感到胸口发紧，但又不是特别疼。",
+      "最近经常觉得眼睛干涩，看东西有点模糊。",
+      "最近经常觉得膝盖有点酸，走路多了就更明显。",
+      "最近经常觉得喉咙发痒，但又不是感冒。",
+      "最近经常觉得整个人很疲惫，但又没做什么重活。"
+    ],
+    "en": [
+      "I've been feeling really down lately, even though nothing seems to be wrong.",
+      "I can't seem to focus on anything, my mind keeps drifting.",
+      "I had a rough day at work and I'm still feeling it.",
+      "I've been eating a lot more than usual, and I don't know why.",
+      "I woke up this morning with a heavy feeling in my chest.",
+      "I've been avoiding social interactions more than I normally do.",
+      "I feel like I'm not getting enough rest, even after a full night's sleep.",
+      "I've been unusually irritable and short-tempered with my family.",
+      "I'm not sure why, but I've been feeling restless and unable to relax.",
+      "I've been struggling with motivation for things I usually enjoy.",
+      "I've been traveling a lot recently and it's starting to take a toll.",
+      "I've been experiencing a dull ache in my head that won't go away.",
+      "I feel like I'm constantly on edge and can't shake the anxiety.",
+      "I've been neglecting my usual routines and haven't been taking care of myself.",
+      "I've been feeling disconnected from the people around me.",
+      "I've been having trouble with my appetite, not eating much at all.",
+      "I've been feeling unusually emotional, crying over small things.",
+      "I've been having a hard time keeping up with my usual schedule.",
+      "I've been feeling physically sluggish, like I can't move as easily as before.",
+      "I've been dealing with a lot of stress lately and it's hard to shake.",
+      "I'm not sure what's going on, but I've been feeling uncharacteristically low.",
+      "I've been experiencing a general sense of unease that I can't explain.",
+      "I've been eating more junk food and skipping meals, which I'm not proud of.",
+      "I've been having trouble falling asleep and staying asleep.",
+      "I've been feeling like I'm going through the motions without any real purpose.",
+      "I've been dealing with a lot of mental fog and can't think clearly.",
+      "I've been feeling more anxious than usual, even in calm situations.",
+      "I've been avoiding things I used to enjoy, like going out or spending time with friends.",
+      "I've been feeling like I'm not in control of my own emotions lately.",
+      "I've been experiencing a general sense of fatigue that doesn't seem to go away."
+    ]
+  }
+}

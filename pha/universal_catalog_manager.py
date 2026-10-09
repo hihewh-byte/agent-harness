@@ -174,7 +174,7 @@ class UniversalCatalogManager:
       out = filtered
     return out[:_MAX_CATALOG_ENTRIES]
 
-  def infer_wearable_metrics(self, user_message: str) -> List[str]:
+  def infer_wearable_metrics(self, user_message: str, *, allow_default: bool = True) -> List[str]:
     doc = self.get_asset("wearable_bundle")
     if not doc:
       return []
@@ -182,7 +182,7 @@ class UniversalCatalogManager:
 
     msg = user_message or ""
     has_lab = bool(_LAB_MARKERS_RE.search(msg))
-    default_wearable = user_message_needs_wearable_query(msg)
+    default_wearable = allow_default and user_message_needs_wearable_query(msg)
     return infer_wearable_metrics_from_schema(
       msg,
       doc,

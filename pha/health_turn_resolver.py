@@ -495,8 +495,8 @@ def resolve_health_turn_scope(
 
         if episodic.focus_metric and (matches_anaphora(msg) or _topic_continues(msg, episodic, hint)):
             return HealthTurnScope(
-                metric_keys=[episodic.focus_metric],
-                metric_source="focus",
+                metric_keys=explicit_metrics or [episodic.focus_metric],
+                metric_source="explicit" if explicit_metrics else "focus",
                 lab_years=list(episodic.focus_lab_years),
                 year_source="focus" if episodic.focus_lab_years else "default",
                 wearable_window=explicit_window

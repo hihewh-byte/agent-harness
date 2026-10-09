@@ -79,11 +79,12 @@ def _seed() -> None:
     )
 
 
-def _today_episodic() -> SimpleNamespace:
+def _today_episodic(focus_metric: str = "sleep") -> SimpleNamespace:
     return SimpleNamespace(
         focus_grain_start=DAY.isoformat(),
         focus_grain_end=DAY.isoformat(),
         focus_grain_aggregation="point",
+        focus_metric=focus_metric,
     )
 
 
@@ -198,7 +199,14 @@ def test_h11_grain_anchor() -> None:
         episodic=_today_episodic(),
     )
     _assert("5.3" in en and "0.47" in en, en)
+    other_cluster = resolve_wearable_time_grain("我的跑步功率怎么样？", episodic=_today_episodic("time_in_daylight"))
+    _assert(other_cluster.source == "default", other_cluster)
+    no_focus = resolve_wearable_time_grain("我的跑步功率怎么样？", episodic=_today_episodic(""))
+    _assert(no_focus.source == "default", no_focus)
+    anaphoric = resolve_wearable_time_grain("那跑步功率呢？", episodic=_today_episodic("time_in_daylight"))
+    _assert(anaphoric.source == "episodic_anchor", anaphoric)
     print("PASS H11/H11E episodic grain anchor on/off")
+    print("PASS episodic grain anchor: other cluster / no focus → default; anaphora → anchor")
 
 
 def test_h12_h13_fail_closed() -> None:

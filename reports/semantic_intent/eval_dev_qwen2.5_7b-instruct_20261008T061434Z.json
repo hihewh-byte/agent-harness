@@ -1,0 +1,4616 @@
+{
+  "summary": {
+    "split": "dev",
+    "model": "qwen2.5:7b-instruct",
+    "labelled": 150,
+    "counts": {
+      "none": 81,
+      "adopt_ok": 57,
+      "adopt_wrong": 11,
+      "clarify_hit": 1
+    },
+    "adopt_rate": 0.4533,
+    "adopt_precision": 0.8382,
+    "recovered_rate": 0.38,
+    "clarify_rate": 0.0067,
+    "negatives": 54,
+    "negative_counts": {
+      "none": 54
+    },
+    "negative_false_adopt_rate": 0.0,
+    "latency_ms_p50": 2451,
+    "latency_ms_p90": 3897
+  },
+  "details": [
+    {
+      "expected": "flights_climbed",
+      "text": "How often do I climb stairs in a typical day?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "爬楼层数"
+          }
+        ],
+        "latency_ms": 2916
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:flights_climbed"
+        ]
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "为什么我运动后心率降得比别人慢？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心率降得比别人慢"
+          }
+        ],
+        "latency_ms": 2537
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "cardio_recovery_1min_bpm"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "这个数值会不会和我跑步时的功率有关？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "跑步时的功率"
+          }
+        ],
+        "latency_ms": 2228
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_power_w"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "What's the number for my heart rate at rest?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 2305
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "sleep_core",
+      "text": "这个指标对健康有什么影响？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 933
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "我是否经常处于高分贝的环境里？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "高分贝的环境"
+          }
+        ],
+        "latency_ms": 2448
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "I feel more tired than usual—could it be because I burned more calories moving around?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "burned more calories moving around"
+          }
+        ],
+        "latency_ms": 2539
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "body_fat_fraction",
+      "text": "这个月我的脂肪含量有变化吗？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_fat_fraction",
+            "evidence": "脂肪含量"
+          }
+        ],
+        "latency_ms": 2243
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_fat_fraction"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "有没有数据可以告诉我耳机使用时的音量水平？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "耳机使用时的音量水平"
+          }
+        ],
+        "latency_ms": 2391
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "environmental_audio_db"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "I want to track my heart rate without any activity involved.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 2320
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "I ran a mile, what was my power during that?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "power during that"
+          }
+        ],
+        "latency_ms": 2142
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_power_w"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "最近站立的时间有变化吗？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "站立时间"
+          }
+        ],
+        "latency_ms": 2154
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:apple_stand_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "hrv_sdnn_ms",
+      "text": "Can I track how my heart rate changes throughout the day?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 2321
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "steps",
+      "text": "I walked a lot, but the app didn't show it, why?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "steps",
+            "evidence": "走了很多步"
+          },
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "app没显示"
+          }
+        ],
+        "latency_ms": 3254
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:steps",
+          "evidence_not_verbatim:apple_exercise_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "What's my energy burn at rest?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "energy burn at rest"
+          }
+        ],
+        "latency_ms": 2283
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "basal_energy_kcal"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "What's the measure of how hard I moved throughout the day?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "how hard I moved throughout the day"
+          }
+        ],
+        "latency_ms": 2321
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "physical_effort"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "respiratory_rate",
+      "text": "I've been more aware of my breathing, can you track that?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "respiratory_rate",
+            "evidence": "我的呼吸"
+          }
+        ],
+        "latency_ms": 2163
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:respiratory_rate"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "I think I stood more than usual today, any stats?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "stood more than usual today"
+          }
+        ],
+        "latency_ms": 2320
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "我今天运动后消耗了多少能量？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "active_energy",
+            "evidence": "运动后消耗了多少能量"
+          }
+        ],
+        "latency_ms": 2223
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "active_energy"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "Is there a way to track how much noise I'm in?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 889
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "和上周相比，我现在的基础代谢有没有变化？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "基础消耗"
+          }
+        ],
+        "latency_ms": 2215
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:basal_energy_kcal"
+        ]
+      }
+    },
+    {
+      "expected": "spo2_percent",
+      "text": "Have my oxygen levels been consistent over the past few days?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "spo2_percent",
+            "evidence": "oxygen levels"
+          }
+        ],
+        "latency_ms": 2193
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "spo2_percent"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "I think I've been in noisy places more than usual. Can I check?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": " noisy places"
+          }
+        ],
+        "latency_ms": 2327
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "这个数据能说明我的心肺功能吗？",
+      "verdict": "clarify_hit",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "心肺功能"
+          },
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心肺功能"
+          }
+        ],
+        "latency_ms": 3671
+      },
+      "decision": {
+        "action": "clarify",
+        "metricIds": [],
+        "candidates": [
+          "vo2max",
+          "cardio_recovery_1min_bpm"
+        ],
+        "reasons": [
+          "shared_evidence"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "我应该每天站多久才健康？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1098
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "respiratory_rate",
+      "text": "What's my breathing speed been like lately?",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_speed_kmh",
+            "evidence": "breathing speed"
+          }
+        ],
+        "latency_ms": 2274
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "walking_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "我感觉今天比昨天更努力了，但数据没变，这是怎么回事？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1096
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "I've been feeling tired, could that be linked to my heart rate?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 2505
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "我一天里站了多少分钟？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "站了多少分钟"
+          }
+        ],
+        "latency_ms": 2248
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "Can I see my heart rate when I'm not moving?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 2451
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "What's the current value for my maximum oxygen consumption?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "maximum oxygen consumption"
+          }
+        ],
+        "latency_ms": 2227
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "vo2max"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "time_in_daylight_min",
+      "text": "What's the best way to track how much sun I'm getting?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 936
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "耳朵最近感觉不太舒服，是不是和耳机有关？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1280
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "Can you explain my maximum oxygen consumption in simple terms?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "maximum oxygen consumption"
+          }
+        ],
+        "latency_ms": 2398
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "vo2max"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "我在家里的声音环境是否安全？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 935
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "怎么提高这个数值？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "这个数值"
+          }
+        ],
+        "latency_ms": 2299
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "vo2max"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "I feel like I climbed a lot of stairs, can you check?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "I feel like I climbed a lot of stairs"
+          }
+        ],
+        "latency_ms": 2937
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "wrist_temp",
+      "text": "Did my wrist get too hot during the night?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1002
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "How does my activity energy use compare to the average?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "active_energy",
+            "evidence": "activity energy use"
+          }
+        ],
+        "latency_ms": 2247
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "active_energy"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "我每天运动的时长有没有记录？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "每天运动的时长"
+          }
+        ],
+        "latency_ms": 2571
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_exercise_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "body_fat_fraction",
+      "text": "How much fat am I carrying?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_fat_fraction",
+            "evidence": "体脂率"
+          }
+        ],
+        "latency_ms": 2329
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:body_fat_fraction"
+        ]
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "Did I use up more energy through movement compared to yesterday?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "active_energy",
+            "evidence": "通过运动消耗了多少能量"
+          },
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "昨天"
+          }
+        ],
+        "latency_ms": 3799
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:active_energy",
+          "evidence_not_verbatim:basal_energy_kcal"
+        ]
+      }
+    },
+    {
+      "expected": "respiratory_rate",
+      "text": "I feel out of breath more often, is that normal?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "respiratory_rate",
+            "evidence": "feel out of breath"
+          }
+        ],
+        "latency_ms": 2796
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "How can I see the noise levels I've been exposed to each day?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1068
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "How can I check my daily activity minutes?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "daily activity minutes"
+          }
+        ],
+        "latency_ms": 2479
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_exercise_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "跑步时身体的动力表现如何？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "身体的动力表现如何"
+          }
+        ],
+        "latency_ms": 2514
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "physical_effort"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "我的基础能量消耗和同龄人相比如何？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "基础能量消耗"
+          }
+        ],
+        "latency_ms": 2486
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "basal_energy_kcal"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "How many flights have I climbed this month?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "How many flights have I climbed this month?"
+          }
+        ],
+        "latency_ms": 2699
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "flights_climbed"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "How fast did I run yesterday?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "How fast did I run yesterday?"
+          }
+        ],
+        "latency_ms": 2536
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "我跑步的速度有没有达到平均水平？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "跑步速度"
+          }
+        ],
+        "latency_ms": 2474
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:running_speed_kmh"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "Has my weight been stable recently?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "weight"
+          }
+        ],
+        "latency_ms": 2449
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_mass_kg"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "和上周相比，我爬的楼层数多吗？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "爬楼层数"
+          }
+        ],
+        "latency_ms": 2605
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:flights_climbed"
+        ]
+      }
+    },
+    {
+      "expected": "distance_walking_running_km",
+      "text": "I want to check my activity distance for the past few days.",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "activity distance"
+          }
+        ],
+        "latency_ms": 2619
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "distance_walking_running_km"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "有没有记录我每天接触的声音大小？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "有没有记录我每天接触的声音大小"
+          }
+        ],
+        "latency_ms": 2849
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "environmental_audio_db"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "Could you show me my standing time for the past two days?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "standing time"
+          }
+        ],
+        "latency_ms": 2619
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "steps",
+      "text": "I want to track how much I move each day.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "steps",
+            "evidence": "如何每天移动多少"
+          },
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "如何每天移动多少"
+          },
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "如何每天移动多少"
+          }
+        ],
+        "latency_ms": 5700
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:steps",
+          "evidence_not_verbatim:distance_walking_running_km",
+          "evidence_not_verbatim:flights_climbed"
+        ]
+      }
+    },
+    {
+      "expected": "walking_step_length_cm",
+      "text": "最近我的步长变短了吗？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_step_length_cm",
+            "evidence": "步长变短了吗"
+          }
+        ],
+        "latency_ms": 2852
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "walking_step_length_cm"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "我跑步时的输出功率是否正常？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "跑步时的输出功率"
+          }
+        ],
+        "latency_ms": 2855
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_power_w"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "How many calories does my body use just to function?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "基础消耗"
+          }
+        ],
+        "latency_ms": 2798
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:basal_energy_kcal"
+        ]
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "How does my heart rate return to normal after exercise?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心率恢复"
+          }
+        ],
+        "latency_ms": 3200
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:cardio_recovery_1min_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "Can I see how my weight has fluctuated this month?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "我的体重"
+          }
+        ],
+        "latency_ms": 3196
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:body_mass_kg"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "What's the noise exposure like in my daily life?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1221
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "我今天听到的声音比平时大吗？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1193
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "How many flights did I climb yesterday?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "How many flights did I climb yesterday?"
+          }
+        ],
+        "latency_ms": 3413
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "flights_climbed"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "hrv_sdnn_ms",
+      "text": "Why is my heart rate variation lower than usual this week?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "hrv_sdnn_ms",
+            "evidence": "心率变异"
+          }
+        ],
+        "latency_ms": 3409
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:hrv_sdnn_ms"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "我每天听到的噪音水平怎么样？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1244
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "walking_hr_avg_bpm",
+      "text": "Can you show me the trend of my heart rate during walks?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_hr_avg_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 3502
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:walking_hr_avg_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "I feel like I haven't been as active lately.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1655
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "steps",
+      "text": "How far did I walk in total?",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "How far did I walk in total?"
+          }
+        ],
+        "latency_ms": 3796
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "distance_walking_running_km"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "body_fat_fraction",
+      "text": "What's my current fat ratio?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_fat_fraction",
+            "evidence": "fat ratio"
+          }
+        ],
+        "latency_ms": 3312
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_fat_fraction"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "What was my power output during the run?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "power output during the run"
+          }
+        ],
+        "latency_ms": 3330
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_power_w"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "sleep_core",
+      "text": "我睡了多久才算够？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "sleep_time_asleep",
+            "evidence": "睡了多久才算够"
+          }
+        ],
+        "latency_ms": 3256
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "sleep_time_asleep"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "walking_step_length_cm",
+      "text": "我的步长和别人相比如何？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1534
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "I need to know how many minutes I've spent standing recently.",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "minutes I've spent standing"
+          }
+        ],
+        "latency_ms": 3722
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "How quick was my run today?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "How quick was my run today?"
+          }
+        ],
+        "latency_ms": 3492
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "sleep_time_asleep",
+      "text": "我睡得时间比朋友多吗？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "sleep_in_bed",
+            "evidence": "睡得时间"
+          }
+        ],
+        "latency_ms": 3892
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "sleep_in_bed"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "six_minute_walk_m",
+      "text": "I walked for six minutes today, how far did I go?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "six_minute_walk_m",
+            "evidence": "六分钟步行"
+          },
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "步行+跑步距离"
+          }
+        ],
+        "latency_ms": 5667
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:six_minute_walk_m",
+          "evidence_not_verbatim:distance_walking_running_km"
+        ]
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "听音乐时音量是否在合理范围内？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1710
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "我今天运动的时候感觉有点吃力，这个数据是怎么计算的？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1796
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "time_in_daylight_min",
+      "text": "有没有办法增加我白天的日光接触时间？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1511
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "time_in_daylight_min",
+      "text": "How long was I outside today?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1515
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "Is there a way to track how loud my music is when I'm using headphones?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1488
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "walking_step_length_cm",
+      "text": "I'm curious about how far I walk with each step on average.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_step_length_cm",
+            "evidence": "步幅"
+          }
+        ],
+        "latency_ms": 3838
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:walking_step_length_cm"
+        ]
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "What's my overall physical exertion like?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1562
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "How does my heart rate recover after a workout?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心率恢复"
+          }
+        ],
+        "latency_ms": 4173
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:cardio_recovery_1min_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "Did I run faster today compared to last week?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "run faster"
+          }
+        ],
+        "latency_ms": 3761
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "Have I lost any weight lately?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1772
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "Could my heart recovery be affecting my overall fitness?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心率恢复"
+          }
+        ],
+        "latency_ms": 4259
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:cardio_recovery_1min_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "我今天爬了多少层楼？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "爬楼层数"
+          }
+        ],
+        "latency_ms": 4152
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:flights_climbed"
+        ]
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "I feel like I'm not pushing as hard as before, is my power lower?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "power lower"
+          }
+        ],
+        "latency_ms": 3825
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_power_w"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "What's the noise level I've been exposed to?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1602
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "How hard did I work during my workout today?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "How hard did I work during my workout today?"
+          }
+        ],
+        "latency_ms": 4264
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "physical_effort"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "Can I see how much I stood up yesterday?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "stood up"
+          }
+        ],
+        "latency_ms": 3772
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "hrv_sdnn_ms",
+      "text": "How does my heart rate fluctuation look now compared to a few months ago?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "hrv_sdnn_ms",
+            "evidence": "心率波动"
+          }
+        ],
+        "latency_ms": 4030
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:hrv_sdnn_ms"
+        ]
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "我每天静止状态下消耗多少热量？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "每天静止状态下消耗多少热量"
+          }
+        ],
+        "latency_ms": 4386
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "basal_energy_kcal"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "Have I been in too noisy environments?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1529
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "I'm curious about my lung capacity during exercise.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1529
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "I'm trying to track how much I stand each day, any data?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "任何数据"
+          }
+        ],
+        "latency_ms": 3795
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:apple_stand_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "How much do I weigh right now?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "How much do I weigh right now?"
+          }
+        ],
+        "latency_ms": 4008
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_mass_kg"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "six_minute_walk_m",
+      "text": "How far can I walk in six minutes?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "six_minute_walk_m",
+            "evidence": "六分钟步行"
+          }
+        ],
+        "latency_ms": 3213
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:six_minute_walk_m"
+        ]
+      }
+    },
+    {
+      "expected": "hrv_sdnn_ms",
+      "text": "What's the pattern of my heart rate variation over time?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "hrv_sdnn_ms",
+            "evidence": "heart rate variation"
+          }
+        ],
+        "latency_ms": 3604
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "hrv_sdnn_ms"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "hrv_sdnn_ms",
+      "text": "Can I see my heart rate variation from last month?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "hrv_sdnn_ms",
+            "evidence": "heart rate variation"
+          }
+        ],
+        "latency_ms": 3234
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "hrv_sdnn_ms"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "Can I see how my headphone volume compares to safe levels?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "环境声暴露"
+          },
+          {
+            "metric_id": "headphone_audio_db",
+            "evidence": "耳机音量暴露"
+          }
+        ],
+        "latency_ms": 5452
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "Is my weight the same as it was last month?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "weight"
+          }
+        ],
+        "latency_ms": 3897
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_mass_kg"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "运动后心率多久能恢复到正常？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心率多久能恢复到正常"
+          }
+        ],
+        "latency_ms": 4250
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "cardio_recovery_1min_bpm"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "Can the app tell me how loud I've been using my headphones?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "环境声暴露"
+          },
+          {
+            "metric_id": "headphone_audio_db",
+            "evidence": "耳机音量暴露"
+          }
+        ],
+        "latency_ms": 6162
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "time_in_daylight_min",
+      "text": "Did I get enough sunlight exposure?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "time_in_daylight_min",
+            "evidence": "Did I get enough sunlight exposure?"
+          }
+        ],
+        "latency_ms": 4390
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "和上周比，我瘦了还是胖了？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "我瘦了还是胖了"
+          }
+        ],
+        "latency_ms": 3851
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_mass_kg"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "跑步时的体力消耗是不是和功率有关？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "跑步功率"
+          },
+          {
+            "metric_id": "physical_effort",
+            "evidence": "体力活动努力"
+          }
+        ],
+        "latency_ms": 5280
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:running_power_w",
+          "evidence_not_verbatim:physical_effort"
+        ]
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "How does my oxygen intake affect my workout performance?",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "spo2_percent",
+            "evidence": "氧 intake"
+          },
+          {
+            "metric_id": "active_energy",
+            "evidence": "workout performance"
+          }
+        ],
+        "latency_ms": 5394
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "active_energy"
+        ],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:spo2_percent"
+        ]
+      }
+    },
+    {
+      "expected": "body_mass_kg",
+      "text": "What's the difference between my weight today and yesterday?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "body_mass_kg",
+            "evidence": "weight"
+          }
+        ],
+        "latency_ms": 3430
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "body_mass_kg"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "我最近运动的总时长是多少？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "运动的总时长"
+          }
+        ],
+        "latency_ms": 3804
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_exercise_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "跑步时的移动速度如何？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_speed_kmh",
+            "evidence": "跑步时的移动速度如何"
+          }
+        ],
+        "latency_ms": 3797
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "walking_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "cardio_recovery_1min_bpm",
+      "text": "What's my heart's ability to bounce back after working out?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "cardio_recovery_1min_bpm",
+            "evidence": "心的 ability to bounce back after working out"
+          }
+        ],
+        "latency_ms": 3796
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:cardio_recovery_1min_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "sleep_awake",
+      "text": "睡着之后多久会醒？",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "sleep_in_bed",
+            "evidence": "睡着之后多久会醒"
+          }
+        ],
+        "latency_ms": 3423
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "sleep_in_bed"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "How does my standing time compare to my usual?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "站立时间"
+          }
+        ],
+        "latency_ms": 3046
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:apple_stand_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "wrist_temp",
+      "text": "我睡觉时手腕为什么会感觉热？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1271
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "steps",
+      "text": "I think I walked more than usual, can you check?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "steps",
+            "evidence": "走了更多"
+          },
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "走了更多"
+          }
+        ],
+        "latency_ms": 4601
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:steps",
+          "evidence_not_verbatim:distance_walking_running_km"
+        ]
+      }
+    },
+    {
+      "expected": "flights_climbed",
+      "text": "Did I do any stairs today?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "flights_climbed",
+            "evidence": "did I do any stairs today"
+          }
+        ],
+        "latency_ms": 3459
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "flights_climbed"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "Has my headphone volume been too high over the past few days?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "环境声暴露"
+          },
+          {
+            "metric_id": "headphone_audio_db",
+            "evidence": "耳机音量暴露"
+          }
+        ],
+        "latency_ms": 5223
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "distance_walking_running_km",
+      "text": "How far have I walked and run today?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "distance_walking_running_km",
+            "evidence": "How far have I walked and run today?"
+          }
+        ],
+        "latency_ms": 3791
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "distance_walking_running_km"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "I feel like I didn't put in much effort today, can I check?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "I didn't put in much effort today"
+          }
+        ],
+        "latency_ms": 3688
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "I'm curious about the calories I spent on being active.",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "active_energy",
+            "evidence": "calories I spent on being active"
+          }
+        ],
+        "latency_ms": 3355
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "active_energy"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_power_w",
+      "text": "我跑步时的发力情况和别人比如何？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_power_w",
+            "evidence": "跑步功率"
+          }
+        ],
+        "latency_ms": 3097
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:running_power_w"
+        ]
+      }
+    },
+    {
+      "expected": "respiratory_rate",
+      "text": "Can you show me my breathing frequency over the past few days?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "respiratory_rate",
+            "evidence": "breathing frequency"
+          }
+        ],
+        "latency_ms": 3048
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "respiratory_rate"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "I'm wondering about the sound environment I've been in recently.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1284
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "I want to track how long I exercise each day.",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "track how long I exercise each day"
+          }
+        ],
+        "latency_ms": 3429
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_exercise_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "How many minutes did I spend working out yesterday?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "锻炼分钟"
+          }
+        ],
+        "latency_ms": 3082
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:apple_exercise_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "How much energy do I burn without moving?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "基础消耗"
+          }
+        ],
+        "latency_ms": 3173
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:basal_energy_kcal"
+        ]
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "What was my heart rate when I was just sitting still?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 3239
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "What was my speed during that 5K?",
+      "verdict": "adopt_wrong",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_speed_kmh",
+            "evidence": "speed"
+          }
+        ],
+        "latency_ms": 3113
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "walking_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "basal_energy_kcal",
+      "text": "我每天身体维持基本功能需要多少热量？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "basal_energy_kcal",
+            "evidence": "基础消耗"
+          }
+        ],
+        "latency_ms": 3048
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:basal_energy_kcal"
+        ]
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "Can I see how much time I've been active lately?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "active_energy"
+          }
+        ],
+        "latency_ms": 3045
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:apple_exercise_time_min"
+        ]
+      }
+    },
+    {
+      "expected": "time_in_daylight_min",
+      "text": "我白天接触阳光的时间比上周多了吗？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "time_in_daylight_min",
+            "evidence": "白天接触阳光的时间"
+          }
+        ],
+        "latency_ms": 3233
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "time_in_daylight_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "What's the best way to measure my heart's efficiency?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "heart's efficiency"
+          }
+        ],
+        "latency_ms": 2989
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "vo2max"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "headphone_audio_db",
+      "text": "我听歌时音量是不是经常太大？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1241
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "apple_stand_time_min",
+      "text": "我是不是站得不够？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_stand_time_min",
+            "evidence": "站得不够"
+          }
+        ],
+        "latency_ms": 2902
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_stand_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "最近跑步快了不少，是不是进步了？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "跑步速度"
+          }
+        ],
+        "latency_ms": 2888
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:running_speed_kmh"
+        ]
+      }
+    },
+    {
+      "expected": "environmental_audio_db",
+      "text": "How loud has it been around me lately?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "other",
+        "metrics": [],
+        "latency_ms": 1248
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:other"
+        ]
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "I spent more time moving than usual yesterday.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "steps",
+            "evidence": "更多时间移动"
+          },
+          {
+            "metric_id": "active_energy",
+            "evidence": "更多时间移动"
+          }
+        ],
+        "latency_ms": 4128
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:steps",
+          "evidence_not_verbatim:active_energy"
+        ]
+      }
+    },
+    {
+      "expected": "wrist_temp",
+      "text": "我晚上睡觉时手腕的温度数据在哪里看？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "wrist_temp",
+            "evidence": "手腕的温度数据"
+          }
+        ],
+        "latency_ms": 3112
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "wrist_temp"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "apple_exercise_time_min",
+      "text": "昨天的锻炼时间比前天多了吗？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "apple_exercise_time_min",
+            "evidence": "昨天的锻炼时间比前天多了吗？"
+          }
+        ],
+        "latency_ms": 3513
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "apple_exercise_time_min"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "vo2max",
+      "text": "为什么我的体能得分比上周低？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "vo2max",
+            "evidence": "体能得分"
+          }
+        ],
+        "latency_ms": 3037
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "vo2max"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "running_speed_kmh",
+      "text": "What's the average speed I maintain while running?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "running_speed_kmh",
+            "evidence": "average speed I maintain while running"
+          }
+        ],
+        "latency_ms": 3270
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "running_speed_kmh"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "resting_heart_rate_bpm",
+      "text": "Is my heart rate lower than usual lately?",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "resting_heart_rate_bpm",
+            "evidence": "心率"
+          }
+        ],
+        "latency_ms": 3143
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:resting_heart_rate_bpm"
+        ]
+      }
+    },
+    {
+      "expected": "active_energy",
+      "text": "昨天活动时用了多少能量？",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "active_energy",
+            "evidence": "活动消耗"
+          }
+        ],
+        "latency_ms": 2771
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:active_energy"
+        ]
+      }
+    },
+    {
+      "expected": "six_minute_walk_m",
+      "text": "六分钟能走多远？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "six_minute_walk_m",
+            "evidence": "六分钟能走多远"
+          }
+        ],
+        "latency_ms": 3199
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "six_minute_walk_m"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "I'm curious about how physically active I was during my walk.",
+      "verdict": "none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "walking_hr_avg_bpm",
+            "evidence": "如何活跃"
+          },
+          {
+            "metric_id": "walking_speed_kmh",
+            "evidence": "如何活跃"
+          },
+          {
+            "metric_id": "walking_step_length_cm",
+            "evidence": "如何活跃"
+          }
+        ],
+        "latency_ms": 6269
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "evidence_not_verbatim:walking_hr_avg_bpm",
+          "evidence_not_verbatim:walking_speed_kmh",
+          "evidence_not_verbatim:walking_step_length_cm"
+        ]
+      }
+    },
+    {
+      "expected": "physical_effort",
+      "text": "How intense was my movement throughout the day?",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "How intense was my movement throughout the day?"
+          }
+        ],
+        "latency_ms": 3195
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "physical_effort"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": "sleep_awake",
+      "text": "最近几天晚上醒着的时间比之前多了吗？",
+      "verdict": "adopt_ok",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "metric_query",
+        "metrics": [
+          {
+            "metric_id": "sleep_awake",
+            "evidence": "晚上醒着的时间"
+          }
+        ],
+        "latency_ms": 3082
+      },
+      "decision": {
+        "action": "adopt",
+        "metricIds": [
+          "sleep_awake"
+        ],
+        "candidates": [],
+        "reasons": []
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近总觉得提不起精神，做什么都觉得很累。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1526
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近压力有点大，晚上经常睡不着。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1479
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "总觉得心里空空的，没什么特别的原因。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1439
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近吃东西没胃口，但又饿得快。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1457
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常头晕，但又不是特别严重。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1460
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近情绪波动比较大，有时候莫名会难过。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1463
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近感觉身体不太对劲，但又说不上来哪里不舒服。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1458
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常忘记事情，记忆力好像变差了。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1444
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得胸口闷闷的，有点不舒服。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1438
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近和朋友见面的时候，总觉得有点紧张。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1506
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得口干舌燥，喝再多水也没用。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1460
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得头有点晕，像是缺氧的感觉。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "spo2_percent",
+            "evidence": "像是缺氧的感觉"
+          }
+        ],
+        "latency_ms": 3109
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常感到焦虑，但又不知道为什么。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1457
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近总觉得身体像被掏空了一样，很疲惫。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1441
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近吃东西之后胃有点不舒服，但不是特别严重。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1440
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得手心出汗，有点奇怪。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "wrist_temp",
+            "evidence": "手心出汗"
+          }
+        ],
+        "latency_ms": 3157
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近情绪不太稳定，有时候会莫名发脾气。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1566
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得喉咙有东西卡着，但又咽不下去。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1474
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得脑子转不动，反应变慢了。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1460
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得耳朵里有嗡嗡声，但又不是特别明显。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "environmental_audio_db",
+            "evidence": "耳朵里有嗡嗡声"
+          },
+          {
+            "metric_id": "headphone_audio_db",
+            "evidence": "耳朵里有嗡嗡声"
+          }
+        ],
+        "latency_ms": 5529
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得身体忽冷忽热，不太舒服。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1578
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得嘴巴里有苦味，但又不是生病。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1451
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常感到胸口发紧，但又不是特别疼。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1453
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得眼睛干涩，看东西有点模糊。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1459
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得喉咙发痒，但又不是感冒。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "sleep_time_asleep",
+            "evidence": "最近经常觉得喉咙发痒，但又不是感冒。"
+          }
+        ],
+        "latency_ms": 3938
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "最近经常觉得整个人很疲惫，但又没做什么重活。",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1496
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling really down lately, even though nothing seems to be wrong.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1441
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I can't seem to focus on anything, my mind keeps drifting.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1448
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I had a rough day at work and I'm still feeling it.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1449
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been eating a lot more than usual, and I don't know why.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1451
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I woke up this morning with a heavy feeling in my chest.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1444
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been avoiding social interactions more than I normally do.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1419
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been unusually irritable and short-tempered with my family.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1525
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I'm not sure why, but I've been feeling restless and unable to relax.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1455
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been struggling with motivation for things I usually enjoy.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1459
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been traveling a lot recently and it's starting to take a toll.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1444
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been experiencing a dull ache in my head that won't go away.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1451
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I feel like I'm constantly on edge and can't shake the anxiety.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1431
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been neglecting my usual routines and haven't been taking care of myself.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1421
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling disconnected from the people around me.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1445
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been having trouble with my appetite, not eating much at all.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1430
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling unusually emotional, crying over small things.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1414
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been having a hard time keeping up with my usual schedule.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1423
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling physically sluggish, like I can't move as easily as before.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [
+          {
+            "metric_id": "physical_effort",
+            "evidence": "物理 sluggish"
+          }
+        ],
+        "latency_ms": 2983
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been dealing with a lot of stress lately and it's hard to shake.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1502
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I'm not sure what's going on, but I've been feeling uncharacteristically low.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1470
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been experiencing a general sense of unease that I can't explain.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1424
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been eating more junk food and skipping meals, which I'm not proud of.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1508
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling like I'm going through the motions without any real purpose.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1476
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been dealing with a lot of mental fog and can't think clearly.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1441
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling more anxious than usual, even in calm situations.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1431
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been avoiding things I used to enjoy, like going out or spending time with friends.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1460
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been feeling like I'm not in control of my own emotions lately.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1467
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    },
+    {
+      "expected": null,
+      "text": "I've been experiencing a general sense of fatigue that doesn't seem to go away.",
+      "verdict": "neg_none",
+      "proposal": {
+        "model": "qwen2.5:7b-instruct",
+        "kind": "feeling_or_symptom",
+        "metrics": [],
+        "latency_ms": 1494
+      },
+      "decision": {
+        "action": "none",
+        "metricIds": [],
+        "candidates": [],
+        "reasons": [
+          "kind:feeling_or_symptom"
+        ]
+      }
+    }
+  ]
+}

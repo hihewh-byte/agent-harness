@@ -1,6 +1,6 @@
 {
   "schema_version": "wearable_metric_registry_v1",
-  "version": "2026.09.15-batch2",
+  "version": "2026.10.09-intent-hint-combos",
   "shortcut_pack_version": "2026.09.11.hrv-today",
   "description": "PHA 穿戴指标注册表 — CompareTable / L1 聚合 / 事实卡可选指标。Apple Health export 为全量快照；HealthKit ingest 白名单另见 PRD FR-1.4。捷径包版本见 shortcut_pack_version；zip 为最终真值。",
   "ingest_modules": [],
@@ -60,7 +60,8 @@
         "how long did i sleep",
         "sleep data",
         "sleep metrics",
-        "sleep"
+        "sleep",
+        "睡了多少"
       ],
       "catalog": {
         "key": "sleep",
@@ -156,7 +157,27 @@
         "heart rate variability",
         "heart-rate variability",
         "HRV SDNN",
-        "心率变异 SDNN"
+        "心率变异 SDNN",
+        "心率波动"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "心率",
+            "心跳",
+            "heart rate",
+            "heart rhythm",
+            "heart"
+          ],
+          [
+            "变异",
+            "波动",
+            "稳定性",
+            "fluctuation",
+            "variation",
+            "variability"
+          ]
+        ]
       ],
       "catalog": {
         "key": "hrv",
@@ -389,7 +410,9 @@
         "deep sleep",
         "sleep stage",
         "sleep stages",
-        "staging"
+        "staging",
+        "睡得沉",
+        "睡得熟"
       ],
       "catalog": {
         "key": "sleep",
@@ -450,7 +473,9 @@
         "rem sleep",
         "sleep stage",
         "sleep stages",
-        "rapid eye movement"
+        "rapid eye movement",
+        "眼动阶段",
+        "眼动时长"
       ],
       "catalog": {
         "key": "sleep",
@@ -619,7 +644,37 @@
         "awake",
         "awake time",
         "time awake",
-        "WASO"
+        "WASO",
+        "清醒时间",
+        "醒着时间",
+        "夜间醒",
+        "老醒",
+        "夜醒",
+        "醒了几次"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "睡觉",
+            "睡眠",
+            "睡着",
+            "夜间",
+            "夜里",
+            "晚上",
+            "sleep",
+            "night"
+          ],
+          [
+            "清醒",
+            "醒来",
+            "醒着",
+            "醒",
+            "awake",
+            "woke",
+            "waking",
+            "wake"
+          ]
+        ]
       ],
       "catalog": {
         "key": "sleep",
@@ -748,7 +803,9 @@
         "走了多少",
         "走路",
         "走路多",
-        "step count"
+        "step count",
+        "走动",
+        "步量"
       ],
       "catalog": {
         "key": "steps",
@@ -797,7 +854,32 @@
       "intent_hints": [
         "活动消耗",
         "active energy",
-        "卡路里"
+        "卡路里",
+        "活动热量"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "运动",
+            "活动",
+            "锻炼",
+            "跑步",
+            "exercise",
+            "workout",
+            "activity",
+            "activities"
+          ],
+          [
+            "卡路里",
+            "热量",
+            "能量",
+            "calories",
+            "calorie",
+            "energy",
+            "burn"
+          ]
+        ]
       ],
       "catalog": {
         "key": "activity_kcal",
@@ -849,7 +931,9 @@
         "vo2max",
         "VO2",
         "最大摄氧量",
-        "cardio fitness"
+        "cardio fitness",
+        "有氧能力",
+        "摄氧"
       ],
       "catalog": {
         "key": "vo2max",
@@ -906,6 +990,43 @@
         "一分钟心率恢复",
         "运动后心率恢复"
       ],
+      "intent_hint_combos": [
+        [
+          [
+            "运动后",
+            "运动完",
+            "锻炼后",
+            "练完",
+            "after exercise",
+            "after a workout",
+            "after workout",
+            "after exercising",
+            "post-workout"
+          ],
+          [
+            "心跳",
+            "心率",
+            "heart rate",
+            "heartbeat",
+            "pulse",
+            "heart"
+          ]
+        ],
+        [
+          [
+            "心率",
+            "心跳",
+            "heart rate",
+            "heart"
+          ],
+          [
+            "恢复",
+            "回落",
+            "recovery",
+            "recover"
+          ]
+        ]
+      ],
       "catalog": {
         "key": "cardio_recovery",
         "cluster": "cardio_recovery",
@@ -952,7 +1073,27 @@
         "腕温",
         "手腕温度",
         "wrist temperature",
-        "sleeping wrist"
+        "sleeping wrist",
+        "手腕体温"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "手腕",
+            "wrist"
+          ],
+          [
+            "温度",
+            "发热",
+            "热",
+            "凉",
+            "temperature",
+            "temp",
+            "warm",
+            "hot",
+            "cool"
+          ]
+        ]
       ],
       "catalog": {
         "key": "wrist_temp",
@@ -1001,7 +1142,10 @@
         "锻炼时长",
         "exercise minutes",
         "apple exercise time",
-        "Exercise Time"
+        "Exercise Time",
+        "运动时长",
+        "锻炼时数",
+        "运动时间"
       ],
       "catalog": {
         "key": "exercise_minutes",
@@ -1051,7 +1195,8 @@
         "站立时间",
         "站立时长",
         "stand time",
-        "apple stand time"
+        "apple stand time",
+        "站时长"
       ],
       "catalog": {
         "key": "stand_time",
@@ -1101,7 +1246,29 @@
         "步行+跑步距离",
         "步行跑步距离",
         "walking + running distance",
-        "walking running distance"
+        "walking running distance",
+        "跑步距离",
+        "走跑距离"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "步行",
+            "走了",
+            "walking",
+            "walk"
+          ],
+          [
+            "公里",
+            "距离",
+            "多远",
+            "km",
+            "distance",
+            "how far",
+            "miles"
+          ]
+        ]
       ],
       "catalog": {
         "key": "walk_run_distance",
@@ -1153,6 +1320,23 @@
         "walking heart rate average",
         "walking heart rate"
       ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "步行",
+            "walking",
+            "walk"
+          ],
+          [
+            "心跳",
+            "心率",
+            "heart rate",
+            "heartbeat",
+            "pulse"
+          ]
+        ]
+      ],
       "catalog": {
         "key": "walking_hr",
         "cluster": "walking_hr",
@@ -1201,7 +1385,30 @@
       "intent_hints": [
         "步行稳定性",
         "walking steadiness",
-        "apple walking steadiness"
+        "apple walking steadiness",
+        "步态稳定"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "步行",
+            "walking",
+            "walk"
+          ],
+          [
+            "稳定",
+            "平衡",
+            "摇晃",
+            "不稳",
+            "稳",
+            "晃",
+            "steadiness",
+            "steady",
+            "balance",
+            "wobbl"
+          ]
+        ]
       ],
       "catalog": {
         "key": "walking_steadiness",
@@ -1251,7 +1458,11 @@
         "日光暴露",
         "日照时长",
         "time in daylight",
-        "daylight"
+        "daylight",
+        "日照时间",
+        "日光时长",
+        "户外时间",
+        "光照时长"
       ],
       "catalog": {
         "key": "daylight",
@@ -1302,6 +1513,23 @@
         "爬楼",
         "flights climbed"
       ],
+      "intent_hint_combos": [
+        [
+          [
+            "爬",
+            "climb"
+          ],
+          [
+            "楼梯",
+            "楼层",
+            "层楼",
+            "楼",
+            "stairs",
+            "flights",
+            "floors"
+          ]
+        ]
+      ],
       "catalog": {
         "key": "flights",
         "cluster": "flights",
@@ -1349,7 +1577,40 @@
       "intent_hints": [
         "步行速度",
         "步速",
-        "walking speed"
+        "walking speed",
+        "行走速度"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "步行",
+            "walking",
+            "walk",
+            "走得"
+          ],
+          [
+            "速度",
+            "节奏",
+            "多快",
+            "快慢",
+            "pace",
+            "speed",
+            "走得快",
+            "走得慢",
+            "走路快",
+            "走路慢",
+            "步行快",
+            "步行慢",
+            "how fast",
+            "walk fast",
+            "walking fast",
+            "walk faster",
+            "walk slow",
+            "walking slow",
+            "walk slower"
+          ]
+        ]
       ],
       "catalog": {
         "key": "walking_speed",
@@ -1399,7 +1660,38 @@
       "intent_hints": [
         "六分钟步行",
         "six-minute walk",
-        "six minute walk"
+        "six minute walk",
+        "六分钟走",
+        "六分钟测试",
+        "六分钟距离",
+        "走六分钟"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "六分钟",
+            "6分钟",
+            "six-minute",
+            "six minute",
+            "6-minute"
+          ],
+          [
+            "走",
+            "walk"
+          ]
+        ],
+        [
+          [
+            "走路",
+            "步行",
+            "walking",
+            "walk"
+          ],
+          [
+            "耐力",
+            "endurance"
+          ]
+        ]
       ],
       "catalog": {
         "key": "six_minute_walk",
@@ -1548,7 +1840,8 @@
       },
       "intent_hints": [
         "体力活动努力",
-        "physical effort"
+        "physical effort",
+        "活动强度"
       ],
       "catalog": {
         "key": "physical_effort",
@@ -1598,7 +1891,30 @@
         "基础消耗",
         "基础代谢消耗",
         "basal energy burned",
-        "basal energy"
+        "basal energy",
+        "基础热量",
+        "静止能量"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "静息",
+            "静止",
+            "不动",
+            "休息",
+            "resting",
+            "at rest"
+          ],
+          [
+            "卡路里",
+            "热量",
+            "能量",
+            "calories",
+            "calorie",
+            "energy",
+            "burn"
+          ]
+        ]
       ],
       "catalog": {
         "key": "basal_energy",
@@ -1647,7 +1963,38 @@
       "intent_hints": [
         "跑步速度",
         "跑步配速",
-        "running speed"
+        "running speed",
+        "跑步快慢"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "跑步",
+            "跑",
+            "running",
+            "run",
+            "跑得"
+          ],
+          [
+            "配速",
+            "速度",
+            "多快",
+            "快慢",
+            "pace",
+            "speed",
+            "跑得快",
+            "跑得慢",
+            "跑步快",
+            "跑步慢",
+            "how fast",
+            "run fast",
+            "running fast",
+            "run faster",
+            "run slow",
+            "running slow",
+            "run slower"
+          ]
+        ]
       ],
       "catalog": {
         "key": "running_speed",
@@ -1697,6 +2044,21 @@
         "跑步功率",
         "running power"
       ],
+      "intent_hint_combos": [
+        [
+          [
+            "跑步",
+            "跑",
+            "running",
+            "run"
+          ],
+          [
+            "功率",
+            "发力",
+            "power"
+          ]
+        ]
+      ],
       "catalog": {
         "key": "running_power",
         "cluster": "running_power",
@@ -1744,7 +2106,26 @@
       "intent_hints": [
         "步幅",
         "walking step length",
-        "step length"
+        "step length",
+        "每步多长"
+      ],
+      "intent_hint_combos": [
+        [
+          [
+            "走路",
+            "步行",
+            "walking",
+            "walk"
+          ],
+          [
+            "步长",
+            "步幅",
+            "步子",
+            "每一步",
+            "stride",
+            "step length"
+          ]
+        ]
       ],
       "catalog": {
         "key": "step_length",
@@ -1793,7 +2174,9 @@
       "intent_hints": [
         "环境声暴露",
         "环境噪音",
-        "environmental audio exposure"
+        "environmental audio exposure",
+        "环境音",
+        "噪音大小"
       ],
       "catalog": {
         "key": "env_audio",

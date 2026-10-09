@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "notes": "Stage 2 gated semantic proposal. Proposer = local LLM constrained to registry metric enum + verbatim evidence span; Harness gate decides adopt / clarify / none. Runs only when direct token resolution found zero wearable entities. Flag PHA_SEMANTIC_INTENT=off|shadow|on (default off).",
+  "model": "qwen2.5:7b-instruct",
+  "keep_alive": "30m",
+  "timeout_seconds": 20,
+  "temperature": 0,
+  "max_adopt_metrics": 3,
+  "max_clarify_choices": 4,
+  "min_evidence_len_cjk": 2,
+  "min_evidence_len_ascii": 3,
+  "verify_adopt": true,
+  "verify_instruction": "The phrase below was taken from the user's message. Pick the one option the phrase actually asks about, judging by what quantity is measured and during which activity. Pick none if no option matches what the phrase measures.",
+  "system": "You map a user's message in a personal health app to the wearable metrics it asks about. Output only JSON matching the schema.",
+  "instruction": "Classify the message. kind=metric_query only when the user asks about a measurable metric from the list (its value, trend, comparison or status). kind=feeling_or_symptom when the user mainly describes how they feel, a symptom or a mood without asking about a specific metric. kind=other for anything else. For metric_query, list each metric the user asks about (at most 3) with evidence = the exact words copied from the message that refer to that metric. Do not guess metrics the user did not refer to. If the words could equally mean several metrics, list each of them with the same evidence."
+}

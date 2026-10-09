@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import json
 import os
 import re
@@ -325,7 +326,82 @@ def catalog_unit_for(metric_id: str) -> str:
 _CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 
 
+def _token_spans(token: str, msg: str, blob: str) -> List[Tuple[int, int]]:
+    hay, needle = (msg, token) if _CJK_RE.search(token) else (blob, token.lower())
+    return [(m.start(), m.end()) for m in re.finditer(re.escape(needle), hay)]
+
+
+def _group_spans(
+    group: Any, msg: str, blob: str, foreign: List[Tuple[int, int]]
+) -> List[Tuple[int, int, bool]]:
+    """Occurrences of a combo group; the flag marks one nested in a longer foreign hint."""
+    spans: List[Tuple[int, int, bool]] = []
+    for t in group or []:
+        tok = str(t).strip()
+        if not tok:
+            continue
+        for s, e in _token_spans(tok, msg, blob):
+            nested = any(fs <= s and e <= fe and (fe - fs) > (e - s) for fs, fe in foreign)
+            spans.append((s, e, nested))
+    return spans
+
+
+def combo_hint_resolution(user_message: str) -> Tuple[Tuple[str, ...], str]:
+    """Registry ``intent_hint_combos``: every group of a combo must hit.
+
+    Returns matched metric ids and the message with the consumed spans blanked,
+    so single-token hints / catalog aliases cannot re-bind those words to a broader metric.
+    Occurrences outside longer direct hints of other metrics are preferred, then the tightest
+    pick. A picked occurrence nested in such a hint (e.g. "sleep" in "deep sleep") still
+    satisfies its group but is not blanked, so that metric keeps its own phrase.
+    """
+    msg = user_message or ""
+    blob = msg.lower()
+    if len(blob) != len(msg):
+        blob = msg
+    matched: List[str] = []
+    consumed: List[Tuple[int, int]] = []
+    hint_spans: Optional[Dict[str, List[Tuple[int, int]]]] = None
+    for m in list_metric_entries():
+        mid = str(m.get("metric_id") or "").strip()
+        combos = [c for c in (m.get("intent_hint_combos") or []) if isinstance(c, list) and len(c) >= 2]
+        if not combos:
+            continue
+        if hint_spans is None:
+            hint_spans = {
+                other: [s for h in hs if (h or "").strip() for s in _token_spans(h.strip(), msg, blob)]
+                for other, hs in metric_mention_hints().items()
+            }
+        foreign = [s for other, spans in hint_spans.items() if other != mid for s in spans]
+        for combo in combos:
+            per_group = [_group_spans(g, msg, blob, foreign) for g in combo]
+            if not all(per_group):
+                continue
+            best = min(
+                itertools.product(*per_group),
+                key=lambda pick: (
+                    sum(nested for _, _, nested in pick),
+                    max(e for _, e, _ in pick) - min(s for s, _, _ in pick),
+                ),
+            )
+            if mid and mid not in matched:
+                matched.append(mid)
+            consumed.extend((s, e) for s, e, nested in best if not nested)
+            break
+    chars = list(msg)
+    for start, end in consumed:
+        for i in range(start, end):
+            chars[i] = " "
+    return tuple(matched), "".join(chars)
+
+
 def hint_match_metric_ids(user_message: str) -> Tuple[str, ...]:
+    combo_ids, residual = combo_hint_resolution(user_message)
+    plain = _plain_hint_match_metric_ids(residual)
+    return tuple(dict.fromkeys((*combo_ids, *plain)))
+
+
+def _plain_hint_match_metric_ids(user_message: str) -> Tuple[str, ...]:
     msg = user_message or ""
     blob = msg.lower()
     matches: List[tuple[str, str]] = []

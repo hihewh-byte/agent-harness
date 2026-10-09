@@ -133,10 +133,17 @@ def infer_metrics_from_message(message: str) -> list[str]:
         return []
     if message_names_unpromoted_metric(msg):
         return []
+    from pha.wearable_metric_registry import catalog_key_for, combo_hint_resolution
+
+    combo_ids, residual = combo_hint_resolution(msg)
     found: list[str] = []
+    for mid in combo_ids:
+        key = catalog_key_for(mid)
+        if key and key not in found:
+            found.append(key)
     for key in catalog_all_metric_keys():
         for alias in catalog_metric_aliases(key):
-            if token_in_message(alias, msg, case_insensitive=True):
+            if token_in_message(alias, residual, case_insensitive=True):
                 if key not in found:
                     found.append(key)
                 break

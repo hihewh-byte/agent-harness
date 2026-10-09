@@ -173,6 +173,19 @@ def main() -> int:
         if missing:
             errors.append(f"registry catalog.key missing bundle canonical {sorted(missing)}")
 
+    from pha.intent_gates import infer_wearable_metric_ids
+
+    combo_cases = (
+        ("核心睡眠是多少？深睡是多少？睡眠清醒是多少？", {"sleep_core", "sleep_deep", "sleep_awake"}, set()),
+        ("How much core sleep, deep sleep and awake time?", {"sleep_core", "sleep_deep", "sleep_awake"}, set()),
+        ("我走路的时候心跳快吗？", {"walking_hr_avg_bpm"}, {"walking_speed_kmh", "steps"}),
+        ("我走路快不快", {"walking_speed_kmh"}, {"steps"}),
+    )
+    for msg, want, banned in combo_cases:
+        got = set(infer_wearable_metric_ids(msg))
+        if not want <= got or got & banned:
+            errors.append(f"intent_hint_combos {msg!r}: got {sorted(got)} want ⊇{sorted(want)} ∌{sorted(banned)}")
+
     import subprocess
 
     gen = ROOT / "scripts" / "pha_wearable_bundle_schema_generate.py"

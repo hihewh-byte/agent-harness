@@ -1,0 +1,2649 @@
+{
+  "summary": {
+    "holdout": {
+      "precise_recall": 0.4955,
+      "runtime_recall": 0.5379,
+      "precise_misbind_rate": 0.0833,
+      "fallback_only_rate": 0.0561,
+      "catalog_key_recall": 0.4939,
+      "total": 660
+    },
+    "train": {
+      "precise_recall": 0.6528,
+      "runtime_recall": 0.6654,
+      "precise_misbind_rate": 0.0404,
+      "fallback_only_rate": 0.0341,
+      "catalog_key_recall": 0.6098,
+      "total": 792
+    },
+    "negatives": {
+      "false_bind_rate": 0.1,
+      "bound": 6,
+      "total": 60
+    }
+  },
+  "per_metric": {
+    "sleep_deep": {
+      "holdout": {
+        "precise_hit": 13,
+        "runtime_hit": 18,
+        "precise_misbind": 5,
+        "fallback_only": 0,
+        "catalog_key_hit": 18,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 21,
+        "runtime_hit": 23,
+        "precise_misbind": 2,
+        "fallback_only": 0,
+        "catalog_key_hit": 23,
+        "total": 24
+      }
+    },
+    "sleep_awake": {
+      "holdout": {
+        "precise_hit": 12,
+        "runtime_hit": 15,
+        "precise_misbind": 4,
+        "fallback_only": 0,
+        "catalog_key_hit": 15,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 23,
+        "precise_misbind": 3,
+        "fallback_only": 1,
+        "catalog_key_hit": 22,
+        "total": 24
+      }
+    },
+    "sleep_time_asleep": {
+      "holdout": {
+        "precise_hit": 13,
+        "runtime_hit": 13,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 14,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 19,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 18,
+        "total": 24
+      }
+    },
+    "hrv_sdnn_ms": {
+      "holdout": {
+        "precise_hit": 4,
+        "runtime_hit": 5,
+        "precise_misbind": 2,
+        "fallback_only": 1,
+        "catalog_key_hit": 4,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 22,
+        "runtime_hit": 22,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 22,
+        "total": 24
+      }
+    },
+    "resting_heart_rate_bpm": {
+      "holdout": {
+        "precise_hit": 10,
+        "runtime_hit": 11,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 1,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 13,
+        "runtime_hit": 14,
+        "precise_misbind": 1,
+        "fallback_only": 1,
+        "catalog_key_hit": 1,
+        "total": 24
+      }
+    },
+    "spo2_percent": {
+      "holdout": {
+        "precise_hit": 15,
+        "runtime_hit": 15,
+        "precise_misbind": 0,
+        "fallback_only": 5,
+        "catalog_key_hit": 15,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 23,
+        "runtime_hit": 23,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 23,
+        "total": 24
+      }
+    },
+    "respiratory_rate": {
+      "holdout": {
+        "precise_hit": 14,
+        "runtime_hit": 14,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 11,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 18,
+        "runtime_hit": 18,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 15,
+        "total": 24
+      }
+    },
+    "sleep_rem": {
+      "holdout": {
+        "precise_hit": 10,
+        "runtime_hit": 19,
+        "precise_misbind": 9,
+        "fallback_only": 0,
+        "catalog_key_hit": 19,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 24,
+        "runtime_hit": 24,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 24,
+        "total": 24
+      }
+    },
+    "sleep_core": {
+      "holdout": {
+        "precise_hit": 10,
+        "runtime_hit": 19,
+        "precise_misbind": 9,
+        "fallback_only": 0,
+        "catalog_key_hit": 19,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 22,
+        "precise_misbind": 3,
+        "fallback_only": 0,
+        "catalog_key_hit": 21,
+        "total": 24
+      }
+    },
+    "sleep_in_bed": {
+      "holdout": {
+        "precise_hit": 18,
+        "runtime_hit": 18,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 3,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 23,
+        "runtime_hit": 23,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 6,
+        "total": 24
+      }
+    },
+    "steps": {
+      "holdout": {
+        "precise_hit": 15,
+        "runtime_hit": 15,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 17,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 17,
+        "runtime_hit": 17,
+        "precise_misbind": 2,
+        "fallback_only": 0,
+        "catalog_key_hit": 17,
+        "total": 24
+      }
+    },
+    "active_energy": {
+      "holdout": {
+        "precise_hit": 13,
+        "runtime_hit": 13,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 13,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 16,
+        "runtime_hit": 16,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 15,
+        "total": 24
+      }
+    },
+    "vo2max": {
+      "holdout": {
+        "precise_hit": 3,
+        "runtime_hit": 3,
+        "precise_misbind": 0,
+        "fallback_only": 8,
+        "catalog_key_hit": 0,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 7,
+        "runtime_hit": 7,
+        "precise_misbind": 1,
+        "fallback_only": 5,
+        "catalog_key_hit": 0,
+        "total": 24
+      }
+    },
+    "cardio_recovery_1min_bpm": {
+      "holdout": {
+        "precise_hit": 14,
+        "runtime_hit": 14,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 14,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 19,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 19,
+        "total": 24
+      }
+    },
+    "wrist_temp": {
+      "holdout": {
+        "precise_hit": 20,
+        "runtime_hit": 20,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 20,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 23,
+        "runtime_hit": 23,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 23,
+        "total": 24
+      }
+    },
+    "apple_exercise_time_min": {
+      "holdout": {
+        "precise_hit": 2,
+        "runtime_hit": 2,
+        "precise_misbind": 0,
+        "fallback_only": 6,
+        "catalog_key_hit": 2,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 8,
+        "runtime_hit": 8,
+        "precise_misbind": 1,
+        "fallback_only": 7,
+        "catalog_key_hit": 8,
+        "total": 24
+      }
+    },
+    "apple_stand_time_min": {
+      "holdout": {
+        "precise_hit": 1,
+        "runtime_hit": 1,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 1,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 6,
+        "runtime_hit": 6,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 6,
+        "total": 24
+      }
+    },
+    "distance_walking_running_km": {
+      "holdout": {
+        "precise_hit": 13,
+        "runtime_hit": 13,
+        "precise_misbind": 3,
+        "fallback_only": 0,
+        "catalog_key_hit": 13,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 20,
+        "runtime_hit": 20,
+        "precise_misbind": 1,
+        "fallback_only": 1,
+        "catalog_key_hit": 20,
+        "total": 24
+      }
+    },
+    "walking_hr_avg_bpm": {
+      "holdout": {
+        "precise_hit": 17,
+        "runtime_hit": 17,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 17,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 23,
+        "runtime_hit": 23,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 23,
+        "total": 24
+      }
+    },
+    "walking_steadiness": {
+      "holdout": {
+        "precise_hit": 14,
+        "runtime_hit": 14,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 14,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 14,
+        "runtime_hit": 14,
+        "precise_misbind": 2,
+        "fallback_only": 0,
+        "catalog_key_hit": 14,
+        "total": 24
+      }
+    },
+    "time_in_daylight_min": {
+      "holdout": {
+        "precise_hit": 3,
+        "runtime_hit": 3,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 3,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 10,
+        "runtime_hit": 10,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 10,
+        "total": 24
+      }
+    },
+    "flights_climbed": {
+      "holdout": {
+        "precise_hit": 12,
+        "runtime_hit": 12,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 12,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 18,
+        "runtime_hit": 18,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 18,
+        "total": 24
+      }
+    },
+    "walking_speed_kmh": {
+      "holdout": {
+        "precise_hit": 16,
+        "runtime_hit": 16,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 16,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 19,
+        "precise_misbind": 3,
+        "fallback_only": 0,
+        "catalog_key_hit": 19,
+        "total": 24
+      }
+    },
+    "six_minute_walk_m": {
+      "holdout": {
+        "precise_hit": 16,
+        "runtime_hit": 16,
+        "precise_misbind": 3,
+        "fallback_only": 0,
+        "catalog_key_hit": 16,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 22,
+        "runtime_hit": 22,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 22,
+        "total": 24
+      }
+    },
+    "body_mass_kg": {
+      "holdout": {
+        "precise_hit": 8,
+        "runtime_hit": 8,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 8,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 10,
+        "runtime_hit": 10,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 10,
+        "total": 24
+      }
+    },
+    "body_fat_fraction": {
+      "holdout": {
+        "precise_hit": 3,
+        "runtime_hit": 3,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 3,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 15,
+        "runtime_hit": 15,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 15,
+        "total": 24
+      }
+    },
+    "physical_effort": {
+      "holdout": {
+        "precise_hit": 1,
+        "runtime_hit": 1,
+        "precise_misbind": 1,
+        "fallback_only": 9,
+        "catalog_key_hit": 1,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 1,
+        "runtime_hit": 1,
+        "precise_misbind": 5,
+        "fallback_only": 6,
+        "catalog_key_hit": 1,
+        "total": 24
+      }
+    },
+    "basal_energy_kcal": {
+      "holdout": {
+        "precise_hit": 4,
+        "runtime_hit": 4,
+        "precise_misbind": 4,
+        "fallback_only": 0,
+        "catalog_key_hit": 4,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 13,
+        "runtime_hit": 13,
+        "precise_misbind": 1,
+        "fallback_only": 0,
+        "catalog_key_hit": 13,
+        "total": 24
+      }
+    },
+    "running_speed_kmh": {
+      "holdout": {
+        "precise_hit": 15,
+        "runtime_hit": 15,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 15,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 19,
+        "precise_misbind": 0,
+        "fallback_only": 2,
+        "catalog_key_hit": 19,
+        "total": 24
+      }
+    },
+    "running_power_w": {
+      "holdout": {
+        "precise_hit": 9,
+        "runtime_hit": 9,
+        "precise_misbind": 2,
+        "fallback_only": 3,
+        "catalog_key_hit": 9,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 19,
+        "runtime_hit": 19,
+        "precise_misbind": 0,
+        "fallback_only": 1,
+        "catalog_key_hit": 19,
+        "total": 24
+      }
+    },
+    "walking_step_length_cm": {
+      "holdout": {
+        "precise_hit": 7,
+        "runtime_hit": 7,
+        "precise_misbind": 7,
+        "fallback_only": 3,
+        "catalog_key_hit": 7,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 14,
+        "runtime_hit": 14,
+        "precise_misbind": 4,
+        "fallback_only": 0,
+        "catalog_key_hit": 14,
+        "total": 24
+      }
+    },
+    "environmental_audio_db": {
+      "holdout": {
+        "precise_hit": 0,
+        "runtime_hit": 0,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 0,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 0,
+        "runtime_hit": 0,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 0,
+        "total": 24
+      }
+    },
+    "headphone_audio_db": {
+      "holdout": {
+        "precise_hit": 2,
+        "runtime_hit": 2,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 2,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 3,
+        "runtime_hit": 3,
+        "precise_misbind": 0,
+        "fallback_only": 0,
+        "catalog_key_hit": 3,
+        "total": 24
+      }
+    }
+  },
+  "negatives_bound": [
+    {
+      "text": "走路的时候感觉腿有点发软，不太舒服。",
+      "got": "steps"
+    },
+    {
+      "text": "最近经常觉得心慌，但心跳又正常。",
+      "got": "resting_heart_rate_bpm"
+    },
+    {
+      "text": "最近经常觉得身体沉重，走路都费劲。",
+      "got": "steps"
+    },
+    {
+      "text": "最近经常觉得膝盖有点酸，走路多了就更明显。",
+      "got": "steps"
+    },
+    {
+      "text": "I feel like I'm not getting enough rest, even after a full night's sleep.",
+      "got": "sleep_time_asleep"
+    },
+    {
+      "text": "I've been having trouble falling asleep and staying asleep.",
+      "got": "sleep_time_asleep"
+    }
+  ],
+  "holdout_misses": [
+    {
+      "metric_id": "sleep_deep",
+      "text": "能告诉我昨晚有几小时是特别深的睡眠吗？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "I want to know how many hours I spent in the deepest part of my sleep.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How many hours of deep rest did I have?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "I'm curious about how much of my sleep was really deep and restful.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How long did I stay in the most restorative sleep phase?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "Can you check how much deep rest I had last night?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How many hours of the deepest sleep did I get?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我昨晚睡得怎么样？有没有很多次醒过来？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "睡了一觉，但感觉没怎么休息，是不是醒的时间太长了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我睡得不踏实，是不是因为醒的时间太多？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我是不是经常被什么吵醒？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "有没有办法知道我是不是睡得不深？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "Can you tell me how much time I spent not sleeping?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "I want to know how many hours I was up when I should have been asleep.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "Tell me how much time I was not in a deep sleep or REM.",
+      "precise": "sleep_deep,sleep_rem",
+      "runtime": "sleep_deep,sleep_rem"
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "你能告诉我这周我每天睡了多久吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "我每天晚上睡几个小时？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "昨晚我睡得怎么样？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "我每天大概睡多长时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "昨晚我睡了多久？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "Could you check how long I slept?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "text": "I'm curious about the number of hours I slept.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "我最近感觉心跳不太规律，这个指标能说明什么吗？",
+      "precise": "resting_heart_rate_bpm",
+      "runtime": "resting_heart_rate_bpm"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "能告诉我一下这个指标代表的是什么吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个数值对心脏健康有什么影响？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "怎么通过这个指标判断心脏状况？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个数值高或低意味着什么？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个指标和我平时的睡眠质量有关系吗？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个数据是不是和我的心率有关？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个指标能反映出我的心脏功能吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "这个数值的变化是不是说明身体有什么问题？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "How steady is my heart's rhythm over time?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "Can you tell me about the changes in my heart's beat patterns?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "I'm curious about how my heart's beat patterns are doing lately.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "Is there a way to check how my heart's rhythm is fluctuating?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "Could you explain what my heart's beat consistency means for me?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "What's the status of my heart's beat regularity?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "text": "I want to know more about how my heart's beat patterns are changing.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "有没有什么指标可以反映我心脏的健康状况？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's my average heart rate when I'm just sitting around doing nothing?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "How often does my heart beat per minute when I'm not moving?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "Can you tell me my heart rate when I'm completely relaxed?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's the number of times my heart beats in a minute when I'm at rest?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's my heart rate like when I'm just lying down and not doing anything?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "How does my heart rate look when I'm not active or working out?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's my heart rate when I'm just chilling and not moving?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's the rate of my heartbeat when I'm not doing any physical activity?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "resting_heart_rate_bpm",
+      "text": "What's my heart rate when I'm not stressed or exerting myself?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "spo2_percent",
+      "text": "How much oxygen is in my blood right now?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "text": "Is my blood getting enough oxygen?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "text": "Could you tell me my oxygen levels?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "text": "I'm curious, what's my blood's oxygen level?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "spo2_percent",
+      "text": "Can you let me know how well my blood is carrying oxygen?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "Can you tell me how fast I'm breathing right now?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "What's my breathing speed looking like today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "Is there a way to track how quickly I'm breathing throughout the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "How does my breathing compare to what's considered normal?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "I want to know how many times I'm breathing every minute.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "respiratory_rate",
+      "text": "Can you give me an update on my breathing pace?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "这个阶段对睡眠质量有多重要？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "睡眠中哪个部分最能让人恢复精力？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "有没有办法让这个阶段的睡眠时间增加？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "这个阶段是不是和做梦有关系？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "为什么这个阶段的睡眠时间会变化这么大？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "我这个阶段的睡眠时间正常吗？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "这个阶段的睡眠时间对记忆力有帮助吗？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "能不能通过一些方法提高这个阶段的睡眠质量？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "Can you tell me how long I was in that light sleep phase?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_rem",
+      "text": "What's the average time I spend in that dreamy sleep phase?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "How many hours of deep rest did I get last night?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "What's the amount of really restful sleep I had?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "Can you tell me how much quality sleep I got?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "How long was my most restorative sleep?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "What's the number of hours I spent in really good sleep?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "How much of my sleep was actually helpful for recovery?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "Could you check how much of my sleep was truly restful?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "How many hours of real sleep did I have?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "What's the count of my most restful sleep hours?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_core",
+      "text": "How much of my sleep was actually deep and restful?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "text": "睡了多少小时才算够？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_in_bed",
+      "text": "这个数据能告诉我睡得怎么样吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "steps",
+      "text": "我每天大概走多少步？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "steps",
+      "text": "Can you tell me how much I walked?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "steps",
+      "text": "How far did I walk today?",
+      "precise": "distance_walking_running_km",
+      "runtime": "distance_walking_running_km"
+    },
+    {
+      "metric_id": "steps",
+      "text": "How much walking have I done this week?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "steps",
+      "text": "I'm curious about how much I've walked lately.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "How many calories did I burn from being active today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "Can you tell me how much energy I used up moving around?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "What's the total number of calories I used up during the day from moving?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "How many calories did I lose from being active?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "How much energy did I spend just from moving around?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "How many calories did I use up while doing things today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "active_energy",
+      "text": "Can you show me how many calories I burned from moving?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "我怎么知道自己心肺功能有多好？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "有没有办法测测我运动时的最大氧气消耗？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "我的心肺耐力怎么样？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "这个指标能告诉我身体的耐力水平吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "能帮我看看我的心肺功能有没有进步吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "我平时锻炼，但不知道自己的心肺能力如何？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "这个数据能不能反映我身体的健康状况？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "怎么才能知道我的身体在运动时的氧气利用率？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "How good is my heart and lungs when I exercise?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "Can you tell me how well my body uses oxygen during workouts?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "What's my maximum oxygen intake level?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "How does my body handle intense physical activity?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "How efficient is my breathing during exercise?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "What's my peak oxygen consumption?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "Can you check how my heart and lungs perform under stress?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "How well can my body take in oxygen when I'm working out hard?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "vo2max",
+      "text": "What's my overall stamina based on oxygen use?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "我心肺功能恢复得还好吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "How quickly does my heart rate come back down after I exercise?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "Can you tell me how my heart rate drops after I finish a workout?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "I want to know how my heart returns to normal after I exercise.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "How fast does my heart slow down after I'm done being active?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "cardio_recovery_1min_bpm",
+      "text": "How does my heart rate change after I stop exercising?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "我今天运动了多久？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "最近几天我每天锻炼多长时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "有没有记录我每天运动的时间？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "我想知道我每天花多少时间在锻炼上。",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "能告诉我这周我总共运动了多少分钟吗？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "我每天锻炼的时间有多长？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "有没有办法查看我每天运动的时间？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "有没有办法知道我每天锻炼的时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "我运动的时间多久？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "How many minutes did I spend working out today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "Can you tell me how long I exercised yesterday?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "I want to know the total time I was active and moving.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "How much time did I spend on physical activity last night?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "Could you show me how many minutes I spent exercising this morning?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "I'm curious about how long I was active during the day.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "What's the total time I've been exercising recently?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "How long was I moving and working out today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "text": "Tell me how many minutes I spent on exercise yesterday.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "我今天站了多久？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "能告诉我一下我今天站着的时间吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "我平时站立的时间有多长？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "今天有没有记录我站立的时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "我今天站立了多少分钟？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "站立的时间是怎么计算的？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "我今天有没有一直站着？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "能不能看一下我最近站立的时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "我今天站着的时间比昨天多吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "How long have I been standing today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "Can you tell me how much time I spent on my feet?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "I want to know how many minutes I stood up during the day.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "What's the total time I was standing around?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "How much of my day did I spend just standing there?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "Could you check how long I was standing without sitting?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "Tell me how many minutes I was up on my feet.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "I'm curious about how much time I've been standing lately.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "How much time did I spend standing instead of sitting?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "text": "Can you show me how long I stood during my daily routine?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "走路和跑步加起来一共走了多少？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "走路和跑步加起来的总里程数是多少？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "走路加跑步一共走了多少？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "I want to know how many kilometers I've walked and ran altogether.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "Could you check how much I've walked and run in total?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "What's the total distance I've covered on foot and while running?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "text": "How much have I walked and run in total this week?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "text": "How fast is my heart beating when I walk?",
+      "precise": "walking_speed_kmh",
+      "runtime": "walking_speed_kmh"
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "text": "How does my heart rate look when I'm on the move?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_hr_avg_bpm",
+      "text": "How does my heart beat when I'm out walking?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "Is my walking smooth or shaky?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "How does my walking stability look?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "Have you noticed any changes in how I walk?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "Is my gait stable or wobbly?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "Is my walking pattern consistent?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "text": "Could you give me an idea of how steady I am on my feet?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我今天在户外待了多久？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我的手机告诉我我在阳光下待的时间有多长？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我每天晒太阳的时间够不够？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "有没有办法知道我每天在阳光下待了多久？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我最近是不是晒太阳的时间变少了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我今天在阳光下暴露了多久？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "有没有数据能显示我每天晒太阳的时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我每天在户外活动的时间有多长？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我今天在阳光下待的时间是不是太短了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "我的健康应用有没有记录我每天晒太阳的时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "How much time was I spending outside in the sun today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "I want to know how many minutes I was exposed to sunlight.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "How long was I in the sun during the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "Tell me how much time I spent in the sun today.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "Can you show me how many minutes I was in the sun?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "How long was I in the sunlight during the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "text": "What was my total time in the sun today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "我想知道我今天走了多少层楼梯。",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "Can you tell me how many times I went up the stairs?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "Did I do a lot of stair climbing today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "How many times did I walk up the stairs?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "How many times did I go up and down the stairs?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "How many stair levels did I ascend today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "I'd like to know how many staircases I climbed.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "flights_climbed",
+      "text": "How many flights of stairs did I do yesterday?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "text": "我最近走路是不是变慢了？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "text": "I want to know how quickly I walk on a daily basis.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "text": "How quick am I when I'm on my feet walking?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "text": "I'm curious about my typical walking rate.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "text": "我走路的时候能走多远？",
+      "precise": "distance_walking_running_km,steps",
+      "runtime": "distance_walking_running_km"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "text": "这个测试是看我走路的能力吗？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "text": "这个测试是评估我身体状况的吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "text": "这个测试是看我走路的体力吗？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "我最近感觉胖了，能帮我测测现在有多重吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "有没有办法知道我现在身体有多重？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "我是不是变重了？能不能帮我查一下？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "我感觉身体比以前重了，能帮我确认一下吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "How much do I weigh right now?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "Can you tell me my current weight?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "I want to check my weight, can you help?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "What's the number on the scale?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "Could you let me know how many kilograms I'm at?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "I need to know my weight, please.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "Can you show me my weight measurement?",
+      "precise": "sleep_rem",
+      "runtime": "sleep_rem"
+    },
+    {
+      "metric_id": "body_mass_kg",
+      "text": "I'm curious about my current weight, can you tell me?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "有没有办法测测我身体里的脂肪含量？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "我最近在关注健康，想知道我的脂肪比例正常吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "我的身体里有多少脂肪？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "可以告诉我我的脂肪含量吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "我身体里的脂肪占比高吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "怎么才能知道我的脂肪比例？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "有没有什么方法能测出我身体的脂肪比例？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "我的脂肪占比是不是偏高？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "How much fat am I carrying compared to my weight?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "Can you tell me what percentage of my body is fat?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "What's the ratio of fat to muscle in my body?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "I want to know how fat my body is in terms of percentage.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "What's the proportion of fat in my body?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "Could you check my body's fat percentage for me?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "I'm curious about how much fat I have in my body as a percentage.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "What's my fat level as a percentage of my total body?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "body_fat_fraction",
+      "text": "Can you help me find out my body's fat ratio?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "我今天运动的时候感觉挺费劲的，这个数据是怎么算的？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "能告诉我一下，系统是怎么判断我运动时的用力程度吗？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "有没有办法知道我平时锻炼有多费力？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "系统是不是能记录我运动时的辛苦程度？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "我跑步的时候是不是可以知道我用了多大劲？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "有没有办法查看我运动时的体力消耗情况？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "系统怎么知道我运动的时候有多努力？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "我走路的时候，是不是能知道我用了多少力气？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "是不是有办法知道我运动时的强度有多大？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "系统怎么评估我运动时的体力付出？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How hard was I working physically today?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "Can you tell me how much effort I put into my activities?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "What's my activity intensity level like?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How physically active was I during the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How much energy did I use up from moving around?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How intense were my movements throughout the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "What's my overall physical exertion level?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How much was I pushing myself during the day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "physical_effort",
+      "text": "How hard have I been working physically lately?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "我每天不活动的时候大概能消耗多少热量？",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "躺着的时候，身体自己会消耗多少能量？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "不运动的时候，身体每天大概会消耗多少热量？",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "睡觉的时候，身体是不是也在消耗热量？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "如果不做任何事情，一天能消耗多少卡路里？",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "不吃饭只靠身体消耗，一天能消耗多少热量？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "静坐的时候，身体消耗的热量有多少？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "How many calories does my body burn just sitting around doing nothing?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "What's the number of calories I use up every day without even moving?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "What's the amount of energy my body needs just to keep me alive?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "How much energy does my body use when I'm not doing any activity?",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "What's the number that shows how many calories I burn without moving a muscle?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "How many calories do I use just to stay alive and not do anything?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "What's the basic amount of calories my body uses every day?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "Can you show me how many calories I burn without even thinking about it?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "text": "What's the number that represents the calories I use to keep my body running?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "text": "What was my speed while I was jogging this morning?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "text": "How quickly did I move during my run?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "text": "What was my running velocity on my last run?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "text": "Could you show me how quickly I was running last week?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "text": "How quickly was I going when I ran yesterday?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "跑步时，我的身体用了多少力气？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "跑步时，我的身体在用多大的力量？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "跑步过程中，我的能量输出有多高？",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "跑步时，我的身体在消耗多少能量？",
+      "precise": "active_energy",
+      "runtime": "active_energy"
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "跑步时，我的身体用了多少力？",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "Can you tell me how strong my running is in watts?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "What's the measure of how hard I'm working while running?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "How does the app track my running strength?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "How does the app calculate my running effort in watts?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "What's the term for how much energy I use during a run?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "running_power_w",
+      "text": "How does the app show how hard I'm pushing during my runs?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "我的步子长度怎么样？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "每走一步大概有多远？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "我的步长是不是偏小？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "我走路时每步的长度是多少？",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "How long is my average step when I walk?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "Can you tell me how far I move with each step?",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "What's the length of my steps during walking?",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "I'm curious about how long each step I take is.",
+      "precise": "",
+      "runtime": "hrv_sdnn_ms,active_energy,sleep_time_asleep,steps,resting_heart_rate_bpm,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "How much distance do I cover with every walk step?",
+      "precise": "distance_walking_running_km",
+      "runtime": "distance_walking_running_km"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "Could you check the length of my walking steps?",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "What's the average distance between my footfalls when I walk?",
+      "precise": "distance_walking_running_km",
+      "runtime": "distance_walking_running_km"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "I want to know how long my steps are when I'm on my feet.",
+      "precise": "steps",
+      "runtime": "steps"
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "text": "Can you measure how far I walk with each step?",
+      "precise": "distance_walking_running_km",
+      "runtime": "distance_walking_running_km"
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我平时在户外待的时间多，会不会对耳朵有影响？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "最近感觉耳朵有点不舒服，是不是因为环境太吵了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "能不能告诉我一下我每天接触的噪音有多大？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我经常在嘈杂的地方工作，这对听力有伤害吗？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "有没有办法知道我每天暴露在多少分贝的环境中？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我晚上睡觉的时候，周围的声音会不会影响我的耳朵？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我应该怎样减少日常生活中对耳朵的伤害？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我每天接触的环境声音是不是太响了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "有没有数据能告诉我我的耳朵每天承受了多少噪音？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "我是不是经常在不知不觉中暴露在太大的声音里？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "How loud has it been around me lately?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "Can you tell me about the noise levels I've been exposed to?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "What's the average sound level I've been in?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "I'm curious about the background noise I've been experiencing.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "Have I been in any really noisy environments recently?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "What's the sound exposure like in my everyday surroundings?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "How much noise have I been dealing with on a daily basis?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "Can you check how much environmental noise I've been exposed to?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "I want to know about the sounds I've been hearing in my environment.",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "text": "Is there a way to track how noisy my environment has been?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "我戴耳机听歌的时候，声音会不会太大，对耳朵不好？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "长时间戴耳机会不会伤耳朵？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "有没有办法知道我平时听音乐的音量是不是太高了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "我经常用耳机，会不会影响听力？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "怎么知道我用耳机的时候音量是不是在安全范围内？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "我担心自己戴耳机时音量太大，对耳朵有害。",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "听音乐时音量是不是太大了，有没有办法监测？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "我经常戴耳机，想了解音量是否对耳朵有影响。",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "How loud is my headphone use getting?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Is my listening through headphones too loud for my ears?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Does the app track how loud I listen to music with my headphones?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Can I see if I'm exposing my ears to too much noise from my headphones?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Does the app check if my headphones are too loud for my hearing?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Is there a way to know if my headphones are damaging my hearing?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Does the app monitor how much sound I'm getting from my headphones?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "How does the app tell me if my headphone volume is harmful?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Can I find out if I'm listening to music at dangerous volumes with my headphones?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "headphone_audio_db",
+      "text": "Does the app warn me if I'm using my headphones at unsafe levels?",
+      "precise": "",
+      "runtime": ""
+    }
+  ],
+  "synth": "reports/intent_synth/synth_s1full.json",
+  "label": "combos_v2"
+}

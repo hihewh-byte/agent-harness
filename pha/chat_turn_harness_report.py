@@ -53,6 +53,7 @@ class HarnessEmitContext:
     arbiter_decision: Dict[str, Any] | None = None
     goal_class: str = ""
     goal_source: str = ""
+    semantic_intent: Dict[str, Any] | None = None
 
 
 def build_turn_intent_route_telemetry(ctx: HarnessEmitContext) -> Dict[str, Any]:
@@ -191,7 +192,7 @@ def _wearable_metric_resolution(ctx: HarnessEmitContext) -> Dict[str, Any]:
             )
             if not any(c in present for c in candidates):
                 missing.append(mid)
-    return {
+    out: Dict[str, Any] = {
         "requestedCatalogKeys": keys,
         "requestedMetricIds": ids,
         "clusterExpanded": clusters,
@@ -202,6 +203,9 @@ def _wearable_metric_resolution(ctx: HarnessEmitContext) -> Dict[str, Any]:
         },
         "missingForGrain": missing,
     }
+    if ctx.semantic_intent:
+        out["semanticIntent"] = dict(ctx.semantic_intent)
+    return out
 
 
 __all__ = ["HarnessEmitContext", "build_turn_intent_route_telemetry", "emit_turn_harness_report"]

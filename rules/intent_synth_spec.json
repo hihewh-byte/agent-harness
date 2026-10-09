@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "notes": "Stage 1 offline synthetic alias expansion. Proposal-only until apply; cores land in registry intent_hints + catalog metric_aliases (schema regenerated). Gates reuse loop_keyword_conflicts 1E-a/b/c/d + validate_alias_proposals.",
+  "model": "qwen3:14b",
+  "temperature": 0.8,
+  "timeout_seconds": 300,
+  "locales": ["zh", "en"],
+  "train": {
+    "utterances_per_locale": 12,
+    "cores_per_locale": 8,
+    "instruction": "Write realistic chat questions a user of a personal health app might ask about this metric. Mix point lookups, trend or change questions, comparisons and casual everyday phrasing. About half should avoid the official metric name and use everyday words instead."
+  },
+  "holdout": {
+    "utterances_per_locale": 10,
+    "instruction": "Write how a non-technical person would casually ask a chatbot about this metric in everyday speech. Do NOT use the official metric name or its standard abbreviation; describe it the way ordinary people talk."
+  },
+  "negatives": {
+    "utterances_per_locale": 30,
+    "instruction": "Write realistic chat messages to a personal health app that describe feelings, symptoms, moods, lifestyle events or general wellbeing WITHOUT naming or clearly pointing to any single measurable wearable metric (no sleep stage, heart rate, HRV, steps, blood oxygen, weight, etc.). Examples of the kind: vague tiredness, stress, feeling off, diet, travel."
+  },
+  "core_rules": "A core is the shortest everyday phrase (Chinese 2-6 characters, English 1-4 words) that, appearing anywhere in a user message, almost certainly refers to THIS metric and not to any sibling metric listed. A core must not contain time words (today, last night, this week...), aggregation words (average, total...), question particles, or evaluative words (good, bad, ok, normal, how is). Do not repeat the existing hints.",
+  "core_max_len_cjk": 6,
+  "core_max_words_en": 4,
+  "core_min_len_en": 4,
+  "gate": {
+    "min_own_train_support_en": 1,
+    "min_own_train_support_cjk": 0,
+    "reject_on_negative_hit": true,
+    "reject_on_cross_cluster_utterance_hit": true,
+    "max_same_cluster_utterance_hits": 1
+  }
+}

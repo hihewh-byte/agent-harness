@@ -2,6 +2,62 @@
 
 > **Language / 语言**：[English](pha-ios-proactive-change-log.en.md) · 中文（本文）
 
+## 2026-10-09 (意图组合提示 intent_hint_combos 修步行族误绑；时间语法补日历月 / 月内分段 / 近 N 周)
+
+- **类别**：P1 / 意图召回 + 时间粒度。阶段 2 评测显示：大量「零命中 / 误绑」集中在步行、跑步、睡眠清醒等族，原因是单词 hint 只认一个词（「走路」→ 步数，「心跳」→ 心率），组合语义（「走路时心跳」= 步行心率）无从表达。另「八月最后一周」「上上个月」「去年十二月」「近三周」等时间短语未解析，落到默认 90 天。
+- **改动**：① registry 新增声明式字段 `intent_hint_combos`（组合内每组都须命中），覆盖 15 个指标，token 取自 train 切分的漏召回；`combo_hint_resolution` 只消耗每组最紧的一处命中，并优先避开「嵌在其他指标更长 hint 内」的出现（如 deep sleep 里的 sleep、核心睡眠里的睡眠）；即便只能用嵌套出现，也不抹掉它，留给那个指标。被消耗的片段置空后，单词 hint / catalog 别名在残句上继续匹配；组合命中时关闭 catalog 默认核心包兜底。速度类组合不用裸「快 / 慢 / fast / slow」（否则「走路时心跳快吗」会串绑步速），改为「走得快 / 跑步慢 / how fast」等。② `wearable_time_grain` 新增：日历月（可带今年 / 去年 / 前年 / YYYY年；上个月 / 上上个月 / 本月），月内分段（第 N 周 / 最后一周 / 上中下旬 / 月初 / 月底），英文月份（须带介词或分段，避免 May I…），上上周，近 N 周；未来月份按上一年处理；日历月 token 内的「一月 / 十一月」不再被「一个月 = 30 天」误吞。均为语法正则，无词表。③ 回归语料 `rules/intent_synth_regression.json` 重冻（holdout 正例 327、负例 54）；新增 `pha_wearable_time_grain_selfcheck`（26 时间 + 4 锚点用例，已入 manifest）；`pha_wearable_registry_selfcheck` 增组合消耗用例。build `pha-v2.3.67-intent-combos-calendar-grain`。
+- **证据**（合成语料，holdout 660 句不含官方名）：直接精确召回 26.2%（阶段 1 前）→ 27.6%（阶段 1）→ 49.5%（本次）；误绑 15.8% → 8.3%；train 精确召回 45.6% → 65.3%，误绑 11.0% → 4.0%；负例误绑 6/60 不变；holdout 回归 0（「我最近走路是不是变慢了」因去掉裸「慢」不再命中，有意取舍）。叠加阶段 2（qwen2.5:7b，shadow）在剩余 268 句零命中上 adopt_ok 96、clarify_hit 15、adopt_wrong 9，负例误采纳 0/54，p50 3.8s；端到端（直接 + 采纳）≈ 423/660 = 64.1%（含澄清命中 66.4%），此前 47.1%。真实库复现（LLM 打桩）：「我的跑步功率怎么样？」90 天 →「那八月最后一周呢？」08-25~08-31 跑步功率；「我走路的时候心跳快吗？」仅步行心率；「那上上周呢？」09-21~09-27。8788 实机（qwen3:14b）：「我走路的时候心跳快吗？」plan 仅 `walking_hr_avg_bpm`（77.18 bpm，90 天）→「那八月最后一周呢？」继承焦点、`calendar_month` 08-25~08-31，确定性直出 75.5 bpm。相关 selfcheck（intent_synth、wearable_registry、health_intent_catalog、loop_keyword_conflict、ledger_passthrough_lookup、stage3c_wearable、semantic_intent、wearable_time_grain、health_turn_resolver、health_episodic、fact_card、chat_turn_routing、goal_arbiter、clarify_turns、chat_turn_fsm、harness_profile_registry）PASS，H11 单跑 PASS，bundle schema `--check` 一致。测试会话及焦点行已删除。
+
+## 2026-10-09 (会话时间锚点收窄：指代追问或同簇指标才继承；修正 v2.3.65 焦点覆盖)
+
+- **类别**：P1 / 主链路时间粒度。真机：「我今天在阳光下…」两轮后问「我的跑步功率怎么样？」，答「库内没有今天的跑步功率记录」。根因（更正此前「无时间词按今天兜底」的判断）：Wave D 锚点 `PHA_EPISODIC_GRAIN_ANCHOR` 规定「点名指标且无时间词」即继承会话时间窗，跨话题也继承。
+- **改动**：维护者定口径「带指代词，或本句指标与会话焦点指标同属一个 registry 簇，才继承」。`wearable_time_grain._anchor_applies`：catalog `anaphora` 命中，或本句 metric 的 `cluster_of`（无簇时用 catalog key）与 `focus_metric` 对应 id 的簇有交集；无焦点指标则不继承。不新增词表。黄金 H11 夹具补 `focus_metric="sleep"`（其前提即上一轮问睡眠），预期不变；新增断言：跨簇 / 无焦点 → default，指代 → anchor。另修 v2.3.65 两处：① 焦点指标覆盖与跳过仲裁回显仅在本句自身解析不出穿戴指标时生效（否则点名的新指标会被焦点指标顶掉）；② `health_turn_resolver` 话题延续分支优先本句显式指标（`explicit_metrics or [focus_metric]`），焦点随之更新，后续「那上周呢？」跟随最新指标。build `pha-v2.3.66-grain-anchor-anaphora-cluster`。
+- **证据**：真实库进程内复现（LLM 打桩）：「8月20日深睡多久？」→「核心睡眠是多少？」沿用 08-20（同簇）→「我的跑步功率怎么样？」默认 90 天 → 「那上周呢？」上周跑步功率；「我今天的步数是多少？」→「我的跑步功率怎么样？」不再沿用今天。H11 单跑 PASS（parity selfcheck 整体仍止于 H10 固定日期数据的基线失败）。`semantic_intent`、`clarify_turns`、`health_episodic`、`health_turn_resolver`、`health_intent_catalog`、`stage3c_wearable`、`chat_turn_fsm`、`fact_card`、`goal_arbiter`、`chat_turn_routing`、`harness_profile_registry` PASS。复现产生的 6 个测试会话及其焦点行已删除。
+- **已知**：不带「那」的短追问（如「心率呢？」）不再继承上文时间窗，除非与焦点同簇；「八月最后一周」类时间词未解析，另议。
+- **回滚**：`_anchor_applies` 恒返回 True 即恢复 Wave D 原口径；resolver 一行还原；orchestrator 去掉 `infer_wearable_metric_ids` 条件。
+
+## 2026-10-09 (焦点追问不再被仲裁器回显覆盖：「那上周呢？」答到化验)
+
+- **类别**：P1 / 主链路多轮追问。真机：「我的跑步功率怎么样？」→「那上周呢？」，turn scope 已从会话焦点得到 `running_power` 与上周窗口，但回答却是化验指标。根因：仲裁器 `schema_default` 只是回显消息路由（`lifestyle`），却作为 `authoritative_profile` 传给 `build_turn_evidence_plan`，后者先应用强制档位、再看 turn scope，焦点继承被覆盖（与 RFC §7「resolver scope 优先于纯消息路由」相反）；且穿戴取数只看本句文本，焦点指标进不了 `requestedMetricIds`。
+- **改动**：`chat_turn_orchestrator`：仲裁器为 `schema_default` 且 turn scope `metric_source == "focus"` 时，不把回显档位作为 authoritative，交由 `_plan_from_turn_scope`；同一条件下把焦点指标经 registry `primary_metric_id_for_catalog_key` 映射后，复用语义层的回合级指标覆盖（仅在本句自身解析为空时生效，回合结束复位）。实验室焦点键无穿戴映射则不设置。selfcheck `semantic_intent` 加两条断言（追问计划为 `wearable_only` 且带焦点指标；回合后复位）。build `pha-v2.3.65-focus-followup-route`。
+- **证据**：真实库进程内复现（LLM 打桩）：「那上周呢？」→ `wearable_only`、`requestedMetricIds=[running_power_w]`、窗口 2026-09-28~10-04，确定性披露「库内没有该周跑步功率记录」（数据止于 09-02，属实）。`semantic_intent`、`clarify_turns`、`health_episodic`、`stage3c_wearable`、`chat_turn_fsm`、`fact_card`、`goal_arbiter`、`chat_turn_routing`、`harness_profile_registry` PASS。
+- **已知**：「那八月最后一周呢？」时间词未被解析，沿用焦点窗口（回答写明日期）——时间词覆盖缺口，另议。「无时间词点名指标沿用会话时间窗」（Wave D 锚点）未改，待维护者定口径（与黄金 H11 相关）。
+- **回滚**：删除 orchestrator 中 `_focus_followup` 条件与焦点指标覆盖段。
+
+## 2026-10-08 (语义层真机测试后两处修复：chip 历史记录 + 焦点追问不再提案)
+
+- **类别**：P2 / 语义层（`PHA_SEMANTIC_INTENT=on` 时生效；shadow 下仅第二条影响是否记录）。真机测试发现：① 点 `metric_pick` chip 后，会话历史/标题/后台记忆写入的是重放的原问题，表现为同一问题出现两次；② 短追问（如「那前天呢？」）已由会话焦点解析出指标，仍调用提案器，白耗约 3.8 s。
+- **改动**：`chat_turn_orchestrator` 重放时保留 `_stored_user_msg`（chip 文案），历史、标题、`on_request_start`、背景采集都用它，路由与证据计划仍用重放的原问题；提案器触发条件加 `not (_health_turn_scope and _health_turn_scope.metric_keys)`。selfcheck `semantic_intent` 加两条全链路用例，并在 e2e 段打开与线上 `.env` 一致的焦点开关（`PHA_HEALTH_TURN_RESOLVER` / `PHA_EPISODIC_ALL_PROFILES` / `PHA_GOAL_CLASSIFIER` / `PHA_GOAL_SESSION_ANCHOR`）。build `pha-v2.3.64-semantic-pick-history`。
+- **证据**：`semantic_intent` 全部 PASS（含「历史存 chip 文案」「焦点追问跳过提案」；后者已确认第二轮 `metric_keys=['sleep']`、来源 focus、仲裁器回显路由，即无此修复必调提案器）；`clarify_turns`、`health_episodic`、`stage3c_wearable`、`chat_turn_fsm`、`fact_card` PASS。
+- **未做**：主链路两项（无时间词的单指标问只答今天；「那上周呢？」答到化验）——与语义层无关，另议。
+- **回滚**：还原 orchestrator 中 `_stored_user_msg` 与 `metric_keys` 条件。
+
+## 2026-10-08 (穿戴类型枚举改索引跳跃扫描 + 语义层开 shadow)
+
+- **类别**：P1 / 对话延迟。`list_distinct_wearable_metric_types` 的 `SELECT DISTINCT` 需逐条走完该用户全部索引项（本机 563 万行、48 类，冷缓存约 7–11 s）；目标分类器与 `resolve_turn_wearable_scope` 每轮都会触发。
+- **改动**：改为在 `idx_user_metric_time` 上循环 `MIN(metric_type) WHERE metric_type > ?`（不用递归 CTE，避免 1000 行递归上限报错）；返回值仍为非空、字母序。评测脚本删去临时缓存。`.env` 加 `PHA_SEMANTIC_INTENT=shadow`（只记录，不改路由）。语义层超时维持 20 s 不变。build `pha-v2.3.63-distinct-skipscan`。
+- **证据**：真实库新旧结果逐项一致（48 类）；单次 0.8–3.3 ms。`ledger_passthrough_lookup`、`semantic_intent`、`stage3c_wearable`、`wearable_registry` PASS；`healthkit_ingest` 失败与基线相同（steps sum daily）。另见：进程首次 `init_schema()` 约 9.6 s，一次性开销，本条未动。
+- **切 on 前待办**：真实页面点一遍 `metric_pick` 按钮；看 shadow 日志中无指标词的短追问是否被判成指标查询。
+- **回滚**：还原 `list_distinct_wearable_metric_types` 为 DISTINCT；删 `.env` 中 `PHA_SEMANTIC_INTENT`。
+
+## 2026-10-08 (意图识别阶段 2：门闩式语义提案层，默认关)
+
+- **类别**：P1 / 对话意图召回。阶段 1 结论：组合式说法（「在阳光下待了多久」「运动后恢复得怎么样」）靠子串别名覆盖不了。本条加一层「LLM 只提案、Harness 决定」的语义提案，**只在 token 直接解析零实体时触发**，不改写用户原句。
+- **改动**：新增 `rules/semantic_intent_spec.json` + `pha/semantic_intent.py`。提案器 `qwen2.5:7b-instruct`（JSON schema 约束 metric_id 为 registry 可解析枚举，须给原句逐字证据）。确定性门闩：非 metric_query / 证据非原文 / 证据过短 / 证据只剩时间聚合修饰词（复用 1E-a `strip_dynamic_modifiers`）→ 不采纳；同一证据对应多个指标 → 澄清。采纳前再做一次**对比式复核**：在「提议指标 + registry 同组兄弟指标 + 都不是」里对证据重选，选回原指标才采纳，选成兄弟指标转澄清，选「都不是」则放弃。采纳结果为按原句键控的回合级 contextvar，仅在 `infer_wearable_metric_ids` / `_named_registry_metric_ids` 自身解析为空时生效，因此 `resolve_turn_wearable_scope` 及各调用方口径一致；采纳回合 authoritative profile 置 `wearable_only`（仅当仲裁器只是回显路由时）。澄清走新 catalog `clarify_kinds.metric_pick` chip；点选后用原问题重放（保留时间窗）并采纳所选指标，「都不是」按原逻辑作答；chip 失效（如开关已关）退化为普通消息，不再报错。遥测进 harness report `wearableMetricResolution.semanticIntent` 与日志 `semantic_intent`。Flag `PHA_SEMANTIC_INTENT=off|shadow|on`（**默认 off**；shadow 只记录不改路由）。catalog 1.11→1.12。新 selfcheck `semantic_intent`（门闩/复核/采纳传递/澄清往返 + 临时库全链路编排，提案器与 LLM 打桩）。离线评测 `scripts/pha_semantic_intent_eval.py`。build `pha-v2.3.62-semantic-intent-s2`。
+- **证据**：holdout（阶段 1 语料中直接零命中的 345 句，仅测一次）：采纳 41%，采纳精度 91.5%，直接救回 37.4%；澄清 5.8%（20 句中 17 句含正确指标）；负样本 54 条误采纳/误澄清 0。dev 150 句无复核时采纳精度 83.8%，加复核后离线复算约 95%（剔除标注噪声）。qwen2.5:1.5b 冒烟即把明确查询判为「感受」，弃用。全量 selfcheck 失败项与基线一致（numerics_manifest / chat_fact_card_parity / healthkit_ingest / wearable_golden_fixture / m1_batch2_fact_card；stage2d 单跑 PASS）。报告 `reports/semantic_intent/`。
+- **已知**：零实体回合多一到两次本地调用，p50 约 3–4.5 s（评测时与 selfcheck 并发，偏高）；「跑步速度」常被判成「步行速度」（两者不同组，复核覆盖不到）；`match_ledger_passthrough_types` 每次全表 `DISTINCT` 约 7 s（主链路原有开销，本条未改，评测脚本内缓存）。
+- **未做**：真机 shadow 观察与开 on；阶段 1 遗留的步行类直接解析误绑定（零实体门槛以外）；英文召回。
+- **回滚**：`PHA_SEMANTIC_INTENT=off`（默认即关）；彻底移除则删 `pha/semantic_intent.py`、spec、catalog `metric_pick`、两处解析器 adoption 分支与 orchestrator 钩子。
+
+## 2026-10-08 (意图识别阶段 1：离线合成扩容 + 门闩 + 人工复核入库)
+
+- **类别**：P1 / 对话意图召回。维护者同意「先度量与离线别名扩容，再上门闩式语义提案」，本条只做阶段 1；运行时路径不变（仍是声明式 token 匹配）。
+- **改动**：新增 `rules/intent_synth_spec.json` + `scripts/pha_intent_synth_expand.py`（synth / gate / eval / regress / apply）。本机 `qwen3:14b` 按 33 个可解析指标生成 train 句+候选核心词、holdout 句（不许用官方名）、负样本（感受/症状无指标）。门闩复用 `classify_alias_phrase`（1E-a/b/c/d）与 `validate_alias_proposals`，另加：真实解析器直接命中检测（不计簇扩展与默认核心包回落）、跨簇语料劫持、负样本命中、批内跨指标重复、英文自身语料支撑。apply 只写「门闩通过 ∩ 人工 review」的核心词：registry `intent_hints` + catalog 已有 key 的 `metric_aliases`（不新开 key）+ 已镜像该 key 的 `daily_readiness.anti_tokens` / `assessment_outline.exclusive`；schema 由生成器重建；冲突则回滚。524 候选 → 门闩放行 146 → 复核收 41（含 7 条复核员补充、同样过门闩）。catalog 1.10→1.11；registry `2026.10.08-intent-synth-s1`。新 selfcheck `intent_synth`（门闩夹具 + `rules/intent_synth_regression.json` 182 正例/54 负例）。build `pha-v2.3.61-intent-synth-s1`。
+- **证据**：holdout 660 句直接命中召回 26.2%→27.6%（中文 30.9%→33.6%，英文 21.5% 不变）；误绑定 15.6%→15.8%（+1 句）；负样本误绑定 10% 不变。「睡得沉不沉/昨晚怎么老醒/心率波动/运动时长/户外时间」由 Miss → 命中正确指标；「感觉最近有点累」仍不绑定；daily_readiness 不变。`intent_synth`、`loop_keyword_conflict`、`health_intent_catalog`、`wearable_registry`、`wearable_bundle_schema --check` PASS。报告 `reports/intent_synth/`。
+- **结论（交给阶段 2）**：剩余 miss 多为组合式说法（「走路时的心跳」「在阳光下待了多久」「运动后心跳降得慢」），连续子串别名结构上覆盖不了；英文候选几乎全被 1E-a 8 字符上限挡住（未放宽）。步行类指标约 50% 误绑定（「走路」→步数、「心跳」→静息心率）属解析器精度问题，加别名修不了。
+- **未做**：阶段 2 语义提案层；放宽 1E-a；解析器步行类精度；英文召回。
+- **回滚**：从 `reports/intent_synth/backup_20261008T045325Z/` 还原 catalog / registry / schema 三文件，删 manifest `intent_synth` 行与 `rules/intent_synth_regression.json`。
+
 ## 2026-09-17 (M1-P23 DONE：真机验收 + loop_weekly docstring 修复)
 
 - **类别**：P1 / 对话 harness。维护者真机：「请分析我近一周的 HRV/深睡变化趋势」——正文引用本窗 + 深睡近90日对照，不再称「缺乏此前数据」。

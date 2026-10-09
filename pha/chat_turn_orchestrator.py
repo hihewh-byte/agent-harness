@@ -178,6 +178,17 @@ def orchestrate_chat_turn_events(
         else:
             msg = "请根据附件与 Current Patient State 事实账本，逐项解读化验指标（指标 | 数值 | 参考），勿输出空泛健康模板。"
 
+    from pha.semantic_intent import METRIC_PICK_ACTION, metric_pick_replay
+
+    _semantic_pick = metric_pick_replay(session_id or "", clarify_choice_id)
+    _stored_user_msg = msg
+    if _semantic_pick is not None:
+        msg = _semantic_pick[0]
+    if (clarify_choice_id or "").strip().startswith(f"{METRIC_PICK_ACTION}:"):
+        clarify_choice_id = None
+    _semantic_token = None
+    _semantic_report: Optional[Dict[str, Any]] = None
+
     # Step 0: hard temporal intercept — SSE status before any heavy work
     temporal_probe = probe_temporal_route(msg)
     if temporal_probe.is_temporal_dynamic:
@@ -234,7 +245,7 @@ def orchestrate_chat_turn_events(
     attach_client_reuse = False
     user_row = _memory.append(
         "user",
-        msg,
+        _stored_user_msg or msg,
         attachment_path=att_path,
         attachment_name=att_name,
     )
@@ -247,14 +258,14 @@ def orchestrate_chat_turn_events(
         ]
         if len(_user_hist) >= 2:
             _prior_user_msg = _user_hist[1]
-    _memory.set_title_from_first_message(msg)
-    slot_turn_meta = _memory.on_request_start(msg)
+    _memory.set_title_from_first_message(_stored_user_msg or msg)
+    slot_turn_meta = _memory.on_request_start(_stored_user_msg or msg)
     stored_bg, bg_reject = _memory.capture_background(
-        msg,
+        _stored_user_msg or msg,
         source_message_id=user_row.id,
     )
     if stored_bg:
-        _memory.on_background_captured(msg)
+        _memory.on_background_captured(_stored_user_msg or msg)
     if bg_reject == "background_too_long":
         yield json.dumps(
             {
@@ -317,6 +328,7 @@ def orchestrate_chat_turn_events(
     _episodic_bridge_block = ""
     _arbiter_decision = None
     _arbiter_auth_profile = None
+    _focus_followup = False
     try:
         _phase_rec.enter(ChatTurnPhase.EVIDENCE_PROBE)
         _, temporal_intent, temporal_status, _, is_temporal_dynamic, fusion_stats = (
@@ -426,9 +438,67 @@ def orchestrate_chat_turn_events(
                     _health_turn_scope,
                     _arbiter_decision,
                 )
+                from pha.intent_gates import infer_wearable_metric_ids
+
                 _auth = (_arbiter_decision.authoritative_profile or "").strip()
-                if _auth:
+                # A schema_default echo is message-only routing; a metric carried by session
+                # focus must still reach _plan_from_turn_scope (RFC §7).
+                _focus_followup = (
+                    _arbiter_decision.reason == "schema_default"
+                    and _health_turn_scope is not None
+                    and (_health_turn_scope.metric_source or "") == "focus"
+                    and not infer_wearable_metric_ids(raw_user_msg)
+                )
+                if _auth and not _focus_followup:
                     _arbiter_auth_profile = _auth
+
+        _arbiter_echoes_router = _arbiter_decision is None or (
+            (_arbiter_decision.authoritative_profile or "") == (_arbiter_decision.router_profile or "")
+        )
+        if _semantic_pick is not None:
+            _semantic_report = {"mode": "on", "action": "metric_pick", "metricIds": [_semantic_pick[1]] if _semantic_pick[1] else []}
+            if _semantic_pick[1] and not _resolved_override and _arbiter_echoes_router:
+                from pha.semantic_intent import set_turn_adoption
+
+                _semantic_token = set_turn_adoption(raw_user_msg, [_semantic_pick[1]])
+                _arbiter_auth_profile = "wearable_only"
+        elif (
+            not _resolved_override
+            and _arbiter_echoes_router
+            and not _paths_in
+            and not parsed_payload
+            and not (clarify_choice_id or "").strip()
+            and not (_health_turn_scope and _health_turn_scope.needs_clarification)
+            and not (_health_turn_scope and _health_turn_scope.metric_keys)
+        ):
+            from pha.semantic_intent import build_metric_pick_scope, run_semantic_proposal, set_turn_adoption
+
+            _semantic = run_semantic_proposal(uid, raw_user_msg)
+            if _semantic is not None:
+                _semantic_report = _semantic.as_report()
+                if _semantic.mode == "on" and _semantic.decision.action == "adopt":
+                    _semantic_token = set_turn_adoption(raw_user_msg, _semantic.decision.metric_ids)
+                    _arbiter_auth_profile = "wearable_only"
+                elif _semantic.mode == "on" and _semantic.decision.action == "clarify" and clarify_turns_enabled():
+                    _health_turn_scope = build_metric_pick_scope(
+                        raw_user_msg,
+                        _semantic.decision.candidates,
+                        locale=response_locale,
+                    )
+            if _semantic_report:
+                logger.info("semantic_intent %s", json.dumps(_semantic_report, ensure_ascii=False))
+
+        if _focus_followup and _semantic_token is None:
+            from pha.semantic_intent import set_turn_adoption
+            from pha.wearable_metric_registry import primary_metric_id_for_catalog_key
+
+            _focus_metric_ids = [
+                mid
+                for mid in (primary_metric_id_for_catalog_key(k) for k in _health_turn_scope.metric_keys)
+                if mid
+            ]
+            if _focus_metric_ids:
+                _semantic_token = set_turn_adoption(raw_user_msg, _focus_metric_ids)
 
         if (
             not _resolved_override
@@ -726,6 +796,7 @@ def orchestrate_chat_turn_events(
             ),
             goal_class=_arbiter_decision.goal_class if _arbiter_decision else "",
             goal_source=_arbiter_decision.goal_source if _arbiter_decision else "",
+            semantic_intent=_semantic_report,
         )
 
         _phase_rec.enter(ChatTurnPhase.PLAN_PRE_LLM)
@@ -1027,3 +1098,11 @@ def orchestrate_chat_turn_events(
             session_id=sid,
         )
         yield json.dumps({"event": "error", "message": str(exc)}, ensure_ascii=False)
+    finally:
+        if _semantic_token is not None:
+            from pha.semantic_intent import reset_turn_adoption
+
+            try:
+                reset_turn_adoption(_semantic_token)
+            except ValueError:
+                pass

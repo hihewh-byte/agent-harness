@@ -1,0 +1,253 @@
+{
+  "applied_at": "2026-10-08T04:53:25.662073+00:00",
+  "proposal": "reports/intent_synth/proposal_s1full.json",
+  "backup": "reports/intent_synth/backup_20261008T045325Z",
+  "added": [
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "清醒时间",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "醒着时间",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "夜间醒",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_time_asleep",
+      "key": "sleep",
+      "core": "睡了多少",
+      "catalog": true
+    },
+    {
+      "metric_id": "hrv_sdnn_ms",
+      "key": "hrv",
+      "core": "心率波动",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "core": "眼动阶段",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_rem",
+      "key": "sleep",
+      "core": "眼动时长",
+      "catalog": true
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "core": "走动",
+      "catalog": true
+    },
+    {
+      "metric_id": "steps",
+      "key": "steps",
+      "core": "步量",
+      "catalog": true
+    },
+    {
+      "metric_id": "active_energy",
+      "key": "activity_kcal",
+      "core": "活动热量",
+      "catalog": false
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "core": "有氧能力",
+      "catalog": false
+    },
+    {
+      "metric_id": "vo2max",
+      "key": "vo2max",
+      "core": "摄氧",
+      "catalog": false
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "core": "运动时长",
+      "catalog": true
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "core": "锻炼时数",
+      "catalog": true
+    },
+    {
+      "metric_id": "apple_exercise_time_min",
+      "key": "exercise_minutes",
+      "core": "运动时间",
+      "catalog": true
+    },
+    {
+      "metric_id": "apple_stand_time_min",
+      "key": "stand_time",
+      "core": "站时长",
+      "catalog": true
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "core": "跑步距离",
+      "catalog": true
+    },
+    {
+      "metric_id": "distance_walking_running_km",
+      "key": "walk_run_distance",
+      "core": "走跑距离",
+      "catalog": true
+    },
+    {
+      "metric_id": "walking_steadiness",
+      "key": "walking_steadiness",
+      "core": "步态稳定",
+      "catalog": true
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "core": "日照时间",
+      "catalog": true
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "core": "日光时长",
+      "catalog": true
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "core": "户外时间",
+      "catalog": true
+    },
+    {
+      "metric_id": "time_in_daylight_min",
+      "key": "daylight",
+      "core": "光照时长",
+      "catalog": true
+    },
+    {
+      "metric_id": "walking_speed_kmh",
+      "key": "walking_speed",
+      "core": "行走速度",
+      "catalog": true
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "core": "六分钟走",
+      "catalog": true
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "core": "六分钟测试",
+      "catalog": true
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "core": "六分钟距离",
+      "catalog": true
+    },
+    {
+      "metric_id": "six_minute_walk_m",
+      "key": "six_minute_walk",
+      "core": "走六分钟",
+      "catalog": true
+    },
+    {
+      "metric_id": "physical_effort",
+      "key": "physical_effort",
+      "core": "活动强度",
+      "catalog": true
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "core": "基础热量",
+      "catalog": true
+    },
+    {
+      "metric_id": "basal_energy_kcal",
+      "key": "basal_energy",
+      "core": "静止能量",
+      "catalog": true
+    },
+    {
+      "metric_id": "running_speed_kmh",
+      "key": "running_speed",
+      "core": "跑步快慢",
+      "catalog": true
+    },
+    {
+      "metric_id": "walking_step_length_cm",
+      "key": "step_length",
+      "core": "每步多长",
+      "catalog": true
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "core": "环境音",
+      "catalog": true
+    },
+    {
+      "metric_id": "environmental_audio_db",
+      "key": "env_audio",
+      "core": "噪音大小",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "core": "睡得沉",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_deep",
+      "key": "sleep",
+      "core": "睡得熟",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "老醒",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "夜醒",
+      "catalog": true
+    },
+    {
+      "metric_id": "sleep_awake",
+      "key": "sleep",
+      "core": "醒了几次",
+      "catalog": true
+    },
+    {
+      "metric_id": "wrist_temp",
+      "key": "wrist_temp",
+      "core": "手腕体温",
+      "catalog": false
+    }
+  ]
+}

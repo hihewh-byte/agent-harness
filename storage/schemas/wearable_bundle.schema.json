@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pha://schemas/wearable_bundle.schema.json",
-  "schema_version": "1.2.5",
+  "schema_version": "1.2.6",
   "contract": {
     "name": "pha-evidence-asset",
     "revision": "2026-09-09",
@@ -123,6 +123,11 @@
         "zh": "睡眠"
       },
       {
+        "token": "睡了多少",
+        "metric_id": "sleep",
+        "zh": "睡眠"
+      },
+      {
         "token": "hrv",
         "metric_id": "hrv",
         "zh": "HRV"
@@ -164,6 +169,11 @@
       },
       {
         "token": "心率变异 SDNN",
+        "metric_id": "hrv",
+        "zh": "HRV"
+      },
+      {
+        "token": "心率波动",
         "metric_id": "hrv",
         "zh": "HRV"
       },
@@ -308,6 +318,16 @@
         "zh": "深睡"
       },
       {
+        "token": "睡得沉",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
+        "token": "睡得熟",
+        "metric_id": "sleep",
+        "zh": "深睡"
+      },
+      {
         "token": "REM",
         "metric_id": "sleep",
         "zh": "REM"
@@ -324,6 +344,16 @@
       },
       {
         "token": "rapid eye movement",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "眼动阶段",
+        "metric_id": "sleep",
+        "zh": "REM"
+      },
+      {
+        "token": "眼动时长",
         "metric_id": "sleep",
         "zh": "REM"
       },
@@ -388,6 +418,36 @@
         "zh": "睡眠清醒"
       },
       {
+        "token": "清醒时间",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "醒着时间",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "夜间醒",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "老醒",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "夜醒",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
+        "token": "醒了几次",
+        "metric_id": "sleep",
+        "zh": "睡眠清醒"
+      },
+      {
         "token": "步数",
         "metric_id": "steps",
         "zh": "步数"
@@ -418,6 +478,16 @@
         "zh": "步数"
       },
       {
+        "token": "走动",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
+        "token": "步量",
+        "metric_id": "steps",
+        "zh": "步数"
+      },
+      {
         "token": "活动消耗",
         "metric_id": "activity_kcal",
         "zh": "活动消耗"
@@ -429,6 +499,11 @@
       },
       {
         "token": "卡路里",
+        "metric_id": "activity_kcal",
+        "zh": "活动消耗"
+      },
+      {
+        "token": "活动热量",
         "metric_id": "activity_kcal",
         "zh": "活动消耗"
       },
@@ -449,6 +524,16 @@
       },
       {
         "token": "cardio fitness",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "有氧能力",
+        "metric_id": "vo2max",
+        "zh": "VO2max"
+      },
+      {
+        "token": "摄氧",
         "metric_id": "vo2max",
         "zh": "VO2max"
       },
@@ -523,6 +608,11 @@
         "zh": "手腕体温"
       },
       {
+        "token": "手腕体温",
+        "metric_id": "wrist_temp",
+        "zh": "手腕体温"
+      },
+      {
         "token": "锻炼分钟",
         "metric_id": "exercise_minutes",
         "zh": "锻炼分钟"
@@ -548,6 +638,21 @@
         "zh": "锻炼分钟"
       },
       {
+        "token": "运动时长",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "锻炼时数",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
+        "token": "运动时间",
+        "metric_id": "exercise_minutes",
+        "zh": "锻炼分钟"
+      },
+      {
         "token": "站立时间",
         "metric_id": "stand_time",
         "zh": "站立时间"
@@ -568,6 +673,11 @@
         "zh": "站立时间"
       },
       {
+        "token": "站时长",
+        "metric_id": "stand_time",
+        "zh": "站立时间"
+      },
+      {
         "token": "步行+跑步距离",
         "metric_id": "walk_run_distance",
         "zh": "步行+跑步距离"
@@ -584,6 +694,16 @@
       },
       {
         "token": "walking running distance",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "跑步距离",
+        "metric_id": "walk_run_distance",
+        "zh": "步行+跑步距离"
+      },
+      {
+        "token": "走跑距离",
         "metric_id": "walk_run_distance",
         "zh": "步行+跑步距离"
       },
@@ -618,6 +738,11 @@
         "zh": "步行稳定性"
       },
       {
+        "token": "步态稳定",
+        "metric_id": "walking_steadiness",
+        "zh": "步行稳定性"
+      },
+      {
         "token": "日光暴露",
         "metric_id": "daylight",
         "zh": "日光暴露"
@@ -634,6 +759,26 @@
       },
       {
         "token": "daylight",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "日照时间",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "日光时长",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "户外时间",
+        "metric_id": "daylight",
+        "zh": "日光暴露"
+      },
+      {
+        "token": "光照时长",
         "metric_id": "daylight",
         "zh": "日光暴露"
       },
@@ -668,6 +813,11 @@
         "zh": "步行速度"
       },
       {
+        "token": "行走速度",
+        "metric_id": "walking_speed",
+        "zh": "步行速度"
+      },
+      {
         "token": "六分钟步行",
         "metric_id": "six_minute_walk",
         "zh": "六分钟步行"
@@ -679,6 +829,26 @@
       },
       {
         "token": "six minute walk",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "六分钟走",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "六分钟测试",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "六分钟距离",
+        "metric_id": "six_minute_walk",
+        "zh": "六分钟步行"
+      },
+      {
+        "token": "走六分钟",
         "metric_id": "six_minute_walk",
         "zh": "六分钟步行"
       },
@@ -728,6 +898,11 @@
         "zh": "体力活动努力"
       },
       {
+        "token": "活动强度",
+        "metric_id": "physical_effort",
+        "zh": "体力活动努力"
+      },
+      {
         "token": "基础消耗",
         "metric_id": "basal_energy",
         "zh": "基础消耗"
@@ -748,6 +923,16 @@
         "zh": "基础消耗"
       },
       {
+        "token": "基础热量",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
+        "token": "静止能量",
+        "metric_id": "basal_energy",
+        "zh": "基础消耗"
+      },
+      {
         "token": "跑步速度",
         "metric_id": "running_speed",
         "zh": "跑步速度"
@@ -759,6 +944,11 @@
       },
       {
         "token": "running speed",
+        "metric_id": "running_speed",
+        "zh": "跑步速度"
+      },
+      {
+        "token": "跑步快慢",
         "metric_id": "running_speed",
         "zh": "跑步速度"
       },
@@ -788,6 +978,11 @@
         "zh": "步幅"
       },
       {
+        "token": "每步多长",
+        "metric_id": "step_length",
+        "zh": "步幅"
+      },
+      {
         "token": "环境声暴露",
         "metric_id": "env_audio",
         "zh": "环境声暴露"
@@ -799,6 +994,16 @@
       },
       {
         "token": "environmental audio exposure",
+        "metric_id": "env_audio",
+        "zh": "环境声暴露"
+      },
+      {
+        "token": "环境音",
+        "metric_id": "env_audio",
+        "zh": "环境声暴露"
+      },
+      {
+        "token": "噪音大小",
         "metric_id": "env_audio",
         "zh": "环境声暴露"
       },

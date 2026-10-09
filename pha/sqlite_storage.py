@@ -362,15 +362,18 @@ def list_distinct_wearable_metric_types(user_id: str) -> List[str]:
     uid = (user_id or "default").strip() or "default"
     conn = _connect()
     try:
-        cur = conn.execute(
-            """
-            SELECT DISTINCT metric_type FROM wearable_data
-            WHERE user_id = ? AND metric_type IS NOT NULL AND metric_type != ''
-            ORDER BY metric_type
-            """,
-            (uid,),
-        )
-        return [str(row["metric_type"]) for row in cur.fetchall() if row["metric_type"]]
+        # Index skip-scan on idx_user_metric_time; plain DISTINCT walks every sample row.
+        out: List[str] = []
+        prev = ""
+        while True:
+            row = conn.execute(
+                "SELECT MIN(metric_type) AS m FROM wearable_data WHERE user_id = ? AND metric_type > ?",
+                (uid, prev),
+            ).fetchone()
+            if not row or row["m"] is None:
+                return out
+            prev = str(row["m"])
+            out.append(prev)
     finally:
         _release_connection(conn)
 

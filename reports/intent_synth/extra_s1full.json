@@ -1,0 +1,10 @@
+[
+  {"metric_id": "sleep_deep", "core": "睡得沉"},
+  {"metric_id": "sleep_deep", "core": "睡得深"},
+  {"metric_id": "sleep_deep", "core": "睡得熟"},
+  {"metric_id": "sleep_awake", "core": "老醒"},
+  {"metric_id": "sleep_awake", "core": "夜醒"},
+  {"metric_id": "sleep_awake", "core": "醒了几次"},
+  {"metric_id": "wrist_temp", "core": "手腕体温"},
+  {"metric_id": "basal_energy_kcal", "core": "基础代谢"}
+]

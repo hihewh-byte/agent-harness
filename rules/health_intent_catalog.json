@@ -1,5 +1,5 @@
 {
-  "version": "1.10",
+  "version": "1.12",
   "anaphora": {
     "tokens": [
       "那",
@@ -43,7 +43,8 @@
       "rmssd",
       "心率变异正常",
       "heart rate variability",
-      "heart-rate variability"
+      "heart-rate variability",
+      "心率波动"
     ],
     "ldl": [
       "ldl",
@@ -70,7 +71,18 @@
       "睡眠清醒",
       "core sleep",
       "awake",
-      "rem"
+      "rem",
+      "清醒时间",
+      "醒着时间",
+      "夜间醒",
+      "睡了多少",
+      "眼动阶段",
+      "眼动时长",
+      "睡得沉",
+      "睡得熟",
+      "老醒",
+      "夜醒",
+      "醒了几次"
     ],
     "steps": [
       "步数",
@@ -80,7 +92,9 @@
       "多少步",
       "steps",
       "step count",
-      "walking"
+      "walking",
+      "走动",
+      "步量"
     ],
     "rhr": [
       "静息心率",
@@ -122,19 +136,25 @@
       "锻炼时长",
       "exercise minutes",
       "apple exercise time",
-      "Exercise Time"
+      "Exercise Time",
+      "运动时长",
+      "锻炼时数",
+      "运动时间"
     ],
     "stand_time": [
       "站立时间",
       "站立时长",
       "stand time",
-      "apple stand time"
+      "apple stand time",
+      "站时长"
     ],
     "walk_run_distance": [
       "步行+跑步距离",
       "步行跑步距离",
       "walking + running distance",
-      "walking running distance"
+      "walking running distance",
+      "跑步距离",
+      "走跑距离"
     ],
     "walking_hr": [
       "步行心率",
@@ -144,13 +164,18 @@
     "walking_steadiness": [
       "步行稳定性",
       "walking steadiness",
-      "apple walking steadiness"
+      "apple walking steadiness",
+      "步态稳定"
     ],
     "daylight": [
       "日光暴露",
       "日照时长",
       "time in daylight",
-      "daylight"
+      "daylight",
+      "日照时间",
+      "日光时长",
+      "户外时间",
+      "光照时长"
     ],
     "flights": [
       "爬楼层数",
@@ -160,12 +185,17 @@
     "walking_speed": [
       "步行速度",
       "步速",
-      "walking speed"
+      "walking speed",
+      "行走速度"
     ],
     "six_minute_walk": [
       "六分钟步行",
       "six-minute walk",
-      "six minute walk"
+      "six minute walk",
+      "六分钟走",
+      "六分钟测试",
+      "六分钟距离",
+      "走六分钟"
     ],
     "body_mass": [
       "体重",
@@ -180,18 +210,22 @@
     ],
     "physical_effort": [
       "体力活动努力",
-      "physical effort"
+      "physical effort",
+      "活动强度"
     ],
     "basal_energy": [
       "基础消耗",
       "基础代谢消耗",
       "basal energy burned",
-      "basal energy"
+      "basal energy",
+      "基础热量",
+      "静止能量"
     ],
     "running_speed": [
       "跑步速度",
       "跑步配速",
-      "running speed"
+      "running speed",
+      "跑步快慢"
     ],
     "running_power": [
       "跑步功率",
@@ -200,12 +234,15 @@
     "step_length": [
       "步幅",
       "walking step length",
-      "step length"
+      "step length",
+      "每步多长"
     ],
     "env_audio": [
       "环境声暴露",
       "环境噪音",
-      "environmental audio exposure"
+      "environmental audio exposure",
+      "环境音",
+      "噪音大小"
     ],
     "headphone_audio": [
       "耳机音量暴露",
@@ -461,7 +498,30 @@
         "environmental audio exposure",
         "耳机音量暴露",
         "耳机音量",
-        "headphone audio exposure"
+        "headphone audio exposure",
+        "运动时长",
+        "锻炼时数",
+        "运动时间",
+        "站时长",
+        "跑步距离",
+        "走跑距离",
+        "步态稳定",
+        "日照时间",
+        "日光时长",
+        "户外时间",
+        "光照时长",
+        "行走速度",
+        "六分钟走",
+        "六分钟测试",
+        "六分钟距离",
+        "走六分钟",
+        "活动强度",
+        "基础热量",
+        "静止能量",
+        "跑步快慢",
+        "每步多长",
+        "环境音",
+        "噪音大小"
       ],
       "domain": "wearable",
       "precedence_over": [
@@ -613,7 +673,30 @@
           "environmental audio exposure",
           "耳机音量暴露",
           "耳机音量",
-          "headphone audio exposure"
+          "headphone audio exposure",
+          "运动时长",
+          "锻炼时数",
+          "运动时间",
+          "站时长",
+          "跑步距离",
+          "走跑距离",
+          "步态稳定",
+          "日照时间",
+          "日光时长",
+          "户外时间",
+          "光照时长",
+          "行走速度",
+          "六分钟走",
+          "六分钟测试",
+          "六分钟距离",
+          "走六分钟",
+          "活动强度",
+          "基础热量",
+          "静止能量",
+          "跑步快慢",
+          "每步多长",
+          "环境音",
+          "噪音大小"
         ]
       },
       "emphasis": {
@@ -680,6 +763,13 @@
     },
     "data_gap": {
       "prompt_template": "库内暂无足够化验或穿戴数据，请先导入后再做综合评估。",
+      "choices": []
+    },
+    "metric_pick": {
+      "prompt_template": "您想看的是下面哪一项穿戴指标？",
+      "prompt_template_en": "Which wearable metric did you mean?",
+      "none_label": "都不是，按原问题回答",
+      "none_label_en": "None of these, answer as asked",
       "choices": []
     }
   },

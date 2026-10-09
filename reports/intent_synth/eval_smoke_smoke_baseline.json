@@ -1,0 +1,213 @@
+{
+  "summary": {
+    "holdout": {
+      "precise_recall": 0.5,
+      "runtime_recall": 0.7,
+      "precise_misbind_rate": 0.225,
+      "fallback_only_rate": 0.0,
+      "catalog_key_recall": 0.7,
+      "total": 40
+    },
+    "train": {
+      "precise_recall": 0.625,
+      "runtime_recall": 0.8958,
+      "precise_misbind_rate": 0.1875,
+      "fallback_only_rate": 0.0833,
+      "catalog_key_recall": 0.8125,
+      "total": 48
+    },
+    "negatives": {
+      "false_bind_rate": 0.1,
+      "bound": 6,
+      "total": 60
+    }
+  },
+  "per_metric": {
+    "sleep_deep": {
+      "holdout": {
+        "precise_hit": 13,
+        "runtime_hit": 18,
+        "precise_misbind": 5,
+        "fallback_only": 0,
+        "catalog_key_hit": 18,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 21,
+        "runtime_hit": 23,
+        "precise_misbind": 2,
+        "fallback_only": 0,
+        "catalog_key_hit": 23,
+        "total": 24
+      }
+    },
+    "sleep_awake": {
+      "holdout": {
+        "precise_hit": 7,
+        "runtime_hit": 10,
+        "precise_misbind": 4,
+        "fallback_only": 0,
+        "catalog_key_hit": 10,
+        "total": 20
+      },
+      "train": {
+        "precise_hit": 9,
+        "runtime_hit": 20,
+        "precise_misbind": 7,
+        "fallback_only": 4,
+        "catalog_key_hit": 16,
+        "total": 24
+      }
+    }
+  },
+  "negatives_bound": [
+    {
+      "text": "走路的时候感觉腿有点发软，不太舒服。",
+      "got": "steps"
+    },
+    {
+      "text": "最近经常觉得心慌，但心跳又正常。",
+      "got": "resting_heart_rate_bpm"
+    },
+    {
+      "text": "最近经常觉得身体沉重，走路都费劲。",
+      "got": "steps"
+    },
+    {
+      "text": "最近经常觉得膝盖有点酸，走路多了就更明显。",
+      "got": "steps"
+    },
+    {
+      "text": "I feel like I'm not getting enough rest, even after a full night's sleep.",
+      "got": "sleep_time_asleep"
+    },
+    {
+      "text": "I've been having trouble falling asleep and staying asleep.",
+      "got": "sleep_time_asleep"
+    }
+  ],
+  "holdout_misses": [
+    {
+      "metric_id": "sleep_deep",
+      "text": "能告诉我昨晚有几小时是特别深的睡眠吗？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "I want to know how many hours I spent in the deepest part of my sleep.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How many hours of deep rest did I have?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "I'm curious about how much of my sleep was really deep and restful.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How long did I stay in the most restorative sleep phase?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "Can you check how much deep rest I had last night?",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_deep",
+      "text": "How many hours of the deepest sleep did I get?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我昨晚睡得怎么样？有没有很多次醒过来？",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "睡了一觉，但感觉没怎么休息，是不是醒的时间太长了？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "有没有办法知道我晚上醒了多少次？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我是不是经常在半夜醒来？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我睡得不踏实，是不是因为醒的时间太多？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "能不能告诉我晚上我大概醒了多少时间？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "睡着了但又老是醒，这是怎么回事？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "有没有数据能显示我晚上醒了多少次？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "我是不是经常被什么吵醒？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "有没有办法知道我是不是睡得不深？",
+      "precise": "",
+      "runtime": ""
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "Can you tell me how much time I spent not sleeping?",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "I want to know how many hours I was up when I should have been asleep.",
+      "precise": "sleep_time_asleep",
+      "runtime": "sleep_time_asleep,sleep_deep,sleep_rem,sleep_core,sleep_awake"
+    },
+    {
+      "metric_id": "sleep_awake",
+      "text": "Tell me how much time I was not in a deep sleep or REM.",
+      "precise": "sleep_deep,sleep_rem",
+      "runtime": "sleep_deep,sleep_rem"
+    }
+  ],
+  "synth": "reports/intent_synth/synth_smoke.json",
+  "label": "smoke_baseline"
+}

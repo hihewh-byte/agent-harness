@@ -191,11 +191,11 @@ def should_inject_wearable_snapshot(user_message: str, *, is_temporal_dynamic: b
     return True
 
 
-def infer_wearable_metrics(user_message: str) -> List[str]:
+def infer_wearable_metrics(user_message: str, *, allow_default: bool = True) -> List[str]:
     """Schema-driven (P1.6 DCH); see ``wearable_bundle.schema.json`` trigger_keywords."""
     from pha.universal_catalog_manager import get_catalog_manager
 
-    return get_catalog_manager().infer_wearable_metrics(user_message)
+    return get_catalog_manager().infer_wearable_metrics(user_message, allow_default=allow_default)
 
 
 def infer_wearable_metric_ids(user_message: str) -> List[str]:
@@ -226,10 +226,16 @@ def infer_wearable_metric_ids(user_message: str) -> List[str]:
             seen.add(mid)
             ordered.append(mid)
 
-    for mid in hint_match_metric_ids(msg):
+    from pha.semantic_intent import adopted_metric_ids_for
+
+    adopted = adopted_metric_ids_for(msg)
+    for mid in adopted or hint_match_metric_ids(msg):
         _add(mid)
     hinted_clusters = {cluster_of(mid) for mid in ordered if cluster_of(mid)}
-    for key in infer_wearable_metrics(msg):
+    from pha.wearable_metric_registry import combo_hint_resolution
+
+    combo_ids, key_msg = combo_hint_resolution(msg)
+    for key in () if adopted else infer_wearable_metrics(key_msg, allow_default=not combo_ids):
         primary = primary_metric_id_for_catalog_key(key)
         key_cluster = cluster_of(primary) if primary else None
         if primary and key_cluster and key_cluster in hinted_clusters and primary not in seen:
